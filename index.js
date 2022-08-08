@@ -25,9 +25,6 @@ app.use(express.json({ extended: false }))
 
 /* app.use('/api/', characters) */
 
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-
 routes(app)
 
 app.get('/', (req, res) => {
