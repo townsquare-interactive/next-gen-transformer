@@ -30,8 +30,6 @@ app.use(bodyParser.json())
 
 routes(app)
 
-app.use(express.static('public'))
-
 app.get('/', (req, res) => {
     res.send('Welcome to the Harry Potter character API')
 })
