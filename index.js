@@ -1,5 +1,5 @@
 const express = require('express')
-const routes = require('./api/characters')
+/* const routes = require('./api/characters') */
 const routes = require('./characters')
 
 const app = express()
