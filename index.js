@@ -8,7 +8,7 @@ app.use(express.json())
 //view localhost:3000/characters
 
 app.get('/', (req, res) => {
-    res.send('Wel come to the Harry Potter character API')
+    res.send('Welcome to the Harry Potter character API')
 })
 
 app.get('/characters', async (req, res) => {
