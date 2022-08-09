@@ -13,9 +13,11 @@ app.use(express.json({ extended: true }))
 
 routes(app)
 
+/* process.env.DYN_DEFAULT_REGION ? console.log('yes') : console.log('no') */
+console.log('hello')
+
 app.get('/', (req, res) => {
     res.send('Welcome to the Harry Potter character API')
-    process.env.DYN_DEFAULT_REGION ? console.log('yes') : console.log('no')
 })
 
 const port = process.env.PORT || 3000
