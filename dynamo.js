@@ -2,12 +2,9 @@ const AWS = require('aws-sdk')
 require('dotenv').config()
 
 AWS.config.update({
-    /*     region: process.env.AWS_DEFAULT_REGION,
+    region: process.env.AWS_DEFAULT_REGION,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, */
-    region: 'us-east-1',
-    accessKeyId: 'AKIA2W2JW4HH6NNUOSOF',
-    secretAccessKey: '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',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 })
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
