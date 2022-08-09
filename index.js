@@ -9,7 +9,7 @@ const app = express()
 
 /* app.use('/api/', characters) */
 
-app.use(express.json({ extended: true }))
+app.use(express.json({ extended: false }))
 
 routes(app)
 
