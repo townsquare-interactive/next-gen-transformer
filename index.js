@@ -1,5 +1,6 @@
 const express = require('express')
 const routes = require('./api/characters')
+require('dotenv').config()
 
 const app = express()
 
