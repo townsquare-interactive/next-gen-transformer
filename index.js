@@ -3,13 +3,13 @@ const routes = require('./src/routes/routes')
 require('dotenv').config()
 
 const app = express()
-
-/* app.use(express.json())
+/*
+ app.use(express.json())
  */
 
-app.use(express.json({ extended: true }))
-
 /* app.use('/api/', characters) */
+
+app.use(express.json({ extended: true }))
 
 routes(app)
 
