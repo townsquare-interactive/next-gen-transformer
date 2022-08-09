@@ -1,6 +1,6 @@
 /* const express = require('express') */
 /* const router = express.app() */
-const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../dynamo')
+const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/dynamo-controller')
 
 const routes = (app) => {
     app.get('/characters', async (req, res) => {

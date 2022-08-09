@@ -1,5 +1,5 @@
 const axios = require('axios')
-const { addOrUpdateCharacter } = require('./dynamo')
+const { addOrUpdateCharacter } = require('./routes/routes')
 
 const seedData = async () => {
     const url = 'http://hp-api.herokuapp.com/api/characters'
