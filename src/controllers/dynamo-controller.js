@@ -4,7 +4,7 @@ require('dotenv').config()
 AWS.config.update({
     region: process.env.DYN_DEFAULT_REGION,
     accessKeyId: process.env.NEXT_PUBLIC_DYN_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_DYN_SECRET_ACCESS_KEY,
+    secretAccessKey: process.env.NEXT_PUBLIC_DYN_SECRET_ACCESS_KEY_ID,
 })
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
