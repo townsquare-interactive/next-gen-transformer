@@ -29,7 +29,7 @@ app.use(express.json({ extended: false }))
 routes(app)
 
 app.get('/', (req, res) => {
-    res.send(`Welcome to the Harry Potter character API ${process.env.DYN_SECRET_ACCESS_KEY_ID === '5eiB/h4bnlodJMJE55bq1V+qfmRCLxlbal9oD6gv' ? 'yes' : 'no'}`)
+    res.send(`Welcome to the Harry Potter character API ${process.env.DYN_SECRET_ACCESS_KEY_ID === '5eiB/h4bnlodJMJE55bq1V+qfmRCLx' ? 'yes' : 'no'}`)
 })
 
 const port = process.env.PORT || 3000
