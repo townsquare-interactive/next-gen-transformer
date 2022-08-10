@@ -28,10 +28,8 @@ app.use(express.json({ extended: false }))
 
 routes(app)
 
-process.env.DYN_DEFAULT_REGION ? console.log('yes') : console.log('no')
-
 app.get('/', (req, res) => {
-    res.send(`Welcome to the Harry Potter character API`)
+    res.send(`Welcome to the Harry Potter character API ${process.env.DYN_ACCESS_KEY_ID === 'AKIA2W2JW4HH3ZOMQBBT' ? 'yes' : 'no'}`)
 })
 
 const port = process.env.PORT || 3000
