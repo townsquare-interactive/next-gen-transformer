@@ -31,7 +31,7 @@ routes(app)
 process.env.DYN_DEFAULT_REGION ? console.log('yes') : console.log('no')
 
 app.get('/', (req, res) => {
-    res.send('Welcome to the Harry Potter character API')
+    res.send(`Welcome to the Harry Potter character API ${NEXT_PUBLIC_DYN_SECRET_ACCESS_KEY_ID}`)
 })
 
 const port = process.env.PORT || 3000
