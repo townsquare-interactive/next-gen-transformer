@@ -16,6 +16,8 @@ const getCharacters = async () => {
     }
     const characters = await dynamoClient.scan(params).promise()
     /* console.log(characters) */
+
+    //change
     return characters
 }
 
