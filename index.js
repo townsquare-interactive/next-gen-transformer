@@ -23,6 +23,8 @@ app.use((req, res, next) => {
  */
 //check
 
+//now
+
 /* app.use('/api/', characters) */
 
 app.use(express.json({ extended: false }))
