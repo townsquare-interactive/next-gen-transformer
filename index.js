@@ -21,6 +21,7 @@ app.use((req, res, next) => {
 /*
  app.use(express.json())
  */
+//check
 
 /* app.use('/api/', characters) */
 
