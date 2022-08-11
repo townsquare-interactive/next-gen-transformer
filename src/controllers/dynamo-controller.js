@@ -5,10 +5,7 @@ AWS.config.update({
     region: process.env.DYN_DEFAULT_REGION,
     accessKeyId: process.env.DYN_ACCESS_KEY_ID,
     secretAccessKey: process.env.DYN_SECRET_ACCESS_KEY_ID,
-    signatureVersion: 'v4',
-    /*     region: 'us-east-1',
-    accessKeyId: 'AKIA2W2JW4HHXQPE7SDB',
-    secretAccessKey: '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', */
+    /* signatureVersion: 'v4', */
 })
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
