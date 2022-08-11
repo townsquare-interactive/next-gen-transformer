@@ -5,7 +5,6 @@ AWS.config.update({
     region: process.env.DYN_DEFAULT_REGION,
     accessKeyId: process.env.DYN_ACCESS_KEY_ID,
     secretAccessKey: process.env.DYN_SECRET_ACCESS_KEY_ID,
-    /* signatureVersion: 'v4', */
 })
 
 const dynamoClient = new AWS.DynamoDB.DocumentClient()
@@ -16,8 +15,6 @@ const getCharacters = async () => {
         TableName: TABLE_NAME,
     }
     const characters = await dynamoClient.scan(params).promise()
-    /* console.log(characters) */
-
     return characters
 }
 

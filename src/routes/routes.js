@@ -1,6 +1,7 @@
 /* const express = require('express') */
 /* const router = express.app() */
-const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/dynamo-controller')
+/* const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/dynamo-controller') */
+const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/mongo-controller')
 
 const routes = (app) => {
     app.get('/characters', async (req, res) => {
