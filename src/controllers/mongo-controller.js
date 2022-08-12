@@ -36,13 +36,7 @@ const getCharacters = async () => {
 }
 
 const getCharacterById = async (id) => {
-    const params = {
-        /* TableName: TABLE_NAME, */
-        Key: {
-            id,
-        },
-    }
-    char = await Item.findById(id)
+    char = await Item.find({ id: id })
     if (char == null) {
         return res.status(404).json({ message: 'cannot find' })
     } else {

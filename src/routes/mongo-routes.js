@@ -17,10 +17,9 @@ const routes = (app) => {
     })
 
     app.get('/characters/:id', async (req, res) => {
-        /* const id = req.params.id */
+        const id = req.params.id
         try {
-            /* const character = await getCharacterById(id) */
-            const character = await Item.findById(req.params.id)
+            const character = await getCharacterById(id)
             res.json(character)
         } catch (err) {
             console.error(err)
@@ -33,6 +32,7 @@ const routes = (app) => {
         const newChar = new Item({
             name: req.body.name,
             id: req.body.id,
+            charId: req.body.charId,
         })
         try {
             const newCharacter = await newChar.save()
