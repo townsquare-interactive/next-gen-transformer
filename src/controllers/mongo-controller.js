@@ -40,7 +40,11 @@ const addCharacter = async (req) => {
 
 const updateCharacter = async (req) => {
     const updateObject = req.body
-    Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true })
+    return Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true })
+    /* Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true }, function (err, doc) {
+        if (err) return res.send(500, { error: err })
+        return res.send('Succesfully saved.')
+    }) */
 }
 
 const deleteCharacter = async (id) => {

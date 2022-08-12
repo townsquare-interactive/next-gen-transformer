@@ -1,7 +1,7 @@
 /* const express = require('express') */
 /* const router = express.app() */
 /* const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/dynamo-controller') */
-const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/mongo-controller')
+const { updateCharacter, getCharacters, deleteCharacter, getCharacterById, addCharacter } = require('../controllers/mongo-controller')
 
 const Item = require('../../schema')
 
@@ -28,15 +28,8 @@ const routes = (app) => {
     })
 
     app.post('/characters', async (req, res) => {
-        /* const character = req.body */
-        const newChar = new Item({
-            name: req.body.name,
-            id: req.body.id,
-        })
         try {
-            const newCharacter = await newChar.save()
-            /* const newCharacter = await addOrUpdateCharacter(character) */
-            res.json(newCharacter)
+            res.json(addCharacter(req))
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
@@ -44,18 +37,17 @@ const routes = (app) => {
     })
 
     app.patch('/characters/:id', async (req, res) => {
-        var updateObject = req.body
-
-        const newChar = Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true }, function (err, doc) {
-            if (err) return res.send(500, { error: err })
-            return res.send('Succesfully saved.')
-        })
+        try {
+            await updateCharacter(req)
+            res.json('successful change')
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
     })
 
     app.delete('/characters/:id', async (req, res) => {
-        /* const { id } = req.params */
         const id = req.params.id
-        /* char = await Item.find({ id: id }) */
         try {
             res.json(await deleteCharacter(id))
         } catch (err) {
