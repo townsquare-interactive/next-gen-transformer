@@ -58,7 +58,9 @@ const routes = (app) => {
     })
 
     app.delete('/characters/:id', async (req, res) => {
-        const { id } = req.params
+        /* const { id } = req.params */
+        const id = req.params.id
+        /* char = await Item.find({ id: id }) */
         try {
             res.json(await deleteCharacter(id))
         } catch (err) {

@@ -53,13 +53,11 @@ const addOrUpdateCharacter = async (character) => {
 }
 
 const deleteCharacter = async (id) => {
-    const params = {
-        /* TableName: TABLE_NAME, */
-        Key: {
-            id,
-        },
+    char = await Item.find({ id: id })
+    if (char == null) {
+        return res.status(404).json({ message: 'cannot find' })
     }
-    return await Item.delete(params).promise()
+    return await Item.findOneAndRemove({ id: id })
 }
 
 module.exports = {
