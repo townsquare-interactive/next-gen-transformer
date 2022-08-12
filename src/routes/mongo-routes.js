@@ -32,7 +32,6 @@ const routes = (app) => {
         const newChar = new Item({
             name: req.body.name,
             id: req.body.id,
-            charId: req.body.charId,
         })
         try {
             const newCharacter = await newChar.save()
@@ -44,17 +43,13 @@ const routes = (app) => {
         }
     })
 
-    app.put('/characters/:id', async (req, res) => {
-        const character = req.body
-        const { id } = req.params
-        character.id = id
-        try {
-            const newCharacter = await addOrUpdateCharacter(character)
-            res.json(newCharacter)
-        } catch (err) {
-            console.error(err)
-            res.status(500).json({ err: 'Something went wrong' })
-        }
+    app.patch('/characters/:id', async (req, res) => {
+        var updateObject = req.body
+
+        const newChar = Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true }, function (err, doc) {
+            if (err) return res.send(500, { error: err })
+            return res.send('Succesfully saved.')
+        })
     })
 
     app.delete('/characters/:id', async (req, res) => {
