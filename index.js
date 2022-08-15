@@ -30,7 +30,7 @@ app.use(express.json({ extended: false }))
 routes(app)
 
 app.get('/', (req, res) => {
-    res.send(`Welcome to the Harry Potter character API`)
+    res.send(`Welcome to the Harry Potter character API using ${process.env.DB == 'dynamo' ? 'dynamo' : 'mongo'}`)
 })
 
 const port = process.env.PORT || 3000
