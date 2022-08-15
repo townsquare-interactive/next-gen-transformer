@@ -2,17 +2,11 @@ require('dotenv').config()
 const Item = require('../../schema')
 
 const mongoose = require('mongoose')
-mongoose.connect('mongodb://localhost/hp', { useNewUrlParser: true })
+mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
 const db = mongoose.connection
 
 db.on('error', (error) => console.error(error))
 db.once('open', (error) => console.error('connected to database'))
-
-/* const Any = new mongoose.Schema({ any: {} })
-
-const Item = mongoose.model('Characters', Any) */
-
-const TABLE_NAME = 'hp'
 
 const getCharacters = async () => {
     const characters = await Item.find()
@@ -41,10 +35,6 @@ const addCharacter = async (req) => {
 const updateCharacter = async (req) => {
     const updateObject = req.body
     return Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true })
-    /* Item.findOneAndUpdate({ id: req.params.id }, updateObject, { upsert: true }, function (err, doc) {
-        if (err) return res.send(500, { error: err })
-        return res.send('Succesfully saved.')
-    }) */
 }
 
 const deleteCharacter = async (id) => {

@@ -3,7 +3,7 @@
 /* const { addOrUpdateCharacter, getCharacters, deleteCharacter, getCharacterById } = require('../controllers/dynamo-controller') */
 const { updateCharacter, getCharacters, deleteCharacter, getCharacterById, addCharacter } = require('../controllers/mongo-controller')
 
-const Item = require('../../schema')
+//const Item = require('../../schema')
 
 const routes = (app) => {
     app.get('/characters', async (req, res) => {
