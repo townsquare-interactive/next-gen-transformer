@@ -1,6 +1,7 @@
 const express = require('express')
 require('dotenv').config()
 
+//Determinging which database to use
 let routes
 if (process.env.DB == 'dynamo') {
     routes = require('./src/routes/dynamo-routes')
