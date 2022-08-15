@@ -1,6 +1,12 @@
 const express = require('express')
-const routes = require('./src/routes/mongo-routes')
 require('dotenv').config()
+
+let routes
+if (process.env.DB == 'dynamo') {
+    routes = require('./src/routes/dynamo-routes')
+} else {
+    routes = require('./src/routes/mongo-routes')
+}
 
 const app = express()
 
