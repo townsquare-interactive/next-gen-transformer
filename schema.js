@@ -2,16 +2,27 @@ const mongoose = require('mongoose')
 
 const Any = new mongoose.Schema({
     any: {},
-    /*     _id: {
-        type: String,
-        required: false,
-    }, */
-    /*     _id: mongoose.Schema.Types.ObjectId, */
     id: {
         type: String,
         required: false,
     },
     name: {
+        type: String,
+        required: false,
+    },
+    species: {
+        type: String,
+        required: false,
+    },
+    gender: {
+        type: String,
+        required: false,
+    },
+    wizard: {
+        type: Boolean,
+        required: false,
+    },
+    actor: {
         type: String,
         required: false,
     },
