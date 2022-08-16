@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { addOrUpdateCharacter } = require('./controllers/dynamo-controller')
 
+//Function to add all entries from this api into DynamoDB
 const seedData = async () => {
     const url = 'http://hp-api.herokuapp.com/api/characters'
     try {

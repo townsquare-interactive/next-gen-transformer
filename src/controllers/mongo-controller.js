@@ -23,23 +23,13 @@ const getCharacterById = async (id) => {
 }
 
 const addCharacter = async (req) => {
-    /*     const newChar = new Item({
-        name: req.body.name,
-        id: req.body.id,
-    }) */
     const newChar = new Item(req.body)
-
     const newCharacter = await newChar.save()
     return newCharacter
 }
 
 const addMultiCharacters = async (character) => {
-    /*     const newChar = new Item({
-        name: req.body.name,
-        id: req.body.id,
-    }) */
     const newChar = new Item(character)
-
     const newCharacter = await newChar.save()
     return newCharacter
 }

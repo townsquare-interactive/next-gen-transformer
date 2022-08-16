@@ -5,6 +5,8 @@ require('dotenv').config()
 let routes
 if (process.env.DB == 'dynamo') {
     routes = require('./src/routes/dynamo-routes')
+} else if (process.env.DB == 'mongo') {
+    routes = require('./src/routes/mongo-routes')
 } else {
     routes = require('./src/routes/mongo-routes')
 }
@@ -31,7 +33,7 @@ app.use(express.json({ extended: false }))
 routes(app)
 
 app.get('/', (req, res) => {
-    res.send(`Welcome to the Harry Potter character API using ${process.env.DB == 'dynamo' ? 'dynamo' : 'mongo'}`)
+    res.send(`Welcome to the Harry Potter character API using ${process.env.DB == 'dynamo' ? 'Dynamo' : 'Mongo'}`)
 })
 
 const port = process.env.PORT || 3000

@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { addMultiCharacters } = require('./controllers/mongo-controller')
 
+//Function to add all entries from this api into mongoDB
 const seedData = async () => {
     const url = 'http://hp-api.herokuapp.com/api/characters'
     try {

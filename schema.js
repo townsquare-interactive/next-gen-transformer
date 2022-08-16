@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 
 const Any = new mongoose.Schema({
-    any: {},
     id: {
         type: String,
         required: false,
