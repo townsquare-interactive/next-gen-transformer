@@ -7,8 +7,8 @@ if (process.env.DB == 'dynamo') {
     routes = require('./src/routes/dynamo-routes')
 } else if (process.env.DB == 'mongo') {
     routes = require('./src/routes/mongo-routes')
-} else {
-    routes = require('./src/routes/mongo-routes')
+} else if (process.env.DB == 'cms') {
+    routes = require('./src/routes/cms-routes')
 }
 
 const app = express()
