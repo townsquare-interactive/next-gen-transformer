@@ -28,7 +28,7 @@ const transformPage = (pageData) => {
 
 const transformWhole = function (data) {
     let newData = []
-    const pageList = []
+    const pageListData = []
     for (const [key, value] of Object.entries(data.pages)) {
         //creating file for pagelist
         const pageData = {
@@ -37,7 +37,7 @@ const transformWhole = function (data) {
             id: value.id,
             page_type: value.page_type,
         }
-        pageList.push(pageData)
+        pageListData.push(pageData)
 
         //transforming page data
         if (value.backup.data) {
@@ -51,6 +51,8 @@ const transformWhole = function (data) {
 
         newData.push(value)
     }
+
+    const pageList = { pages: pageListData }
     data.pages = newData
 
     //pagelist file, need to return later
@@ -62,8 +64,6 @@ const transformWhole = function (data) {
 //adding a page file for each page in cms data
 const addFile = async (data, pageList) => {
     const pages = data.pages
-
-    console.log('pagelist', pageList)
 
     await s3
         .putObject({
@@ -86,6 +86,14 @@ const addFile = async (data, pageList) => {
 
         console.log('Page Placed')
     }
+
+    await s3
+        .putObject({
+            Body: JSON.stringify(data),
+            Bucket: 'townsquareinteractive',
+            Key: `${data.config.website.url}/newdata.json`,
+        })
+        .promise()
 }
 
 //deletes file
