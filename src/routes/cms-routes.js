@@ -27,6 +27,7 @@ const routes = (app) => {
 
         try {
             addFile(newData)
+
             res.json(newData)
         } catch (err) {
             console.error(err)

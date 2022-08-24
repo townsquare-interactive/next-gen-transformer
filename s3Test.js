@@ -1,9 +1,9 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
 AWS.config.update({
-    region: process.env.DYN_DEFAULT_REGION,
-    accessKeyId: process.env.DYN_ACCESS_KEY_ID,
-    secretAccessKey: process.env.DYN_SECRET_ACCESS_KEY_ID,
+    region: process.env.CMS_DEFAULT_REGION,
+    accessKeyId: process.env.CMS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID,
 })
 
 const test = [
@@ -24,7 +24,7 @@ const addFile = async () => {
     await s3
         .putObject({
             Body: JSON.stringify(test),
-            Bucket: 'townsquaretest',
+            Bucket: 'townsquareinteractive',
             Key: 'test.json',
         })
         .promise()
@@ -35,7 +35,7 @@ const addFile = async () => {
 const deleteFile = async () => {
     await s3
         .deleteObject({
-            Bucket: 'townsquaretest',
+            Bucket: '',
             Key: 'test.json',
         })
         .promise()

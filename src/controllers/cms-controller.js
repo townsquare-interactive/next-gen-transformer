@@ -1,9 +1,9 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
 AWS.config.update({
-    region: process.env.DYN_DEFAULT_REGION,
-    accessKeyId: process.env.DYN_ACCESS_KEY_ID,
-    secretAccessKey: process.env.DYN_SECRET_ACCESS_KEY_ID,
+    region: process.env.CMS_DEFAULT_REGION,
+    accessKeyId: process.env.CMS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID,
 })
 
 const s3 = new AWS.S3()
@@ -28,7 +28,18 @@ const transformPage = (pageData) => {
 
 const transformWhole = function (data) {
     let newData = []
+    const pageList = []
     for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        const pageData = {
+            name: value.title,
+            slug: value.slug,
+            id: value.id,
+            page_type: value.page_type,
+        }
+        pageList.push(pageData)
+
+        //transforming page data
         if (value.backup.data) {
             const columnsData = []
             for (let i = 0; i <= 4; ++i) {
@@ -37,9 +48,15 @@ const transformWhole = function (data) {
 
             value.backup.data.modules = columnsData
         }
+
         newData.push(value)
     }
     data.pages = newData
+
+    //pagelist file, need to return later
+    console.log('pagelist', JSON.stringify(pageList))
+
+    //returned transformed whole page json
     return data
 }
 
@@ -47,14 +64,25 @@ const transformWhole = function (data) {
 const addFile = async (data) => {
     const pages = data.pages
 
-    for (let i = 0; i < pages; i++) {
+    /*     await s3
+        .putObject({
+            Body: JSON.stringify(data),
+            Bucket: 'townsquareinteractive',
+            Key: `test2.json`,
+        })
+        .promise()
+
+    console.log('Object Placed') */
+
+    for (let i = 0; i < pages.length; i++) {
         await s3
             .putObject({
-                data: JSON.stringify(pages[i]),
-                Bucket: 'townsquaretest',
-                Key: `${pages[i].slug}json`,
+                Body: JSON.stringify(pages[i]),
+                Bucket: 'townsquareinteractive',
+                Key: `pages/${pages[i].slug}.json`,
             })
             .promise()
+
         console.log('Object Placed')
     }
 }
