@@ -54,36 +54,37 @@ const transformWhole = function (data) {
     data.pages = newData
 
     //pagelist file, need to return later
-    console.log('pagelist', JSON.stringify(pageList))
 
     //returned transformed whole page json
-    return data
+    return { data: data, pageList: pageList }
 }
 
 //adding a page file for each page in cms data
-const addFile = async (data) => {
+const addFile = async (data, pageList) => {
     const pages = data.pages
 
-    /*     await s3
+    console.log('pagelist', pageList)
+
+    await s3
         .putObject({
-            Body: JSON.stringify(data),
+            Body: JSON.stringify(pageList),
             Bucket: 'townsquareinteractive',
-            Key: `test2.json`,
+            Key: `${data.config.website.url}/pages/page-list.json`,
         })
         .promise()
 
-    console.log('Object Placed') */
+    console.log('Pagelist Placed')
 
     for (let i = 0; i < pages.length; i++) {
         await s3
             .putObject({
                 Body: JSON.stringify(pages[i]),
                 Bucket: 'townsquareinteractive',
-                Key: `pages/${pages[i].slug}.json`,
+                Key: `${data.config.website.url}/pages/${pages[i].slug}.json`,
             })
             .promise()
 
-        console.log('Object Placed')
+        console.log('Page Placed')
     }
 }
 

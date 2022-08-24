@@ -26,7 +26,7 @@ const routes = (app) => {
         const newData = transformWhole(req.body)
 
         try {
-            addFile(newData)
+            addFile(newData.data, newData.pageList)
 
             res.json(newData)
         } catch (err) {
