@@ -8,49 +8,52 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformCMSData = function (data) {
+const transformWhole = function (data) {
     let newData = []
     const pageListData = []
     for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
         pageListData.push(createPageList(value))
 
         //transforming page data
         if (value.backup.data) {
-            const columnsData = []
-            for (let i = 0; i <= 4; ++i) {
-                columnsData.push(transformCMSPage(value.backup.data.modules[i]))
-            }
-
-            value.backup.data.modules = columnsData
+            /*             console.log('page before', value.backup.data.modules)
+            console.log('page transformed', transformPage(value.backup.data.modules)) */
+            value.backup.data.modules = transformPage(value.backup.data.modules)
         }
 
         newData.push(value)
+        console.log(newData)
     }
 
     const pageList = { pages: pageListData }
     data.pages = newData
 
-    //returned transformed whole page json and pagelist
+    /*    console.log(data.pages.backup ? data.pages.backup.data.modules : '') */
+
+    //returned transformed whole page json
     return { data: data, pageList: pageList }
 }
 
-const transformCMSPage = (pageData) => {
-    let newData = []
+const transformPage = (pageMods) => {
+    const columnsData = []
+    for (let i = 0; i <= 4; i++) {
+        //new function
+        let newData = []
+        for (const [key, value] of Object.entries(pageMods[i])) {
+            let modType
 
-    for (const [key, value] of Object.entries(pageData)) {
-        let modType
+            if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
+                modType = 'MyArticle'
+            }
 
-        if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
-            modType = 'MyArticle'
+            const modData = { ...value, modId: key }
+
+            const newItem = { attributes: modData, componentType: modType }
+            newData.push(newItem)
         }
-
-        const modData = { ...value, modId: key }
-
-        const newItem = { attributes: modData, componentType: modType }
-        newData.push(newItem)
+        columnsData.push(newData)
     }
-    return newData
+    return columnsData
 }
 
 const createPageList = (value) => {
@@ -65,20 +68,9 @@ const createPageList = (value) => {
 }
 
 //adding a page file for each page in cms data
-const addFilesS3 = async (data, pageList) => {
+const addFile = async (data, pageList) => {
     const pages = data.pages
 
-    //adding page list file to s3
-    addPageListS3(pageList, data)
-
-    //adding page files to s3
-    addPagesS3(data.pages, data)
-
-    //add full site data to s3
-    addSiteDataS3(data)
-}
-
-const addPageListS3 = async (pageList, data) => {
     await s3
         .putObject({
             Body: JSON.stringify(pageList),
@@ -88,9 +80,7 @@ const addPageListS3 = async (pageList, data) => {
         .promise()
 
     console.log('Pagelist Placed')
-}
 
-const addPagesS3 = async (pages, data) => {
     for (let i = 0; i < pages.length; i++) {
         await s3
             .putObject({
@@ -102,9 +92,7 @@ const addPagesS3 = async (pages, data) => {
 
         console.log('Page Placed')
     }
-}
 
-const addSiteDataS3 = async (data) => {
     await s3
         .putObject({
             Body: JSON.stringify(data),
@@ -114,7 +102,18 @@ const addSiteDataS3 = async (data) => {
         .promise()
 }
 
+//deletes file
+/* const deleteFile = async () => {
+    await s3
+        .deleteObject({
+            Bucket: 'townsquaretest',
+            Key: 'test.json',
+        })
+        .promise()
+    console.log('File Delete')
+} */
+
 module.exports = {
-    addFilesS3,
-    transformCMSData,
+    addFile,
+    transformWhole,
 }

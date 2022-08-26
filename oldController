@@ -8,34 +8,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformCMSData = function (data) {
-    let newData = []
-    const pageListData = []
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        pageListData.push(createPageList(value))
-
-        //transforming page data
-        if (value.backup.data) {
-            const columnsData = []
-            for (let i = 0; i <= 4; ++i) {
-                columnsData.push(transformCMSPage(value.backup.data.modules[i]))
-            }
-
-            value.backup.data.modules = columnsData
-        }
-
-        newData.push(value)
-    }
-
-    const pageList = { pages: pageListData }
-    data.pages = newData
-
-    //returned transformed whole page json and pagelist
-    return { data: data, pageList: pageList }
-}
-
-const transformCMSPage = (pageData) => {
+const transformPage = (pageData) => {
     let newData = []
 
     for (const [key, value] of Object.entries(pageData)) {
@@ -53,32 +26,45 @@ const transformCMSPage = (pageData) => {
     return newData
 }
 
-const createPageList = (value) => {
-    const pageData = {
-        name: value.title,
-        slug: value.slug,
-        id: value.id,
-        page_type: value.page_type,
+const transformWhole = function (data) {
+    let newData = []
+    const pageListData = []
+    for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        const pageData = {
+            name: value.title,
+            slug: value.slug,
+            id: value.id,
+            page_type: value.page_type,
+        }
+        pageListData.push(pageData)
+
+        //transforming page data
+        if (value.backup.data) {
+            const columnsData = []
+            for (let i = 0; i <= 4; ++i) {
+                columnsData.push(transformPage(value.backup.data.modules[i]))
+            }
+
+            value.backup.data.modules = columnsData
+        }
+
+        newData.push(value)
     }
 
-    return pageData
+    const pageList = { pages: pageListData }
+    data.pages = newData
+
+    //pagelist file, need to return later
+
+    //returned transformed whole page json
+    return { data: data, pageList: pageList }
 }
 
 //adding a page file for each page in cms data
-const addFilesS3 = async (data, pageList) => {
+const addFile = async (data, pageList) => {
     const pages = data.pages
 
-    //adding page list file to s3
-    addPageListS3(pageList, data)
-
-    //adding page files to s3
-    addPagesS3(data.pages, data)
-
-    //add full site data to s3
-    addSiteDataS3(data)
-}
-
-const addPageListS3 = async (pageList, data) => {
     await s3
         .putObject({
             Body: JSON.stringify(pageList),
@@ -88,9 +74,7 @@ const addPageListS3 = async (pageList, data) => {
         .promise()
 
     console.log('Pagelist Placed')
-}
 
-const addPagesS3 = async (pages, data) => {
     for (let i = 0; i < pages.length; i++) {
         await s3
             .putObject({
@@ -102,19 +86,31 @@ const addPagesS3 = async (pages, data) => {
 
         console.log('Page Placed')
     }
-}
 
-const addSiteDataS3 = async (data) => {
     await s3
         .putObject({
             Body: JSON.stringify(data),
             Bucket: 'townsquareinteractive',
-            Key: `${data.config.website.url}/siteData.json`,
+            Key: `${data.config.website.url}/newdata.json`,
         })
         .promise()
 }
 
-module.exports = {
-    addFilesS3,
-    transformCMSData,
+//deletes file
+const deleteFile = async () => {
+    await s3
+        .deleteObject({
+            Bucket: 'townsquaretest',
+            Key: 'test.json',
+        })
+        .promise()
+    console.log('File Delete')
 }
+
+module.exports = {
+    addFile,
+    deleteFile,
+    transformWhole,
+}
+
+//transformWhole(cmsWhole)
