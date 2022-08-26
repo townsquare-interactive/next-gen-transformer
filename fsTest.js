@@ -12,11 +12,12 @@ const { transformFile, addFile, transformWhole } = require('./src/controllers/cm
 
 //Changes the file to the code passed as second parameter
 
-const obj = JSON.stringify(transformWhole(cmsWhole))
+/* const obj = JSON.stringify(transformWhole(cmsWhole))
 /* console.log('obj', obj) */
-fs.writeFile('new.json', obj, function (err) {
+
+/*fs.writeFile('new.json', obj, function (err) {
     console.log('data saved')
-})
+}) */
 
 //appends file with code
 /* fs.appendFile('test.js', 'console.log("done")', function (err) {
@@ -27,3 +28,7 @@ fs.writeFile('new.json', obj, function (err) {
 /* fs.unlink('test.js', function (err) {
     console.log('Deleted')
 }) */
+
+var href = 'joshedwards?343.production.com'
+href = href.replace(/\..*/, '')
+console.log(href) //# => /Controller/Action
