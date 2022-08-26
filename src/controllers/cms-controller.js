@@ -18,8 +18,12 @@ const transformCMSData = function (data) {
         //transforming page data
         if (value.backup.data) {
             const columnsData = []
-            for (let i = 0; i <= 4; ++i) {
-                columnsData.push(transformCMSPage(value.backup.data.modules[i]))
+            /*            for (let i = 0; i <= 4; ++i) { */
+
+            for (let i = 0; i <= value.backup.data.modules.length; ++i) {
+                if (value.backup.data.modules[i]) {
+                    columnsData.push(transformCMSPage(value.backup.data.modules[i]))
+                }
             }
 
             value.backup.data.modules = columnsData
