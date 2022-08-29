@@ -17,15 +17,7 @@ const transformCMSData = function (data) {
 
         //transforming page data
         if (value.backup.data) {
-            const columnsData = []
-
-            for (let i = 0; i <= value.backup.data.modules.length; ++i) {
-                if (value.backup.data.modules[i]) {
-                    columnsData.push(transformCMSMods(value.backup.data.modules[i]))
-                }
-            }
-
-            value.backup.data.modules = columnsData
+            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
         }
 
         newData.push(value)
@@ -39,21 +31,27 @@ const transformCMSData = function (data) {
 }
 
 const transformCMSMods = (pageData) => {
-    let newData = []
+    let columnsData = []
+    for (let i = 0; i <= pageData.length; ++i) {
+        if (pageData[i]) {
+            let newData = []
 
-    for (const [key, value] of Object.entries(pageData)) {
-        let modType
+            for (const [key, value] of Object.entries(pageData[i])) {
+                let modType
 
-        if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
-            modType = 'MyArticle'
+                if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
+                    modType = 'MyArticle'
+                }
+
+                const modData = { ...value, modId: key }
+
+                const newItem = { attributes: modData, componentType: modType }
+                newData.push(newItem)
+            }
+            columnsData.push(newData)
         }
-
-        const modData = { ...value, modId: key }
-
-        const newItem = { attributes: modData, componentType: modType }
-        newData.push(newItem)
     }
-    return newData
+    return columnsData
 }
 
 const createPageList = (value) => {
