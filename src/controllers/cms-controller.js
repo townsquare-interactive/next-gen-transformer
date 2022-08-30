@@ -68,8 +68,8 @@ const createPageList = (value) => {
 //adding a page file for each page in cms data
 const addFilesS3 = async (data, pageList) => {
     const pages = data.pages
-    //removing .production.come from url for s3 storage
-    newUrl = data.config.website.url.replace(/\..*/, '')
+    //removing everything after first period from url for s3 storage
+    newUrl = stripUrl(data.config.website.url)
 
     //adding page list file to s3
     addPageListS3(pageList, data, newUrl)
@@ -79,6 +79,10 @@ const addFilesS3 = async (data, pageList) => {
 
     //add full site data to s3
     addSiteDataS3(data, newUrl)
+}
+
+const stripUrl = (url) => {
+    return url.replace(/\..*/, '')
 }
 
 const addPageListS3 = async (pageList, data, newUrl) => {
