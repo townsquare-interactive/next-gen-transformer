@@ -136,12 +136,12 @@ const transformPageData = function (page) {
 const updatePageList = async (page, data) => {
     let newUrl = stripUrl(data.url)
 
-    const params = {
+    /*     const params = {
         Bucket: 'townsquareinteractive',
         Key: `${newUrl}/pages/page-list.json`,
     }
-
-    const newFile = await download()
+ */
+    const newFile = await getFile()
 
     if (newFile.pages.filter((e) => e.Name === page.title).length === 0) {
         newFile.pages.push({
@@ -150,10 +150,9 @@ const updatePageList = async (page, data) => {
             id: page.id,
             page_type: page.page_type,
         })
-        console.log(newFile)
     }
 
-    async function download() {
+    async function getFile() {
         try {
             // Converted it to async/await syntax just to simplify.
             const data = await s3.getObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }).promise()
@@ -169,6 +168,21 @@ const updatePageList = async (page, data) => {
             }
         }
     }
+
+    addFileS3(newFile, `${newUrl}/pages/page-list.json`)
+}
+
+//add any file, pass it the file and key for filename
+const addFileS3 = async (file, key) => {
+    await s3
+        .putObject({
+            Body: JSON.stringify(file),
+            Bucket: 'townsquareinteractive',
+            Key: key,
+        })
+        .promise()
+
+    console.log('File Placed')
 }
 
 const addSiteDataS3 = async (data) => {

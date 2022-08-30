@@ -23,7 +23,7 @@ const routes = (app) => {
             addPageS3(newPageData, req.body.data)
 
             /* res.json(newData) */
-            res.json(JSON.stringify(pageList))
+            res.json(JSON.stringify('page added'))
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
