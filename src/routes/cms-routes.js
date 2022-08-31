@@ -1,13 +1,12 @@
-const { transformCMSData, addFilesS3, addPageS3, transformPageData, updatePageList } = require('../controllers/cms-controller')
+const { transformCMSData, addFilesS3, transformPageData, updatePageList, addFileS3, stripUrl } = require('../controllers/cms-controller')
 
 const routes = (app) => {
     app.post('/cms', async (req, res) => {
         const newData = transformCMSData(req.body)
+        const newUrl = stripUrl(req.body.config.website.url)
 
         try {
-            addFilesS3(newData.data, newData.pageList)
-
-            /* res.json(newData) */
+            addFilesS3(newData.data, newData.pageList, newUrl)
             res.json('All Files added')
         } catch (err) {
             console.error(err)
@@ -17,12 +16,12 @@ const routes = (app) => {
 
     app.post('/page', async (req, res) => {
         const newPageData = transformPageData(req.body.page)
-        const pageList = updatePageList(req.body.page, req.body.data)
+        const newUrl = stripUrl(req.body.data.url)
 
         try {
-            addPageS3(newPageData, req.body.data)
+            updatePageList(req.body.page, req.body.data)
+            addFileS3(newPageData, `${newUrl}/pages/${newPageData.slug}.json`)
 
-            /* res.json(newData) */
             res.json(JSON.stringify('page added'))
         } catch (err) {
             console.error(err)

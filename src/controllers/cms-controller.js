@@ -69,61 +69,23 @@ const createPageList = (value) => {
 }
 
 //adding a page file for each page in cms data
-const addFilesS3 = async (data, pageList) => {
+const addFilesS3 = async (data, pageList, newUrl) => {
     const pages = data.pages
-    //removing everything after first period from url for s3 storage
-    newUrl = stripUrl(data.config.website.url)
 
     //adding page list file to s3
-    addPageListS3(pageList, data, newUrl)
+    addFileS3(pageList, `${newUrl}/pages/page-list.json`)
 
     //adding page files to s3
-    addPagesS3(data.pages, data, newUrl)
+    for (let i = 0; i < data.pages.length; i++) {
+        addFileS3(data.pages[i], `${newUrl}/pages/${pages[i].slug}.json`)
+    }
 
     //add full site data to s3
-    addSiteDataS3(data, newUrl)
+    addFileS3(data, `${newUrl}/siteData.json`)
 }
 
 const stripUrl = (url) => {
     return url.replace(/\..*/, '')
-}
-
-const addPageListS3 = async (pageList, data, newUrl) => {
-    await s3
-        .putObject({
-            Body: JSON.stringify(pageList),
-            Bucket: 'townsquareinteractive',
-            Key: `${newUrl}/pages/page-list.json`,
-        })
-        .promise()
-
-    console.log('Pagelist Placed')
-}
-
-const addPagesS3 = async (pages, data, newUrl) => {
-    for (let i = 0; i < pages.length; i++) {
-        await s3
-            .putObject({
-                Body: JSON.stringify(pages[i]),
-                Bucket: 'townsquareinteractive',
-                Key: `${newUrl}/pages/${pages[i].slug}.json`,
-            })
-            .promise()
-
-        console.log('Page Placed')
-    }
-}
-const addPageS3 = async (page, data) => {
-    let newUrl = stripUrl(data.url)
-    await s3
-        .putObject({
-            Body: JSON.stringify(page),
-            Bucket: 'townsquareinteractive',
-            Key: `${newUrl}/pages/${page.slug}.json`,
-        })
-        .promise()
-
-    console.log('Page Placed')
 }
 
 const transformPageData = function (page) {
@@ -135,15 +97,9 @@ const transformPageData = function (page) {
 
 const updatePageList = async (page, data) => {
     let newUrl = stripUrl(data.url)
-
-    /*     const params = {
-        Bucket: 'townsquareinteractive',
-        Key: `${newUrl}/pages/page-list.json`,
-    }
- */
     const newFile = await getFile()
 
-    if (newFile.pages.filter((e) => e.Name === page.title).length === 0) {
+    if (newFile.pages.filter((e) => e.name === page.title).length === 0) {
         newFile.pages.push({
             name: page.title,
             slug: page.slug,
@@ -157,9 +113,6 @@ const updatePageList = async (page, data) => {
             // Converted it to async/await syntax just to simplify.
             const data = await s3.getObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }).promise()
 
-            // console.log(data)
-
-            //console.log(data)
             return JSON.parse(data.Body.toString('utf-8'))
         } catch (err) {
             return {
@@ -185,20 +138,11 @@ const addFileS3 = async (file, key) => {
     console.log('File Placed')
 }
 
-const addSiteDataS3 = async (data) => {
-    await s3
-        .putObject({
-            Body: JSON.stringify(data, newUrl),
-            Bucket: 'townsquareinteractive',
-            Key: `${newUrl}/siteData.json`,
-        })
-        .promise()
-}
-
 module.exports = {
     addFilesS3,
     transformCMSData,
-    addPageS3,
     transformPageData,
     updatePageList,
+    addFileS3,
+    stripUrl,
 }
