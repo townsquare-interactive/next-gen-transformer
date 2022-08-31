@@ -2,12 +2,11 @@ const { transformCMSData, addFilesS3, transformPageData, updatePageList, addFile
 
 const routes = (app) => {
     app.post('/cms', async (req, res) => {
-        const newData = transformCMSData(req.body)
         const newUrl = stripUrl(req.body.config.website.url)
 
         try {
-            addFilesS3(newData.data, newData.pageList, newUrl)
-            res.json('All Files added')
+            addFileS3(req.body, `${newUrl}/siteData.json`)
+            res.json('Site Data added')
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
@@ -23,6 +22,19 @@ const routes = (app) => {
             addFileS3(newPageData, `${newUrl}/pages/${newPageData.slug}.json`)
 
             res.json(JSON.stringify('page added'))
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    })
+
+    app.post('/migrate', async (req, res) => {
+        const newData = transformCMSData(req.body)
+        const newUrl = stripUrl(req.body.config.website.url)
+
+        try {
+            addFilesS3(newData.data, newData.pageList, newUrl)
+            res.json('All Files added')
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })

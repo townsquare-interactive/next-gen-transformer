@@ -19,11 +19,15 @@ const transformCMSData = function (data) {
         pageListData.push(createPageList(value))
 
         //transforming page data
-        if (value.backup.data) {
+        if (value.publisher.data.modules) {
+            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
+            newData.push(value)
+        } else if (value.backup.data) {
             value.backup.data.modules = transformCMSMods(value.backup.data.modules)
+            newData.push(value)
+        } else {
+            newData.push(value)
         }
-
-        newData.push(value)
     }
 
     const pageList = { pages: pageListData }
@@ -89,23 +93,54 @@ const stripUrl = (url) => {
 }
 
 const transformPageData = function (page) {
-    if (page.backup.data) {
+    if (page.publisher) {
+        page.publisher.data.modules = transformCMSMods(page.publisher.data.modules)
+    }
+    if (page.backup) {
         page.backup.data.modules = transformCMSMods(page.backup.data.modules)
+    }
+    if (page.modules) {
+        page.modules = transformCMSMods(page.modules)
     }
     return page
 }
 
 const updatePageList = async (page, data) => {
     let newUrl = stripUrl(data.url)
-    const newFile = await getFile()
+    let pageListFile = await getFile()
 
-    if (newFile.pages.filter((e) => e.name === page.title).length === 0) {
-        newFile.pages.push({
-            name: page.title,
-            slug: page.slug,
-            id: page.id,
-            page_type: page.page_type,
-        })
+    //check to see if pagelist exists
+    s3.headObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }, function (err, metadata) {
+        if (err && err.name === 'NotFound') {
+            // Handle no object on cloud here
+            console.log('page not found')
+            pageListFile = { pages: [] }
+            addPageToList()
+            addFileS3(pageListFile, `${newUrl}/pages/page-list.json`)
+
+            return false
+        } else if (err) {
+            // Handle other errors here....
+            console.log(err.name)
+            return false
+        } else {
+            // Do stuff with signedUrl
+            addPageToList()
+            addFileS3(pageListFile, `${newUrl}/pages/page-list.json`)
+            return true
+        }
+    })
+
+    //add page object to pagelist
+    const addPageToList = () => {
+        if (pageListFile.pages.filter((e) => e.name === page.title).length === 0) {
+            pageListFile.pages.push({
+                name: page.title,
+                slug: page.slug,
+                id: page.id,
+                page_type: page.page_type,
+            })
+        }
     }
 
     async function getFile() {
@@ -121,8 +156,6 @@ const updatePageList = async (page, data) => {
             }
         }
     }
-
-    addFileS3(newFile, `${newUrl}/pages/page-list.json`)
 }
 
 //add any file, pass it the file and key for filename
