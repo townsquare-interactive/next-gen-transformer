@@ -34,7 +34,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 5000
 routes(app)
 
 app.get('/', (req, res) => {
-    res.send(`Welcome to the my API using ${process.env.DB == 'dynamo' ? 'Dynamo' : 'Mongo'}`)
+    res.send(`Welcome to the my API using ${process.env.DB == 'dynamo' ? 'Dynamo' : process.env.DB == 'mongo' ? 'Mongo' : 'cms'}`)
 })
 
 const port = process.env.PORT || 3000

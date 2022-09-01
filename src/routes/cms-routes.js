@@ -28,6 +28,18 @@ const routes = (app) => {
         }
     })
 
+    app.post('/pages', async (req, res) => {
+        const newUrl = 'clttestsiteforjoshedwards'
+
+        try {
+            addFileS3(req.body, `${newUrl}/testData.json`)
+            res.json('Site Data added')
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    })
+
     app.post('/migrate', async (req, res) => {
         const newData = transformCMSData(req.body)
         const newUrl = stripUrl(req.body.config.website.url)
