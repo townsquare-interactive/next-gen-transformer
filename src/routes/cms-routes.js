@@ -18,7 +18,7 @@ const routes = (app) => {
         const newUrl = stripUrl(req.body.data.url)
 
         try {
-            updatePageList(req.body.page, req.body.data)
+            updatePageList(req.body.page, newUrl)
             addFileS3(newPageData, `${newUrl}/pages/${newPageData.slug}.json`)
 
             res.json(JSON.stringify('page added'))

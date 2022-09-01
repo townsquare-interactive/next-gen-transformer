@@ -105,8 +105,7 @@ const transformPageData = function (page) {
     return page
 }
 
-const updatePageList = async (page, data) => {
-    let newUrl = stripUrl(data.url)
+const updatePageList = async (page, newUrl) => {
     let pageListFile = await getFile()
 
     //check to see if pagelist exists
