@@ -37,6 +37,27 @@ const transformCMSData = function (data) {
     return { data: data, pageList: pageList }
 }
 
+const transformPagesData = function (data) {
+    let newData = []
+    //const pageListData = []
+    for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        /*  pageListData.push(createPageList(value)) */
+
+        //transforming page data
+        if (value.data.modules) {
+            value.data.modules = transformCMSMods(value.data.modules)
+            newData.push(value)
+        }
+    }
+
+    /*  const pageList = { pages: pageListData } */
+    data.pages = newData
+
+    //returned transformed whole page json and pagelist
+    return data
+}
+
 const transformCMSMods = (pageData) => {
     let columnsData = []
     for (let i = 0; i <= pageData.length; ++i) {
@@ -177,4 +198,5 @@ module.exports = {
     updatePageList,
     addFileS3,
     stripUrl,
+    transformPagesData,
 }

@@ -1,4 +1,4 @@
-const { transformCMSData, addFilesS3, transformPageData, updatePageList, addFileS3, stripUrl } = require('../controllers/cms-controller')
+const { transformCMSData, addFilesS3, transformPageData, updatePageList, addFileS3, stripUrl, transformPagesData } = require('../controllers/cms-controller')
 
 const routes = (app) => {
     app.post('/cms', async (req, res) => {
@@ -34,6 +34,21 @@ const routes = (app) => {
         try {
             addFileS3(req.body, `${newUrl}/testData.json`)
             res.json('Site Data added')
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    })
+
+    app.post('/pages2', async (req, res) => {
+        const newUrl = 'testSite'
+        const newData = transformPagesData(req.body)
+
+        try {
+            for (let i = 0; i < newData.pages.length; i++) {
+                addFileS3(newData.pages[i], `${newUrl}/page${i}.json`)
+            }
+            res.json(newData)
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
