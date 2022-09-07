@@ -41,14 +41,15 @@ const routes = (app) => {
     })
 
     app.post('/pages2', async (req, res) => {
-        const newUrl = 'testSite'
+        /* const newUrl = 'testSite' */
+        const newUrl = req.hostname
         const newData = transformPagesData(req.body)
 
         try {
             for (let i = 0; i < newData.pages.length; i++) {
-                addFileS3(newData.pages[i], `${newUrl}/page${i}.json`)
+                addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
             }
-            res.json(newData)
+            res.json(req.hostname)
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
