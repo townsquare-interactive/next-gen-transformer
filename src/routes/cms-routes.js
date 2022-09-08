@@ -46,6 +46,7 @@ const routes = (app) => {
         const newData = transformPagesData(req.body)
 
         try {
+            addFileS3(req.body, `${newUrl}/cmsSave.json`)
             for (let i = 0; i < newData.pages.length; i++) {
                 addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
             }
