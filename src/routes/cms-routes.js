@@ -28,7 +28,7 @@ const routes = (app) => {
         }
     })
 
-    app.post('/pages', async (req, res) => {
+    /*     app.post('/pages', async (req, res) => {
         const newUrl = 'clttestsiteforjoshedwards'
 
         try {
@@ -38,18 +38,18 @@ const routes = (app) => {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
         }
-    })
+    }) */
 
-    app.post('/pages2', async (req, res) => {
-        /* const newUrl = 'testSite' */
-        const newUrl = req.hostname
+    app.post('/pages', async (req, res) => {
+        const newUrl = 'testSite'
+        /* const newUrl = req.url */
         const newData = transformPagesData(req.body)
 
         try {
             for (let i = 0; i < newData.pages.length; i++) {
                 addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
             }
-            res.json(req.hostname)
+            res.json(req.protocol + '://' + req.get('host') + req.originalUrl)
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
