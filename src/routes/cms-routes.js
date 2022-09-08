@@ -29,9 +29,9 @@ const routes = (app) => {
     })
 
     app.post('/pages', async (req, res) => {
-        const newUrl = 'testSite'
+        const newUrl = req.body.siteData.url
         /* const newUrl = req.url */
-        const newData = transformPagesData(req.body)
+        const newData = transformPagesData(req.body.pageData)
 
         try {
             addFileS3(req.body, `${newUrl}/cmsSave.json`)
@@ -47,7 +47,7 @@ const routes = (app) => {
     })
 
     app.post('/sitedata', async (req, res) => {
-        const newUrl = 'testSite'
+        const newUrl = req.body.siteData.url
 
         try {
             addFileS3(req.body, `${newUrl}/siteData.json`)
