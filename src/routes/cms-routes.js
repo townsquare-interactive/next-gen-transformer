@@ -28,18 +28,6 @@ const routes = (app) => {
         }
     })
 
-    /*     app.post('/pages', async (req, res) => {
-        const newUrl = 'clttestsiteforjoshedwards'
-
-        try {
-            addFileS3(req.body, `${newUrl}/testData.json`)
-            res.json('Site Data added')
-        } catch (err) {
-            console.error(err)
-            res.status(500).json({ err: 'Something went wrong' })
-        }
-    }) */
-
     app.post('/pages', async (req, res) => {
         const newUrl = 'testSite'
         /* const newUrl = req.url */
@@ -51,6 +39,20 @@ const routes = (app) => {
             for (let i = 0; i < newData.pages.length; i++) {
                 addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
             }
+            res.json(req.body)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    })
+
+    app.post('/sitedata', async (req, res) => {
+        const newUrl = 'testSite'
+
+        try {
+            addFileS3(req.body, `${newUrl}/siteData.json`)
+            //save each page
+
             res.json(req.body)
         } catch (err) {
             console.error(err)
