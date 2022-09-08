@@ -42,7 +42,7 @@ const routes = (app) => {
             for (let i = 0; i < newData.pages.length; i++) {
                 addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
             }
-            res.json(req.body)
+            res.json(newUrl)
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })
