@@ -29,7 +29,8 @@ const routes = (app) => {
     })
 
     app.post('/pages', async (req, res) => {
-        const newUrl = req.body.siteData.url
+        const newUrl = req.body.fullData.config.website.url
+
         /* const newUrl = req.url */
         const newData = transformPagesData(req.body.pageData)
 
