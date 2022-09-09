@@ -41,13 +41,19 @@ const transformPagesData = function (pageData, siteData) {
     let newData = []
     //const pageListData = []
     for (const [key, value] of Object.entries(pageData.pages)) {
+        if (value.data.title) {
+            console.log('name found', value.data.title)
+            delete value.data.title
+        }
+
         //getting data from site
         const pageId = key
         const pageTitle = siteData.pages[pageId].title
         const pageSlug = siteData.pages[pageId].slug
+        const page_type = siteData.pages[pageId].page_type
 
         //adding site data to pages
-        value.data = { ...value.data, pageId: pageId, title: pageTitle, slug: pageSlug }
+        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, ...value.data }
 
         //transforming page data
         if (value.data.modules) {
@@ -131,13 +137,14 @@ const transformPageData = function (page) {
 }
 
 const updatePageList = async (page, newUrl) => {
+    console.log('page list updater started')
     let pageListFile = await getFile()
 
     //check to see if pagelist exists
     s3.headObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }, function (err, metadata) {
         if (err && err.name === 'NotFound') {
             // Handle no object on cloud here
-            console.log('page not found')
+            console.log('pagelist not found')
             pageListFile = { pages: [] }
             addPageToList()
             addFileS3(pageListFile, `${newUrl}/pages/page-list.json`)
@@ -164,6 +171,9 @@ const updatePageList = async (page, newUrl) => {
                 id: page.id,
                 page_type: page.page_type,
             })
+            console.log('new page added:', page.title)
+        } else {
+            console.log('page already there', page.title)
         }
     }
 
