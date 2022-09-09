@@ -34,13 +34,14 @@ const routes = (app) => {
         newUrl = stripUrl(cutProtocol)
 
         /* const newUrl = req.url */
-        const newData = transformPagesData(req.body.pageData)
+        const newPageData = transformPagesData(req.body.pageData, req.body.fullData)
 
         try {
             addFileS3(req.body, `${newUrl}/cmsSave.json`)
             //save each page
-            for (let i = 0; i < newData.pages.length; i++) {
-                addFileS3(newData.pages[i], `${newUrl}/pages2/page${i}.json`)
+
+            for (let i = 0; i < newPageData.pages.length; i++) {
+                addFileS3(newPageData.pages[i], `${newUrl}/pages2/${newPageData.pages[i].data.slug}.json`)
             }
             res.json(newUrl)
         } catch (err) {

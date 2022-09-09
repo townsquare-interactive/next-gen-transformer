@@ -37,12 +37,17 @@ const transformCMSData = function (data) {
     return { data: data, pageList: pageList }
 }
 
-const transformPagesData = function (data) {
+const transformPagesData = function (pageData, siteData) {
     let newData = []
     //const pageListData = []
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        /*  pageListData.push(createPageList(value)) */
+    for (const [key, value] of Object.entries(pageData.pages)) {
+        //getting data from site
+        const pageId = key
+        const pageTitle = siteData.pages[pageId].title
+        const pageSlug = siteData.pages[pageId].slug
+
+        //adding site data to pages
+        value.data = { ...value.data, id: pageId, title: pageTitle, slug: pageSlug }
 
         //transforming page data
         if (value.data.modules) {
@@ -51,11 +56,10 @@ const transformPagesData = function (data) {
         }
     }
 
-    /*  const pageList = { pages: pageListData } */
-    data.pages = newData
+    pageData.pages = newData
 
     //returned transformed whole page json and pagelist
-    return data
+    return pageData
 }
 
 const transformCMSMods = (pageData) => {
@@ -177,6 +181,8 @@ const updatePageList = async (page, newUrl) => {
         }
     }
 }
+
+const linkPageId = (pageData, siteData) => {}
 
 //add any file, pass it the file and key for filename
 const addFileS3 = async (file, key) => {
