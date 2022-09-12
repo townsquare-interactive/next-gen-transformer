@@ -38,6 +38,7 @@ const transformCMSData = function (data) {
 }
 
 const transformPagesData = function (pageData, siteData) {
+    console.log('page transformer started')
     let newData = []
     //const pageListData = []
     for (const [key, value] of Object.entries(pageData.pages)) {
@@ -138,18 +139,19 @@ const transformPageData = function (page) {
 
 const updatePageList = async (page, newUrl) => {
     console.log('page list updater started')
+    const pageListUrl = `${newUrl}/pages/page-list.json`
 
     //check to see if pagelist exists
 
     let pageListFile = await getFile()
-    s3.headObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }, function (err, metadata) {
+    s3.headObject({ Bucket: 'townsquareinteractive', Key: pageListUrl }, function (err, metadata) {
         if (err && err.name === 'NotFound') {
             // Handle no object on cloud here
             console.log('pagelist not found')
             pageListFile = { pages: [] }
             addPagesToList()
 
-            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
+            addFileS3List(pageListFile, pageListUrl)
             return false
         } else if (err) {
             // Handle other errors here....
@@ -160,7 +162,7 @@ const updatePageList = async (page, newUrl) => {
             console.log('pageList found')
             addPagesToList()
 
-            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
+            addFileS3List(pageListFile, pageListUrl)
 
             return true
         }
@@ -198,9 +200,6 @@ const updatePageList = async (page, newUrl) => {
             }
         }
     }
-
-    console.log('pagelist file', pageListFile)
-    console.log('updater done')
 }
 
 //add any file, pass it the file and key for filename
