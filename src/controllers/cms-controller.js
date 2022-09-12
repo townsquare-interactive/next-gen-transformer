@@ -146,9 +146,9 @@ const updatePageList = async (page, newUrl) => {
             // Handle no object on cloud here
             console.log('pagelist not found')
             pageListFile = { pages: [] }
-            addPageToList()
-            addFileS3(pageListFile, `${newUrl}/pages/page-list.json`)
+            addPagesToList()
 
+            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
             return false
         } else if (err) {
             // Handle other errors here....
@@ -156,24 +156,31 @@ const updatePageList = async (page, newUrl) => {
             return false
         } else {
             // Do stuff with signedUrl
-            addPageToList()
-            addFileS3(pageListFile, `${newUrl}/pages/page-list.json`)
+            console.log('pageList found')
+            addPagesToList()
+
+            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
+
             return true
         }
     })
 
     //add page object to pagelist
-    const addPageToList = () => {
-        if (pageListFile.pages.filter((e) => e.name === page.title).length === 0) {
-            pageListFile.pages.push({
-                name: page.title,
-                slug: page.slug,
-                id: page.id,
-                page_type: page.page_type,
-            })
-            console.log('new page added:', page.title)
-        } else {
-            console.log('page already there', page.title)
+    const addPagesToList = () => {
+        console.log('old pagelist', pageListFile)
+        for (let i = 0; i < page.length; i++) {
+            pageData = page[i].data
+            if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
+                pageListFile.pages.push({
+                    name: pageData.title,
+                    slug: pageData.slug,
+                    id: pageData.id,
+                    page_type: pageData.page_type,
+                })
+                console.log('new page added:', pageData.title)
+            } else {
+                console.log('page already there', pageData.title)
+            }
         }
     }
 
@@ -192,10 +199,22 @@ const updatePageList = async (page, newUrl) => {
     }
 }
 
-const linkPageId = (pageData, siteData) => {}
-
 //add any file, pass it the file and key for filename
 const addFileS3 = async (file, key) => {
+    await s3
+        .putObject({
+            Body: JSON.stringify(file),
+            Bucket: 'townsquareinteractive',
+            Key: key,
+        })
+        .promise()
+
+    console.log('File Placed')
+}
+
+const addFileS3List = async (file, key) => {
+    console.log('pagelist added', file)
+
     await s3
         .putObject({
             Body: JSON.stringify(file),

@@ -39,8 +39,9 @@ const routes = (app) => {
         try {
             addFileS3(req.body, `${newUrl}/cmsSave.json`)
             //save each page
+            updatePageList(newPageData.pages, newUrl)
             for (let i = 0; i < newPageData.pages.length; i++) {
-                updatePageList(newPageData.pages[i].data, newUrl)
+                //updatePageList(newPageData.pages[i].data, newUrl)
                 addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
             }
             res.json(newUrl)
