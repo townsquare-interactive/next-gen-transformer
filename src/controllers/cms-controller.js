@@ -198,6 +198,8 @@ const updatePageList = async (page, newUrl) => {
                 }
             }
         }
+
+        console.log(pageListFile)
     } catch {
         console.log('unable to use s3 getHead')
     }
