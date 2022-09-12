@@ -48,9 +48,9 @@ const transformPagesData = function (pageData, siteData) {
 
         //getting data from site
         const pageId = key
-        const pageTitle = siteData.pages[pageId].title
-        const pageSlug = siteData.pages[pageId].slug
-        const page_type = siteData.pages[pageId].page_type
+        const pageTitle = siteData[pageId].title
+        const pageSlug = siteData[pageId].slug
+        const page_type = siteData[pageId].page_type
 
         //adding site data to pages
         value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, ...value.data }

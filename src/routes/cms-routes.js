@@ -29,12 +29,12 @@ const routes = (app) => {
     })
 
     app.post('/pages', async (req, res) => {
-        const url = req.body.fullData.config.website.url
+        const url = req.body.siteConfig.url
         cutProtocol = url.replace(/(^\w+:|^)\/\//, '')
         newUrl = stripUrl(cutProtocol)
 
         /* const newUrl = req.url */
-        const newPageData = transformPagesData(req.body.pageData, req.body.fullData)
+        const newPageData = transformPagesData(req.body.pageData, req.body.allPages)
 
         try {
             addFileS3(req.body, `${newUrl}/cmsSave.json`)
