@@ -138,64 +138,68 @@ const transformPageData = function (page) {
 
 const updatePageList = async (page, newUrl) => {
     console.log('page list updater started')
-    let pageListFile = await getFile()
 
     //check to see if pagelist exists
-    s3.headObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }, function (err, metadata) {
-        if (err && err.name === 'NotFound') {
-            // Handle no object on cloud here
-            console.log('pagelist not found')
-            pageListFile = { pages: [] }
-            addPagesToList()
+    try {
+        let pageListFile = await getFile()
+        s3.headObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }, function (err, metadata) {
+            if (err && err.name === 'NotFound') {
+                // Handle no object on cloud here
+                console.log('pagelist not found')
+                pageListFile = { pages: [] }
+                addPagesToList()
 
-            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
-            return false
-        } else if (err) {
-            // Handle other errors here....
-            console.log(err.name)
-            return false
-        } else {
-            // Do stuff with signedUrl
-            console.log('pageList found')
-            addPagesToList()
-
-            addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
-
-            return true
-        }
-    })
-
-    //add page object to pagelist
-    const addPagesToList = () => {
-        console.log('old pagelist', pageListFile)
-        for (let i = 0; i < page.length; i++) {
-            pageData = page[i].data
-            if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
-                pageListFile.pages.push({
-                    name: pageData.title,
-                    slug: pageData.slug,
-                    id: pageData.id,
-                    page_type: pageData.page_type,
-                })
-                console.log('new page added:', pageData.title)
+                addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
+                return false
+            } else if (err) {
+                // Handle other errors here....
+                console.log(err.name)
+                return false
             } else {
-                console.log('page already there', pageData.title)
+                // Do stuff with signedUrl
+                console.log('pageList found')
+                addPagesToList()
+
+                addFileS3List(pageListFile, `${newUrl}/pages/page-list2.json`)
+
+                return true
+            }
+        })
+
+        //add page object to pagelist
+        const addPagesToList = () => {
+            console.log('old pagelist', pageListFile)
+            for (let i = 0; i < page.length; i++) {
+                pageData = page[i].data
+                if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
+                    pageListFile.pages.push({
+                        name: pageData.title,
+                        slug: pageData.slug,
+                        id: pageData.id,
+                        page_type: pageData.page_type,
+                    })
+                    console.log('new page added:', pageData.title)
+                } else {
+                    console.log('page already there', pageData.title)
+                }
             }
         }
-    }
 
-    async function getFile() {
-        try {
-            // Converted it to async/await syntax just to simplify.
-            const data = await s3.getObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }).promise()
+        async function getFile() {
+            try {
+                // Converted it to async/await syntax just to simplify.
+                const data = await s3.getObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }).promise()
 
-            return JSON.parse(data.Body.toString('utf-8'))
-        } catch (err) {
-            return {
-                statusCode: err.statusCode || 400,
-                body: err.message || JSON.stringify(err.message),
+                return JSON.parse(data.Body.toString('utf-8'))
+            } catch (err) {
+                return {
+                    statusCode: err.statusCode || 400,
+                    body: err.message || JSON.stringify(err.message),
+                }
             }
         }
+    } catch {
+        console.log('unable to use s3 getHead')
     }
 }
 
