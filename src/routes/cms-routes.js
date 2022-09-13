@@ -50,14 +50,14 @@ const routes = (app) => {
     })
 
     app.post('/test', async (req, res) => {
-        const url = req.body.siteConfig.url
-        newUrl = stripUrl(url)
-
         try {
+            const url = req.body.siteConfig.url
+            newUrl = stripUrl(url)
             addFileS3(req.body, `${newUrl}/testSave.json`) //debugging passed data
             res.json(newUrl)
         } catch (err) {
             console.error(err)
+            console.log('did not work')
             res.status(500).json({ err: 'Something went wrong' })
         }
     })
