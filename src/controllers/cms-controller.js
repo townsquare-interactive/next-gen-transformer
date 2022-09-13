@@ -11,37 +11,11 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformCMSData = function (data) {
-    let newData = []
-    const pageListData = []
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        pageListData.push(createPageList(value))
-
-        //transforming page data
-        if (value.publisher.data.modules) {
-            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
-            newData.push(value)
-        } else if (value.backup.data) {
-            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
-            newData.push(value)
-        } else {
-            newData.push(value)
-        }
-    }
-
-    const pageList = { pages: pageListData }
-    data.pages = newData
-
-    //returned transformed whole page json and pagelist
-    return { data: data, pageList: pageList }
-}
-
 const transformPagesData = function (pageData, siteData) {
     console.log('page transformer started')
     let newData = []
     //const pageListData = []
-    for (const [key, value] of Object.entries(pageData.pages)) {
+    for (const [key, value] of Object.entries(pageData)) {
         if (value.data.title) {
             console.log('name found', value.data.title)
             delete value.data.title
@@ -121,7 +95,8 @@ const addFilesS3 = async (data, pageList, newUrl) => {
 }
 
 const stripUrl = (url) => {
-    return url.replace(/\..*/, '')
+    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
+    return removeProtocol.replace(/\..*/, '')
 }
 
 const transformPageData = function (page) {
@@ -202,6 +177,32 @@ const updatePageList = async (page, newUrl) => {
     }
 }
 
+const transformCMSData = function (data) {
+    let newData = []
+    const pageListData = []
+    for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        pageListData.push(createPageList(value))
+
+        //transforming page data
+        if (value.publisher.data.modules) {
+            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
+            newData.push(value)
+        } else if (value.backup.data) {
+            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
+            newData.push(value)
+        } else {
+            newData.push(value)
+        }
+    }
+
+    const pageList = { pages: pageListData }
+    data.pages = newData
+
+    //returned transformed whole page json and pagelist
+    return { data: data, pageList: pageList }
+}
+
 //add any file, pass it the file and key for filename
 const addFileS3 = async (file, key) => {
     await s3
@@ -216,7 +217,7 @@ const addFileS3 = async (file, key) => {
 }
 
 const addFileS3List = async (file, key) => {
-    console.log('pagelist added', file)
+    console.log('pagelist to be added', file)
 
     await s3
         .putObject({
@@ -226,7 +227,7 @@ const addFileS3List = async (file, key) => {
         })
         .promise()
 
-    console.log('File Placed')
+    console.log('pagelist Placed')
 }
 
 module.exports = {

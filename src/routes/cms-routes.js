@@ -28,22 +28,33 @@ const routes = (app) => {
         }
     })
 
+    //chnage to save data
     app.post('/pages', async (req, res) => {
         const url = req.body.siteConfig.url
-        cutProtocol = url.replace(/(^\w+:|^)\/\//, '')
-        newUrl = stripUrl(cutProtocol)
+        newUrl = stripUrl(url)
 
-        /* const newUrl = req.url */
-        const newPageData = transformPagesData(req.body.pageData, req.body.allPages)
+        const newPageData = transformPagesData(req.body.savedData.pages, req.body.allPages)
 
         try {
-            addFileS3(req.body, `${newUrl}/cmsSave.json`)
+            addFileS3(req.body, `${newUrl}/cmsSave.json`) //debugging passed data
             //save each page
-            updatePageList(newPageData.pages, newUrl)
             for (let i = 0; i < newPageData.pages.length; i++) {
-                //updatePageList(newPageData.pages[i].data, newUrl)
                 addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
             }
+            updatePageList(newPageData.pages, newUrl)
+            res.json(newUrl)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    })
+
+    app.post('/test', async (req, res) => {
+        const url = req.body.siteConfig.url
+        newUrl = stripUrl(url)
+
+        try {
+            addFileS3(req.body, `${newUrl}/testSave.json`) //debugging passed data
             res.json(newUrl)
         } catch (err) {
             console.error(err)

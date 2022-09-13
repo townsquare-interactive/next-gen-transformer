@@ -1760,6 +1760,19 @@ module.exports = function (ngModule) {
                         data: data,
                     }
 
+                    //Adding cms data save to vercel endpoint
+                    if (FeatureFlags.object.vercelDataSave) {
+                        const requestVercelData = {
+                            method: 'POST',
+                            url: 'https://cms-routes.vercel.app/pages',
+                            data: { pageData: data, allPages: $scope.data.pages, siteConfig: $scope.data.config.website },
+                        }
+
+                        $http(requestVercelData).then(function (success) {
+                            console.log('vercel post success')
+                        })
+                    }
+
                     $http(request)
                         .then(
                             function (success) {
