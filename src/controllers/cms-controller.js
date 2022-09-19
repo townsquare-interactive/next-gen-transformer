@@ -7,6 +7,7 @@ AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
     accessKeyId: process.env.CMS_ACCESS_KEY_ID,
     secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID,
+    //logger: console,
 })
 
 const s3 = new AWS.S3()
@@ -79,7 +80,7 @@ const createPageList = (value) => {
 }
 
 //adding a page file for each page in cms data
-const addFilesS3 = async (data, pageList, newUrl) => {
+const addMultipleS3 = async (data, pageList, newUrl) => {
     const pages = data.pages
 
     //adding page list file to s3
@@ -212,6 +213,9 @@ const addFileS3 = async (file, key) => {
             Key: key,
         })
         .promise()
+        .catch((error) => {
+            console.error(error)
+        })
 
     console.log('File Placed')
 }
@@ -231,7 +235,7 @@ const addFileS3List = async (file, key) => {
 }
 
 module.exports = {
-    addFilesS3,
+    addMultipleS3,
     transformCMSData,
     transformPageData,
     updatePageList,
