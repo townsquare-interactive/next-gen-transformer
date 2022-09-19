@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 })
 
 app.use(express.json({ limit: '80mb' }))
-app.use(express.urlencoded({ limit: '80mb', extended: false, parameterLimit: 5000000 }))
+app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000000 }))
 
 app.use('/api/cms-routes', cms)
 
