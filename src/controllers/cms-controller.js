@@ -136,7 +136,6 @@ const updatePageList = async (page, newUrl) => {
             // Do stuff with signedUrl
             console.log('pageList found')
             addPagesToList()
-
             addFileS3List(pageListFile, pageListUrl)
 
             return true
@@ -205,6 +204,7 @@ const transformCMSData = function (data) {
 
 //add any file, pass it the file and key for filename
 const addFileS3 = async (file, key) => {
+    console.log('starting file upload')
     await s3
         .putObject({
             Body: JSON.stringify(file),

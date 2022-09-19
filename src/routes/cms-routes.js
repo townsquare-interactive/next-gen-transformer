@@ -54,6 +54,7 @@ const routes = (app) => {
             const url = req.body.siteConfig.url
             newUrl = stripUrl(url)
             addFileS3(req.body, `${newUrl}/testSave.json`) //debugging passed data
+
             res.json(newUrl)
         } catch (err) {
             console.error(err)
