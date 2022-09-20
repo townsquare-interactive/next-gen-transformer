@@ -58,7 +58,8 @@ router.post('/save', async (req, res) => {
     const newPageData = transformPagesData(req.body.savedData.pages, req.body.allPages)
 
     try {
-        addFileS3(req.body, `${newUrl}/cmsSave.json`) //debugging passed data
+        //await addFileS3(req.body, `${newUrl}/cmsSave.json`) //debugging passed data
+
         //save each page
         for (let i = 0; i < newPageData.pages.length; i++) {
             await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
@@ -72,7 +73,7 @@ router.post('/save', async (req, res) => {
 })
 
 //used for debugging
-router.post('/test', async (req, res) => {
+/* router.post('/test', async (req, res) => {
     try {
         const url = req.body.siteConfig.url
         newUrl = stripUrl(url)
@@ -84,7 +85,7 @@ router.post('/test', async (req, res) => {
         console.log('did not work')
         res.status(500).json({ err: 'Something went wrong' })
     }
-})
+}) */
 
 router.post('/sitedata', async (req, res) => {
     const newUrl = req.body.siteData.url
