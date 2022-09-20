@@ -26,7 +26,7 @@ app.use('/api/cms-routes', cms)
 const PORT = process.env.PORT || 8080
 
 app.get('/', (req, res) => {
-    res.send(`new API`)
+    res.send(`API Running CMS`)
 })
 
 app.listen(PORT, () => console.log(`Server running in port ${PORT}`))
