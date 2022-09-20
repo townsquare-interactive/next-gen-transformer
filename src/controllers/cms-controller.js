@@ -1,6 +1,7 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
-/* const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3') */
+
+const TsiBucket = 'townsquareinteractive'
 
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
@@ -71,7 +72,7 @@ const updatePageList = async (page, newUrl) => {
         }
     }
 
-    let pageListFile = await getFileS3('townsquareinteractive', `${newUrl}/pages/page-list.json`)
+    let pageListFile = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
     addPagesToList(pageListFile)
     await addFileS3List(pageListFile, pageListUrl)
 }
@@ -93,7 +94,7 @@ const addFileS3 = async (file, key) => {
     await s3
         .putObject({
             Body: JSON.stringify(file),
-            Bucket: 'townsquareinteractive',
+            Bucket: TsiBucket,
             Key: key,
         })
         .promise()
@@ -202,7 +203,7 @@ const addFileS3List = async (file, key) => {
     await s3
         .putObject({
             Body: JSON.stringify(file),
-            Bucket: 'townsquareinteractive',
+            Bucket: TsiBucket,
             Key: key,
         })
         .promise()

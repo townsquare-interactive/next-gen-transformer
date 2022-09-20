@@ -57,7 +57,7 @@ router.post('/save', async (req, res) => {
     }
 })
 
-router.post('/page', async (req, res) => {
+/* router.post('/page', async (req, res) => {
     const newPageData = transformPageData(req.body.page)
     const newUrl = stripUrl(req.body.data.url)
 
@@ -70,7 +70,7 @@ router.post('/page', async (req, res) => {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
     }
-})
+}) */
 
 /* router.post('/sitedata', async (req, res) => {
     const newUrl = req.body.siteData.url
@@ -86,6 +86,8 @@ router.post('/page', async (req, res) => {
     }
 })
  */
+
+//takes all site data and adds pages using backup data
 router.post('/migrate', async (req, res) => {
     const newData = transformCMSData(req.body)
     const newUrl = stripUrl(req.body.config.website.url)

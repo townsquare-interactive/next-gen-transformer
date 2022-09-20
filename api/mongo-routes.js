@@ -1,4 +1,4 @@
-const { updateCharacter, getCharacters, deleteCharacter, getCharacterById, addCharacter } = require('../controllers/mongo-controller')
+const { updateCharacter, getCharacters, deleteCharacter, getCharacterById, addCharacter } = require('../src/controllers/mongo-controller')
 
 const routes = (app) => {
     app.get('/characters', async (req, res) => {
