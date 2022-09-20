@@ -1,7 +1,6 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
-const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3')
-/* const { getObjectCommand, S3Client } = require('aws-sdk') */
+/* const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3') */
 
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
@@ -44,6 +43,93 @@ const transformPagesData = function (pageData, siteData) {
     return pageData
 }
 
+const stripUrl = (url) => {
+    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
+    return removeProtocol.replace(/\..*/, '')
+}
+
+const updatePageList = async (page, newUrl) => {
+    console.log('page list updater started ------')
+    const pageListUrl = `${newUrl}/pages/page-list.json`
+
+    //add page object to pagelist
+    const addPagesToList = (pageListFile) => {
+        console.log('old pagelist', pageListFile)
+        for (let i = 0; i < page.length; i++) {
+            pageData = page[i].data
+            if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
+                pageListFile.pages.push({
+                    name: pageData.title,
+                    slug: pageData.slug,
+                    id: pageData.id,
+                    page_type: pageData.page_type,
+                })
+                console.log('new page added:', pageData.title)
+            } else {
+                console.log('page already there', pageData.title)
+            }
+        }
+    }
+
+    let pageListFile = await getFileS3('townsquareinteractive', `${newUrl}/pages/page-list.json`)
+    addPagesToList(pageListFile)
+    await addFileS3List(pageListFile, pageListUrl)
+}
+
+//Get S3 object and return, if not found return passed object
+const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
+    try {
+        const data = await s3.getObject({ Bucket: bucket, Key: key }).promise()
+        console.log('getFile', data)
+        return JSON.parse(data.Body.toString('utf-8'))
+    } catch (err) {
+        console.log('file  not found in S3, creating new file')
+        return rtnObj
+    }
+}
+
+const addFileS3 = async (file, key) => {
+    console.log('starting file upload')
+    await s3
+        .putObject({
+            Body: JSON.stringify(file),
+            Bucket: 'townsquareinteractive',
+            Key: key,
+        })
+        .promise()
+        .catch((error) => {
+            console.error(error)
+        })
+
+    console.log('File Placed')
+}
+
+const transformCMSData = function (data) {
+    let newData = []
+    const pageListData = []
+    for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        pageListData.push(createPageList(value))
+
+        //transforming page data
+        if (value.publisher.data.modules) {
+            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
+            newData.push(value)
+        } else if (value.backup.data) {
+            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
+            newData.push(value)
+        } else {
+            newData.push(value)
+        }
+    }
+
+    const pageList = { pages: pageListData }
+    data.pages = newData
+
+    //returned transformed whole page json and pagelist
+    return { data: data, pageList: pageList }
+}
+
 const transformCMSMods = (pageData) => {
     let columnsData = []
     for (let i = 0; i <= pageData.length; ++i) {
@@ -79,6 +165,19 @@ const createPageList = (value) => {
     return pageData
 }
 
+const transformPageData = function (page) {
+    if (page.publisher) {
+        page.publisher.data.modules = transformCMSMods(page.publisher.data.modules)
+    }
+    if (page.backup) {
+        page.backup.data.modules = transformCMSMods(page.backup.data.modules)
+    }
+    if (page.modules) {
+        page.modules = transformCMSMods(page.modules)
+    }
+    return page
+}
+
 //adding a page file for each page in cms data
 const addMultipleS3 = async (data, pageList, newUrl) => {
     const pages = data.pages
@@ -95,166 +194,7 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
     addFileS3(data, `${newUrl}/siteData.json`)
 }
 
-const stripUrl = (url) => {
-    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
-    return removeProtocol.replace(/\..*/, '')
-}
-
-const transformPageData = function (page) {
-    if (page.publisher) {
-        page.publisher.data.modules = transformCMSMods(page.publisher.data.modules)
-    }
-    if (page.backup) {
-        page.backup.data.modules = transformCMSMods(page.backup.data.modules)
-    }
-    if (page.modules) {
-        page.modules = transformCMSMods(page.modules)
-    }
-    return page
-}
-
-const updatePageList = async (page, newUrl) => {
-    console.log('page list updater started ------')
-    const pageListUrl = `${newUrl}/pages/page-list.json`
-
-    //let pageList = await getFile()
-
-    //check to see if pagelist exists
-    /* let isPage
-    await s3.headObject({ Bucket: 'townsquareinteractive', Key: pageListUrl }, function (err, metadata) {
-        if (err && err.name === 'NotFound') {
-            // Handle no object on cloud here
-            pageListFile = { pages: [] }
-            addPagesToList()
-            addFileS3List(pageListFile, pageListUrl) 
-            // pageChanges(false)
-            console.log('pagelist not found')
-            isPage = false
-            return false
-        } else if (err) {
-            // Handle other errors here....
-            //pageChanges(false)
-            console.log(err.name)
-            isPage = false
-            return false
-        } else {
-            // Do stuff with signedUrl
-            // pageChanges(true)
-            addPagesToList()
-            addFileS3List(pageListFile, pageListUrl) 
-            console.log('pageList found')
-            isPage = true
-
-            return true
-        }
-    })
- */
-    //add page object to pagelist
-    const addPagesToList = (pageListFile) => {
-        console.log('old pagelist', pageListFile)
-        for (let i = 0; i < page.length; i++) {
-            pageData = page[i].data
-            if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
-                pageListFile.pages.push({
-                    name: pageData.title,
-                    slug: pageData.slug,
-                    id: pageData.id,
-                    page_type: pageData.page_type,
-                })
-                console.log('new page added:', pageData.title)
-            } else {
-                console.log('page already there', pageData.title)
-            }
-        }
-    }
-
-    async function getFile() {
-        try {
-            const data = await s3.getObject({ Bucket: 'townsquareinteractive', Key: `${newUrl}/pages/page-list.json` }).promise()
-            console.log('getFile', data)
-
-            return JSON.parse(data.Body.toString('utf-8'))
-        } catch (err) {
-            console.log('pagelist not found in S3, creating new pageList')
-            /* return {
-                statusCode: err.statusCode || 400,
-                body: err.message || JSON.stringify(err.message),
-            } */
-
-            return { pages: [] }
-        }
-    }
-
-    let pageListFile = await getFile()
-    addPagesToList(pageListFile)
-    await addFileS3List(pageListFile, pageListUrl)
-
-    /*     if (isPage) {
-        let pageListFile = await getFile()
-        addPagesToList(pageListFile)
-        await addFileS3List(pageListFile, pageListUrl)
-    } else {
-        let pageListFile = { pages: [] }
-        addPagesToList(pageListFile)
-        await addFileS3List(pageListFile, pageListUrl)
-    }
- */
-    /* async function pageChanges(isPageList) {
-        console.log('page changer started')
-        if (await isPageList) {
-            let pageListFile = await getFile()
-            addPagesToList(pageListFile)
-            await addFileS3List(pageListFile, pageListUrl)
-        } else {
-            let pageListFile = { pages: [] }
-            addPagesToList(pageListFile)
-            await addFileS3List(pageListFile, pageListUrl)
-        }
-    } */
-}
-
-const transformCMSData = function (data) {
-    let newData = []
-    const pageListData = []
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        pageListData.push(createPageList(value))
-
-        //transforming page data
-        if (value.publisher.data.modules) {
-            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
-            newData.push(value)
-        } else if (value.backup.data) {
-            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
-            newData.push(value)
-        } else {
-            newData.push(value)
-        }
-    }
-
-    const pageList = { pages: pageListData }
-    data.pages = newData
-
-    //returned transformed whole page json and pagelist
-    return { data: data, pageList: pageList }
-}
-
 //add any file, pass it the file and key for filename
-const addFileS3 = async (file, key) => {
-    console.log('starting file upload')
-    await s3
-        .putObject({
-            Body: JSON.stringify(file),
-            Bucket: 'townsquareinteractive',
-            Key: key,
-        })
-        .promise()
-        .catch((error) => {
-            console.error(error)
-        })
-
-    console.log('File Placed')
-}
 
 const addFileS3List = async (file, key) => {
     console.log('pagelist to be added', file)

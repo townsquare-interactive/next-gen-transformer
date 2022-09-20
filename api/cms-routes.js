@@ -22,28 +22,13 @@ router.get('/', async (req, res) => {
         return res.status(500).send('Server error')
     }
 })
-
+//save all of site data to s3
 router.post('/cms', async (req, res) => {
     const newUrl = stripUrl(req.body.config.website.url)
 
     try {
         await addFileS3(req.body, `${newUrl}/siteData.json`)
         res.json('Site Data added')
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
-    }
-})
-
-router.post('/page', async (req, res) => {
-    const newPageData = transformPageData(req.body.page)
-    const newUrl = stripUrl(req.body.data.url)
-
-    try {
-        updatePageList(req.body.page, newUrl)
-        await addFileS3(newPageData, `${newUrl}/pages/${newPageData.slug}.json`)
-
-        res.json(JSON.stringify('page added'))
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
@@ -72,22 +57,22 @@ router.post('/save', async (req, res) => {
     }
 })
 
-//used for debugging
-/* router.post('/test', async (req, res) => {
-    try {
-        const url = req.body.siteConfig.url
-        newUrl = stripUrl(url)
-        await addFileS3(req.body, `${newUrl}/testSave.json`) //debugging passed data
+router.post('/page', async (req, res) => {
+    const newPageData = transformPageData(req.body.page)
+    const newUrl = stripUrl(req.body.data.url)
 
-        res.json(newUrl)
+    try {
+        updatePageList(req.body.page, newUrl)
+        await addFileS3(newPageData, `${newUrl}/pages/${newPageData.slug}.json`)
+
+        res.json(JSON.stringify('page added'))
     } catch (err) {
         console.error(err)
-        console.log('did not work')
         res.status(500).json({ err: 'Something went wrong' })
     }
-}) */
+})
 
-router.post('/sitedata', async (req, res) => {
+/* router.post('/sitedata', async (req, res) => {
     const newUrl = req.body.siteData.url
 
     try {
@@ -100,7 +85,7 @@ router.post('/sitedata', async (req, res) => {
         res.status(500).json({ err: 'Something went wrong' })
     }
 })
-
+ */
 router.post('/migrate', async (req, res) => {
     const newData = transformCMSData(req.body)
     const newUrl = stripUrl(req.body.config.website.url)
