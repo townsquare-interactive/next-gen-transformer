@@ -1,6 +1,5 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
-
 const TsiBucket = 'townsquareinteractive'
 
 AWS.config.update({
@@ -74,6 +73,7 @@ const updatePageList = async (page, newUrl) => {
 
     let pageListFile = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
     addPagesToList(pageListFile)
+    //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
 }
 
@@ -81,7 +81,6 @@ const updatePageList = async (page, newUrl) => {
 const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
     try {
         const data = await s3.getObject({ Bucket: bucket, Key: key }).promise()
-        console.log('getFile', data)
         return JSON.parse(data.Body.toString('utf-8'))
     } catch (err) {
         console.log('file  not found in S3, creating new file')
@@ -90,7 +89,6 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
 }
 
 const addFileS3 = async (file, key) => {
-    console.log('starting file upload')
     await s3
         .putObject({
             Body: JSON.stringify(file),
@@ -105,6 +103,7 @@ const addFileS3 = async (file, key) => {
     console.log('File Placed')
 }
 
+//used for migrate, probably deleted later
 const transformCMSData = function (data) {
     let newData = []
     const pageListData = []
@@ -198,7 +197,7 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
 //add any file, pass it the file and key for filename
 
 const addFileS3List = async (file, key) => {
-    console.log('pagelist to be added', file)
+    console.log('File to be added', file)
 
     await s3
         .putObject({
@@ -208,7 +207,7 @@ const addFileS3List = async (file, key) => {
         })
         .promise()
 
-    console.log('pagelist Placed')
+    console.log('S3 File Added')
 }
 
 module.exports = {
