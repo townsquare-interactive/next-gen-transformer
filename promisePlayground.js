@@ -49,23 +49,27 @@ function makeRequest(location) {
     return new Promise((resolve, reject) => {
         console.log(`making request to ${location}`)
         if (location === 'Google') {
-            resolve('Google says hi')
+            resolve('www.google.com')
         } else {
-            reject('We can only talk to Google')
+            reject('We can only search Google')
         }
     })
 }
 
 function processRequest(response) {
+    const newObj = {
+        browserSite: response,
+    }
     return new Promise((resolve, reject) => {
         console.log('Processing response')
-        resolve(`Extra Information + ${response}`)
+        /* resolve(`Extra Information + ${response}`) */
+        resolve(newObj)
     })
 }
 
 async function findLocation() {
     try {
-        const response = await makeRequest('FB')
+        const response = await makeRequest('Google')
         console.log('response received')
         const processedResponse = await processRequest(response)
         console.log(processedResponse)

@@ -60,7 +60,7 @@ const updatePageList = async (page, newUrl) => {
             if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
                 pageListFile.pages.push({
                     name: pageData.title,
-                    slug: pageData.slug,
+                    slug: '/' + pageData.slug,
                     id: pageData.id,
                     page_type: pageData.page_type,
                 })
