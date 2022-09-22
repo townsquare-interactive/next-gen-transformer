@@ -4,7 +4,7 @@ const router = express.Router()
 
 //chnage to save data
 router.post('/save', async (req, res) => {
-    try {
+    /*  try {
         //grab url to make S3 folder name
         const url = req.body.siteConfig.url
         newUrl = stripUrl(url)
@@ -12,6 +12,22 @@ router.post('/save', async (req, res) => {
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
             const newPageData = transformPagesData(req.body.savedData.pages, req.body.allPages)
+
+            //adding each page to s3
+            for (let i = 0; i < newPageData.pages.length; i++) {
+                await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
+            }
+            // update/create pagelist
+            await updatePageList(newPageData.pages, newUrl)
+        } */
+    try {
+        //grab url to make S3 folder name
+        const url = req.body.siteData.config.website.url
+        newUrl = stripUrl(url)
+
+        //Transforming and posting saved page data
+        if (req.body.savedData.pages) {
+            const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages)
 
             //adding each page to s3
             for (let i = 0; i < newPageData.pages.length; i++) {
