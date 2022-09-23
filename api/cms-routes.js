@@ -21,7 +21,7 @@ router.post('/save', async (req, res) => {
             await updatePageList(newPageData.pages, newUrl)
         }
 
-        res.json('posting to s3 folder' + newUrl)
+        res.json('posting to s3 folder: ' + newUrl)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
