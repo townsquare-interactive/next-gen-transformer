@@ -29,6 +29,9 @@ router.post('/save', async (req, res) => {
             await updatePageList(newPageData.pages, newUrl)
         }
 
+        const globalFile = await createGlobalFile(req.body, newUrl)
+        await addFileS3(globalFile, `${newUrl}/global.json`)
+
         res.json('posting to s3 folder: ' + newUrl)
     } catch (err) {
         console.error(err)
