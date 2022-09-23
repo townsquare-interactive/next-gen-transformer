@@ -1,4 +1,12 @@
-const { transformCMSData, addMultipleS3, updatePageList, addFileS3, stripUrl, transformPagesData } = require('../src/controllers/cms-controller')
+const {
+    transformCMSData,
+    addMultipleS3,
+    updatePageList,
+    addFileS3,
+    stripUrl,
+    transformPagesData,
+    createGlobalFile,
+} = require('../src/controllers/cms-controller')
 const express = require('express')
 const router = express.Router()
 
@@ -34,7 +42,20 @@ router.post('/cms', async (req, res) => {
 
     try {
         await addFileS3(req.body, `${newUrl}/siteData.json`)
-        res.json('Site Data added')
+        res.json('cms data added')
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
+router.post('/cmsconfig', async (req, res) => {
+    const newUrl = stripUrl(req.body.config.website.url)
+
+    try {
+        const globalFile = await createGlobalFile(req.body, newUrl)
+        await addFileS3(globalFile, `${newUrl}/global.json`)
+        res.json(globalFile)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })

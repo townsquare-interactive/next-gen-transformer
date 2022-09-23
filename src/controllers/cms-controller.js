@@ -105,6 +105,58 @@ const addFileS3 = async (file, key) => {
     console.log('File Placed')
 }
 
+const createGlobalFile = async (file, newUrl) => {
+    let pageListFile = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+
+    const globalFile = {
+        themeStyles: '',
+        logoUrl: '/files/2022/08/EiffelWater1.jpg',
+        modules: [
+            {
+                componentType: 'navigation',
+                attributes: {
+                    logoUrl: '/files/2022/08/EiffelWater1.jpg',
+                    pages: pageListFile.pages,
+                    navStyle: 'layout1',
+                    borderNum: 7,
+                    navImage: '/files/2022/08/EiffelWater1.jpg',
+                },
+            },
+            {
+                componentType: 'footer',
+                attributes: {
+                    pages: pageListFile.pages,
+                    navStyle: 'layout1',
+                    borderNum: 7,
+                    socialData: [
+                        {
+                            linkUrl: 'https://www.google.com/',
+                        },
+                        {
+                            linkUrl: 'https://www.facebook.com',
+                        },
+                        {
+                            linkUrl: 'https://www.instagram.com',
+                        },
+                        {
+                            linkUrl: 'https://www.twitter.com',
+                        },
+                    ],
+                    addressData: {
+                        street: '444 happy road',
+                        cityState: 'Townsville, Georgia',
+                        zip: '47384',
+                    },
+                    siteName: file.config.website.site_title,
+                    phoneNumber: 'no phone',
+                },
+            },
+        ],
+    }
+
+    return globalFile
+}
+
 //used for migrate, probably deleted later
 const transformCMSData = function (data) {
     let newData = []
@@ -220,4 +272,5 @@ module.exports = {
     addFileS3,
     stripUrl,
     transformPagesData,
+    createGlobalFile,
 }
