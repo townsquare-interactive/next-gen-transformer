@@ -26,9 +26,10 @@ const transformPagesData = function (pageData, siteData) {
         const pageTitle = siteData[pageId].title
         const pageSlug = siteData[pageId].slug
         const page_type = siteData[pageId].page_type
+        const url = siteData[pageId].url
 
         //adding site data to pages
-        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, ...value.data }
+        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, url: url, ...value.data }
 
         //transforming page data
         if (value.data.modules) {
