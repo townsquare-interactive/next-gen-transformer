@@ -5,7 +5,7 @@ const {
     addFileS3,
     stripUrl,
     transformPagesData,
-    createGlobalFile,
+    createOrEditLayout,
 } = require('../src/controllers/cms-controller')
 const express = require('express')
 const router = express.Router()
@@ -26,11 +26,14 @@ router.post('/save', async (req, res) => {
                 await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
             }
             // update/create pagelist
-            await updatePageList(newPageData.pages, newUrl)
+            const newPageList = await updatePageList(newPageData.pages, newUrl)
+
+            const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+            await addFileS3(globalFile, `${newUrl}/layout.json`)
         }
 
-        const globalFile = await createGlobalFile(req.body, newUrl)
-        await addFileS3(globalFile, `${newUrl}/global.json`)
+        //Adding new siteData file after saved
+        await addFileS3(req.body.siteData, `${newUrl}/siteData.json`)
 
         res.json('posting to s3 folder: ' + newUrl)
     } catch (err) {
@@ -56,8 +59,8 @@ router.post('/cmsconfig', async (req, res) => {
     const newUrl = stripUrl(req.body.config.website.url)
 
     try {
-        const globalFile = await createGlobalFile(req.body, newUrl)
-        await addFileS3(globalFile, `${newUrl}/global.json`)
+        const globalFile = await createOrEditLayout(req.body, newUrl)
+        await addFileS3(globalFile, `${newUrl}/layout.json`)
         res.json(globalFile)
     } catch (err) {
         console.error(err)

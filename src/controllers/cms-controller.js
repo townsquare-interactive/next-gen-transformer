@@ -77,6 +77,7 @@ const updatePageList = async (page, newUrl) => {
     addPagesToList(pageListFile)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
+    return pageListFile
 }
 
 //Get S3 object and return, if not found return passed object
@@ -105,8 +106,8 @@ const addFileS3 = async (file, key) => {
     console.log('File Placed')
 }
 
-const createGlobalFile = async (file, newUrl) => {
-    let pageListFile = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+const createOrEditLayout = async (file, newUrl, newPageList) => {
+    let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
 
     const globalFile = {
         themeStyles: '',
@@ -272,5 +273,5 @@ module.exports = {
     addFileS3,
     stripUrl,
     transformPagesData,
-    createGlobalFile,
+    createOrEditLayout,
 }
