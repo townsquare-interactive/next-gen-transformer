@@ -28,6 +28,7 @@ router.post('/save', async (req, res) => {
             // update/create pagelist
             const newPageList = await updatePageList(newPageData.pages, newUrl)
 
+            //Create or edit global file based off of pagelist updated above ^
             const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
             await addFileS3(globalFile, `${newUrl}/layout.json`)
         }
@@ -42,19 +43,7 @@ router.post('/save', async (req, res) => {
     }
 })
 
-//save all of site data in one file to s3
-router.post('/cms', async (req, res) => {
-    const newUrl = stripUrl(req.body.config.website.url)
-
-    try {
-        await addFileS3(req.body, `${newUrl}/siteData.json`)
-        res.json('cms data added')
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
-    }
-})
-
+//Saving layout file for nav in header/footer
 router.post('/cmsconfig', async (req, res) => {
     const newUrl = stripUrl(req.body.config.website.url)
 
@@ -62,6 +51,19 @@ router.post('/cmsconfig', async (req, res) => {
         const globalFile = await createOrEditLayout(req.body, newUrl)
         await addFileS3(globalFile, `${newUrl}/layout.json`)
         res.json(globalFile)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
+//save all of site data in one file to s3
+router.post('/cms', async (req, res) => {
+    const newUrl = stripUrl(req.body.config.website.url)
+
+    try {
+        await addFileS3(req.body, `${newUrl}/siteData.json`)
+        res.json('cms data added')
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })

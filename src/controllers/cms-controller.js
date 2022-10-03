@@ -14,14 +14,13 @@ const s3 = new AWS.S3()
 const transformPagesData = function (pageData, siteData) {
     console.log('page transformer started')
     let newData = []
-    //const pageListData = []
     for (const [key, value] of Object.entries(pageData)) {
         if (value.data.title) {
             console.log('name found', value.data.title)
             delete value.data.title
         }
 
-        //getting data from site
+        //getting page data from siteconfig
         const pageId = key
         const pageTitle = siteData[pageId].title
         const pageSlug = siteData[pageId].slug
@@ -44,11 +43,13 @@ const transformPagesData = function (pageData, siteData) {
     return pageData
 }
 
+//Strip url of protocol and .production / .com
 const stripUrl = (url) => {
     const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
     return removeProtocol.replace(/\..*/, '')
 }
 
+//Update pagelist file in s3 or create if not already there
 const updatePageList = async (page, newUrl) => {
     console.log('page list updater started ------')
     const pageListUrl = `${newUrl}/pages/page-list.json`
@@ -91,6 +92,7 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
     }
 }
 
+//add file to s3 bucket
 const addFileS3 = async (file, key) => {
     await s3
         .putObject({
@@ -106,12 +108,32 @@ const addFileS3 = async (file, key) => {
     console.log('File Placed')
 }
 
+//Create or edit layout file
 const createOrEditLayout = async (file, newUrl, newPageList) => {
     let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+
+    //adding socials from sitedata
+    const social = []
+    if (file.settings) {
+        for (let i = 0; i < file.settings.social.services.length; i++) {
+            let item = file.settings.social.services[i]
+
+            if (file.settings.social.services[i]) {
+                if (item.value && item.enabled == 1) {
+                    social.push(item.format.replace(/\%.*/, '') + item.value)
+                }
+            }
+        }
+    }
 
     const globalFile = {
         themeStyles: '',
         logoUrl: '/files/2022/08/EiffelWater1.jpg',
+        social: social,
+        siteName: file.config.website.site_title || '',
+        phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
+        email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
+        url: file.config.website.url,
         modules: [
             {
                 componentType: 'navigation',
@@ -148,41 +170,12 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
                         cityState: 'Townsville, Georgia',
                         zip: '47384',
                     },
-                    siteName: file.config.website.site_title,
-                    phoneNumber: 'no phone',
                 },
             },
         ],
     }
 
     return globalFile
-}
-
-//used for migrate, probably deleted later
-const transformCMSData = function (data) {
-    let newData = []
-    const pageListData = []
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        pageListData.push(createPageList(value))
-
-        //transforming page data
-        if (value.publisher.data.modules) {
-            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
-            newData.push(value)
-        } else if (value.backup.data) {
-            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
-            newData.push(value)
-        } else {
-            newData.push(value)
-        }
-    }
-
-    const pageList = { pages: pageListData }
-    data.pages = newData
-
-    //returned transformed whole page json and pagelist
-    return { data: data, pageList: pageList }
 }
 
 const transformCMSMods = (pageData) => {
@@ -209,29 +202,19 @@ const transformCMSMods = (pageData) => {
     return columnsData
 }
 
-const createPageList = (value) => {
-    const pageData = {
-        name: value.title,
-        slug: value.slug,
-        id: value.id,
-        page_type: value.page_type,
+/* const transformPageData = function (page) {
+    if (page.modules) {
+        page.modules = transformCMSMods(page.modules)
     }
-
-    return pageData
-}
-
-const transformPageData = function (page) {
     if (page.publisher) {
         page.publisher.data.modules = transformCMSMods(page.publisher.data.modules)
     }
     if (page.backup) {
         page.backup.data.modules = transformCMSMods(page.backup.data.modules)
     }
-    if (page.modules) {
-        page.modules = transformCMSMods(page.modules)
-    }
+
     return page
-}
+} */
 
 //adding a page file for each page in cms data
 const addMultipleS3 = async (data, pageList, newUrl) => {
@@ -265,10 +248,47 @@ const addFileS3List = async (file, key) => {
     console.log('S3 File Added')
 }
 
+//used for migrate, probably delete later
+const transformCMSData = function (data) {
+    let newData = []
+    const pageListData = []
+    for (const [key, value] of Object.entries(data.pages)) {
+        //creating file for pagelist
+        pageListData.push(createPageList(value))
+
+        //transforming page data
+        if (value.publisher.data.modules) {
+            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
+            newData.push(value)
+        } else if (value.backup.data) {
+            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
+            newData.push(value)
+        } else {
+            newData.push(value)
+        }
+    }
+
+    const pageList = { pages: pageListData }
+    data.pages = newData
+
+    //returned transformed whole page json and pagelist
+    return { data: data, pageList: pageList }
+}
+
+const createPageList = (value) => {
+    const pageData = {
+        name: value.title,
+        slug: value.slug,
+        id: value.id,
+        page_type: value.page_type,
+    }
+
+    return pageData
+}
+
 module.exports = {
     addMultipleS3,
     transformCMSData,
-    transformPageData,
     updatePageList,
     addFileS3,
     stripUrl,

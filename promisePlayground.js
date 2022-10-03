@@ -41,9 +41,6 @@ watchTutorialPromise()
         console.log(error.name + ' ' + error.message)
     }) */
 
-const { _ErrorFilterSensitiveLog } = require('@aws-sdk/client-s3')
-const { error } = require('console')
-
 /*----------------------------- Async Await ----------------------------------------*/
 function makeRequest(location) {
     return new Promise((resolve, reject) => {
