@@ -29,8 +29,12 @@ router.post('/save', async (req, res) => {
             const newPageList = await updatePageList(newPageData.pages, newUrl)
 
             //Create or edit global file based off of pagelist updated above ^
-            const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
-            await addFileS3(globalFile, `${newUrl}/layout.json`)
+            if (req.body.siteData.settings) {
+                const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+                await addFileS3(globalFile, `${newUrl}/layout.json`)
+            } else {
+                console.log('no settings passed, layout not updated')
+            }
         }
 
         //Adding new siteData file after saved

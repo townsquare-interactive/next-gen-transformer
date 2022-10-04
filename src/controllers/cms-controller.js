@@ -114,6 +114,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
 
     //adding socials from sitedata
     const social = []
+    let contact = { phone: '', email: '' }
     if (file.settings) {
         for (let i = 0; i < file.settings.social.services.length; i++) {
             let item = file.settings.social.services[i]
@@ -124,12 +125,18 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
                 }
             }
         }
+
+        contact = {
+            phone: file.settings.contact.contact_list.wide.items[0].phone[0],
+            email: file.settings.contact.contact_list.wide.items[0].email[0],
+        }
     }
 
     const globalFile = {
         themeStyles: '',
         logoUrl: '/files/2022/08/EiffelWater1.jpg',
         social: social,
+        contact: contact,
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
         email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
