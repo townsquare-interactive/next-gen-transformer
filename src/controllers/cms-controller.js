@@ -141,6 +141,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
         email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
         url: file.config.website.url,
+        cmsNav: file.navigation.menu_items['primary-menu'],
         modules: [
             {
                 componentType: 'navigation',
