@@ -17,6 +17,7 @@ router.post('/save', async (req, res) => {
         const url = req.body.siteData.config.website.url
         const newUrl = stripUrl(url)
 
+        let newPageList
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
             const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages)
@@ -26,17 +27,20 @@ router.post('/save', async (req, res) => {
                 await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
             }
             // update/create pagelist
-            const newPageList = await updatePageList(newPageData.pages, newUrl)
+            newPageList = await updatePageList(newPageData.pages, newUrl)
+        }
 
-            //Create or edit global file based off of pagelist updated above ^
-
-            if (req.body.siteData.settings) {
+        //Create or edit global file based off of pagelist updated above ^
+        if (req.body.siteData.settings) {
+            if (req.body.savedData.pages) {
                 const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
-
                 await addFileS3(globalFile, `${newUrl}/layout.json`)
             } else {
-                console.log('no settings passed, layout not updated')
+                const globalFile = await createOrEditLayout(req.body.siteData, newUrl)
+                await addFileS3(globalFile, `${newUrl}/layout.json`)
             }
+        } else {
+            console.log('no settings passed, layout not updated')
         }
 
         //Adding new siteData file after saved
