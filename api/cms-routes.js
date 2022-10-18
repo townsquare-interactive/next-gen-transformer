@@ -15,7 +15,7 @@ router.post('/save', async (req, res) => {
     try {
         //grab url to make S3 folder name
         const url = req.body.siteData.config.website.url
-        newUrl = stripUrl(url)
+        const newUrl = stripUrl(url)
 
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
@@ -29,8 +29,10 @@ router.post('/save', async (req, res) => {
             const newPageList = await updatePageList(newPageData.pages, newUrl)
 
             //Create or edit global file based off of pagelist updated above ^
+
             if (req.body.siteData.settings) {
                 const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+
                 await addFileS3(globalFile, `${newUrl}/layout.json`)
             } else {
                 console.log('no settings passed, layout not updated')
@@ -41,6 +43,7 @@ router.post('/save', async (req, res) => {
         await addFileS3(req.body.siteData, `${newUrl}/siteData.json`)
 
         res.json('posting to s3 folder: ' + newUrl)
+        /*      res.json(req.body.siteData.settings ? 'true' : 'false') */
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })

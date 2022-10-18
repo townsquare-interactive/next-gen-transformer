@@ -110,6 +110,7 @@ const addFileS3 = async (file, key) => {
 
 //Create or edit layout file
 const createOrEditLayout = async (file, newUrl, newPageList) => {
+    console.log('layout edit')
     let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
 
     //adding socials from sitedata
