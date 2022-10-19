@@ -131,61 +131,87 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             phone: file.settings.contact.contact_list.wide.items[0].phone[0],
             email: file.settings.contact.contact_list.wide.items[0].email[0],
         }
-    }
 
-    const globalFile = {
-        themeStyles: '',
-        logoUrl: '/files/2022/08/EiffelWater1.jpg',
-        social: social,
-        contact: contact,
-        siteName: file.config.website.site_title || '',
-        phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
-        email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
-        url: file.config.website.url,
-        cmsNav: file.navigation.menu_items['primary-menu'],
-        modules: [
-            {
-                componentType: 'navigation',
-                attributes: {
-                    logoUrl: '/files/2022/08/EiffelWater1.jpg',
-                    pages: pageListFile.pages,
-                    navStyle: 'layout1',
-                    borderNum: 7,
-                    navImage: '/files/2022/08/EiffelWater1.jpg',
-                },
-            },
-            {
-                componentType: 'footer',
-                attributes: {
-                    pages: pageListFile.pages,
-                    navStyle: 'layout1',
-                    borderNum: 7,
-                    socialData: [
-                        {
-                            linkUrl: 'https://www.google.com/',
-                        },
-                        {
-                            linkUrl: 'https://www.facebook.com',
-                        },
-                        {
-                            linkUrl: 'https://www.instagram.com',
-                        },
-                        {
-                            linkUrl: 'https://www.twitter.com',
-                        },
-                    ],
-                    addressData: {
-                        street: '444 happy road',
-                        cityState: 'Townsville, Georgia',
-                        zip: '47384',
+        const globalFile = {
+            themeStyles: '',
+            logoUrl: '/files/2022/08/EiffelWater1.jpg',
+            social: social,
+            contact: contact,
+            siteName: file.config.website.site_title || '',
+            phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
+            email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
+            url: file.config.website.url,
+            cmsNav: file.navigation.menu_items['primary-menu'],
+            modules: [
+                {
+                    componentType: 'navigation',
+                    attributes: {
+                        logoUrl: '/files/2022/08/EiffelWater1.jpg',
+                        pages: pageListFile.pages,
+                        navStyle: 'layout1',
+                        borderNum: 7,
+                        navImage: '/files/2022/08/EiffelWater1.jpg',
                     },
                 },
-            },
-        ],
+                {
+                    componentType: 'footer',
+                    attributes: {
+                        pages: pageListFile.pages,
+                        navStyle: 'layout1',
+                        borderNum: 7,
+                        socialData: [
+                            {
+                                linkUrl: 'https://www.google.com/',
+                            },
+                            {
+                                linkUrl: 'https://www.facebook.com',
+                            },
+                            {
+                                linkUrl: 'https://www.instagram.com',
+                            },
+                            {
+                                linkUrl: 'https://www.twitter.com',
+                            },
+                        ],
+                        addressData: {
+                            street: '444 happy road',
+                            cityState: 'Townsville, Georgia',
+                            zip: '47384',
+                        },
+                    },
+                },
+            ],
+        }
+        return globalFile
+    } else {
+        let currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
+        const globalFile = { cmsNav: file.navigation.menu_items['primary-menu'], ...currentLayout }
+        return globalFile
+    }
+}
+
+/* const determineParent = (menu) => {
+    let editTable = []
+    for (let i = 0; i < menu.length; i++) {
+        let parent = menu[i].ID
+
+        //create table of items that have parent
+        if (menu[i].menu_item_parent == 0) {
+            let childTable = menu.filter((item) => item.menu_item_parent == parent)
+            let newTable = childTable.length != 0 ? { ...menu[i], childTable } : menu[i]
+
+            //console.log(parent)
+
+            //console.log(newTable)
+
+            editTable.push(newTable)
+        }
+        //nav[0] = menu.menu_item_parent
     }
 
-    return globalFile
-}
+    console.log('editted table', editTable)
+    return editTable
+} */
 
 const transformCMSMods = (pageData) => {
     let columnsData = []

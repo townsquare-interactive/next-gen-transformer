@@ -31,23 +31,18 @@ router.post('/save', async (req, res) => {
         }
 
         //Create or edit global file based off of pagelist updated above ^
-        if (req.body.siteData.settings) {
-            if (req.body.savedData.pages) {
-                const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
-                await addFileS3(globalFile, `${newUrl}/layout.json`)
-            } else {
-                const globalFile = await createOrEditLayout(req.body.siteData, newUrl)
-                await addFileS3(globalFile, `${newUrl}/layout.json`)
-            }
+
+        if (req.body.savedData.pages) {
+            const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+            await addFileS3(globalFile, `${newUrl}/layout.json`)
         } else {
-            console.log('no settings passed, layout not updated')
+            const globalFile = await createOrEditLayout(req.body.siteData, newUrl)
+            await addFileS3(globalFile, `${newUrl}/layout.json`)
         }
 
         //Adding new siteData file after saved
         await addFileS3(req.body.siteData, `${newUrl}/siteData.json`)
-
         res.json('posting to s3 folder: ' + newUrl)
-        /*      res.json(req.body.siteData.settings ? 'true' : 'false') */
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
