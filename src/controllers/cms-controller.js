@@ -186,7 +186,12 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         return globalFile
     } else {
         let currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
-        const globalFile = { cmsNav: file.navigation.menu_items['primary-menu'], ...currentLayout }
+        const globalFile = {
+            ...currentLayout,
+            cmsNav: file.navigation.menu_items['primary-menu'],
+            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2],
+            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2],
+        }
         return globalFile
     }
 }
