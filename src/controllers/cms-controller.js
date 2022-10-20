@@ -128,8 +128,8 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         }
 
         contact = {
-            phone: file.settings.contact.contact_list.wide.items[0].phone[0],
-            email: file.settings.contact.contact_list.wide.items[0].email[0],
+            phone: file.settings.contact.contact_list.wide.items[0].phone[0] || '',
+            email: file.settings.contact.contact_list.wide.items[0].email[0] || '',
         }
 
         const globalFile = {
