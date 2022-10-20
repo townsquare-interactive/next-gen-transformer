@@ -128,14 +128,14 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         }
 
         contact = {
-            phone: file.settings.contact.contact_list.wide.items[0].phone[0] || '',
-            email: file.settings.contact.contact_list.wide.items[0].email[0] || '',
+            phone: file.settings.contact.contact_list.wide.items[0].phone ? file.settings.contact.contact_list.wide.items[0].phone[0] : '',
+            email: file.settings.contact.contact_list.wide.items[0].email ? file.settings.contact.contact_list.wide.items[0].email[0] : '',
         }
 
         const globalFile = {
             themeStyles: '',
-            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2],
-            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2],
+            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
+            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
             social: social,
             contact: contact,
             siteName: file.config.website.site_title || '',
@@ -189,8 +189,8 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         const globalFile = {
             ...currentLayout,
             cmsNav: file.navigation.menu_items['primary-menu'],
-            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2],
-            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2],
+            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
+            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
         }
         return globalFile
     }
