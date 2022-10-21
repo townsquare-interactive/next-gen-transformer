@@ -208,13 +208,11 @@ const determineParent = (menu) => {
                 let submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent)
                 let newTable = submenu.length != 0 ? { ...menu[i], submenu } : menu[i]
                 editTable.push(newTable)
-            } else {
-                editTable.push(newTable)
             }
         }
     }
 
-    return editTable
+    return editTable.length != 0 ? editTable : menu
 }
 
 const transformCMSMods = (pageData) => {
