@@ -201,18 +201,14 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
 const determineParent = (menu) => {
     let editTable = []
     for (let i = 0; i < menu.length; i++) {
-        /* let parent = menu[i].ID */
-
         //create table of items that have parent
         if (menu[i].menu_item_parent == 0) {
             //Sometimes submenu is not passed but we can use menu_item_parent
             if (!menu[i].submenu) {
                 let submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent)
-                /*    console.log(menu[i].ID , item.menu_item_parent) */
-                console.log('child', submenu)
-
                 let newTable = submenu.length != 0 ? { ...menu[i], submenu } : menu[i]
-
+                editTable.push(newTable)
+            } else {
                 editTable.push(newTable)
             }
         }
