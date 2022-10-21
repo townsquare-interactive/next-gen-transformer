@@ -142,7 +142,8 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
             email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
             url: file.config.website.url,
-            cmsNav: file.navigation.menu_items['primary-menu'],
+            //cmsNav: file.navigation.menu_items['primary-menu'],
+            cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             modules: [
                 {
                     componentType: 'navigation',
@@ -188,7 +189,8 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         let currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
         const globalFile = {
             ...currentLayout,
-            cmsNav: file.navigation.menu_items['primary-menu'],
+            //cmsNav: file.navigation.menu_items['primary-menu'],
+            cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
         }
@@ -196,7 +198,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
     }
 }
 
-/* const determineParent = (menu) => {
+const determineParent = (menu) => {
     let editTable = []
     for (let i = 0; i < menu.length; i++) {
         let parent = menu[i].ID
@@ -206,18 +208,13 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             let childTable = menu.filter((item) => item.menu_item_parent == parent)
             let newTable = childTable.length != 0 ? { ...menu[i], childTable } : menu[i]
 
-            //console.log(parent)
-
-            //console.log(newTable)
-
             editTable.push(newTable)
         }
-        //nav[0] = menu.menu_item_parent
     }
 
-    console.log('editted table', editTable)
+
     return editTable
-} */
+} 
 
 const transformCMSMods = (pageData) => {
     let columnsData = []
