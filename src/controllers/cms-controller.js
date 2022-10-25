@@ -127,17 +127,17 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             }
         }
 
-        contact = {
+        /* contact = {
             phone: file.settings.contact.contact_list.wide.items[0].phone ? file.settings.contact.contact_list.wide.items[0].phone[0] : '',
             email: file.settings.contact.contact_list.wide.items[0].email ? file.settings.contact.contact_list.wide.items[0].email[0] : '',
-        }
+        } */
 
         const globalFile = {
             themeStyles: '',
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
             social: social,
-            contact: contact,
+            contact: file.settings.contact.contact_list.wide.items[0],
             siteName: file.config.website.site_title || '',
             phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
             email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
