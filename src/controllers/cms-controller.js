@@ -136,6 +136,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             themeStyles: '',
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
+            footerLogos: file.logos.footer.slots[0] || '',
             social: social,
             contact: file.settings.contact.contact_list.wide.items[0],
             siteName: file.config.website.site_title || '',
@@ -194,6 +195,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
+            footerLogos: file.logos.footer.slots[0] || '',
             composites: file.composites,
         }
         return globalFile
