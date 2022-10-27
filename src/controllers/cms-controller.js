@@ -142,6 +142,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
             email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
             url: file.config.website.url,
+            composites: file.composites,
             //cmsNav: file.navigation.menu_items['primary-menu'],
             cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             modules: [
@@ -193,6 +194,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
+            composites: file.composites,
         }
         return globalFile
     }
