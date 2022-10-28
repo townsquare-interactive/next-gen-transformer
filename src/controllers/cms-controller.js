@@ -115,22 +115,17 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
 
     //adding socials from sitedata
     const social = []
-    let contact = { phone: '', email: '' }
+
     if (file.settings) {
         for (let i = 0; i < file.settings.social.services.length; i++) {
             let item = file.settings.social.services[i]
 
             if (file.settings.social.services[i]) {
                 if (item.value && item.enabled == 1) {
-                    social.push(item.format.replace(/\%.*/, '') + item.value)
+                    social.push({ ...item, url: item.format.replace(/\%.*/, '') + item.value })
                 }
             }
         }
-
-        /* contact = {
-            phone: file.settings.contact.contact_list.wide.items[0].phone ? file.settings.contact.contact_list.wide.items[0].phone[0] : '',
-            email: file.settings.contact.contact_list.wide.items[0].email ? file.settings.contact.contact_list.wide.items[0].email[0] : '',
-        } */
 
         const globalFile = {
             themeStyles: '',
@@ -144,7 +139,6 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
             url: file.config.website.url,
             composites: file.composites,
-            //cmsNav: file.navigation.menu_items['primary-menu'],
             cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
             modules: [
                 {
