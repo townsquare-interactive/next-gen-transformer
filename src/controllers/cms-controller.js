@@ -139,7 +139,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
             url: file.config.website.url,
             composites: file.composites,
-            cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
+            cmsNav: determineParent(file.vars.navigation.menuList),
             modules: [
                 {
                     componentType: 'navigation',
@@ -186,7 +186,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         const globalFile = {
             ...currentLayout,
             //cmsNav: file.navigation.menu_items['primary-menu'],
-            cmsNav: determineParent(file.navigation.menu_items['primary-menu']),
+            cmsNav: determineParent(file.vars.navigation.menuList),
             logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
             footerLogos: file.logos.footer.slots[0] || '',
