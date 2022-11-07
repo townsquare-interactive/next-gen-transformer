@@ -112,6 +112,7 @@ const addFileS3 = async (file, key) => {
 const createOrEditLayout = async (file, newUrl, newPageList) => {
     console.log('layout edit')
     let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+    const currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
 
     //adding socials from sitedata
     const social = []
@@ -126,83 +127,67 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
                 }
             }
         }
-
-        const globalFile = {
-            themeStyles: '',
-            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
-            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
-            footerLogos: file.logos.footer.slots[0] || '',
-            social: social,
-            contact: file.settings.contact.contact_list.wide.items[0],
-            siteName: file.config.website.site_title || '',
-            phoneNumber: file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber || '',
-            email: file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress || '',
-            url: file.config.website.url,
-            composites: file.composites,
-            cmsNav: determineParent(file.vars.navigation.menuList),
-            cmsColors: file.design.colors || '',
-            theme: file.design.themes.selected || '',
-            cmsUrl: file.config.website.url || '',
-            favicon: file.config.website.favicon.src,
-
-            modules: [
-                {
-                    componentType: 'navigation',
-                    attributes: {
-                        logoUrl: '/files/2022/08/EiffelWater1.jpg',
-                        pages: pageListFile.pages,
-                        navStyle: 'layout1',
-                        borderNum: 7,
-                        navImage: '/files/2022/08/EiffelWater1.jpg',
-                    },
-                },
-                {
-                    componentType: 'footer',
-                    attributes: {
-                        pages: pageListFile.pages,
-                        navStyle: 'layout1',
-                        borderNum: 7,
-                        socialData: [
-                            {
-                                linkUrl: 'https://www.google.com/',
-                            },
-                            {
-                                linkUrl: 'https://www.facebook.com',
-                            },
-                            {
-                                linkUrl: 'https://www.instagram.com',
-                            },
-                            {
-                                linkUrl: 'https://www.twitter.com',
-                            },
-                        ],
-                        addressData: {
-                            street: '444 happy road',
-                            cityState: 'Townsville, Georgia',
-                            zip: '47384',
-                        },
-                    },
-                },
-            ],
-        }
-        return globalFile
-    } else {
-        let currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
-        const globalFile = {
-            ...currentLayout,
-            //cmsNav: file.navigation.menu_items['primary-menu'],
-            cmsNav: determineParent(file.vars.navigation.menuList),
-            logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
-            mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
-            footerLogos: file.logos.footer.slots[0] || '',
-            composites: file.composites,
-            cmsColors: file.design.colors || '',
-            theme: file.design.themes.selected || '',
-            cmsUrl: file.config.website.url || '',
-            favicon: file.config.website.favicon.src,
-        }
-        return globalFile
     }
+
+    const globalFile = {
+        themeStyles: '',
+        logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
+        mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
+        footerLogos: file.logos.footer.slots[0] || '',
+        social: file.settings ? social : currentLayout.social,
+        contact: file.settings ? file.settings.contact.contact_list.wide.items[0] : currentLayout.contact || '',
+        siteName: file.config.website.site_title || '',
+        phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
+        email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
+        url: file.config.website.url,
+        composites: file.composites,
+        cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
+        cmsColors: file.design.colors || '',
+        theme: file.design.themes.selected || '',
+        cmsUrl: file.config.website.url || '',
+        favicon: file.config.website.favicon.src,
+
+        modules: [
+            {
+                componentType: 'navigation',
+                attributes: {
+                    logoUrl: '/files/2022/08/EiffelWater1.jpg',
+                    pages: pageListFile.pages,
+                    navStyle: 'layout1',
+                    borderNum: 7,
+                    navImage: '/files/2022/08/EiffelWater1.jpg',
+                },
+            },
+            {
+                componentType: 'footer',
+                attributes: {
+                    pages: pageListFile.pages,
+                    navStyle: 'layout1',
+                    borderNum: 7,
+                    socialData: [
+                        {
+                            linkUrl: 'https://www.google.com/',
+                        },
+                        {
+                            linkUrl: 'https://www.facebook.com',
+                        },
+                        {
+                            linkUrl: 'https://www.instagram.com',
+                        },
+                        {
+                            linkUrl: 'https://www.twitter.com',
+                        },
+                    ],
+                    addressData: {
+                        street: '444 happy road',
+                        cityState: 'Townsville, Georgia',
+                        zip: '47384',
+                    },
+                },
+            },
+        ],
+    }
+    return globalFile
 }
 
 const determineParent = (menu) => {
