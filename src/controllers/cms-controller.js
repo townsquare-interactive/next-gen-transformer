@@ -140,6 +140,11 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             url: file.config.website.url,
             composites: file.composites,
             cmsNav: determineParent(file.vars.navigation.menuList),
+            cmsColors: file.design.colors || '',
+            theme: file.design.themes.selected || '',
+            cmsUrl: file.config.website.url || '',
+            favicon: file.config.website.favicon.src,
+
             modules: [
                 {
                     componentType: 'navigation',
@@ -191,6 +196,10 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
             footerLogos: file.logos.footer.slots[0] || '',
             composites: file.composites,
+            cmsColors: file.design.colors || '',
+            theme: file.design.themes.selected || '',
+            cmsUrl: file.config.website.url || '',
+            favicon: file.config.website.favicon.src,
         }
         return globalFile
     }
