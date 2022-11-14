@@ -49,6 +49,22 @@ const stripUrl = (url) => {
     return removeProtocol.replace(/\..*/, '')
 }
 
+const deletePages = async (pages, newUrl) => {
+    console.log('deleter started')
+    const oldPageList = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+    let newPageList = []
+
+    for (let i = 0; i < oldPageList.pages.length; i++) {
+        if (!(oldPageList.pages[i].id in pages)) {
+            newPageList.push(oldPageList.pages[i])
+        } else {
+            await deleteFileS3(`${newUrl}/pages/${oldPageList.pages[i].slug}.json`)
+        }
+    }
+
+    return oldPageList
+}
+
 //Update pagelist file in s3 or create if not already there
 const updatePageList = async (page, newUrl) => {
     console.log('page list updater started ------')
@@ -130,7 +146,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
     }
 
     const globalFile = {
-        themeStyles: '',
+        /*         themeStyles: '', */
         logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
         mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
         footerLogos: file.logos.footer.slots[0] || '',
@@ -145,47 +161,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         cmsColors: file.design.colors || '',
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
-        favicon: file.config.website.favicon.src,
-
-        modules: [
-            {
-                componentType: 'navigation',
-                attributes: {
-                    logoUrl: '/files/2022/08/EiffelWater1.jpg',
-                    pages: pageListFile.pages,
-                    navStyle: 'layout1',
-                    borderNum: 7,
-                    navImage: '/files/2022/08/EiffelWater1.jpg',
-                },
-            },
-            {
-                componentType: 'footer',
-                attributes: {
-                    pages: pageListFile.pages,
-                    navStyle: 'layout1',
-                    borderNum: 7,
-                    socialData: [
-                        {
-                            linkUrl: 'https://www.google.com/',
-                        },
-                        {
-                            linkUrl: 'https://www.facebook.com',
-                        },
-                        {
-                            linkUrl: 'https://www.instagram.com',
-                        },
-                        {
-                            linkUrl: 'https://www.twitter.com',
-                        },
-                    ],
-                    addressData: {
-                        street: '444 happy road',
-                        cityState: 'Townsville, Georgia',
-                        zip: '47384',
-                    },
-                },
-            },
-        ],
+        favicon: file.config.website.favicon.src || '',
     }
     return globalFile
 }
@@ -277,6 +253,19 @@ const addFileS3List = async (file, key) => {
     console.log('S3 File Added')
 }
 
+const deleteFileS3 = async (key) => {
+    console.log('File to be deleted', key)
+
+    await s3
+        .deleteObject({
+            Bucket: TsiBucket,
+            Key: key,
+        })
+        .promise()
+
+    console.log('S3 File Deleted')
+}
+
 //used for migrate, probably delete later
 const transformCMSData = function (data) {
     let newData = []
@@ -323,4 +312,5 @@ module.exports = {
     stripUrl,
     transformPagesData,
     createOrEditLayout,
+    deletePages,
 }

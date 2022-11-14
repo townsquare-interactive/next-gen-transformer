@@ -6,6 +6,7 @@ const {
     stripUrl,
     transformPagesData,
     createOrEditLayout,
+    deletePages,
 } = require('../src/controllers/cms-controller')
 const express = require('express')
 const router = express.Router()
@@ -30,14 +31,10 @@ router.post('/save', async (req, res) => {
             newPageList = await updatePageList(newPageData.pages, newUrl)
         }
 
-        //Create or edit global file based off of pagelist updated above ^
-
-        if (req.body.savedData.pages) {
-            const globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
-            await addFileS3(globalFile, `${newUrl}/layout.json`)
-        } else {
-            const globalFile = await createOrEditLayout(req.body.siteData, newUrl)
-            await addFileS3(globalFile, `${newUrl}/layout.json`)
+        if (req.body.savedData.deletePages) {
+            const pageListUrl = `${newUrl}/pages/page-list.json`
+            const updatedPageList = await deletePages(req.body.savedData.deletePages, newUrl)
+            await addFileS3(updatedPageList, pageListUrl)
         }
 
         //Adding new siteData file after saved
