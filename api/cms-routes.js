@@ -31,6 +31,15 @@ router.post('/save', async (req, res) => {
             newPageList = await updatePageList(newPageData.pages, newUrl)
         }
 
+        let globalFile
+        if (req.body.savedData.pages) {
+            globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+        } else {
+            globalFile = await createOrEditLayout(req.body.siteData, newUrl)
+        }
+
+        await addFileS3(globalFile, `${newUrl}/layout.json`)
+
         if (req.body.savedData.deletePages) {
             const pageListUrl = `${newUrl}/pages/page-list.json`
             const updatedPageList = await deletePages(req.body.savedData.deletePages, newUrl)

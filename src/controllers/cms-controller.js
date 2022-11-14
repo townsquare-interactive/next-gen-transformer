@@ -85,7 +85,7 @@ const updatePageList = async (page, newUrl) => {
                 })
                 console.log('new page added:', pageData.title)
             } else {
-                console.log('page already there', pageData.title)
+                /*   console.log('page already there', pageData.title) */
             }
         }
     }
@@ -145,8 +145,9 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         }
     }
 
+    console.log('check', file.navigation.menu_items)
+
     const globalFile = {
-        /*         themeStyles: '', */
         logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
         mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
         footerLogos: file.logos.footer.slots[0] || '',
@@ -158,6 +159,7 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         url: file.config.website.url,
         composites: file.composites,
         cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
+        //cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : determineParent(file.navigation.menu_items['primary-menu']),
         cmsColors: file.design.colors || '',
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
