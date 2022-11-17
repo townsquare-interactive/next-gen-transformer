@@ -196,6 +196,8 @@ const transformCMSMods = (pageData) => {
 
                 if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
                     modType = 'MyArticle'
+                } else if (value.type === 'photo_grid') {
+                    modType = 'PhotoGrid'
                 }
 
                 const modData = { ...value, modId: key }
@@ -240,7 +242,6 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
 }
 
 //add any file, pass it the file and key for filename
-
 const addFileS3List = async (file, key) => {
     console.log('File to be added', file)
 
