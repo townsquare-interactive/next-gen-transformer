@@ -196,8 +196,8 @@ const transformCMSMods = (pageData) => {
 
                 if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
                     modType = 'MyArticle'
-                } else if (value.type === 'photo_grid') {
-                    modType = 'PhotoGrid'
+                } else {
+                    modType = value.type
                 }
 
                 const modData = { ...value, modId: key }
