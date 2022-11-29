@@ -26,9 +26,10 @@ const transformPagesData = function (pageData, siteData) {
         const pageSlug = siteData[pageId].slug
         const page_type = siteData[pageId].page_type
         const url = siteData[pageId].url
+        const columnStyles = decideColumns(value.data)
 
         //adding site data to pages
-        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, url: url, ...value.data }
+        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, url: url, ...value.data, columnStyles: columnStyles }
 
         //transforming page data
         if (value.data.modules) {
@@ -144,8 +145,6 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
             }
         }
     }
-
-    console.log('check', file.navigation.menu_items)
 
     const globalFile = {
         logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
@@ -361,6 +360,32 @@ const setColors = (cmsColors, cmsTheme) => {
             captionText: cmsColors.color_16.value,
             captionBackground: cmsColors.color_17.value,
         }
+    }
+}
+
+const decideColumns = (page) => {
+    if (page.sections[1].wide == '938' || page.sections[1].wide == '988') {
+        return 'wide-column'
+    } else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
+        return 'half-columns'
+    } else if (page.sections[1].wide == '316' && page.sections[2].wide == '316' && page.sections[3].wide == '316') {
+        return 'third-columns'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '232' && page.sections[4].wide == '232') {
+        return 'fourth-columns'
+    } else if (page.sections[1].wide == '652' && page.sections[2].wide == '316') {
+        return 'two-third_one-third'
+    } else if (page.sections[1].wide == '316' && page.sections[2].wide == '652') {
+        return 'one-third_two-third'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '736') {
+        return 'one-fourth_three-fourth'
+    } else if (page.sections[1].wide == '736' && page.sections[2].wide == '232') {
+        return 'three-fourth_one-fourth'
+    } else if (page.sections[1].wide == '484' && page.sections[2].wide == '232' && page.sections[3].wide == '232') {
+        return 'half_one-fourth_one-fourth'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '484') {
+        return 'one-fourth_one-fourth_half'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '484' && page.sections[3].wide == '232') {
+        return 'one-fourth_half_one-fourth'
     }
 }
 
