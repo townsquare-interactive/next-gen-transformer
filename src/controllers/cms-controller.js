@@ -127,7 +127,7 @@ const addFileS3 = async (file, key) => {
 //Create or edit layout file
 const createOrEditLayout = async (file, newUrl, newPageList) => {
     console.log('layout edit')
-    let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+    /*    let pageListFile = newPageList ? newPageList : await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`) */
     const currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
 
     //adding socials from sitedata
@@ -160,7 +160,8 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         composites: file.composites,
         cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
         //cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : determineParent(file.navigation.menu_items['primary-menu']),
-        cmsColors: file.design.colors || '',
+        //cmsColors: file.design.colors || '',
+        cmsColors: setColors(file.design.colors, file.design.themes.selected),
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
         favicon: file.config.website.favicon.src || '',
@@ -307,6 +308,60 @@ const createPageList = (value) => {
     }
 
     return pageData
+}
+
+const setColors = (cmsColors, cmsTheme) => {
+    if (cmsTheme === 'beacon-theme_charlotte') {
+        return {
+            promoColor: cmsColors.color_31.value,
+            textColor: cmsColors.color_4.value,
+            headingColor: cmsColors.color_2.value,
+            subHeadingColor: cmsColors?.color_3.value,
+            textColorAccent: cmsColors.color_9.value,
+            btnBackground: cmsColors.color_8.value,
+            linkColor: cmsColors.color_5.value,
+            accentBackgroundColor: cmsColors.color_25.value,
+            accentColor2: cmsColors.color_32.value,
+            altColor: cmsColors.color_31.value,
+            headerBackground: cmsColors.color_23.value,
+            footerBackground: cmsColors.color_27.value,
+            navBackground: cmsColors.color_23.value,
+            BckdHeaderSocial: cmsColors.color_24.value,
+            NavText: cmsColors.color_18.value,
+            navHover: cmsColors.color_19.value,
+            linkHover: cmsColors.color_6.value,
+            bckdContent: cmsColors.color_22.value,
+            footerText: cmsColors.color_28.value,
+            navCurrent: cmsColors.color_20.value,
+            captionText: cmsColors.color_16.value,
+            captionBackground: cmsColors.color_17.value,
+        }
+    } else {
+        return {
+            promoColor: cmsColors?.color_3.value,
+            textColor: cmsColors?.color_3a.value,
+            headingColor: cmsColors?.color_2.value,
+            subHeadingColor: cmsColors?.color_3.value,
+            textColorAccent: cmsColors?.color_4.value,
+            btnBackground: cmsColors?.color_8.value,
+            linkColor: cmsColors?.color_19.value,
+            accentBackgroundColor: cmsColors?.color_3.value,
+            accentColor2: cmsColors?.color_16.value,
+            altColor: cmsColors?.color_16.value,
+            headerBackground: cmsColors?.color_17.value,
+            footerBackground: cmsColors?.color_20.value,
+            navBackground: cmsColors?.color_16.value,
+            BckdHeaderSocial: cmsColors?.color_17.value,
+            NavText: cmsColors?.color_18.value,
+            linkHover: cmsColors?.color_7.value,
+            footerText: cmsColors?.color_12.value,
+            navHover: cmsColors.color_19.value,
+            navCurrent: cmsColors.color_19.value,
+            //clt
+            captionText: cmsColors.color_16.value,
+            captionBackground: cmsColors.color_17.value,
+        }
+    }
 }
 
 module.exports = {
