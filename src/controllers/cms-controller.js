@@ -26,7 +26,7 @@ const transformPagesData = function (pageData, siteData) {
         const pageSlug = siteData[pageId].slug
         const page_type = siteData[pageId].page_type
         const url = siteData[pageId].url
-        const columnStyles = decideColumns(value.data)
+        const columnStyles = getColumnsCssClass(value.data)
 
         //adding site data to pages
         value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, url: url, ...value.data, columnStyles: columnStyles }
@@ -370,9 +370,9 @@ const setColors = (cmsColors, cmsTheme) => {
     }
 }
 
-const decideColumns = (page) => {
+const getColumnsCssClass = (page) => {
     if (page.sections[1].wide == '938' || page.sections[1].wide == '988') {
-        return 'wide-column'
+        return 'full-column'
     } else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
         return 'half-columns'
     } else if (page.sections[1].wide == '316' && page.sections[2].wide == '316' && page.sections[3].wide == '316') {
