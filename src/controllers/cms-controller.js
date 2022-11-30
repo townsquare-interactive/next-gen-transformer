@@ -202,6 +202,13 @@ const transformCMSMods = (pageData) => {
                     modType = value.type
                 }
 
+                //replace line breaks from cms
+                for (let i = 0; i < value.items.length; i++) {
+                    if (value.items[i].desc) {
+                        value.items[i].desc = value.items[i].desc.replaceAll('[rn]', '<br>')
+                    }
+                }
+
                 const modData = { ...value, modId: key }
 
                 const newItem = { attributes: modData, componentType: modType }
