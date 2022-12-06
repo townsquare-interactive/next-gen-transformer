@@ -137,13 +137,15 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
     if (file.settings) {
         for (let i = 0; i < file.settings.social.services.length; i++) {
             let item = file.settings.social.services[i]
+            const newUrl = item.format.replace(/\%.*/, '') + item.value
 
             if (file.settings.social.services[i]) {
                 if (item.value && item.enabled == 1) {
-                    social.push({ ...item, url: item.format.replace(/\%.*/, '') + item.value })
+                    social.push({ ...item, url: newUrl, icon: socialConvert(item.name) })
                 }
             }
         }
+        console.log(social)
     }
 
     const globalFile = {
@@ -158,8 +160,6 @@ const createOrEditLayout = async (file, newUrl, newPageList) => {
         url: file.config.website.url,
         composites: file.composites,
         cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
-        //cmsNav: file.vars.navigation ? determineParent(file.vars.navigation.menuList) : determineParent(file.navigation.menu_items['primary-menu']),
-        //cmsColors: file.design.colors || '',
         cmsColors: setColors(file.design.colors, file.design.themes.selected),
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
@@ -194,7 +194,7 @@ const transformCMSMods = (pageData) => {
             for (const [key, value] of Object.entries(pageData[i])) {
                 let modType
 
-                if (value.type === 'article_1' || value.type === 'article_2' || value.type === 'article_3' || value.type === 'article') {
+                if (value.type.includes('article')) {
                     modType = 'MyArticle'
                 } else if (value.type === 'photo_grid') {
                     modType = 'PhotoGrid'
@@ -207,6 +207,36 @@ const transformCMSMods = (pageData) => {
                     if (value.items[i].desc) {
                         value.items[i].desc = value.items[i].desc.replaceAll('[rn]', '<br>')
                     }
+
+                    let buttonList = [
+                        {
+                            name: 'btn1',
+                            link: value.items[i].pagelink || value.items[i].weblink,
+                            window: value.items[i].newwindow,
+                            icon: btnIconConvert(value.items[i].icon || ''),
+                            label: value.items[i].actionlbl,
+                            active: value.items[i].actionlbl && (value.items[i].pagelink || value.items[i].weblink) ? true : false,
+                            btnType: value.items[i].btnType,
+                            btnSize: value.items[i].btnSize,
+                            linkType: value.items[i].pagelink ? 'local' : 'ext',
+                        },
+                        {
+                            name: 'btn2',
+                            link: value.items[i].pagelink2 || value.items[i].weblink2,
+                            window: value.items[i].newwindow2,
+                            icon: btnIconConvert(value.items[i].icon2 || ''),
+                            label: value.items[i].actionlbl2,
+                            active: value.items[i].actionlbl2 && (value.items[i].pagelink2 || value.items[i].weblink2) ? true : false,
+                            btnType: value.items[i].btnType2,
+                            btnSize: value.items[i].btnSize2,
+                            linkType: value.items[i].pagelink2 ? 'local' : 'ext',
+                        },
+                    ]
+
+                    const imageIcon = btnIconConvert(value.items[i].icon3 || '')
+
+                    console.log(buttonList)
+                    value.items[i] = { ...value.items[i], buttonList: buttonList, imageIcon: imageIcon }
                 }
 
                 const modData = { ...value, modId: key }
@@ -220,19 +250,16 @@ const transformCMSMods = (pageData) => {
     return columnsData
 }
 
-/* const transformPageData = function (page) {
-    if (page.modules) {
-        page.modules = transformCMSMods(page.modules)
-    }
-    if (page.publisher) {
-        page.publisher.data.modules = transformCMSMods(page.publisher.data.modules)
-    }
-    if (page.backup) {
-        page.backup.data.modules = transformCMSMods(page.backup.data.modules)
-    }
+function btnIconConvert(icon) {
+    if (icon) {
+        //replaces fas fa-rocket with faRocket
+        const stripIcon = icon.replace('fas', '')
+        const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : ''
+        const iconModel = stripIcon.replace(/^(.*?)-/, '')
 
-    return page
-} */
+        return { iconPrefix: iconPrefix, iconModel: iconModel }
+    }
+}
 
 //adding a page file for each page in cms data
 const addMultipleS3 = async (data, pageList, newUrl) => {
@@ -393,6 +420,36 @@ const getColumnsCssClass = (page) => {
         return 'one-fourth_one-fourth_half'
     } else if (page.sections[1].wide == '232' && page.sections[2].wide == '484' && page.sections[3].wide == '232') {
         return 'one-fourth_half_one-fourth'
+    }
+}
+
+//newwwww
+function iconConvert(str) {
+    if (str.indexOf('google') !== -1) {
+        return 'google'
+    } else if (str.indexOf('facebook') !== -1) {
+        return 'facebook'
+    } else if (str.indexOf('instagram') !== -1) {
+        return 'instagram'
+    } else if (str.indexOf('twitter') !== -1) {
+        return 'twitter'
+    } else {
+        return 'social'
+    }
+}
+
+function socialConvert(str) {
+    let icon = iconConvert(str)
+    if (icon === 'google') {
+        return ['fab', 'google']
+    } else if (icon === 'facebook') {
+        return ['fab', 'facebook']
+    } else if (icon === 'instagram') {
+        return ['fab', 'instagram']
+    } else if (icon === 'twitter') {
+        return ['fab', 'twitter']
+    } else {
+        return ['fas', 'rocket']
     }
 }
 
