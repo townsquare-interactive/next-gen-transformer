@@ -3,11 +3,13 @@ const {
     addMultipleS3,
     updatePageList,
     addFileS3,
-    stripUrl,
     transformPagesData,
     createOrEditLayout,
     deletePages,
 } = require('../src/controllers/cms-controller')
+
+const { stripUrl } = require('../src/utils')
+
 const express = require('express')
 const router = express.Router()
 
