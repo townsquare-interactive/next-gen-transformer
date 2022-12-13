@@ -72,6 +72,54 @@ const determineNavParent = (menu) => {
     return editTable.length != 0 ? editTable : menu
 }
 
+function isButton(item) {
+    if (item.actionlbl || item.actionlbl2) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function isLink(item) {
+    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function isOneButton(currentItem) {
+    if (
+        (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
+        (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
+    ) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function isTwoButtons(currentItem) {
+    if (currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink) && (currentItem.pagelink2 || currentItem.weblink2)) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function linkAndBtn(currentItem) {
+    if (
+        (currentItem.actionlbl && currentItem.pagelink) ||
+        (currentItem.actionlbl && currentItem.weblink) ||
+        (currentItem.actionlbl2 && currentItem.pagelink2) ||
+        (currentItem.actionlbl2 && currentItem.weblink2)
+    ) {
+        return true
+    } else {
+        return false
+    }
+}
+
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
@@ -159,4 +207,9 @@ module.exports = {
     transformcontact,
     determineNavParent,
     stripUrl,
+    isButton,
+    isLink,
+    isOneButton,
+    isTwoButtons,
+    linkAndBtn,
 }

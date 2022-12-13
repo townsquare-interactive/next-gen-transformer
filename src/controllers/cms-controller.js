@@ -2,7 +2,19 @@ require('dotenv').config()
 const AWS = require('aws-sdk')
 const TsiBucket = 'townsquareinteractive'
 
-const { socialConvert, btnIconConvert, setColors, getColumnsCssClass, transformcontact, determineNavParent } = require('../utils')
+const {
+    socialConvert,
+    btnIconConvert,
+    setColors,
+    getColumnsCssClass,
+    transformcontact,
+    determineNavParent,
+    isButton,
+    isLink,
+    isOneButton,
+    isTwoButtons,
+    linkAndBtn,
+} = require('../utils')
 
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
@@ -175,7 +187,7 @@ const transformCMSMods = (pageData) => {
                 let modType
 
                 if (value.type.includes('article')) {
-                    modType = 'MyArticle'
+                    modType = 'Article'
                 } else if (value.type === 'photo_grid') {
                     modType = 'PhotoGrid'
                 } else {
@@ -184,9 +196,22 @@ const transformCMSMods = (pageData) => {
 
                 //replace line breaks from cms
                 for (let i = 0; i < value.items.length; i++) {
+                    const currentItem = value.items[i]
+
                     if (value.items[i].desc) {
                         value.items[i].desc = value.items[i].desc.replaceAll('[rn]', '<br>')
                     }
+
+                    //determining button/link logic
+                    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
+
+                    const singleButton = isOneButton(currentItem)
+
+                    const twoButtons = isTwoButtons(currentItem)
+
+                    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
+
+                    const visibleButton = linkAndBtn(currentItem)
 
                     const buttonList = [
                         {
@@ -213,10 +238,21 @@ const transformCMSMods = (pageData) => {
                         },
                     ]
 
+                    const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
+
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
 
                     //update each item's data
-                    value.items[i] = { ...value.items[i], buttonList: buttonList, imageIcon: imageIcon }
+                    value.items[i] = {
+                        ...value.items[i],
+                        buttonList: buttonList,
+                        imageIcon: imageIcon,
+                        linkNoBtn: linkNoBtn,
+                        twoButtons: twoButtons,
+                        isWrapLink: isWrapLink,
+                        visibleButton: visibleButton,
+                        isBeaconHero: isBeaconHero,
+                    }
                 }
 
                 const modData = { ...value, modId: key }
