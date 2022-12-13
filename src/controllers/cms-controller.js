@@ -183,8 +183,11 @@ const transformCMSMods = (pageData) => {
         if (pageData[i]) {
             let newData = []
 
+            let modCount = 0
+
             for (const [key, value] of Object.entries(pageData[i])) {
                 let modType
+                modCount += 1
 
                 if (value.type.includes('article')) {
                     modType = 'Article'
@@ -194,10 +197,14 @@ const transformCMSMods = (pageData) => {
                     modType = value.type
                 }
 
-                //replace line breaks from cms
+                let itemCount = 0
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
+                    itemCount += 1
 
+                    const imagePriority = modCount === 1 && itemCount <= 4 ? true : false
+
+                    //replace line breaks from cms
                     if (value.items[i].desc) {
                         value.items[i].desc = value.items[i].desc.replaceAll('[rn]', '<br>')
                     }
@@ -252,10 +259,11 @@ const transformCMSMods = (pageData) => {
                         isWrapLink: isWrapLink,
                         visibleButton: visibleButton,
                         isBeaconHero: isBeaconHero,
+                        imagePriority: imagePriority,
                     }
                 }
 
-                const modData = { ...value, modId: key }
+                const modData = { ...value, modId: key, modCount: modCount }
 
                 const newItem = { attributes: modData, componentType: modType }
                 newData.push(newItem)
