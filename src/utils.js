@@ -120,6 +120,14 @@ function linkAndBtn(currentItem) {
     }
 }
 
+function isCap(item) {
+    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline) {
+        return true
+    } else {
+        return false
+    }
+}
+
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
@@ -212,4 +220,5 @@ module.exports = {
     isOneButton,
     isTwoButtons,
     linkAndBtn,
+    isCap,
 }

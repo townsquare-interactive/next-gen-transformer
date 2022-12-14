@@ -14,6 +14,7 @@ const {
     isOneButton,
     isTwoButtons,
     linkAndBtn,
+    isCap,
 } = require('../utils')
 
 AWS.config.update({
@@ -249,6 +250,8 @@ const transformCMSMods = (pageData) => {
 
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
 
+                    const hasGridCaption = modType === 'PhotoGrid' ? isCap(currentItem) : false
+
                     //update each item's data
                     value.items[i] = {
                         ...value.items[i],
@@ -260,6 +263,7 @@ const transformCMSMods = (pageData) => {
                         visibleButton: visibleButton,
                         isBeaconHero: isBeaconHero,
                         imagePriority: imagePriority,
+                        hasGridCaption: hasGridCaption,
                     }
                 }
 
