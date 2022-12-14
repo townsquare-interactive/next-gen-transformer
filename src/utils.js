@@ -51,7 +51,11 @@ function transformcontact(contactInfo) {
         location: ['fas', 'location-pin'],
     }
 
-    contactInfo = { ...contactInfo, icons: icons }
+    const newAdd = contactInfo.address.street.replaceAll(' ', '+')
+
+    const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
+
+    contactInfo = { ...contactInfo, icons: icons, mapLink: mapLink }
     return contactInfo
 }
 
@@ -120,7 +124,7 @@ function linkAndBtn(currentItem) {
     }
 }
 
-function isCap(item) {
+function isGridCaption(item) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline) {
         return true
     } else {
@@ -220,5 +224,5 @@ module.exports = {
     isOneButton,
     isTwoButtons,
     linkAndBtn,
-    isCap,
+    isGridCaption,
 }

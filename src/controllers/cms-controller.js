@@ -14,7 +14,7 @@ const {
     isOneButton,
     isTwoButtons,
     linkAndBtn,
-    isCap,
+    isGridCaption,
 } = require('../utils')
 
 AWS.config.update({
@@ -164,6 +164,7 @@ const createOrEditLayout = async (file, newUrl) => {
         footerLogos: file.logos.footer.slots[0] || '',
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: file.settings ? transformcontact(file.settings.contact.contact_list.wide.items[0]) : currentLayout.contact || '',
+
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
@@ -250,7 +251,7 @@ const transformCMSMods = (pageData) => {
 
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
 
-                    const hasGridCaption = modType === 'PhotoGrid' ? isCap(currentItem) : false
+                    const hasGridCaption = modType === 'PhotoGrid' ? isGridCaption(currentItem) : false
 
                     //update each item's data
                     value.items[i] = {
