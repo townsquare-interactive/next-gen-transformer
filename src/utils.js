@@ -30,8 +30,8 @@ function iconConvert(str) {
 function btnIconConvert(icon) {
     if (icon) {
         //replaces fas fa-rocket with faRocket
-        const stripIcon = icon.replace('fas', '')
         const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : ''
+        const stripIcon = icon.replace(iconPrefix, '')
         const iconModel = stripIcon.replace(/^(.*?)-/, '')
 
         return { iconPrefix: iconPrefix, iconModel: iconModel }
