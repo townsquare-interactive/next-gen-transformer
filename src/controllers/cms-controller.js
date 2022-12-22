@@ -5,7 +5,6 @@ const TsiBucket = 'townsquareinteractive'
 const {
     socialConvert,
     btnIconConvert,
-    setColors,
     getColumnsCssClass,
     transformcontact,
     determineNavParent,
@@ -15,6 +14,7 @@ const {
     isTwoButtons,
     linkAndBtn,
     isGridCaption,
+    alternatePromoColors,
 } = require('../utils')
 
 AWS.config.update({
@@ -26,9 +26,10 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformPagesData = function (pageData, siteData) {
+const transformPagesData = function (pageData, sitePageData, themeStyles) {
     console.log('page transformer started')
     let newData = []
+
     for (const [key, value] of Object.entries(pageData)) {
         if (value.data.title) {
             console.log('name found', value.data.title)
@@ -37,10 +38,10 @@ const transformPagesData = function (pageData, siteData) {
 
         //getting page data from siteconfig
         const pageId = key
-        const pageTitle = siteData[pageId].title
-        const pageSlug = siteData[pageId].slug
-        const page_type = siteData[pageId].page_type
-        const url = siteData[pageId].url
+        const pageTitle = sitePageData[pageId].title
+        const pageSlug = sitePageData[pageId].slug
+        const page_type = sitePageData[pageId].page_type
+        const url = sitePageData[pageId].url
         const columnStyles = getColumnsCssClass(value.data)
 
         //adding site data to pages
@@ -48,7 +49,7 @@ const transformPagesData = function (pageData, siteData) {
 
         //transforming page data
         if (value.data.modules) {
-            value.data.modules = transformCMSMods(value.data.modules)
+            value.data.modules = transformCMSMods(value.data.modules, themeStyles)
             newData.push(value)
         }
     }
@@ -135,7 +136,7 @@ const addFileS3 = async (file, key) => {
 }
 
 //Create or edit layout file
-const createOrEditLayout = async (file, newUrl) => {
+const createOrEditLayout = async (file, newUrl, themeStyles) => {
     console.log('layout edit')
     const currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
 
@@ -171,7 +172,7 @@ const createOrEditLayout = async (file, newUrl) => {
         url: file.config.website.url,
         composites: file.composites,
         cmsNav: file.vars.navigation ? determineNavParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
-        cmsColors: setColors(file.design.colors, file.design.themes.selected),
+        cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
         favicon: file.config.website.favicon.src || '',
@@ -179,15 +180,16 @@ const createOrEditLayout = async (file, newUrl) => {
     return globalFile
 }
 
-const transformCMSMods = (pageData) => {
+const transformCMSMods = (moduleList, themeStyles) => {
     let columnsData = []
-    for (let i = 0; i <= pageData.length; ++i) {
-        if (pageData[i]) {
+    for (let i = 0; i <= moduleList.length; ++i) {
+        if (moduleList[i]) {
             let newData = []
 
             let modCount = 0
 
-            for (const [key, value] of Object.entries(pageData[i])) {
+            //each actual page module
+            for (const [key, value] of Object.entries(moduleList[i])) {
                 let modType
                 modCount += 1
 
@@ -199,7 +201,12 @@ const transformCMSMods = (pageData) => {
                     modType = value.type
                 }
 
+                if (modType === 'PhotoGrid') {
+                    value.items = alternatePromoColors(value.items, themeStyles)
+                }
+
                 let itemCount = 0
+                //loop for each item
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
@@ -265,6 +272,7 @@ const transformCMSMods = (pageData) => {
                         isBeaconHero: isBeaconHero,
                         imagePriority: imagePriority,
                         hasGridCaption: hasGridCaption,
+                        itemCount: itemCount,
                     }
                 }
 

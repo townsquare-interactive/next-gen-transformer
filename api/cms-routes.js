@@ -8,7 +8,7 @@ const {
     deletePages,
 } = require('../src/controllers/cms-controller')
 
-const { stripUrl } = require('../src/utils')
+const { stripUrl, setColors } = require('../src/utils')
 
 const express = require('express')
 const router = express.Router()
@@ -20,10 +20,12 @@ router.post('/save', async (req, res) => {
         const url = req.body.siteData.config.website.url
         const newUrl = stripUrl(url)
 
+        const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
+
         let newPageList
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
-            const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages)
+            const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles)
 
             //adding each page to s3
             for (let i = 0; i < newPageData.pages.length; i++) {
@@ -34,11 +36,13 @@ router.post('/save', async (req, res) => {
         }
 
         let globalFile
-        if (req.body.savedData.pages) {
-            globalFile = await createOrEditLayout(req.body.siteData, newUrl, newPageList)
+        /*  if (req.body.savedData.pages) {
+            globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles, newPageList)
         } else {
-            globalFile = await createOrEditLayout(req.body.siteData, newUrl)
-        }
+            globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
+        } */
+
+        globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
 
         await addFileS3(globalFile, `${newUrl}/layout.json`)
 

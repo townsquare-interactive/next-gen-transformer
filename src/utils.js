@@ -132,31 +132,86 @@ function isGridCaption(item) {
     }
 }
 
+const alternatePromoColors = (items, themeStyles) => {
+    const colorList = Array(items.length)
+        .fill([
+            themeStyles.promoColor,
+            themeStyles.promoColor2,
+            themeStyles.promoColor3,
+            themeStyles.promoColor4,
+            themeStyles.promoColor5,
+            themeStyles.promoColor6,
+        ])
+        .flat()
+
+    let noimgCount = 0
+    for (let i = 0; i < items.length; i++) {
+        if (!items[i].image) {
+            items[i] = { ...items[i], gridColor: colorList[noimgCount] }
+            noimgCount += 1
+        }
+    }
+
+    return items
+}
+
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
-            promoColor: cmsColors.color_31.value,
-            textColor: cmsColors.color_4.value,
+            //add
+            logoColor: cmsColors.color_1.value,
+
             headingColor: cmsColors.color_2.value,
             subHeadingColor: cmsColors?.color_3.value,
-            textColorAccent: cmsColors.color_9.value,
-            btnBackground: cmsColors.color_8.value,
+            textColor: cmsColors.color_4.value,
             linkColor: cmsColors.color_5.value,
-            accentBackgroundColor: cmsColors.color_25.value,
-            accentColor2: cmsColors.color_32.value,
-            altColor: cmsColors.color_31.value,
-            headerBackground: cmsColors.color_23.value,
-            footerBackground: cmsColors.color_27.value,
-            navBackground: cmsColors.color_23.value,
-            BckdHeaderSocial: cmsColors.color_24.value,
-            NavText: cmsColors.color_18.value,
-            navHover: cmsColors.color_19.value,
             linkHover: cmsColors.color_6.value,
-            bckdContent: cmsColors.color_22.value,
-            footerText: cmsColors.color_28.value,
-            navCurrent: cmsColors.color_20.value,
+
+            //ad
+            btnText: cmsColors.color_7.value,
+
+            btnBackground: cmsColors.color_8.value,
+            textColorAccent: cmsColors.color_9.value,
+
+            //addd
+            heroSubheadline: cmsColors.color_10.value,
+            heroText: cmsColors.color_11.value,
+            heroBtnText: cmsColors.color_12.value,
+            heroBtnBackground: cmsColors.color_13.value,
+            heroLink: cmsColors.color_14.value,
+            heroLinkHover: cmsColors.color_15.value,
+
             captionText: cmsColors.color_16.value,
             captionBackground: cmsColors.color_17.value,
+            NavText: cmsColors.color_18.value,
+            navHover: cmsColors.color_19.value,
+            navCurrent: cmsColors.color_20.value,
+            //add
+            backgroundMain: cmsColors.color_21.value,
+
+            bckdContent: cmsColors.color_22.value,
+            // navBackground: cmsColors.color_23.value,
+            headerBackground: cmsColors.color_23.value,
+
+            BckdHeaderSocial: cmsColors.color_24.value,
+            accentBackgroundColor: cmsColors.color_25.value,
+            //add
+            backgroundHero: cmsColors.color_26.value,
+            footerBackground: cmsColors.color_27.value,
+            footerText: cmsColors.color_28.value,
+
+            //add
+            footerLink: cmsColors.color_29.value,
+            promoText: cmsColors.color_30.value,
+
+            //accentColor2: cmsColors.color_32.value,
+
+            promoColor: cmsColors.color_31.value,
+            promoColor2: cmsColors.color_32.value,
+            promoColor3: cmsColors.color_33.value,
+            promoColor4: cmsColors.color_34.value,
+            promoColor5: cmsColors.color_35.value,
+            promoColor6: cmsColors.color_36.value,
         }
     } else {
         return {
@@ -225,4 +280,5 @@ module.exports = {
     isTwoButtons,
     linkAndBtn,
     isGridCaption,
+    alternatePromoColors,
 }
