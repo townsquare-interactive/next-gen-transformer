@@ -141,7 +141,6 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
     const currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
 
     //adding socials from sitedata
-
     function transformSocial(file) {
         const social = []
 
@@ -165,7 +164,6 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         footerLogos: file.logos.footer.slots[0] || '',
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: file.settings ? transformcontact(file.settings.contact.contact_list.wide.items[0]) : currentLayout.contact || '',
-
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
@@ -197,6 +195,8 @@ const transformCMSMods = (moduleList, themeStyles) => {
                     modType = 'Article'
                 } else if (value.type === 'photo_grid') {
                     modType = 'PhotoGrid'
+                } else if (value.type === 'banner_1') {
+                    modType = 'Banner'
                 } else {
                     modType = value.type
                 }

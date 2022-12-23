@@ -36,12 +36,6 @@ router.post('/save', async (req, res) => {
         }
 
         let globalFile
-        /*  if (req.body.savedData.pages) {
-            globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles, newPageList)
-        } else {
-            globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
-        } */
-
         globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
 
         await addFileS3(globalFile, `${newUrl}/layout.json`)
