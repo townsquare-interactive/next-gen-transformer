@@ -237,7 +237,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             icon: btnIconConvert(value.items[i].icon || ''),
                             label: value.items[i].actionlbl,
                             active: value.items[i].actionlbl && (value.items[i].pagelink || value.items[i].weblink) ? true : false,
-                            btnType: value.items[i].btnType || modType === 'Banner' ? 'alt-btn' : 'btn_1',
+                            btnType: value.items[i].btnType || modType === 'Banner' ? 'alt_btn' : 'btn_1',
                             btnSize: value.items[i].btnSize,
                             linkType: value.items[i].pagelink ? 'local' : 'ext',
                         },
@@ -248,11 +248,13 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             icon: btnIconConvert(value.items[i].icon2 || ''),
                             label: value.items[i].actionlbl2,
                             active: value.items[i].actionlbl2 && (value.items[i].pagelink2 || value.items[i].weblink2) ? true : false,
-                            btnType: value.items[i].btnType2 || modType === 'Banner' ? 'alt-btn' : 'btn_1',
+                            btnType: value.items[i].btnType2,
                             btnSize: value.items[i].btnSize2,
                             linkType: value.items[i].pagelink2 ? 'local' : 'ext',
                         },
                     ]
+
+                    console.log(buttonList)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
 
