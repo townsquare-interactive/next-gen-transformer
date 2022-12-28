@@ -15,6 +15,7 @@ const {
     linkAndBtn,
     isGridCaption,
     alternatePromoColors,
+    isPromoButton,
 } = require('../utils')
 
 AWS.config.update({
@@ -201,8 +202,8 @@ const transformCMSMods = (moduleList, themeStyles) => {
                     modType = value.type
                 }
 
-                if (modType === 'PhotoGrid') {
-                    value.items = alternatePromoColors(value.items, themeStyles)
+                if (modType === 'PhotoGrid' || modType === 'Banner') {
+                    value.items = alternatePromoColors(value.items, themeStyles, modType)
                 }
 
                 let itemCount = 0
@@ -229,6 +230,13 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                     const visibleButton = linkAndBtn(currentItem)
 
+                    /* const gridButtonNoImage = modType === 'PhotoGrid' && !value.items[i].image ? true : false
+
+                    const bannerButton = modType === 'Banner' ? true : false
+
+                    const firstButtonAlt = gridButtonNoImage ? true : bannerButton ? true : false  
+ */
+
                     const buttonList = [
                         {
                             name: 'btn1',
@@ -237,7 +245,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             icon: btnIconConvert(value.items[i].icon || ''),
                             label: value.items[i].actionlbl,
                             active: value.items[i].actionlbl && (value.items[i].pagelink || value.items[i].weblink) ? true : false,
-                            btnType: value.items[i].btnType || modType === 'Banner' ? 'alt_btn' : 'btn_1',
+                            btnType: value.items[i].btnType || isPromoButton(value.items[i], modType) ? 'btn_promo' : 'btn_1',
                             btnSize: value.items[i].btnSize,
                             linkType: value.items[i].pagelink ? 'local' : 'ext',
                         },
@@ -253,8 +261,6 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             linkType: value.items[i].pagelink2 ? 'local' : 'ext',
                         },
                     ]
-
-                    console.log(buttonList)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
 

@@ -132,7 +132,7 @@ function isGridCaption(item) {
     }
 }
 
-const alternatePromoColors = (items, themeStyles) => {
+const alternatePromoColors = (items, themeStyles, modType) => {
     const colorList = Array(items.length)
         .fill([
             themeStyles.promoColor,
@@ -146,13 +146,27 @@ const alternatePromoColors = (items, themeStyles) => {
 
     let noimgCount = 0
     for (let i = 0; i < items.length; i++) {
-        if (!items[i].image) {
-            items[i] = { ...items[i], gridColor: colorList[noimgCount] }
-            noimgCount += 1
+        if (modType === 'PhotoGrid') {
+            if (!items[i].image) {
+                items[i] = { ...items[i], promoColor: colorList[noimgCount] }
+                noimgCount += 1
+            }
+        } else if (modType === 'Banner') {
+            items[i] = { ...items[i], promoColor: colorList[i] }
         }
     }
 
     return items
+}
+
+const isPromoButton = (items, modType) => {
+    if (modType === 'PhotoGrid' && !items.image) {
+        return true
+    } else if (modType === 'Banner') {
+        return true
+    } else {
+        return false
+    }
 }
 
 const setColors = (cmsColors, cmsTheme) => {
@@ -281,4 +295,5 @@ module.exports = {
     linkAndBtn,
     isGridCaption,
     alternatePromoColors,
+    isPromoButton,
 }
