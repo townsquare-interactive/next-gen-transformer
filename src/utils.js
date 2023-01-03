@@ -144,15 +144,40 @@ const alternatePromoColors = (items, themeStyles, modType) => {
         ])
         .flat()
 
-    let noimgCount = 0
+    const textureImageList = Array(items.length)
+        .fill([
+            {
+                image: `/wp-content/themes/beacon-theme_charlotte/css/bkgs/bright-squares.png`,
+                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor});`,
+            },
+            {
+                image: `/wp-content/themes/beacon-theme_charlotte/css/bkgs/subtle-white-feathers.png`,
+                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor}, ${themeStyles.promoColor2});`,
+            },
+            {
+                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/shattered-dark.png',
+                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor2}, ${themeStyles.promoColor3});`,
+            },
+            {
+                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/fabric-of-squares.png',
+                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor4});`,
+            },
+            {
+                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/cartographer.png',
+                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor4}, ${themeStyles.promoColor5});`,
+            },
+        ])
+        .flat()
+
+    let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
         if (modType === 'PhotoGrid') {
             if (!items[i].image) {
-                items[i] = { ...items[i], promoColor: colorList[noimgCount] }
-                noimgCount += 1
+                items[i] = { ...items[i], promoColor: colorList[noImgCount], textureImage: textureImageList[noImgCount] }
+                noImgCount += 1
             }
         } else if (modType === 'Banner') {
-            items[i] = { ...items[i], promoColor: colorList[i] }
+            items[i] = { ...items[i], promoColor: colorList[i], textureImage: textureImageList[i] }
         }
     }
 
