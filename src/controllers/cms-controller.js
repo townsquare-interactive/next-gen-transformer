@@ -245,7 +245,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             icon: btnIconConvert(value.items[i].icon || ''),
                             label: value.items[i].actionlbl,
                             active: value.items[i].actionlbl && (value.items[i].pagelink || value.items[i].weblink) ? true : false,
-                            btnType: value.items[i].btnType || isPromoButton(value.items[i], modType) ? 'btn_promo' : 'btn_1',
+                            btnType: value.items[i].btnType || !isPromoButton(value.items[i], modType) ? 'btn_1' : 'btn_promo',
                             btnSize: value.items[i].btnSize,
                             linkType: value.items[i].pagelink ? 'local' : 'ext',
                         },
