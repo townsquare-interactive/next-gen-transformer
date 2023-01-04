@@ -146,45 +146,25 @@ const alternatePromoColors = (items, themeStyles, modType) => {
 
     const textureImageList = Array(items.length)
         .fill([
-            /*  {
-                image: `/wp-content/themes/beacon-theme_charlotte/css/bkgs/bright-squares.png`,
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor});`,
-            },
-            {
-                image: `/wp-content/themes/beacon-theme_charlotte/css/bkgs/subtle-white-feathers.png`,
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor}, ${themeStyles.promoColor2});`,
-            },
-            {
-                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/shattered-dark.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor2}, ${themeStyles.promoColor3});`,
-            },
-            {
-                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/fabric-of-squares.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor4});`,
-            },
-            {
-                image: '/wp-content/themes/beacon-theme_charlotte/css/bkgs/cartographer.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor4}, ${themeStyles.promoColor5});`,
-            }, */
             {
                 image: `/bright-squares.png`,
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor});`,
+                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor],
             },
             {
                 image: `/subtle-white-feathers.png`,
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor}, ${themeStyles.promoColor2});`,
+                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor2],
             },
             {
                 image: '/shattered-dark.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor2}, ${themeStyles.promoColor3});`,
+                gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
             },
             {
                 image: '/fabric-of-squares.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor3}, ${themeStyles.promoColor4});`,
+                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
             },
             {
                 image: '/cartographer.png',
-                gradient: `linear-gradient(-45deg, ${themeStyles.promoColor4}, ${themeStyles.promoColor5});`,
+                gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
             },
         ])
         .flat()
