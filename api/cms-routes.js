@@ -6,6 +6,7 @@ const {
     transformPagesData,
     createOrEditLayout,
     deletePages,
+    addFaviconFromSite,
 } = require('../src/controllers/cms-controller')
 
 const { stripUrl, setColors } = require('../src/utils')
@@ -39,6 +40,10 @@ router.post('/save', async (req, res) => {
         globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
 
         await addFileS3(globalFile, `${newUrl}/layout.json`)
+
+        if (req.body.savedData.favicon) {
+            await addFaviconFromSite(req.body.siteData.config.website.url + req.body.savedData.favicon, `${newUrl}/favicon.png`)
+        }
 
         if (req.body.savedData.deletePages) {
             const pageListUrl = `${newUrl}/pages/page-list.json`

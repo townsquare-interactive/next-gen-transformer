@@ -1,6 +1,7 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
 const TsiBucket = 'townsquareinteractive'
+const request = require('request-promise')
 
 const {
     socialConvert,
@@ -174,6 +175,7 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
+        s3Folder: newUrl,
         favicon: file.config.website.favicon.src || '',
     }
     return globalFile
@@ -295,6 +297,34 @@ const transformCMSMods = (moduleList, themeStyles) => {
     return columnsData
 }
 
+const addFaviconFromSite = async (file, key) => {
+    var options = {
+        uri: 'http://' + file,
+        encoding: null,
+    }
+    request(options, function (error, response, body) {
+        if (error || response.statusCode !== 200) {
+            console.log('failed to get image')
+            console.log(error)
+        } else {
+            s3.putObject(
+                {
+                    Body: body,
+                    Key: key,
+                    Bucket: TsiBucket,
+                },
+                function (error, data) {
+                    if (error) {
+                        console.log('error downloading image to s3')
+                    } else {
+                        console.log('success uploading to s3')
+                    }
+                }
+            )
+        }
+    })
+}
+
 //adding a page file for each page in cms data
 const addMultipleS3 = async (data, pageList, newUrl) => {
     const pages = data.pages
@@ -385,4 +415,5 @@ module.exports = {
     transformPagesData,
     createOrEditLayout,
     deletePages,
+    addFaviconFromSite,
 }
