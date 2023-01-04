@@ -17,6 +17,7 @@ const {
     isGridCaption,
     alternatePromoColors,
     isPromoButton,
+    stripImageFolders,
 } = require('../utils')
 
 AWS.config.update({
@@ -176,8 +177,9 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
         s3Folder: newUrl,
-        favicon: file.config.website.favicon.src || '',
+        favicon: stripImageFolders(file.config.website.favicon.src) || '',
     }
+
     return globalFile
 }
 

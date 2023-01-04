@@ -9,7 +9,7 @@ const {
     addFaviconFromSite,
 } = require('../src/controllers/cms-controller')
 
-const { stripUrl, setColors } = require('../src/utils')
+const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 
 const express = require('express')
 const router = express.Router()
@@ -42,7 +42,9 @@ router.post('/save', async (req, res) => {
         await addFileS3(globalFile, `${newUrl}/layout.json`)
 
         if (req.body.savedData.favicon) {
-            await addFaviconFromSite(req.body.siteData.config.website.url + req.body.savedData.favicon, `${newUrl}/favicon.png`)
+            const faviconName = stripImageFolders(req.body.savedData.favicon)
+
+            await addFaviconFromSite(req.body.siteData.config.website.url + req.body.savedData.favicon, newUrl + '/assets/' + faviconName)
         }
 
         if (req.body.savedData.deletePages) {

@@ -44,6 +44,11 @@ const stripUrl = (url) => {
     return removeProtocol.replace(/\..*/, '')
 }
 
+const stripImageFolders = (file) => {
+    const result = file.substring(file.lastIndexOf('/') + 1)
+    return result
+}
+
 function transformcontact(contactInfo) {
     const icons = {
         phone: ['fas', 'phone'],
@@ -321,4 +326,5 @@ module.exports = {
     isGridCaption,
     alternatePromoColors,
     isPromoButton,
+    stripImageFolders,
 }
