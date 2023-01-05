@@ -191,6 +191,8 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
             let modCount = 0
 
+            let imageCount = 0
+
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
                 let modType
@@ -211,16 +213,21 @@ const transformCMSMods = (moduleList, themeStyles) => {
                 }
 
                 let itemCount = 0
+
                 //loop for each item
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
 
-                    const imagePriority = modCount === 1 && itemCount <= 4 ? true : false
+                    if (currentItem.image) {
+                        imageCount += 1
+                    }
+
+                    const imagePriority = modCount === 1 && itemCount <= 4 ? true : imageCount <= 2 ? true : false
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
-                        value.items[i].desc = value.items[i].desc.replaceAll('[rn]', '<br>')
+                        value.items[i].desc = currentItem.desc.replaceAll('[rn]', '<br>')
                     }
 
                     //determining button/link logic
@@ -234,35 +241,28 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                     const visibleButton = linkAndBtn(currentItem)
 
-                    /* const gridButtonNoImage = modType === 'PhotoGrid' && !value.items[i].image ? true : false
-
-                    const bannerButton = modType === 'Banner' ? true : false
-
-                    const firstButtonAlt = gridButtonNoImage ? true : bannerButton ? true : false  
- */
-
                     const buttonList = [
                         {
                             name: 'btn1',
-                            link: value.items[i].pagelink || value.items[i].weblink,
-                            window: value.items[i].newwindow,
-                            icon: btnIconConvert(value.items[i].icon || ''),
-                            label: value.items[i].actionlbl,
-                            active: value.items[i].actionlbl && (value.items[i].pagelink || value.items[i].weblink) ? true : false,
-                            btnType: value.items[i].btnType || !isPromoButton(value.items[i], modType) ? 'btn_1' : 'btn_promo',
-                            btnSize: value.items[i].btnSize,
-                            linkType: value.items[i].pagelink ? 'local' : 'ext',
+                            link: currentItem.pagelink || currentItem.weblink,
+                            window: currentItem.newwindow,
+                            icon: btnIconConvert(currentItem.icon || ''),
+                            label: currentItem.actionlbl,
+                            active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
+                            btnType: currentItem.btnType ? currentItem.btnType : !isPromoButton(currentItem, modType) ? 'btn_1' : 'btn_promo',
+                            btnSize: currentItem.btnSize,
+                            linkType: currentItem.pagelink ? 'local' : 'ext',
                         },
                         {
                             name: 'btn2',
-                            link: value.items[i].pagelink2 || value.items[i].weblink2,
-                            window: value.items[i].newwindow2,
-                            icon: btnIconConvert(value.items[i].icon2 || ''),
-                            label: value.items[i].actionlbl2,
-                            active: value.items[i].actionlbl2 && (value.items[i].pagelink2 || value.items[i].weblink2) ? true : false,
-                            btnType: value.items[i].btnType2,
-                            btnSize: value.items[i].btnSize2,
-                            linkType: value.items[i].pagelink2 ? 'local' : 'ext',
+                            link: currentItem.pagelink2 || currentItem.weblink2,
+                            window: currentItem.newwindow2,
+                            icon: btnIconConvert(currentItem.icon2 || ''),
+                            label: currentItem.actionlbl2,
+                            active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
+                            btnType: currentItem.btnType2,
+                            btnSize: currentItem.btnSize2,
+                            linkType: currentItem.pagelink2 ? 'local' : 'ext',
                         },
                     ]
 
@@ -285,6 +285,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                         imagePriority: imagePriority,
                         hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
+                        customClassName: value.items[i].class,
                     }
                 }
 
@@ -299,7 +300,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
     return columnsData
 }
 
-const addFaviconFromSite = async (file, key) => {
+const addAssetFromSiteToS3 = async (file, key) => {
     var options = {
         uri: 'http://' + file,
         encoding: null,
@@ -417,5 +418,5 @@ module.exports = {
     transformPagesData,
     createOrEditLayout,
     deletePages,
-    addFaviconFromSite,
+    addAssetFromSiteToS3,
 }

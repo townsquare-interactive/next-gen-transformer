@@ -6,7 +6,7 @@ const {
     transformPagesData,
     createOrEditLayout,
     deletePages,
-    addFaviconFromSite,
+    addAssetFromSiteToS3,
 } = require('../src/controllers/cms-controller')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
@@ -44,7 +44,7 @@ router.post('/save', async (req, res) => {
         if (req.body.savedData.favicon) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
 
-            await addFaviconFromSite(req.body.siteData.config.website.url + req.body.savedData.favicon, newUrl + '/assets/' + faviconName)
+            await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, newUrl + '/assets/' + faviconName)
         }
 
         if (req.body.savedData.deletePages) {
