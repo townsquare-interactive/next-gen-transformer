@@ -123,12 +123,12 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
 }
 
 //add file to s3 bucket
-const addFileS3 = async (file, key) => {
+const addFileS3 = async (file, key, fileType = 'json') => {
     await s3
         .putObject({
             Body: JSON.stringify(file),
             Bucket: TsiBucket,
-            Key: key,
+            Key: key + `.${fileType}`,
         })
         .promise()
         .catch((error) => {
@@ -136,6 +136,20 @@ const addFileS3 = async (file, key) => {
         })
 
     console.log('File Placed')
+}
+
+const addFileCssS3 = async (file, key) => {
+    await s3
+        .putObject({
+            Body: file,
+            Bucket: TsiBucket,
+            Key: key,
+            ContentType: 'text/css',
+        })
+        .promise()
+        .catch((error) => {
+            console.error(error)
+        })
 }
 
 //Create or edit layout file
@@ -166,7 +180,9 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
         footerLogos: file.logos.footer.slots[0] || '',
         social: file.settings ? transformSocial(file) : currentLayout.social,
-        contact: file.settings ? transformcontact(file.settings.contact.contact_list.wide.items[0]) : currentLayout.contact || '',
+        contact: file.settings
+            ? transformcontact(file.settings.contact.contact_list.wide.items[0], file.config.website.site_title)
+            : currentLayout.contact || '',
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
@@ -333,15 +349,30 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
     const pages = data.pages
 
     //adding page list file to s3
-    addFileS3(pageList, `${newUrl}/pages/page-list.json`)
+    addFileS3(pageList, `${newUrl}/pages/page-list`)
 
     //adding page files to s3
     for (let i = 0; i < data.pages.length; i++) {
-        addFileS3(data.pages[i], `${newUrl}/pages/${pages[i].slug}.json`)
+        addFileS3(data.pages[i], `${newUrl}/pages/${pages[i].slug}`)
     }
 
     //add full site data to s3
-    addFileS3(data, `${newUrl}/siteData.json`)
+    addFileS3(data, `${newUrl}/siteData`)
+}
+
+const createGlobalStyles = (themeStyles) => {
+    const textColors = `.accent-txt{color:${themeStyles['textColorAccent']};} .txt-color{color:${themeStyles['textColor']};} .txt-color-heading{color:${themeStyles['headingColor']};} .navLink:hover{color: ${themeStyles['navHover']};} .navLink{color:${themeStyles['NavText']};} .socialIcon:hover{background-color: ${themeStyles['navHover']};} .socialIcon{color:${themeStyles['NavText']};} .currentNav{color:${themeStyles['navCurrent']};} .caption-txt{color:${themeStyles.captionText};}`
+
+    const btnStyles = ` .btn_1{color: ${themeStyles['textColorAccent']}; background-color: ${themeStyles['btnBackground']};} .btn_1:hover{color: ${themeStyles['btnBackground']}; background-color: ${themeStyles['textColorAccent']};} .btn_2{color: ${themeStyles['linkColor']}; border-color: ${themeStyles['linkColor']};} .btn_2:hover{color: ${themeStyles['btnBackground']}; border-color: ${themeStyles['btnBackground']};} .btn_alt{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']};} .btn_alt:hover{color: ${themeStyles['textColorAccent']}; background-color: ${themeStyles['promoColor']};}`
+
+    const backgroundStyles = ` .border-background{background-color:${themeStyles['accentBackgroundColor']};} .hero-background{background-color:${themeStyles['promoColor']};} .content-background{background-color:${themeStyles['bckdContent']};} .footer{background-color:${themeStyles['footerBackground']}; color: ${themeStyles['footerText']};} .header-background{background-color:${themeStyles['headerBackground']};}`
+
+    let colorStyles = textColors + btnStyles + backgroundStyles
+
+    colorStyles = colorStyles.replace(/^`|`$/g, '')
+    colorStyles = colorStyles.trim()
+
+    return colorStyles
 }
 
 //add any file, pass it the file and key for filename
@@ -419,4 +450,6 @@ module.exports = {
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
+    addFileCssS3,
+    createGlobalStyles,
 }

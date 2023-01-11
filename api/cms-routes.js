@@ -3,11 +3,15 @@ const {
     addMultipleS3,
     updatePageList,
     addFileS3,
+    addFileCssS3,
     transformPagesData,
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
+    createGlobalStyles,
 } = require('../src/controllers/cms-controller')
+
+const Css = require('json-to-css')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 
@@ -30,7 +34,7 @@ router.post('/save', async (req, res) => {
 
             //adding each page to s3
             for (let i = 0; i < newPageData.pages.length; i++) {
-                await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}.json`)
+                await addFileS3(newPageData.pages[i], `${newUrl}/pages/${newPageData.pages[i].data.slug}`)
             }
             // update/create pagelist
             newPageList = await updatePageList(newPageData.pages, newUrl)
@@ -39,7 +43,7 @@ router.post('/save', async (req, res) => {
         let globalFile
         globalFile = await createOrEditLayout(req.body.siteData, newUrl, themeStyles)
 
-        await addFileS3(globalFile, `${newUrl}/layout.json`)
+        await addFileS3(globalFile, `${newUrl}/layout`)
 
         if (req.body.savedData.favicon) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
@@ -53,8 +57,13 @@ router.post('/save', async (req, res) => {
             await addFileS3(updatedPageList, pageListUrl)
         }
 
+        if (req.body.savedData.colors) {
+            const globalStyles = createGlobalStyles(themeStyles)
+            await addFileCssS3(globalStyles, `${newUrl}/global.scss`)
+        }
+
         //Adding new siteData file after saved
-        await addFileS3(req.body.siteData, `${newUrl}/siteData.json`)
+        await addFileS3(req.body.siteData, `${newUrl}/siteData`)
         res.json('posting to s3 folder: ' + newUrl)
     } catch (err) {
         console.error(err)
@@ -68,7 +77,7 @@ router.post('/cmsconfig', async (req, res) => {
 
     try {
         const globalFile = await createOrEditLayout(req.body, newUrl)
-        await addFileS3(globalFile, `${newUrl}/layout.json`)
+        await addFileS3(globalFile, `${newUrl}/layout`)
         res.json(globalFile)
     } catch (err) {
         console.error(err)
@@ -81,7 +90,7 @@ router.post('/cms', async (req, res) => {
     const newUrl = stripUrl(req.body.config.website.url)
 
     try {
-        await addFileS3(req.body, `${newUrl}/siteData.json`)
+        await addFileS3(req.body, `${newUrl}/siteData`)
         res.json('cms data added')
     } catch (err) {
         console.error(err)

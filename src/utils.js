@@ -49,7 +49,7 @@ const stripImageFolders = (file) => {
     return result
 }
 
-function transformcontact(contactInfo) {
+function transformcontact(contactInfo, siteName) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
@@ -60,7 +60,32 @@ function transformcontact(contactInfo) {
 
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
 
-    contactInfo = { ...contactInfo, icons: icons, mapLink: mapLink }
+    const contactLinks = [
+        {
+            cName: 'phone',
+            link: 'tel:' + contactInfo.phone[0].number,
+            icon: icons.phone,
+            content: contactInfo.phone[0].number,
+            active: contactInfo.phone[0].number ? true : false,
+        },
+        {
+            cName: 'email',
+            link: `mailto:${contactInfo.email[0].email}`,
+            icon: icons.email,
+            content: contactInfo.email[0].name + ':' + contactInfo.email[0].email,
+            active: contactInfo.email[0] ? true : false,
+        },
+        {
+            cName: 'map',
+            link: mapLink,
+            icon: icons.location,
+            content: contactInfo.address.name,
+            active: contactInfo.address ? true : false,
+        },
+    ]
+
+    contactInfo = { ...contactInfo, contactLinks: contactLinks }
+
     return contactInfo
 }
 
