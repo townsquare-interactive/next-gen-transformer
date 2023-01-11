@@ -124,11 +124,18 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
 
 //add file to s3 bucket
 const addFileS3 = async (file, key, fileType = 'json') => {
+    const s3ContentType = fileType === 'scss' ? 'text/css' : 'application/json'
+
+    const body = fileType === 'json' ? JSON.stringify(file) : file
+
+    console.log(s3ContentType)
+
     await s3
         .putObject({
-            Body: JSON.stringify(file),
+            Body: body,
             Bucket: TsiBucket,
             Key: key + `.${fileType}`,
+            ContentType: s3ContentType,
         })
         .promise()
         .catch((error) => {
@@ -138,7 +145,7 @@ const addFileS3 = async (file, key, fileType = 'json') => {
     console.log('File Placed')
 }
 
-const addFileCssS3 = async (file, key) => {
+/* const addFileCssS3 = async (file, key) => {
     await s3
         .putObject({
             Body: file,
@@ -150,7 +157,7 @@ const addFileCssS3 = async (file, key) => {
         .catch((error) => {
             console.error(error)
         })
-}
+} */
 
 //Create or edit layout file
 const createOrEditLayout = async (file, newUrl, themeStyles) => {
@@ -360,21 +367,6 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
     addFileS3(data, `${newUrl}/siteData`)
 }
 
-const createGlobalStyles = (themeStyles) => {
-    const textColors = `.accent-txt{color:${themeStyles['textColorAccent']};} .txt-color{color:${themeStyles['textColor']};} .txt-color-heading{color:${themeStyles['headingColor']};} .navLink:hover{color: ${themeStyles['navHover']};} .navLink{color:${themeStyles['NavText']};} .socialIcon:hover{background-color: ${themeStyles['navHover']};} .socialIcon{color:${themeStyles['NavText']};} .currentNav{color:${themeStyles['navCurrent']};} .caption-txt{color:${themeStyles.captionText};}`
-
-    const btnStyles = ` .btn_1{color: ${themeStyles['textColorAccent']}; background-color: ${themeStyles['btnBackground']};} .btn_1:hover{color: ${themeStyles['btnBackground']}; background-color: ${themeStyles['textColorAccent']};} .btn_2{color: ${themeStyles['linkColor']}; border-color: ${themeStyles['linkColor']};} .btn_2:hover{color: ${themeStyles['btnBackground']}; border-color: ${themeStyles['btnBackground']};} .btn_alt{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']};} .btn_alt:hover{color: ${themeStyles['textColorAccent']}; background-color: ${themeStyles['promoColor']};}`
-
-    const backgroundStyles = ` .border-background{background-color:${themeStyles['accentBackgroundColor']};} .hero-background{background-color:${themeStyles['promoColor']};} .content-background{background-color:${themeStyles['bckdContent']};} .footer{background-color:${themeStyles['footerBackground']}; color: ${themeStyles['footerText']};} .header-background{background-color:${themeStyles['headerBackground']};}`
-
-    let colorStyles = textColors + btnStyles + backgroundStyles
-
-    colorStyles = colorStyles.replace(/^`|`$/g, '')
-    colorStyles = colorStyles.trim()
-
-    return colorStyles
-}
-
 //add any file, pass it the file and key for filename
 const addFileS3List = async (file, key) => {
     console.log('File to be added', file)
@@ -450,6 +442,4 @@ module.exports = {
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
-    addFileCssS3,
-    createGlobalStyles,
 }

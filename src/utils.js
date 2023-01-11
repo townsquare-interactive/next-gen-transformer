@@ -229,7 +229,6 @@ const setColors = (cmsColors, cmsTheme) => {
         return {
             //add
             logoColor: cmsColors.color_1.value,
-
             headingColor: cmsColors.color_2.value,
             subHeadingColor: cmsColors?.color_3.value,
             textColor: cmsColors.color_4.value,
@@ -335,6 +334,84 @@ const getColumnsCssClass = (page) => {
     }
 }
 
+const createGlobalStylesheet = (themeStyles) => {
+    const textColors = `.accent-txt{color:var(--txt-accent);} 
+    .txt-color{color:var(--txt-color);} 
+    .txt-color-hd{color:var(--hd-color);} 
+    .navLink:hover{color: var(--nav-hover);} 
+    .navLink{color:var(--nav-txt);} 
+    .social-icon:hover{background-color: var(--nav-hover);} 
+    .social-icon{color:var(--nav-txt);} 
+    .currentNav{color:var(--nav-current);} 
+    .caption-txt{color:var(--caption-txt);}
+    `
+
+    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
+    .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
+    .btn_2{color: var(--link-color); border-color: var(--link-color);} 
+    .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
+    .btn_alt{color: var(--promo-color); background-color: var(--txt-accent);} 
+    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo-color);}
+    `
+
+    const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
+    .hero-background{background-color:var(--promo-color);} 
+    .content-background{background-color:var(--content-background);} 
+    .footer{background-color:var(--footer-background); color: var(--footer-txt);} 
+    .header-background{background-color:var(--header-background);} 
+    .social-bar-background{background-color:var(--social-background);} 
+    .promo-background{background-color:var(--promo-color);}
+    `
+
+    const colorVars = `
+    :root {
+        --logo-color: ${themeStyles['logoColor']};
+        --hd-color: ${themeStyles['headingColor']};
+        --sh-color: ${themeStyles['subHeadingColor']};
+        --txt-color: ${themeStyles['textColor']};
+        --link-color: ${themeStyles['linkColor']};
+        --txt-hover: ${themeStyles['linkHover']};
+        --btn-txt: ${themeStyles['btnText']};
+        --btn-background: ${themeStyles['btnBackground']};
+        --txt-accent: ${themeStyles['textColorAccent']};
+        --hero-sh: ${themeStyles['heroSubheadline']};
+        --hero-txt: ${themeStyles['heroText']};
+        --hero-btn-txt: ${themeStyles['heroBtnText']};
+        --hero-btn-background: ${themeStyles['heroBtnBackground']};
+        --hero-link: ${themeStyles['heroLink']};
+        --hero-link-hover: ${themeStyles['heroLinkHover']};
+        --caption-text: ${themeStyles['captionText']};
+        --caption-background: ${themeStyles['captionBackground']};
+        --nav-txt: ${themeStyles['NavText']};
+        --nav-hover: ${themeStyles['navHover']};
+        --nav-current: ${themeStyles['navCurrent']};
+        --main-background: ${themeStyles['backgroundMain']};
+        --content-background: ${themeStyles['bckdContent']};
+        --header-background: ${themeStyles['headerBackground']};
+        --social-background: ${themeStyles['BckdHeaderSocial']};
+        --accent-background: ${themeStyles['accentBackgroundColor']};
+        --hero-background: ${themeStyles['backgroundHero']};
+        --footer-background: ${themeStyles['footerBackground']};
+        --footer-txt: ${themeStyles['footerText']};
+        --footer-link: ${themeStyles['footerLink']};
+        --promo-txt: ${themeStyles['promoText']};
+        --promo-color: ${themeStyles['promoColor']};
+        --promo-color2: ${themeStyles['promoColor2']};
+        --promo-color3: ${themeStyles['promoColor3']};
+        --promo-color4: ${themeStyles['promoColor4']};
+        --promo-color5: ${themeStyles['promoColor5']};
+        --promo-color6: ${themeStyles['promoColor6']};
+       }
+       `
+
+    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
+
+    //colorStyles = colorStyles.replace(/^`|`$/g, '')
+    colorStyles = colorStyles.trim()
+
+    return colorStyles
+}
+
 module.exports = {
     socialConvert,
     btnIconConvert,
@@ -352,4 +429,5 @@ module.exports = {
     alternatePromoColors,
     isPromoButton,
     stripImageFolders,
+    createGlobalStylesheet,
 }

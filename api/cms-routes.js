@@ -3,17 +3,13 @@ const {
     addMultipleS3,
     updatePageList,
     addFileS3,
-    addFileCssS3,
     transformPagesData,
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
-    createGlobalStyles,
 } = require('../src/controllers/cms-controller')
 
-const Css = require('json-to-css')
-
-const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
+const { stripUrl, setColors, stripImageFolders, createGlobalStylesheet } = require('../src/utils')
 
 const express = require('express')
 const router = express.Router()
@@ -58,8 +54,8 @@ router.post('/save', async (req, res) => {
         }
 
         if (req.body.savedData.colors) {
-            const globalStyles = createGlobalStyles(themeStyles)
-            await addFileCssS3(globalStyles, `${newUrl}/global.scss`)
+            const globalStyles = createGlobalStylesheet(themeStyles)
+            await addFileS3(globalStyles, `${newUrl}/global`, 'scss')
         }
 
         //Adding new siteData file after saved
