@@ -227,53 +227,36 @@ const isPromoButton = (items, modType) => {
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
-            //add
             logoColor: cmsColors.color_1.value,
             headingColor: cmsColors.color_2.value,
             subHeadingColor: cmsColors?.color_3.value,
             textColor: cmsColors.color_4.value,
             linkColor: cmsColors.color_5.value,
             linkHover: cmsColors.color_6.value,
-
-            //ad
             btnText: cmsColors.color_7.value,
-
             btnBackground: cmsColors.color_8.value,
             textColorAccent: cmsColors.color_9.value,
-
-            //addd
             heroSubheadline: cmsColors.color_10.value,
             heroText: cmsColors.color_11.value,
             heroBtnText: cmsColors.color_12.value,
             heroBtnBackground: cmsColors.color_13.value,
             heroLink: cmsColors.color_14.value,
             heroLinkHover: cmsColors.color_15.value,
-
             captionText: cmsColors.color_16.value,
             captionBackground: cmsColors.color_17.value,
             NavText: cmsColors.color_18.value,
             navHover: cmsColors.color_19.value,
             navCurrent: cmsColors.color_20.value,
-            //add
             backgroundMain: cmsColors.color_21.value,
-
             bckdContent: cmsColors.color_22.value,
-            // navBackground: cmsColors.color_23.value,
             headerBackground: cmsColors.color_23.value,
-
             BckdHeaderSocial: cmsColors.color_24.value,
             accentBackgroundColor: cmsColors.color_25.value,
-            //add
             backgroundHero: cmsColors.color_26.value,
             footerBackground: cmsColors.color_27.value,
             footerText: cmsColors.color_28.value,
-
-            //add
             footerLink: cmsColors.color_29.value,
             promoText: cmsColors.color_30.value,
-
-            //accentColor2: cmsColors.color_32.value,
-
             promoColor: cmsColors.color_31.value,
             promoColor2: cmsColors.color_32.value,
             promoColor3: cmsColors.color_33.value,
@@ -336,40 +319,43 @@ const getColumnsCssClass = (page) => {
 
 const createGlobalStylesheet = (themeStyles) => {
     const textColors = `.accent-txt{color:var(--txt-accent);} 
-    .txt-color{color:var(--txt-color);} 
-    .txt-color-hd{color:var(--hd-color);} 
+    .txt-color{color:var(--txt);} 
+    .txt-color-hd{color:var(--hd);} 
     .navLink:hover{color: var(--nav-hover);} 
     .navLink{color:var(--nav-txt);} 
     .social-icon:hover{background-color: var(--nav-hover);} 
     .social-icon{color:var(--nav-txt);} 
+    .footer-icon:hover{background-color: var(--nav-hover);}
     .currentNav{color:var(--nav-current);} 
     .caption-txt{color:var(--caption-txt);}
     `
 
     const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
     .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
-    .btn_2{color: var(--link-color); border-color: var(--link-color);} 
+    .btn_2{color: var(--link); border-color: var(--link);} 
     .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
-    .btn_alt{color: var(--promo-color); background-color: var(--txt-accent);} 
-    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo-color);}
+    .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
+    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
+    .close-toggle {color:var(--txt-accent); background-color:var(--promo);}
+    .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}
     `
 
     const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
-    .hero-background{background-color:var(--promo-color);} 
+    .hero-background{background-color:var(--promo);} 
     .content-background{background-color:var(--content-background);} 
     .footer{background-color:var(--footer-background); color: var(--footer-txt);} 
     .header-background{background-color:var(--header-background);} 
     .social-bar-background{background-color:var(--social-background);} 
-    .promo-background{background-color:var(--promo-color);}
+    .promo-background{background-color:var(--promo);}
     `
 
     const colorVars = `
     :root {
-        --logo-color: ${themeStyles['logoColor']};
-        --hd-color: ${themeStyles['headingColor']};
-        --sh-color: ${themeStyles['subHeadingColor']};
-        --txt-color: ${themeStyles['textColor']};
-        --link-color: ${themeStyles['linkColor']};
+        --logo: ${themeStyles['logoColor']};
+        --hd: ${themeStyles['headingColor']};
+        --sh: ${themeStyles['subHeadingColor']};
+        --txt: ${themeStyles['textColor']};
+        --link: ${themeStyles['linkColor']};
         --txt-hover: ${themeStyles['linkHover']};
         --btn-txt: ${themeStyles['btnText']};
         --btn-background: ${themeStyles['btnBackground']};
@@ -395,12 +381,12 @@ const createGlobalStylesheet = (themeStyles) => {
         --footer-txt: ${themeStyles['footerText']};
         --footer-link: ${themeStyles['footerLink']};
         --promo-txt: ${themeStyles['promoText']};
-        --promo-color: ${themeStyles['promoColor']};
-        --promo-color2: ${themeStyles['promoColor2']};
-        --promo-color3: ${themeStyles['promoColor3']};
-        --promo-color4: ${themeStyles['promoColor4']};
-        --promo-color5: ${themeStyles['promoColor5']};
-        --promo-color6: ${themeStyles['promoColor6']};
+        --promo: ${themeStyles['promoColor']};
+        --promo2: ${themeStyles['promoColor2']};
+        --promo3: ${themeStyles['promoColor3']};
+        --promo4: ${themeStyles['promoColor4']};
+        --promo5: ${themeStyles['promoColor5']};
+        --promo6: ${themeStyles['promoColor6']};
        }
        `
 

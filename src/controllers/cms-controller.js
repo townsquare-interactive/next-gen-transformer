@@ -125,10 +125,7 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
 //add file to s3 bucket
 const addFileS3 = async (file, key, fileType = 'json') => {
     const s3ContentType = fileType === 'scss' ? 'text/css' : 'application/json'
-
     const body = fileType === 'json' ? JSON.stringify(file) : file
-
-    console.log(s3ContentType)
 
     await s3
         .putObject({
@@ -144,20 +141,6 @@ const addFileS3 = async (file, key, fileType = 'json') => {
 
     console.log('File Placed')
 }
-
-/* const addFileCssS3 = async (file, key) => {
-    await s3
-        .putObject({
-            Body: file,
-            Bucket: TsiBucket,
-            Key: key,
-            ContentType: 'text/css',
-        })
-        .promise()
-        .catch((error) => {
-            console.error(error)
-        })
-} */
 
 //Create or edit layout file
 const createOrEditLayout = async (file, newUrl, themeStyles) => {
