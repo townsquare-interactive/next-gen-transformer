@@ -318,37 +318,6 @@ const getColumnsCssClass = (page) => {
 }
 
 const createGlobalStylesheet = (themeStyles) => {
-    const textColors = `.accent-txt{color:var(--txt-accent);} 
-    .txt-color{color:var(--txt);} 
-    .txt-color-hd{color:var(--hd);} 
-    .navLink:hover{color: var(--nav-hover);} 
-    .navLink{color:var(--nav-txt);} 
-    .social-icon:hover{background-color: var(--nav-hover);} 
-    .social-icon{color:var(--nav-txt);} 
-    .footer-icon:hover{background-color: var(--nav-hover);}
-    .currentNav{color:var(--nav-current);} 
-    .caption-txt{color:var(--caption-txt);}
-    `
-
-    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
-    .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
-    .btn_2{color: var(--link); border-color: var(--link);} 
-    .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
-    .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
-    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
-    .close-toggle {color:var(--txt-accent); background-color:var(--promo);}
-    .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}
-    `
-
-    const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
-    .hero-background{background-color:var(--promo);} 
-    .content-background{background-color:var(--content-background);} 
-    .footer{background-color:var(--footer-background); color: var(--footer-txt);} 
-    .header-background{background-color:var(--header-background);} 
-    .social-bar-background{background-color:var(--social-background);} 
-    .promo-background{background-color:var(--promo);}
-    `
-
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -390,10 +359,36 @@ const createGlobalStylesheet = (themeStyles) => {
        }
        `
 
-    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
+    const textColors = `.accent-txt{color:var(--txt-accent);} 
+    .txt-color{color:var(--txt);} 
+    .txt-color-hd{color:var(--hd);} 
+    .navLink:hover{color: var(--nav-hover);} 
+    .navLink{color:var(--nav-txt);} 
+    .social-icon:hover{background-color: var(--nav-hover);} 
+    .social-icon{color:var(--nav-txt);} 
+    .footer-icon:hover{background-color: var(--nav-hover);}
+    .currentNav{color:var(--nav-current);} 
+    .caption-txt{color:var(--caption-txt);}
+    `
 
-    //colorStyles = colorStyles.replace(/^`|`$/g, '')
-    colorStyles = colorStyles.trim()
+    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
+    .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
+    .btn_2{color: var(--link); border-color: var(--link);} 
+    .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
+    .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
+    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
+    .close-toggle {color:var(--txt-accent); background-color:var(--promo);}
+    .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}
+    `
+
+    const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
+    .hero-background{background-color:var(--promo);} 
+    .content-background{background-color:var(--content-background);} 
+    .footer{background-color:var(--footer-background); color: var(--footer-txt);} 
+    .header-background{background-color:var(--header-background);} 
+    .social-bar-background{background-color:var(--social-background);} 
+    .promo-background{background-color:var(--promo);}`
+    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
 
     return colorStyles
 }
