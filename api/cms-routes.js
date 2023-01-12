@@ -9,7 +9,7 @@ const {
     addAssetFromSiteToS3,
 } = require('../src/controllers/cms-controller')
 
-const { stripUrl, setColors, stripImageFolders, createGlobalStylesheet } = require('../src/utils')
+const { stripUrl, setColors, stripImageFolders, createGlobalStylesheet, createCustomStylesheet } = require('../src/utils')
 
 const express = require('express')
 const router = express.Router()
@@ -55,7 +55,12 @@ router.post('/save', async (req, res) => {
 
         if (req.body.savedData.colors) {
             const globalStyles = createGlobalStylesheet(themeStyles)
-            await addFileS3(globalStyles, `${newUrl}/global`, 'scss')
+            await addFileS3(globalStyles, `${newUrl}/global`, 'css')
+        }
+
+        if (req.body.savedData.code) {
+            const customStyles = createCustomStylesheet(req.body.savedData.code)
+            await addFileS3(customStyles, `${newUrl}/custom`, 'css')
         }
 
         //Adding new siteData file after saved

@@ -124,7 +124,7 @@ const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
 
 //add file to s3 bucket
 const addFileS3 = async (file, key, fileType = 'json') => {
-    const s3ContentType = fileType === 'scss' ? 'text/css' : 'application/json'
+    const s3ContentType = fileType === 'css' ? 'text/css' : 'application/json'
     const body = fileType === 'json' ? JSON.stringify(file) : file
 
     await s3

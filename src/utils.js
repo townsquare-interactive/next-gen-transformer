@@ -392,6 +392,10 @@ const createGlobalStylesheet = (themeStyles) => {
 
     return colorStyles
 }
+const createCustomStylesheet = (code) => {
+    let cssCode = code.CSS
+    return cssCode
+}
 
 module.exports = {
     socialConvert,
@@ -411,4 +415,5 @@ module.exports = {
     isPromoButton,
     stripImageFolders,
     createGlobalStylesheet,
+    createCustomStylesheet,
 }
