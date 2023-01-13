@@ -255,7 +255,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                             icon: btnIconConvert(currentItem.icon || ''),
                             label: currentItem.actionlbl,
                             active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
-                            btnType: currentItem.btnType ? currentItem.btnType : !isPromoButton(currentItem, modType) ? 'btn_1' : 'btn_promo',
+                            btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
                             btnSize: currentItem.btnSize,
                             linkType: currentItem.pagelink ? 'local' : 'ext',
                         },

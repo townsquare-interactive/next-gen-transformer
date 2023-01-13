@@ -215,12 +215,15 @@ const alternatePromoColors = (items, themeStyles, modType) => {
 }
 
 const isPromoButton = (items, modType) => {
+    console.log(modType, items.modColor1)
     if (modType === 'PhotoGrid' && !items.image) {
-        return true
+        return 'btn_promo'
+    } else if (modType === 'Banner' && items.modColor1) {
+        return 'btn_override'
     } else if (modType === 'Banner') {
-        return true
+        return 'btn_promo'
     } else {
-        return false
+        return 'btn_1'
     }
 }
 
