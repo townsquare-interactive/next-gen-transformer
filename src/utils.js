@@ -173,40 +173,59 @@ function isGridCaption(item) {
 
 const alternatePromoColors = (items, themeStyles, modType) => {
     const colorList = Array(items.length)
-        .fill([
-            themeStyles.promoColor,
-            themeStyles.promoColor2,
-            themeStyles.promoColor3,
-            themeStyles.promoColor4,
-            themeStyles.promoColor5,
-            themeStyles.promoColor6,
-        ])
+        .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
         .flat()
 
-    const textureImageList = Array(items.length)
-        .fill([
-            {
-                image: `/bright-squares.png`,
-                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor],
-            },
-            {
-                image: `/subtle-white-feathers.png`,
-                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor2],
-            },
-            {
-                image: '/shattered-dark.png',
-                gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
-            },
-            {
-                image: '/fabric-of-squares.png',
-                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
-            },
-            {
-                image: '/cartographer.png',
-                gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
-            },
-        ])
-        .flat()
+    const textureImageList =
+        /*  modType === 'PhotoGrid'
+            ? Array(items.length)
+                 .fill([
+                      {
+                          image: `/bright-squares.png`,
+                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor],
+                      },
+                      {
+                          image: `/subtle-white-feathers.png`,
+                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor2],
+                      },
+                      {
+                          image: '/shattered-dark.png',
+                          gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
+                      },
+                      {
+                          image: '/fabric-of-squares.png',
+                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
+                      },
+                      {
+                          image: '/cartographer.png',
+                          gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
+                      },
+                  ])
+                  .flat() */
+        Array(items.length)
+            .fill([
+                {
+                    image: `/subtle-white-feathers.png`,
+                    gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
+                },
+                {
+                    image: '/shattered-dark.png',
+                    gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
+                },
+                {
+                    image: '/fabric-of-squares.png',
+                    gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
+                },
+                {
+                    image: '/cartographer.png',
+                    gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
+                },
+                {
+                    image: `/bright-squares.png`,
+                    gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
+                },
+            ])
+            .flat()
 
     let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
