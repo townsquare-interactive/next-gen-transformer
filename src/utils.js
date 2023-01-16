@@ -330,6 +330,7 @@ const getColumnsCssClass = (page) => {
 }
 
 const createGlobalStylesheet = (themeStyles) => {
+    console.log('colors changed --------')
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -379,7 +380,7 @@ const createGlobalStylesheet = (themeStyles) => {
     .social-icon:hover{background-color: var(--nav-hover);} 
     .social-icon{color:var(--nav-txt);} 
     .footer-icon:hover{background-color: var(--nav-hover);}
-    .currentNav{color:var(--nav-current);} 
+    .current-page{color:var(--nav-current);} 
     .caption-txt{color:var(--caption-txt);}
     `
 
