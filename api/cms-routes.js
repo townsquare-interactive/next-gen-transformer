@@ -53,11 +53,16 @@ router.post('/save', async (req, res) => {
             await addFileS3(updatedPageList, pageListUrl)
         }
 
-        if (req.body.savedData.colors) {
-            const globalStyles = createGlobalStylesheet(themeStyles)
+        if (req.body.savedData.colors || req.body.savedData.fonts) {
+            const globalStyles = createGlobalStylesheet(themeStyles, req.body.siteData.design.fonts)
             await addFileS3(globalStyles, `${newUrl}/global`, 'css')
         }
 
+        /* if (req.body.savedData.fonts) {
+            const globalStyles = createGlobalStylesheet(themeStyles, req.body.savedData.design.fonts)
+            await addFileS3(globalStyles, `${newUrl}/global`, 'css')
+        }
+ */
         if (req.body.savedData.code) {
             const customStyles = createCustomStylesheet(req.body.savedData.code)
             await addFileS3(customStyles, `${newUrl}/custom`, 'css')

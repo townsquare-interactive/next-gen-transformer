@@ -348,8 +348,24 @@ const getColumnsCssClass = (page) => {
     }
 }
 
-const createGlobalStylesheet = (themeStyles) => {
+const createGlobalStylesheet = (themeStyles, fonts) => {
     console.log('colors changed --------')
+
+    //creating font import
+    const headlineFont = fonts.list[fonts.sections.hdrs.value]
+    const bodyFont = fonts.list[fonts.sections.body.value]
+    const featuredFont = fonts.list[fonts.sections.feat.value]
+    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+    let fontGroup = []
+
+    for (let x in fontTypes) {
+        const familyText = fontTypes[x]
+        if (!fontGroup.includes(familyText)) {
+            fontGroup.push(familyText)
+        }
+    }
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${fontGroup.join('|')}&display=swap);`
+
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -391,7 +407,8 @@ const createGlobalStylesheet = (themeStyles) => {
        }
        `
 
-    const textColors = `.accent-txt{color:var(--txt-accent);} 
+    const textColors = `body {font-family:${bodyFont.label};}
+    .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
     .navLink:hover{color: var(--nav-hover);} 
@@ -419,8 +436,14 @@ const createGlobalStylesheet = (themeStyles) => {
     .footer{background-color:var(--footer-background); color: var(--footer-txt);} 
     .header-background{background-color:var(--header-background);} 
     .social-bar-background{background-color:var(--social-background);} 
-    .promo-background{background-color:var(--promo);}`
-    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
+    .promo-background{background-color:var(--promo);}
+    `
+
+    const fontClasses = ` .hd-font{font-family:${headlineFont.label};} 
+    .txt-font{font-family:${bodyFont.label};}
+    .feat-font{font-family:${featuredFont.label};}`
+
+    let colorStyles = fontImportGroup + colorVars + textColors + btnStyles + backgroundStyles + fontClasses
 
     return colorStyles
 }
