@@ -8,7 +8,7 @@ const {
     btnIconConvert,
     getColumnsCssClass,
     transformcontact,
-    determineNavParent,
+    transformNav,
     isButton,
     isLink,
     isOneButton,
@@ -43,12 +43,12 @@ const transformPagesData = function (pageData, sitePageData, themeStyles) {
         const pageId = key
         const pageTitle = sitePageData[pageId].title
         const pageSlug = sitePageData[pageId].slug
-        const page_type = sitePageData[pageId].page_type
+        const pageType = sitePageData[pageId].page_type
         const url = sitePageData[pageId].url
         const columnStyles = getColumnsCssClass(value.data)
 
         //adding site data to pages
-        value.data = { id: pageId, title: pageTitle, slug: pageSlug, page_type: page_type, url: url, ...value.data, columnStyles: columnStyles }
+        value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
 
         //transforming page data
         if (value.data.modules) {
@@ -178,7 +178,7 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
         url: file.config.website.url,
         composites: file.composites,
-        cmsNav: file.vars.navigation ? determineNavParent(file.vars.navigation.menuList) : currentLayout.cmsNav,
+        cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList) : currentLayout.cmsNav,
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',

@@ -89,6 +89,15 @@ function transformcontact(contactInfo, siteName) {
     return contactInfo
 }
 
+const transformNav = (menu) => {
+    for (let i = 0; i < menu.length; i++) {
+        const slug = menu[i].title.replace(/\s+/g, '-')
+        menu[i] = { ...menu[i], slug: slug.toLowerCase() }
+    }
+
+    return determineNavParent(menu)
+}
+
 const determineNavParent = (menu) => {
     let editTable = []
     for (let i = 0; i < menu.length; i++) {
@@ -419,4 +428,5 @@ module.exports = {
     stripImageFolders,
     createGlobalStylesheet,
     createCustomStylesheet,
+    transformNav,
 }
