@@ -92,6 +92,19 @@ function transformcontact(contactInfo, siteName) {
 const transformNav = (menu) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title.replace(/\s+/g, '-')
+
+        for (let x = 0; x < menu[i].submenu.length; x++) {
+            const subMenu1 = menu[i].submenu[x]
+            const subSlug = subMenu1.title.replace(/\s+/g, '-')
+            menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase() }
+
+            for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
+                const subMenu2 = menu[i].submenu[x].submenu[k]
+                const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
+                menu[i].submenu[x].submenu[k] = { ...subMenu2, slug: subSlug2.toLowerCase() }
+            }
+        }
+
         menu[i] = { ...menu[i], slug: slug.toLowerCase() }
     }
 
