@@ -335,7 +335,7 @@ const getColumnsCssClass = (page) => {
     }
 }
 
-const createGlobalStylesheet = (themeStyles, fonts) => {
+const createGlobalStylesheet = (themeStyles, fonts, code) => {
     console.log('colors changed --------')
 
     //creating font import
@@ -422,16 +422,22 @@ const createGlobalStylesheet = (themeStyles, fonts) => {
 
     const fontClasses = ` .hd-font{font-family:${headlineFont.label};} 
     .txt-font{font-family:${bodyFont.label};}
-    .feat-font{font-family:${featuredFont.label};}`
+    .feat-font{font-family:${featuredFont.label};}
+    `
 
-    let colorStyles = fontImportGroup + colorVars + textColors + btnStyles + backgroundStyles + fontClasses
+    let customCss = `
+    /*---------------------Custom Code--------------------*/
+    ${code.CSS}
+    `
+
+    let colorStyles = fontImportGroup + colorVars + textColors + btnStyles + backgroundStyles + fontClasses + customCss
 
     return colorStyles
 }
-const createCustomStylesheet = (code) => {
+/* const createCustomStylesheet = (code) => {
     let cssCode = code.CSS
     return cssCode
-}
+} */
 
 const removeDuplicatesArray = (arr) => {
     let uniqueArr = arr.filter((c, index) => {
@@ -458,6 +464,5 @@ module.exports = {
     isPromoButton,
     stripImageFolders,
     createGlobalStylesheet,
-    createCustomStylesheet,
     transformNav,
 }
