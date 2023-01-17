@@ -92,12 +92,12 @@ function transformcontact(contactInfo, siteName) {
 const transformNav = (menu) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title.replace(/\s+/g, '-')
-
+        //loop through first submenu
         for (let x = 0; x < menu[i].submenu.length; x++) {
             const subMenu1 = menu[i].submenu[x]
             const subSlug = subMenu1.title.replace(/\s+/g, '-')
             menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase() }
-
+            //loop through second submenu
             for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
                 const subMenu2 = menu[i].submenu[x].submenu[k]
                 const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
@@ -189,56 +189,30 @@ const alternatePromoColors = (items, themeStyles, modType) => {
         .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
         .flat()
 
-    const textureImageList =
-        /*  modType === 'PhotoGrid'
-            ? Array(items.length)
-                 .fill([
-                      {
-                          image: `/bright-squares.png`,
-                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor],
-                      },
-                      {
-                          image: `/subtle-white-feathers.png`,
-                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor2],
-                      },
-                      {
-                          image: '/shattered-dark.png',
-                          gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
-                      },
-                      {
-                          image: '/fabric-of-squares.png',
-                          gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
-                      },
-                      {
-                          image: '/cartographer.png',
-                          gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
-                      },
-                  ])
-                  .flat() */
-        Array(items.length)
-            .fill([
-                {
-                    image: `/subtle-white-feathers.png`,
-                    gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
-                },
-                {
-                    image: '/shattered-dark.png',
-                    gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
-                },
-                {
-                    image: '/fabric-of-squares.png',
-                    gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
-                },
-                {
-                    image: '/cartographer.png',
-                    gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
-                },
-                {
-                    image: `/bright-squares.png`,
-                    gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
-                },
-            ])
-            .flat()
+    const textureImageList = Array(items.length)
+        .fill([
+            {
+                image: `/subtle-white-feathers.png`,
+                gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
+            },
+            {
+                image: '/shattered-dark.png',
+                gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
+            },
+            {
+                image: '/fabric-of-squares.png',
+                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
+            },
+            {
+                image: '/cartographer.png',
+                gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
+            },
+            {
+                image: `/bright-squares.png`,
+                gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
+            },
+        ])
+        .flat()
 
     let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
@@ -369,15 +343,9 @@ const createGlobalStylesheet = (themeStyles, fonts) => {
     const bodyFont = fonts.list[fonts.sections.body.value]
     const featuredFont = fonts.list[fonts.sections.feat.value]
     const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
-    let fontGroup = []
+    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
 
-    for (let x in fontTypes) {
-        const familyText = fontTypes[x]
-        if (!fontGroup.includes(familyText)) {
-            fontGroup.push(familyText)
-        }
-    }
-    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${fontGroup.join('|')}&display=swap);`
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
 
     const colorVars = `
     :root {
@@ -463,6 +431,13 @@ const createGlobalStylesheet = (themeStyles, fonts) => {
 const createCustomStylesheet = (code) => {
     let cssCode = code.CSS
     return cssCode
+}
+
+const removeDuplicatesArray = (arr) => {
+    let uniqueArr = arr.filter((c, index) => {
+        return arr.indexOf(c) === index
+    })
+    return uniqueArr
 }
 
 module.exports = {
