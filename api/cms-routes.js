@@ -7,9 +7,11 @@ const {
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
+    getFileS3,
+    createGlobalStylesheet,
 } = require('../src/controllers/cms-controller')
 
-const { stripUrl, setColors, stripImageFolders, createGlobalStylesheet } = require('../src/utils')
+const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 
 const express = require('express')
 const router = express.Router()
@@ -26,7 +28,7 @@ router.post('/save', async (req, res) => {
         let newPageList
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
-            const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles)
+            const newPageData = transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, newUrl)
 
             //adding each page to s3
             for (let i = 0; i < newPageData.pages.length; i++) {
@@ -53,9 +55,16 @@ router.post('/save', async (req, res) => {
             await addFileS3(updatedPageList, pageListUrl)
         }
 
-        if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code) {
-            const globalStyles = createGlobalStylesheet(themeStyles, req.body.siteData.design.fonts, req.body.siteData.design.code)
-            await addFileS3(globalStyles, `${newUrl}/global`, 'css')
+        if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code || req.body.savedData.pages) {
+            const currentPageList = await getFileS3(`${newUrl}/pages/page-list.json`, 'css')
+            const globalStyles = await createGlobalStylesheet(
+                themeStyles,
+                req.body.siteData.design.fonts,
+                req.body.siteData.design.code,
+                currentPageList,
+                newUrl
+            )
+            await addFileS3(globalStyles, `${newUrl}/global`, 'scss')
         }
 
         //Adding new siteData file after saved

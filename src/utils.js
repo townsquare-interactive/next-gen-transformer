@@ -1,3 +1,7 @@
+//const { getAllCssPages } = require('./controllers/cmrequires-controller')
+
+const main = require('./controllers/cms-controller')
+
 function socialConvert(str) {
     let icon = iconConvert(str)
     if (icon === 'google') {
@@ -230,7 +234,6 @@ const alternatePromoColors = (items, themeStyles, modType) => {
 }
 
 const isPromoButton = (items, modType) => {
-    console.log(modType, items.modColor1)
     if (modType === 'PhotoGrid' && !items.image) {
         return 'btn_promo'
     } else if (modType === 'Banner' && items.modColor1) {
@@ -335,18 +338,7 @@ const getColumnsCssClass = (page) => {
     }
 }
 
-const createGlobalStylesheet = (themeStyles, fonts, code) => {
-    console.log('colors changed --------')
-
-    //creating font import
-    const headlineFont = fonts.list[fonts.sections.hdrs.value]
-    const bodyFont = fonts.list[fonts.sections.body.value]
-    const featuredFont = fonts.list[fonts.sections.feat.value]
-    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
-    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
-
-    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
-
+const createColorClasses = (themeStyles) => {
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -388,8 +380,7 @@ const createGlobalStylesheet = (themeStyles, fonts, code) => {
        }
        `
 
-    const textColors = `body {font-family:${bodyFont.label};}
-    .accent-txt{color:var(--txt-accent);} 
+    const textColors = ` .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
     .navLink:hover{color: var(--nav-hover);} 
@@ -420,24 +411,10 @@ const createGlobalStylesheet = (themeStyles, fonts, code) => {
     .promo-background{background-color:var(--promo);}
     `
 
-    const fontClasses = ` .hd-font{font-family:${headlineFont.label};} 
-    .txt-font{font-family:${bodyFont.label};}
-    .feat-font{font-family:${featuredFont.label};}
-    `
-
-    let customCss = `
-    /*---------------------Custom Code--------------------*/
-    ${code.CSS}
-    `
-
-    let colorStyles = fontImportGroup + colorVars + textColors + btnStyles + backgroundStyles + fontClasses + customCss
+    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
 
     return colorStyles
 }
-/* const createCustomStylesheet = (code) => {
-    let cssCode = code.CSS
-    return cssCode
-} */
 
 const removeDuplicatesArray = (arr) => {
     let uniqueArr = arr.filter((c, index) => {
@@ -463,6 +440,24 @@ module.exports = {
     alternatePromoColors,
     isPromoButton,
     stripImageFolders,
-    createGlobalStylesheet,
+    createColorClasses,
     transformNav,
+    removeDuplicatesArray,
 }
+
+/* const colorVars = `
+    :root {
+        --logo: ${themeStyles['logoColor']}; --hd: ${themeStyles['headingColor']}; --sh: ${themeStyles['subHeadingColor']}; --txt: ${themeStyles['textColor']}; --link: ${themeStyles['linkColor']}; --txt-hover: ${themeStyles['linkHover']}; --btn-txt: ${themeStyles['btnText']}; --btn-background: ${themeStyles['btnBackground']}; --txt-accent: ${themeStyles['textColorAccent']}; --hero-sh: ${themeStyles['heroSubheadline']}; --hero-txt: ${themeStyles['heroText']}; --hero-btn-txt: ${themeStyles['heroBtnText']}; --hero-btn-background: ${themeStyles['heroBtnBackground']}; --hero-link: ${themeStyles['heroLink']}; --hero-link-hover: ${themeStyles['heroLinkHover']}; --caption-text: ${themeStyles['captionText']}; --caption-background: ${themeStyles['captionBackground']}; --nav-txt: ${themeStyles['NavText']}; --nav-hover: ${themeStyles['navHover']}; --nav-current: ${themeStyles['navCurrent']}; --main-background: ${themeStyles['backgroundMain']}; --content-background: ${themeStyles['bckdContent']}; --header-background: ${themeStyles['headerBackground']}; --social-background: ${themeStyles['BckdHeaderSocial']}; --accent-background: ${themeStyles['accentBackgroundColor']}; --hero-background: ${themeStyles['backgroundHero']}; --footer-background: ${themeStyles['footerBackground']}; --footer-txt: ${themeStyles['footerText']}; --footer-link: ${themeStyles['footerLink']}; --promo-txt: ${themeStyles['promoText']}; --promo: ${themeStyles['promoColor']}; --promo2: ${themeStyles['promoColor2']}; --promo3: ${themeStyles['promoColor3']}; --promo4: ${themeStyles['promoColor4']}; --promo5: ${themeStyles['promoColor5']}; --promo6: ${themeStyles['promoColor6']};
+       }
+       `
+
+    const textColors = `body {font-family:${bodyFont.label};}
+    .accent-txt{color:var(--txt-accent);}  .txt-color{color:var(--txt);}  .txt-color-hd{color:var(--hd);} 
+    .navLink:hover{color: var(--nav-hover);}  .navLink{color:var(--nav-txt);}  .social-icon:hover{background-color: var(--nav-hover);}  .social-icon{color:var(--nav-txt);} .footer-icon:hover{background-color: var(--nav-hover);} .current-page{color:var(--nav-current);} .caption-txt{color:var(--caption-txt);}`
+
+    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} .btn_2{color: var(--link); border-color: var(--link);} .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} .btn_alt{color: var(--promo); background-color: var(--txt-accent);} .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}.close-toggle {color:var(--txt-accent); background-color:var(--promo);} .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}`
+
+    const backgroundStyles = ` .border-background{background-color:var(--accent-background);} .hero-background{background-color:var(--promo);} .content-background{background-color:var(--content-background);} .footer{background-color:var(--footer-background); color: var(--footer-txt);} .header-background{background-color:var(--header-background);} .social-bar-background{background-color:var(--social-background);} .promo-background{background-color:var(--promo);}`
+
+    const fontClasses = ` .hd-font{font-family:${headlineFont.label};} .txt-font{font-family:${bodyFont.label};}.feat-font{font-family:${featuredFont.label};}`
+ */

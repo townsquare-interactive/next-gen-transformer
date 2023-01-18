@@ -1,6 +1,6 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
-const TsiBucket = 'townsquareinteractive'
+
 const request = require('request-promise')
 
 const {
@@ -18,7 +18,12 @@ const {
     alternatePromoColors,
     isPromoButton,
     stripImageFolders,
+    removeDuplicatesArray,
+    createColorClasses,
 } = require('../utils')
+
+const tsiBucket = 'townsquareinteractive'
+const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
@@ -29,7 +34,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformPagesData = function (pageData, sitePageData, themeStyles) {
+const transformPagesData = function (pageData, sitePageData, themeStyles, newUrl) {
     console.log('page transformer started')
     let newData = []
 
@@ -50,6 +55,18 @@ const transformPagesData = function (pageData, sitePageData, themeStyles) {
         //adding site data to pages
         value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
 
+        //create scss file for page
+        if (value.data.JS || value.data.head_script) {
+            const foot_script = value.data.JS
+            const head_script = value.data.head_script
+            const allScripts = foot_script + head_script
+
+            createPageCss(allScripts, pageSlug, newUrl)
+        } else {
+            const allScripts = ''
+            createPageCss(allScripts, pageSlug, newUrl)
+        }
+
         //transforming page data
         if (value.data.modules) {
             value.data.modules = transformCMSMods(value.data.modules, themeStyles)
@@ -63,9 +80,32 @@ const transformPagesData = function (pageData, sitePageData, themeStyles) {
     return pageData
 }
 
+const createPageCss = async (allScripts, pageSlug, newUrl) => {
+    //grab content between <script> tags
+    let pageCss
+    if (allScripts) {
+        var styleMatchRegExp = /<style[^>]*>([^<]+)<\/style>/gi
+        var match = styleMatchRegExp.exec(allScripts)
+        var cssStringArray = []
+        while (match != null) {
+            cssStringArray.push(match[1])
+            match = styleMatchRegExp.exec(allScripts)
+        }
+
+        const cssString = cssStringArray.join(' ')
+        pageCss = `.page-${pageSlug} {
+        ${cssString}
+    }`
+    } else {
+        pageCss = ''
+    }
+
+    await addFileS3(pageCss, `${newUrl}/styles/${pageSlug}`, 'scss')
+}
+
 const deletePages = async (pages, newUrl) => {
     console.log('deleter started')
-    const oldPageList = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+    const oldPageList = await getFileS3(`${newUrl}/pages/page-list.json`)
     let newPageList = []
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
@@ -86,7 +126,7 @@ const updatePageList = async (page, newUrl) => {
 
     //add page object to pagelist
     const addPagesToList = (pageListFile) => {
-        console.log('old pagelist', pageListFile)
+        //console.log('old pagelist', pageListFile)
         for (let i = 0; i < page.length; i++) {
             pageData = page[i].data
             if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
@@ -97,14 +137,14 @@ const updatePageList = async (page, newUrl) => {
                     id: pageData.id,
                     page_type: pageData.page_type,
                 })
-                console.log('new page added:', pageData.title)
+                //console.log('new page added:', pageData.title)
             } else {
-                console.log('page already there', pageData.title)
+                //console.log('page already there', pageData.title)
             }
         }
     }
 
-    let pageListFile = await getFileS3(TsiBucket, `${newUrl}/pages/page-list.json`)
+    let pageListFile = await getFileS3(`${newUrl}/pages/page-list.json`)
     addPagesToList(pageListFile)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
@@ -112,25 +152,36 @@ const updatePageList = async (page, newUrl) => {
 }
 
 //Get S3 object and return, if not found return passed object
-const getFileS3 = async (bucket, key, rtnObj = { pages: [] }) => {
-    try {
-        const data = await s3.getObject({ Bucket: bucket, Key: key }).promise()
-        return JSON.parse(data.Body.toString('utf-8'))
-    } catch (err) {
-        console.log('file  not found in S3, creating new file')
-        return rtnObj
+const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
+    if (type === 'json') {
+        try {
+            const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
+            return type === 'json' ? JSON.parse(data.Body.toString('utf-8')) : data.Body.toString('utf-8')
+        } catch (err) {
+            console.log('file  not found in S3, creating new file')
+            return rtnObj
+        }
+    } else {
+        try {
+            const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
+            console.log(key)
+            return data.Body.toString('utf-8')
+        } catch (err) {
+            console.log('css file not in s3')
+            return rtnObj
+        }
     }
 }
 
 //add file to s3 bucket
 const addFileS3 = async (file, key, fileType = 'json') => {
-    const s3ContentType = fileType === 'css' ? 'text/css' : 'application/json'
+    const s3ContentType = fileType === 'scss' ? 'text/css' : 'application/json'
     const body = fileType === 'json' ? JSON.stringify(file) : file
 
     await s3
         .putObject({
             Body: body,
-            Bucket: TsiBucket,
+            Bucket: tsiBucket,
             Key: key + `.${fileType}`,
             ContentType: s3ContentType,
         })
@@ -145,7 +196,7 @@ const addFileS3 = async (file, key, fileType = 'json') => {
 //Create or edit layout file
 const createOrEditLayout = async (file, newUrl, themeStyles) => {
     console.log('layout edit')
-    const currentLayout = await getFileS3(TsiBucket, `${newUrl}/layout.json`)
+    const currentLayout = await getFileS3(`${newUrl}/layout.json`)
 
     //adding socials from sitedata
     function transformSocial(file) {
@@ -320,7 +371,7 @@ const addAssetFromSiteToS3 = async (file, key) => {
                 {
                     Body: body,
                     Key: key,
-                    Bucket: TsiBucket,
+                    Bucket: tsiBucket,
                 },
                 function (error, data) {
                     if (error) {
@@ -332,6 +383,85 @@ const addAssetFromSiteToS3 = async (file, key) => {
             )
         }
     })
+}
+
+const getAllCssPages = async (currentPageList, newUrl) => {
+    const allPageCss = []
+    for (let i = 0; i < currentPageList.pages.length; i++) {
+        const pageSlug = currentPageList.pages[i].slug
+        // console.log(pageSlug, `${tsiBucket}+${newUrl}/styles/${pageSlug}.scss`)
+        /*         if (pageSlug === 'photo-grid') {
+            const pageCss = await getFileS3(`${newUrl}/styles/photogrid.scss`, '', 'css')
+
+            console.log('pag', pageCss)
+            allPageCss.push(pageCss)
+        } */
+        /*  ///stufff
+        
+        const foot_script = value.data.JS
+        const head_script = value.data.head_script
+        const allScripts = foot_script + head_script
+
+        createPageCss(allScripts) */
+
+        const cssFile = await getCssFile(pageSlug, newUrl)
+        allPageCss.push(cssFile)
+    }
+
+    return allPageCss.join(' ')
+}
+const getCssFile = async (pageSlug, newUrl) => {
+    var options = {
+        uri: `${bucketUrl}/${newUrl}/styles/${pageSlug}.scss`,
+        encoding: null,
+    }
+
+    let cssFile
+
+    await request(options, function (error, response, body) {
+        if (error || response.statusCode !== 200) {
+            console.log('failed to get image')
+            cssFile = ''
+            //console.log(error)
+        } else {
+            cssFile = body.toString('utf-8')
+        }
+    })
+    return cssFile
+}
+
+const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, newUrl) => {
+    console.log('colors changed --------')
+
+    //creating font import
+    const headlineFont = fonts.list[fonts.sections.hdrs.value]
+    const bodyFont = fonts.list[fonts.sections.body.value]
+    const featuredFont = fonts.list[fonts.sections.feat.value]
+    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
+
+    const colorClasses = createColorClasses(themeStyles)
+
+    const fontClasses = ` body {font-family:${bodyFont.label};}
+    .hd-font{font-family:${headlineFont.label};} 
+    .txt-font{font-family:${bodyFont.label};}
+    .feat-font{font-family:${featuredFont.label};}
+    `
+
+    let customCss = `
+    /*---------------------Custom Code--------------------*/
+    ${code.CSS}
+    `
+    const allPageStyles = await getAllCssPages(currentPageList, newUrl)
+
+    let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
+
+    const sass = require('sass')
+    const convertedCss = sass.compileString(allStyles)
+
+    return convertedCss.css
 }
 
 //adding a page file for each page in cms data
@@ -352,12 +482,12 @@ const addMultipleS3 = async (data, pageList, newUrl) => {
 
 //add any file, pass it the file and key for filename
 const addFileS3List = async (file, key) => {
-    console.log('File to be added', file)
+    //console.log('File to be added', file)
 
     await s3
         .putObject({
             Body: JSON.stringify(file),
-            Bucket: TsiBucket,
+            Bucket: tsiBucket,
             Key: key,
         })
         .promise()
@@ -370,7 +500,7 @@ const deleteFileS3 = async (key) => {
 
     await s3
         .deleteObject({
-            Bucket: TsiBucket,
+            Bucket: tsiBucket,
             Key: key,
         })
         .promise()
@@ -425,4 +555,8 @@ module.exports = {
     createOrEditLayout,
     deletePages,
     addAssetFromSiteToS3,
+    getFileS3,
+    createGlobalStylesheet,
 }
+
+exports.getAllCssPages = getAllCssPages
