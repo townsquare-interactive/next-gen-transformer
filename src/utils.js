@@ -423,9 +423,11 @@ const removeDuplicatesArray = (arr) => {
     return uniqueArr
 }
 
-const convertLineBreak = (str) => {
-    const newStr = str.replaceAll('[rn]', '\n')
-    return newStr
+const convertText = (str) => {
+    const removedBreak = str.replaceAll('[rn]', '\n')
+    const removedBlank = removedBreak.replaceAll('[t]', ' ')
+
+    return removedBlank
 }
 
 module.exports = {
@@ -448,5 +450,5 @@ module.exports = {
     createColorClasses,
     transformNav,
     removeDuplicatesArray,
-    convertLineBreak,
+    convertText,
 }

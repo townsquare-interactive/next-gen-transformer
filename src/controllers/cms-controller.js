@@ -21,7 +21,7 @@ const {
     stripImageFolders,
     removeDuplicatesArray,
     createColorClasses,
-    convertLineBreak,
+    convertText,
 } = require('../utils')
 
 const tsiBucket = 'townsquareinteractive'
@@ -286,7 +286,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
-                        value.items[i].desc = convertLineBreak(currentItem.desc)
+                        value.items[i].desc = convertText(currentItem.desc)
                     }
 
                     //determining button/link logic
@@ -442,7 +442,7 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
-    const allStylesConverted = convertLineBreak(allStyles)
+    const allStylesConverted = convertText(allStyles)
 
     try {
         const convertedCss = sass.compileString(allStylesConverted)
