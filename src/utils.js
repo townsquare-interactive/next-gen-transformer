@@ -423,6 +423,11 @@ const removeDuplicatesArray = (arr) => {
     return uniqueArr
 }
 
+const convertLineBreak = (str) => {
+    const newStr = str.replaceAll('[rn]', '\n')
+    return newStr
+}
+
 module.exports = {
     socialConvert,
     btnIconConvert,
@@ -443,21 +448,5 @@ module.exports = {
     createColorClasses,
     transformNav,
     removeDuplicatesArray,
+    convertLineBreak,
 }
-
-/* const colorVars = `
-    :root {
-        --logo: ${themeStyles['logoColor']}; --hd: ${themeStyles['headingColor']}; --sh: ${themeStyles['subHeadingColor']}; --txt: ${themeStyles['textColor']}; --link: ${themeStyles['linkColor']}; --txt-hover: ${themeStyles['linkHover']}; --btn-txt: ${themeStyles['btnText']}; --btn-background: ${themeStyles['btnBackground']}; --txt-accent: ${themeStyles['textColorAccent']}; --hero-sh: ${themeStyles['heroSubheadline']}; --hero-txt: ${themeStyles['heroText']}; --hero-btn-txt: ${themeStyles['heroBtnText']}; --hero-btn-background: ${themeStyles['heroBtnBackground']}; --hero-link: ${themeStyles['heroLink']}; --hero-link-hover: ${themeStyles['heroLinkHover']}; --caption-text: ${themeStyles['captionText']}; --caption-background: ${themeStyles['captionBackground']}; --nav-txt: ${themeStyles['NavText']}; --nav-hover: ${themeStyles['navHover']}; --nav-current: ${themeStyles['navCurrent']}; --main-background: ${themeStyles['backgroundMain']}; --content-background: ${themeStyles['bckdContent']}; --header-background: ${themeStyles['headerBackground']}; --social-background: ${themeStyles['BckdHeaderSocial']}; --accent-background: ${themeStyles['accentBackgroundColor']}; --hero-background: ${themeStyles['backgroundHero']}; --footer-background: ${themeStyles['footerBackground']}; --footer-txt: ${themeStyles['footerText']}; --footer-link: ${themeStyles['footerLink']}; --promo-txt: ${themeStyles['promoText']}; --promo: ${themeStyles['promoColor']}; --promo2: ${themeStyles['promoColor2']}; --promo3: ${themeStyles['promoColor3']}; --promo4: ${themeStyles['promoColor4']}; --promo5: ${themeStyles['promoColor5']}; --promo6: ${themeStyles['promoColor6']};
-       }
-       `
-
-    const textColors = `body {font-family:${bodyFont.label};}
-    .accent-txt{color:var(--txt-accent);}  .txt-color{color:var(--txt);}  .txt-color-hd{color:var(--hd);} 
-    .navLink:hover{color: var(--nav-hover);}  .navLink{color:var(--nav-txt);}  .social-icon:hover{background-color: var(--nav-hover);}  .social-icon{color:var(--nav-txt);} .footer-icon:hover{background-color: var(--nav-hover);} .current-page{color:var(--nav-current);} .caption-txt{color:var(--caption-txt);}`
-
-    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} .btn_2{color: var(--link); border-color: var(--link);} .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} .btn_alt{color: var(--promo); background-color: var(--txt-accent);} .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}.close-toggle {color:var(--txt-accent); background-color:var(--promo);} .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}`
-
-    const backgroundStyles = ` .border-background{background-color:var(--accent-background);} .hero-background{background-color:var(--promo);} .content-background{background-color:var(--content-background);} .footer{background-color:var(--footer-background); color: var(--footer-txt);} .header-background{background-color:var(--header-background);} .social-bar-background{background-color:var(--social-background);} .promo-background{background-color:var(--promo);}`
-
-    const fontClasses = ` .hd-font{font-family:${headlineFont.label};} .txt-font{font-family:${bodyFont.label};}.feat-font{font-family:${featuredFont.label};}`
- */

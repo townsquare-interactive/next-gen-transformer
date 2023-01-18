@@ -12,7 +12,6 @@ const {
 } = require('../src/controllers/cms-controller')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
-
 const express = require('express')
 const router = express.Router()
 

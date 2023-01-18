@@ -21,6 +21,7 @@ const {
     stripImageFolders,
     removeDuplicatesArray,
     createColorClasses,
+    convertLineBreak,
 } = require('../utils')
 
 const tsiBucket = 'townsquareinteractive'
@@ -285,7 +286,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
-                        value.items[i].desc = currentItem.desc.replaceAll('[rn]', '<br>')
+                        value.items[i].desc = convertLineBreak(currentItem.desc)
                     }
 
                     //determining button/link logic
@@ -390,21 +391,6 @@ const getAllCssPages = async (currentPageList, newUrl) => {
     const allPageCss = []
     for (let i = 0; i < currentPageList.pages.length; i++) {
         const pageSlug = currentPageList.pages[i].slug
-        // console.log(pageSlug, `${tsiBucket}+${newUrl}/styles/${pageSlug}.scss`)
-        /*         if (pageSlug === 'photo-grid') {
-            const pageCss = await getFileS3(`${newUrl}/styles/photogrid.scss`, '', 'css')
-
-            console.log('pag', pageCss)
-            allPageCss.push(pageCss)
-        } */
-        /*  ///stufff
-        
-        const foot_script = value.data.JS
-        const head_script = value.data.head_script
-        const allScripts = foot_script + head_script
-
-        createPageCss(allScripts) */
-
         const cssFile = await getCssFile(pageSlug, newUrl)
         allPageCss.push(cssFile)
     }
@@ -421,9 +407,8 @@ const getCssFile = async (pageSlug, newUrl) => {
 
     await request(options, function (error, response, body) {
         if (error || response.statusCode !== 200) {
-            console.log('failed to get image')
+            console.log('failed to get file')
             cssFile = ''
-            //console.log(error)
         } else {
             cssFile = body.toString('utf-8')
         }
@@ -440,11 +425,8 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
     const featuredFont = fonts.list[fonts.sections.feat.value]
     const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
     const uniqueFontGroup = removeDuplicatesArray(fontTypes)
-
     const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
-
     const colorClasses = createColorClasses(themeStyles)
-
     const fontClasses = ` body {font-family:${bodyFont.label};}
     .hd-font{font-family:${headlineFont.label};} 
     .txt-font{font-family:${bodyFont.label};}
@@ -460,8 +442,10 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
+    const allStylesConverted = convertLineBreak(allStyles)
+
     try {
-        const convertedCss = sass.compileString(allStyles)
+        const convertedCss = sass.compileString(allStylesConverted)
         return convertedCss.css
     } catch (e) {
         console.log('custom css ' + e.name + ': ' + e.message)
@@ -563,5 +547,3 @@ module.exports = {
     getFileS3,
     createGlobalStylesheet,
 }
-
-exports.getAllCssPages = getAllCssPages
