@@ -1,5 +1,6 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
+const sass = require('sass')
 
 const request = require('request-promise')
 
@@ -458,7 +459,6 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
-    const sass = require('sass')
     const convertedCss = sass.compileString(allStyles)
 
     return convertedCss.css
