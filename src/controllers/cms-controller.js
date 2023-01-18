@@ -455,13 +455,18 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
     /*---------------------Custom Code--------------------*/
     ${code.CSS}
     `
+
     const allPageStyles = await getAllCssPages(currentPageList, newUrl)
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
-    const convertedCss = sass.compileString(allStyles)
-
-    return convertedCss.css
+    try {
+        const convertedCss = sass.compileString(allStyles)
+        return convertedCss.css
+    } catch (e) {
+        console.log('custom css ' + e.name + ': ' + e.message)
+        return allStyles
+    }
 }
 
 //adding a page file for each page in cms data
