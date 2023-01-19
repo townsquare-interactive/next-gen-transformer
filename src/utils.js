@@ -430,6 +430,14 @@ const convertText = (str) => {
     return removedBlank
 }
 
+const replaceKey = (value, oldKey, newKey) => {
+    if (oldKey !== newKey && value[oldKey]) {
+        Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
+        delete value[oldKey]
+    }
+    return { ...value }
+}
+
 module.exports = {
     socialConvert,
     btnIconConvert,
@@ -447,6 +455,7 @@ module.exports = {
     alternatePromoColors,
     isPromoButton,
     stripImageFolders,
+    replaceKey,
     createColorClasses,
     transformNav,
     removeDuplicatesArray,

@@ -22,6 +22,7 @@ const {
     removeDuplicatesArray,
     createColorClasses,
     convertText,
+    replaceKey,
 } = require('../utils')
 
 const tsiBucket = 'townsquareinteractive'
@@ -344,13 +345,19 @@ const transformCMSMods = (moduleList, themeStyles) => {
                         imagePriority: imagePriority,
                         hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
-                        customClassName: value.items[i].class,
                     }
                 }
 
-                const modData = { ...value, modId: key, modCount: modCount }
+                let newModule
+                if (value.class) {
+                    newModule = replaceKey(value, 'class', 'customClassName')
+                } else {
+                    newModule = { ...value }
+                }
 
+                const modData = { ...newModule, modId: key, modCount: modCount }
                 const newItem = { attributes: modData, componentType: modType }
+
                 newData.push(newItem)
             }
             columnsData.push(newData)
