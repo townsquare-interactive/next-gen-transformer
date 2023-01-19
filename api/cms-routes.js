@@ -55,7 +55,7 @@ router.post('/save', async (req, res) => {
         }
 
         if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code || req.body.savedData.pages) {
-            const currentPageList = await getFileS3(`${newUrl}/pages/page-list.json`, 'css')
+            const currentPageList = await getFileS3(`${newUrl}/pages/page-list.json`, 'json')
             const globalStyles = await createGlobalStylesheet(
                 themeStyles,
                 req.body.siteData.design.fonts,
@@ -63,7 +63,7 @@ router.post('/save', async (req, res) => {
                 currentPageList,
                 newUrl
             )
-            await addFileS3(globalStyles, `${newUrl}/global`, 'scss')
+            await addFileS3(globalStyles, `${newUrl}/global`, 'css')
         }
 
         //Adding new siteData file after saved
