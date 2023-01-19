@@ -94,7 +94,7 @@ const createPageCss = async (allScripts, pageSlug, newUrl) => {
             match = styleMatchRegExp.exec(allScripts)
         }
 
-        const cssString = cssStringArray.join(' ')
+        const cssString = convertText(cssStringArray.join(' '))
         pageCss = `.page-${pageSlug} {
         ${cssString}
     }`
