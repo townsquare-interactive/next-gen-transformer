@@ -78,6 +78,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
                 value.data.modules = transformCMSMods(value.data.modules, themeStyles)
                 newPages.push(value)
             }
+            newData = newPages
         } else if (value.seo) {
             const currentFile = await getFileS3(`${newUrl}/pages/${pageSlug}.json`)
             const newSeoFile = { ...currentFile, seo: value.seo }
