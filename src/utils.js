@@ -181,7 +181,7 @@ function linkAndBtn(currentItem) {
 }
 
 function isGridCaption(item) {
-    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline) {
+    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
         return true
     } else {
         return false

@@ -37,8 +37,9 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformPagesData = function (pageData, sitePageData, themeStyles, newUrl) {
+const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) => {
     console.log('page transformer started')
+    let newPages = []
     let newData = []
 
     for (const [key, value] of Object.entries(pageData)) {
@@ -53,33 +54,38 @@ const transformPagesData = function (pageData, sitePageData, themeStyles, newUrl
         const pageSlug = sitePageData[pageId].slug
         const pageType = sitePageData[pageId].page_type
         const url = sitePageData[pageId].url
-        const columnStyles = getColumnsCssClass(value.data)
 
-        //adding site data to pages
-        value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
-
-        //create scss file for page
-        if (value.data.JS || value.data.head_script) {
-            const foot_script = value.data.JS
-            const head_script = value.data.head_script
-            const allScripts = foot_script + head_script
-
-            createPageCss(allScripts, pageSlug, newUrl)
-        } else {
-            const allScripts = ''
-            createPageCss(allScripts, pageSlug, newUrl)
-        }
-
-        //transforming page data
         if (value.data.modules) {
-            value.data.modules = transformCMSMods(value.data.modules, themeStyles)
-            newData.push(value)
+            const columnStyles = getColumnsCssClass(value.data)
+
+            //adding site data to pages
+            value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
+
+            //create scss file for page
+            if (value.data.JS || value.data.head_script) {
+                const foot_script = value.data.JS
+                const head_script = value.data.head_script
+                const allScripts = foot_script + head_script
+
+                createPageCss(allScripts, pageSlug, newUrl)
+            } else {
+                const allScripts = ''
+                createPageCss(allScripts, pageSlug, newUrl)
+            }
+
+            //transforming page data
+            if (value.data.modules) {
+                value.data.modules = transformCMSMods(value.data.modules, themeStyles)
+                newPages.push(value)
+            }
+        } else if (value.seo) {
+            const currentFile = await getFileS3(`${newUrl}/pages/${pageSlug}.json`)
+            const newSeoFile = { ...currentFile, seo: value.seo }
+            newData.push(newSeoFile)
         }
     }
 
     pageData.pages = newData
-
-    //returned transformed whole page json and pagelist
     return pageData
 }
 
@@ -300,6 +306,9 @@ const transformCMSMods = (moduleList, themeStyles) => {
                     const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
 
                     const visibleButton = linkAndBtn(currentItem)
+                    if (currentItem.itemCount === 22) {
+                        console.log(visibleButton)
+                    }
 
                     const buttonList = [
                         {
