@@ -276,7 +276,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                 }
 
                 if (modType === 'PhotoGrid' || modType === 'Banner') {
-                    value.items = alternatePromoColors(value.items, themeStyles, modType)
+                    value.items = alternatePromoColors(value.items, themeStyles, modType, value.well)
                 }
 
                 let itemCount = 0
@@ -307,9 +307,6 @@ const transformCMSMods = (moduleList, themeStyles) => {
                     const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
 
                     const visibleButton = linkAndBtn(currentItem)
-                    if (currentItem.itemCount === 22) {
-                        console.log(visibleButton)
-                    }
 
                     const buttonList = [
                         {
@@ -367,10 +364,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                 const modData = { ...newModule, modId: key, modCount: modCount }
                 const newItem = { attributes: modData, componentType: modType }
-
-                newData.push(newItem)
             }
-            columnsData.push(newData)
         }
     }
     return columnsData
