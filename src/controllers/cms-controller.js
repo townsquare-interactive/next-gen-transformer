@@ -91,7 +91,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
 }
 
 const createPageCss = async (allScripts, pageSlug, newUrl) => {
-    //grab content between <script> tags
+    //grab content between <style> tags
     let pageCss
     if (allScripts) {
         var styleMatchRegExp = /<style[^>]*>([^<]+)<\/style>/gi
@@ -107,7 +107,7 @@ const createPageCss = async (allScripts, pageSlug, newUrl) => {
         ${cssString}
     }`
     } else {
-        pageCss = ''
+        pageCss = allScripts
     }
 
     await addFileS3(pageCss, `${newUrl}/styles/${pageSlug}`, 'scss')
@@ -159,48 +159,6 @@ const updatePageList = async (page, newUrl) => {
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
-}
-
-//Get S3 object and return, if not found return passed object
-const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
-    if (type === 'json') {
-        try {
-            const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
-            return type === 'json' ? JSON.parse(data.Body.toString('utf-8')) : data.Body.toString('utf-8')
-        } catch (err) {
-            console.log('file  not found in S3, creating new file')
-            return rtnObj
-        }
-    } else {
-        try {
-            const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
-            console.log(key)
-            return data.Body.toString('utf-8')
-        } catch (err) {
-            console.log('css file not in s3')
-            return rtnObj
-        }
-    }
-}
-
-//add file to s3 bucket
-const addFileS3 = async (file, key, fileType = 'json') => {
-    const s3ContentType = fileType.includes('css') ? 'text/css' : 'application/json'
-    const body = fileType === 'json' ? JSON.stringify(file) : file
-
-    await s3
-        .putObject({
-            Body: body,
-            Bucket: tsiBucket,
-            Key: key + `.${fileType}`,
-            ContentType: s3ContentType,
-        })
-        .promise()
-        .catch((error) => {
-            console.error(error)
-        })
-
-    console.log('File Placed')
 }
 
 //Create or edit layout file
@@ -276,7 +234,7 @@ const transformCMSMods = (moduleList, themeStyles) => {
                 }
 
                 if (modType === 'PhotoGrid' || modType === 'Banner') {
-                    value.items = alternatePromoColors(value.items, themeStyles, modType, value.well)
+                    value.items = alternatePromoColors(value.items, themeStyles, value.well)
                 }
 
                 let itemCount = 0
@@ -293,11 +251,11 @@ const transformCMSMods = (moduleList, themeStyles) => {
                     let imagePriority = false
                     if (value.lazy === 'off') {
                         imagePriority = true
-                    } else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
+                    } /*   else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
                         imagePriority = true
                     } else {
                         imagePriority = false
-                    }
+                    } */
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
@@ -408,35 +366,6 @@ const addAssetFromSiteToS3 = async (file, key) => {
     })
 }
 
-const getAllCssPages = async (currentPageList, newUrl) => {
-    const allPageCss = []
-    for (let i = 0; i < currentPageList.pages.length; i++) {
-        const pageSlug = currentPageList.pages[i].slug
-        const cssFile = await getCssFile(pageSlug, newUrl)
-        allPageCss.push(cssFile)
-    }
-
-    return allPageCss.join(' ')
-}
-const getCssFile = async (pageSlug, newUrl) => {
-    var options = {
-        uri: `${bucketUrl}/${newUrl}/styles/${pageSlug}.scss`,
-        encoding: null,
-    }
-
-    let cssFile
-
-    await request(options, function (error, response, body) {
-        if (error || response.statusCode !== 200) {
-            console.log('failed to get file')
-            cssFile = ''
-        } else {
-            cssFile = body.toString('utf-8')
-        }
-    })
-    return cssFile
-}
-
 const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, newUrl) => {
     console.log('colors changed --------')
 
@@ -472,6 +401,78 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
         console.log('custom css ' + e.name + ': ' + e.message)
         return allStyles
     }
+}
+
+const getAllCssPages = async (currentPageList, newUrl) => {
+    const allPageCss = []
+    for (let i = 0; i < currentPageList.pages.length; i++) {
+        const pageSlug = currentPageList.pages[i].slug
+        const cssFile = await getCssFile(pageSlug, newUrl)
+        allPageCss.push(cssFile)
+    }
+
+    return allPageCss.join(' ')
+}
+
+//Get S3 object and return, if not found return passed object
+const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
+    if (type === 'json') {
+        try {
+            const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
+            return type === 'json' ? JSON.parse(data.Body.toString('utf-8')) : data.Body.toString('utf-8')
+        } catch (err) {
+            console.log('file  not found in S3, creating new file')
+            return rtnObj
+        }
+    } else {
+        try {
+            const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
+            console.log(key)
+            return data.Body.toString('utf-8')
+        } catch (err) {
+            console.log('css file not in s3')
+            return rtnObj
+        }
+    }
+}
+
+const getCssFile = async (pageSlug, newUrl) => {
+    var options = {
+        uri: `${bucketUrl}/${newUrl}/styles/${pageSlug}.scss`,
+        encoding: null,
+    }
+
+    let cssFile
+
+    await request(options, function (error, response, body) {
+        if (error || response.statusCode !== 200) {
+            console.log('failed to get file')
+            cssFile = ''
+        } else {
+            cssFile = body.toString('utf-8')
+        }
+    })
+    return cssFile
+}
+
+//add file to s3 bucket
+const addFileS3 = async (file, key, fileType = 'json') => {
+    const s3ContentType = fileType.includes('css') ? 'text/css' : 'application/json'
+    const body = fileType === 'json' ? JSON.stringify(file) : file
+
+    await s3
+        .putObject({
+            Body: body,
+            Bucket: tsiBucket,
+            Key: key + `.${fileType}`,
+            ContentType: s3ContentType,
+        })
+        .promise()
+        .catch((error) => {
+            console.error(error)
+        })
+
+    console.log('File Placed')
 }
 
 //adding a page file for each page in cms data

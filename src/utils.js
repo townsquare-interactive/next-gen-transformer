@@ -31,6 +31,8 @@ function iconConvert(str) {
     }
 }
 
+//fasrocket
+
 function btnIconConvert(icon) {
     if (icon) {
         //replaces fas fa-rocket with faRocket
@@ -188,7 +190,7 @@ function isGridCaption(item) {
     }
 }
 
-const alternatePromoColors = (items, themeStyles, modType, well) => {
+const alternatePromoColors = (items, themeStyles, well) => {
     const colorList = Array(items.length)
         .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
         .flat()
@@ -220,13 +222,11 @@ const alternatePromoColors = (items, themeStyles, modType, well) => {
 
     let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
-        if (modType === 'PhotoGrid') {
-            if (!items[i].image) {
-                items[i] = { ...items[i], promoColor: colorList[noImgCount], textureImage: well == '1' ? textureImageList[noImgCount] : '' }
-                noImgCount += 1
-            }
-        } else if (modType === 'Banner') {
-            items[i] = { ...items[i], promoColor: colorList[i], textureImage: well == '1' ? textureImageList[i] : '' }
+        if (!items[i].image) {
+            items[i] = { ...items[i], promoColor: colorList[noImgCount], textureImage: well == '1' ? textureImageList[noImgCount] : '' }
+            noImgCount += 1
+        } else {
+            items[i] = { ...items[i], promoColor: colorList[i] }
         }
     }
 
