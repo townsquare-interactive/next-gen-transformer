@@ -290,7 +290,14 @@ const transformCMSMods = (moduleList, themeStyles) => {
                         imageCount += 1
                     }
 
-                    const imagePriority = modCount === 1 && itemCount <= 4 ? true : imageCount <= 2 ? true : false
+                    let imagePriority = false
+                    if (value.lazy === 'off') {
+                        imagePriority = true
+                    } else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
+                        imagePriority = true
+                    } else {
+                        imagePriority = false
+                    }
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
@@ -364,7 +371,10 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                 const modData = { ...newModule, modId: key, modCount: modCount }
                 const newItem = { attributes: modData, componentType: modType }
+
+                newData.push(newItem)
             }
+            columnsData.push(newData)
         }
     }
     return columnsData
