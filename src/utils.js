@@ -1,7 +1,3 @@
-//const { getAllCssPages } = require('./controllers/cmrequires-controller')
-
-const main = require('./controllers/cms-controller')
-
 function socialConvert(str) {
     let icon = iconConvert(str)
     if (icon === 'google') {
@@ -220,11 +216,11 @@ const alternatePromoColors = (items, themeStyles, well) => {
         ])
         .flat()
 
-    let noImgCount = 0
+    //let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
         if (!items[i].image) {
-            items[i] = { ...items[i], promoColor: colorList[noImgCount], textureImage: well == '1' ? textureImageList[noImgCount] : '' }
-            noImgCount += 1
+            items[i] = { ...items[i], promoColor: colorList[i], textureImage: well == '1' ? textureImageList[i] : '' }
+            //noImgCount += 1
         } else {
             items[i] = { ...items[i], promoColor: colorList[i] }
         }
@@ -238,7 +234,7 @@ const isPromoButton = (items, modType) => {
         return 'btn_promo'
     } else if (modType === 'Banner' && items.modColor1) {
         return 'btn_override'
-    } else if (modType === 'Banner') {
+    } else if (modType === 'Banner' && !items.image) {
         return 'btn_promo'
     } else {
         return 'btn_1'
@@ -400,6 +396,17 @@ const createColorClasses = (themeStyles) => {
     .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
     .close-toggle {color:var(--txt-accent); background-color:var(--promo);}
     .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}
+    .btn_p4.btn_1 {background-color:var(--promo4); color:var(--txt-accent);}
+    .btn_p4.btn_1:hover{color: var(--promo4); background-color: var(--txt-accent);} 
+    .btn_p3.btn_1 {background-color:var(--promo3); color:var(--txt-accent);}
+    .btn_p3.btn_1:hover{color: var(--promo3); background-color: var(--txt-accent);} 
+    .btn_p2.btn_1 {background-color:var(--promo2); color:var(--txt-accent);}
+    .btn_p2.btn_1:hover{color: var(--promo2); background-color: var(--txt-accent);} 
+    .btn_p4.btn_2 {border-color:var(--promo4); color:var(--promo4);}
+    .btn_p3.btn_2 {border-color:var(--promo3); color:var(--promo3);}
+    .btn_p2.btn_2 {border-color:var(--promo2); color:var(--promo2);}
+    .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--promo); color:var(--promo);}
+
     `
 
     const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 

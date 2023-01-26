@@ -78,6 +78,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
                 value.data.modules = transformCMSMods(value.data.modules, themeStyles)
                 newPages.push(value)
             }
+
             newData = newPages
         } else if (value.seo) {
             const currentFile = await getFileS3(`${newUrl}/pages/${pageSlug}.json`)
@@ -90,8 +91,8 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
     return pageData
 }
 
+//grab content between <style> tags and add scss page to s3
 const createPageCss = async (allScripts, pageSlug, newUrl) => {
-    //grab content between <style> tags
     let pageCss
     if (allScripts) {
         var styleMatchRegExp = /<style[^>]*>([^<]+)<\/style>/gi
@@ -398,6 +399,7 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
         const convertedCss = sass.compileString(allStylesConverted)
         return convertedCss.css
     } catch (e) {
+        //error catch if code passed is not correct scss/css
         console.log('custom css ' + e.name + ': ' + e.message)
         return allStyles
     }
@@ -443,7 +445,6 @@ const getCssFile = async (pageSlug, newUrl) => {
     }
 
     let cssFile
-
     await request(options, function (error, response, body) {
         if (error || response.statusCode !== 200) {
             console.log('failed to get file')
