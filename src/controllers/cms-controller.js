@@ -37,7 +37,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3()
 
-const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) => {
+const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
     console.log('page transformer started')
     let newPages = []
     let newData = []
@@ -65,12 +65,12 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
             if (value.data.JS || value.data.head_script) {
                 const foot_script = value.data.JS
                 const head_script = value.data.head_script
-                const allScripts = foot_script + head_script
+                const customPageCode = foot_script + head_script
 
-                createPageCss(allScripts, pageSlug, newUrl)
+                createPageScss(customPageCode, pageSlug, basePath)
             } else {
-                const allScripts = ''
-                createPageCss(allScripts, pageSlug, newUrl)
+                const customPageCode = ''
+                createPageScss(customPageCode, pageSlug, basePath)
             }
 
             //transforming page data
@@ -81,7 +81,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
 
             newData = newPages
         } else if (value.seo) {
-            const currentFile = await getFileS3(`${newUrl}/pages/${pageSlug}.json`)
+            const currentFile = await getFileS3(`${basePath}/pages/${pageSlug}.json`)
             const newSeoFile = { ...currentFile, seo: value.seo }
             newData.push(newSeoFile)
         }
@@ -92,15 +92,15 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, newUrl) =
 }
 
 //grab content between <style> tags and add scss page to s3
-const createPageCss = async (allScripts, pageSlug, newUrl) => {
+const createPageScss = async (customPageCode, pageSlug, basePath) => {
     let pageCss
-    if (allScripts) {
-        var styleMatchRegExp = /<style[^>]*>([^<]+)<\/style>/gi
-        var match = styleMatchRegExp.exec(allScripts)
-        var cssStringArray = []
+    if (customPageCode) {
+        let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
+        let match = styleMatchReg.exec(customPageCode)
+        let cssStringArray = []
         while (match != null) {
             cssStringArray.push(match[1])
-            match = styleMatchRegExp.exec(allScripts)
+            match = styleMatchReg.exec(customPageCode)
         }
 
         const cssString = convertText(cssStringArray.join(' '))
@@ -108,22 +108,22 @@ const createPageCss = async (allScripts, pageSlug, newUrl) => {
         ${cssString}
     }`
     } else {
-        pageCss = allScripts
+        pageCss = ''
     }
 
-    await addFileS3(pageCss, `${newUrl}/styles/${pageSlug}`, 'scss')
+    await addFileS3(pageCss, `${basePath}/styles/${pageSlug}`, 'scss')
 }
 
-const deletePages = async (pages, newUrl) => {
+const deletePages = async (pages, basePath) => {
     console.log('deleter started')
-    const oldPageList = await getFileS3(`${newUrl}/pages/page-list.json`)
+    const oldPageList = await getFileS3(`${basePath}/pages/page-list.json`)
     let newPageList = []
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
         if (!(oldPageList.pages[i].id in pages)) {
             newPageList.push(oldPageList.pages[i])
         } else {
-            await deleteFileS3(`${newUrl}/pages/${oldPageList.pages[i].slug}.json`)
+            await deleteFileS3(`${basePath}/pages/${oldPageList.pages[i].slug}.json`)
         }
     }
 
@@ -131,9 +131,9 @@ const deletePages = async (pages, newUrl) => {
 }
 
 //Update pagelist file in s3 or create if not already there
-const updatePageList = async (page, newUrl) => {
+const updatePageList = async (page, basePath) => {
     console.log('page list updater started ------')
-    const pageListUrl = `${newUrl}/pages/page-list.json`
+    const pageListUrl = `${basePath}/pages/page-list.json`
 
     //add page object to pagelist
     const addPagesToList = (pageListFile) => {
@@ -155,7 +155,7 @@ const updatePageList = async (page, newUrl) => {
         }
     }
 
-    let pageListFile = await getFileS3(`${newUrl}/pages/page-list.json`)
+    let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
     addPagesToList(pageListFile)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
@@ -163,9 +163,9 @@ const updatePageList = async (page, newUrl) => {
 }
 
 //Create or edit layout file
-const createOrEditLayout = async (file, newUrl, themeStyles) => {
+const createOrEditLayout = async (file, basePath, themeStyles) => {
     console.log('layout edit')
-    const currentLayout = await getFileS3(`${newUrl}/layout.json`)
+    const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     //adding socials from sitedata
     function transformSocial(file) {
@@ -173,11 +173,11 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
 
         for (let i = 0; i < file.settings.social.services.length; i++) {
             let item = file.settings.social.services[i]
-            const newUrl = item.format.replace(/\%.*/, '') + item.value
+            const basePath = item.format.replace(/\%.*/, '') + item.value
 
             if (file.settings.social.services[i]) {
                 if (item.value && item.enabled == 1) {
-                    social.push({ ...item, url: newUrl, icon: socialConvert(item.name) })
+                    social.push({ ...item, url: basePath, icon: socialConvert(item.name) })
                 }
             }
         }
@@ -202,7 +202,7 @@ const createOrEditLayout = async (file, newUrl, themeStyles) => {
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
-        s3Folder: newUrl,
+        s3Folder: basePath,
         favicon: stripImageFolders(file.config.website.favicon.src) || '',
     }
 
@@ -367,7 +367,7 @@ const addAssetFromSiteToS3 = async (file, key) => {
     })
 }
 
-const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, newUrl) => {
+const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, basePath) => {
     console.log('colors changed --------')
 
     //creating font import
@@ -389,7 +389,7 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
     ${code.CSS}
     `
 
-    const allPageStyles = await getAllCssPages(currentPageList, newUrl)
+    const allPageStyles = await getAllCssPages(currentPageList, basePath)
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
@@ -401,15 +401,17 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
     } catch (e) {
         //error catch if code passed is not correct scss/css
         console.log('custom css ' + e.name + ': ' + e.message)
-        return allStyles
+        return `/* ${e.message.toString()} */` + allStyles
+
+        //return
     }
 }
 
-const getAllCssPages = async (currentPageList, newUrl) => {
+const getAllCssPages = async (currentPageList, basePath) => {
     const allPageCss = []
     for (let i = 0; i < currentPageList.pages.length; i++) {
         const pageSlug = currentPageList.pages[i].slug
-        const cssFile = await getCssFile(pageSlug, newUrl)
+        const cssFile = await getCssFile(pageSlug, basePath)
         allPageCss.push(cssFile)
     }
 
@@ -438,9 +440,9 @@ const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
     }
 }
 
-const getCssFile = async (pageSlug, newUrl) => {
+const getCssFile = async (pageSlug, basePath) => {
     var options = {
-        uri: `${bucketUrl}/${newUrl}/styles/${pageSlug}.scss`,
+        uri: `${bucketUrl}/${basePath}/styles/${pageSlug}.scss`,
         encoding: null,
     }
 
@@ -477,19 +479,19 @@ const addFileS3 = async (file, key, fileType = 'json') => {
 }
 
 //adding a page file for each page in cms data
-const addMultipleS3 = async (data, pageList, newUrl) => {
+const addMultipleS3 = async (data, pageList, basePath) => {
     const pages = data.pages
 
     //adding page list file to s3
-    addFileS3(pageList, `${newUrl}/pages/page-list`)
+    addFileS3(pageList, `${basePath}/pages/page-list`)
 
     //adding page files to s3
     for (let i = 0; i < data.pages.length; i++) {
-        addFileS3(data.pages[i], `${newUrl}/pages/${pages[i].slug}`)
+        addFileS3(data.pages[i], `${basePath}/pages/${pages[i].slug}`)
     }
 
     //add full site data to s3
-    addFileS3(data, `${newUrl}/siteData`)
+    addFileS3(data, `${basePath}/siteData`)
 }
 
 //add any file, pass it the file and key for filename

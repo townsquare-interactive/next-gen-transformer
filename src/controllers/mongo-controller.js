@@ -2,7 +2,7 @@ require('dotenv').config()
 const Item = require('../models/schema')
 
 const mongoose = require('mongoose')
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
+mongoose.connect(process.env.MONGO_URL, { usebasePathParser: true })
 const db = mongoose.connection
 
 db.on('error', (error) => console.error(error))
