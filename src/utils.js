@@ -27,7 +27,17 @@ function iconConvert(str) {
     }
 }
 
-//fasrocket
+const determineModType = (type) => {
+    if (type.includes('article')) {
+        return 'Article'
+    } else if (type === 'photo_grid') {
+        return 'PhotoGrid'
+    } else if (type === 'banner_1') {
+        return 'Banner'
+    } else {
+        return type
+    }
+}
 
 function btnIconConvert(icon) {
     if (icon) {
@@ -128,6 +138,45 @@ const determineNavParent = (menu) => {
     }
 
     return editTable.length != 0 ? editTable : menu
+}
+
+const createLinkAndButtonVariables = (currentItem, modType) => {
+    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
+
+    const singleButton = isOneButton(currentItem)
+
+    const twoButtons = isTwoButtons(currentItem)
+
+    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
+
+    const visibleButton = linkAndBtn(currentItem)
+
+    const buttonList = [
+        {
+            name: 'btn1',
+            link: currentItem.pagelink || currentItem.weblink,
+            window: currentItem.newwindow,
+            icon: btnIconConvert(currentItem.icon || ''),
+            label: currentItem.actionlbl,
+            active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
+            btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
+            btnSize: currentItem.btnSize,
+            linkType: currentItem.pagelink ? 'local' : 'ext',
+        },
+        {
+            name: 'btn2',
+            link: currentItem.pagelink2 || currentItem.weblink2,
+            window: currentItem.newwindow2,
+            icon: btnIconConvert(currentItem.icon2 || ''),
+            label: currentItem.actionlbl2,
+            active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
+            btnType: currentItem.btnType2,
+            btnSize: currentItem.btnSize2,
+            linkType: currentItem.pagelink2 ? 'local' : 'ext',
+        },
+    ]
+
+    return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
 }
 
 function isButton(item) {
@@ -334,6 +383,22 @@ const getColumnsCssClass = (page) => {
     }
 }
 
+const createFontCss = (fonts) => {
+    const headlineFont = fonts.list[fonts.sections.hdrs.value]
+    const bodyFont = fonts.list[fonts.sections.body.value]
+    const featuredFont = fonts.list[fonts.sections.feat.value]
+    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
+    const fontClasses = ` body {font-family:${bodyFont.label};}
+    .hd-font{font-family:${headlineFont.label};} 
+    .txt-font{font-family:${bodyFont.label};}
+    .feat-font{font-family:${featuredFont.label};}
+    `
+
+    return { fontImportGroup, fontClasses }
+}
+
 const createColorClasses = (themeStyles) => {
     const colorVars = `
     :root {
@@ -423,6 +488,7 @@ const createColorClasses = (themeStyles) => {
     return colorStyles
 }
 
+//reuseables
 const removeDuplicatesArray = (arr) => {
     let uniqueArr = arr.filter((c, index) => {
         return arr.indexOf(c) === index
@@ -430,7 +496,7 @@ const removeDuplicatesArray = (arr) => {
     return uniqueArr
 }
 
-const convertText = (str) => {
+const convertSpecialTokens = (str) => {
     const removedBreak = str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
 
@@ -453,18 +519,14 @@ module.exports = {
     transformcontact,
     determineNavParent,
     stripUrl,
-    isButton,
-    isLink,
-    isOneButton,
-    isTwoButtons,
-    linkAndBtn,
     isGridCaption,
     alternatePromoColors,
-    isPromoButton,
     stripImageFolders,
     replaceKey,
     createColorClasses,
     transformNav,
-    removeDuplicatesArray,
-    convertText,
+    convertSpecialTokens,
+    createFontCss,
+    createLinkAndButtonVariables,
+    determineModType,
 }

@@ -10,19 +10,15 @@ const {
     getColumnsCssClass,
     transformcontact,
     transformNav,
-    isButton,
-    isLink,
-    isOneButton,
-    isTwoButtons,
-    linkAndBtn,
     isGridCaption,
     alternatePromoColors,
-    isPromoButton,
     stripImageFolders,
-    removeDuplicatesArray,
     createColorClasses,
-    convertText,
+    convertSpecialTokens,
     replaceKey,
+    createFontCss,
+    createLinkAndButtonVariables,
+    determineModType,
 } = require('../utils')
 
 const tsiBucket = 'townsquareinteractive'
@@ -48,12 +44,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             delete value.data.title
         }
 
-        //getting page data from siteconfig
-        const pageId = key
-        const pageTitle = sitePageData[pageId].title
-        const pageSlug = sitePageData[pageId].slug
-        const pageType = sitePageData[pageId].page_type
-        const url = sitePageData[pageId].url
+        const { pageId, pageTitle, pageSlug, pageType, url } = getPageData(sitePageData, key)
 
         if (value.data.modules) {
             const columnStyles = getColumnsCssClass(value.data)
@@ -61,21 +52,11 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             //adding site data to pages
             value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
 
-            //create scss file for page
-            if (value.data.JS || value.data.head_script) {
-                const foot_script = value.data.JS
-                const head_script = value.data.head_script
-                const customPageCode = foot_script + head_script
-
-                createPageScss(customPageCode, pageSlug, basePath)
-            } else {
-                const customPageCode = ''
-                createPageScss(customPageCode, pageSlug, basePath)
-            }
+            createPageScss(value.data, pageSlug, basePath)
 
             //transforming page data
             if (value.data.modules) {
-                value.data.modules = transformCMSMods(value.data.modules, themeStyles)
+                value.data.modules = transformPageModules(value.data.modules, themeStyles)
                 newPages.push(value)
             }
 
@@ -91,19 +72,34 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
     return pageData
 }
 
+const getPageData = (sitePageData, key) => {
+    const pageId = key
+    const pageTitle = sitePageData[pageId].title
+    const pageSlug = sitePageData[pageId].slug
+    const pageType = sitePageData[pageId].page_type
+    const url = sitePageData[pageId].url
+
+    return { pageId, pageTitle, pageSlug, pageType, url }
+}
+
 //grab content between <style> tags and add scss page to s3
-const createPageScss = async (customPageCode, pageSlug, basePath) => {
+const createPageScss = async (pageData, pageSlug, basePath) => {
     let pageCss
-    if (customPageCode) {
+
+    if (pageData.JS || pageData.head_script) {
+        const foot_script = pageData.JS || ''
+        const head_script = pageData.head_script || ''
+        const customPageCode = foot_script + head_script
+
         let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
-        let match = styleMatchReg.exec(customPageCode)
+        let nextMatch = styleMatchReg.exec(customPageCode)
         let cssStringArray = []
-        while (match != null) {
-            cssStringArray.push(match[1])
-            match = styleMatchReg.exec(customPageCode)
+        while (nextMatch != null) {
+            cssStringArray.push(nextMatch[1])
+            nextMatch = styleMatchReg.exec(customPageCode)
         }
 
-        const cssString = convertText(cssStringArray.join(' '))
+        const cssString = convertSpecialTokens(cssStringArray.join(' '))
         pageCss = `.page-${pageSlug} {
         ${cssString}
     }`
@@ -135,31 +131,29 @@ const updatePageList = async (page, basePath) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
 
-    //add page object to pagelist
-    const addPagesToList = (pageListFile) => {
-        //console.log('old pagelist', pageListFile)
-        for (let i = 0; i < page.length; i++) {
-            pageData = page[i].data
-            if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
-                pageListFile.pages.push({
-                    name: pageData.title,
-                    slug: pageData.slug,
-                    url: pageData.url,
-                    id: pageData.id,
-                    page_type: pageData.page_type,
-                })
-                //console.log('new page added:', pageData.title)
-            } else {
-                //console.log('page already there', pageData.title)
-            }
-        }
-    }
-
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
-    addPagesToList(pageListFile)
+    addPagesToList(pageListFile, page)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
+}
+
+//add page object to pagelist
+const addPagesToList = (pageListFile, page) => {
+    //console.log('old pagelist', pageListFile)
+    for (let i = 0; i < page.length; i++) {
+        pageData = page[i].data
+        if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
+            pageListFile.pages.push({
+                name: pageData.title,
+                slug: pageData.slug,
+                url: pageData.url,
+                id: pageData.id,
+                page_type: pageData.page_type,
+            })
+            //console.log('new page added:', pageData.title)
+        }
+    }
 }
 
 //Create or edit layout file
@@ -209,45 +203,34 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
     return globalFile
 }
 
-const transformCMSMods = (moduleList, themeStyles) => {
+const transformPageModules = (moduleList, themeStyles) => {
     let columnsData = []
     for (let i = 0; i <= moduleList.length; ++i) {
         if (moduleList[i]) {
             let newData = []
-
             let modCount = 0
 
-            let imageCount = 0
+            //let imageCount = 0
 
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
-                let modType
                 modCount += 1
 
-                if (value.type.includes('article')) {
-                    modType = 'Article'
-                } else if (value.type === 'photo_grid') {
-                    modType = 'PhotoGrid'
-                } else if (value.type === 'banner_1') {
-                    modType = 'Banner'
-                } else {
-                    modType = value.type
-                }
+                const modType = determineModType(value.type)
 
                 if (modType === 'PhotoGrid' || modType === 'Banner') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
                 }
 
                 let itemCount = 0
-
                 //loop for each item
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
 
-                    if (currentItem.image) {
+                    /*                     if (currentItem.image) {
                         imageCount += 1
-                    }
+                    } */
 
                     let imagePriority = false
                     if (value.lazy === 'off') {
@@ -260,44 +243,10 @@ const transformCMSMods = (moduleList, themeStyles) => {
 
                     //replace line breaks from cms
                     if (value.items[i].desc) {
-                        value.items[i].desc = convertText(currentItem.desc)
+                        value.items[i].desc = convertSpecialTokens(currentItem.desc)
                     }
 
-                    //determining button/link logic
-                    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
-
-                    const singleButton = isOneButton(currentItem)
-
-                    const twoButtons = isTwoButtons(currentItem)
-
-                    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
-
-                    const visibleButton = linkAndBtn(currentItem)
-
-                    const buttonList = [
-                        {
-                            name: 'btn1',
-                            link: currentItem.pagelink || currentItem.weblink,
-                            window: currentItem.newwindow,
-                            icon: btnIconConvert(currentItem.icon || ''),
-                            label: currentItem.actionlbl,
-                            active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
-                            btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
-                            btnSize: currentItem.btnSize,
-                            linkType: currentItem.pagelink ? 'local' : 'ext',
-                        },
-                        {
-                            name: 'btn2',
-                            link: currentItem.pagelink2 || currentItem.weblink2,
-                            window: currentItem.newwindow2,
-                            icon: btnIconConvert(currentItem.icon2 || ''),
-                            label: currentItem.actionlbl2,
-                            active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
-                            btnType: currentItem.btnType2,
-                            btnSize: currentItem.btnSize2,
-                            linkType: currentItem.pagelink2 ? 'local' : 'ext',
-                        },
-                    ]
+                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
 
@@ -368,21 +317,11 @@ const addAssetFromSiteToS3 = async (file, key) => {
 }
 
 const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, basePath) => {
-    console.log('colors changed --------')
+    console.log('global css changed --------')
 
-    //creating font import
-    const headlineFont = fonts.list[fonts.sections.hdrs.value]
-    const bodyFont = fonts.list[fonts.sections.body.value]
-    const featuredFont = fonts.list[fonts.sections.feat.value]
-    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
-    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
-    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
+    const { fontImportGroup, fontClasses } = createFontCss(fonts)
+
     const colorClasses = createColorClasses(themeStyles)
-    const fontClasses = ` body {font-family:${bodyFont.label};}
-    .hd-font{font-family:${headlineFont.label};} 
-    .txt-font{font-family:${bodyFont.label};}
-    .feat-font{font-family:${featuredFont.label};}
-    `
 
     let customCss = `
     /*---------------------Custom Code--------------------*/
@@ -393,7 +332,7 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
 
-    const allStylesConverted = convertText(allStyles)
+    const allStylesConverted = convertSpecialTokens(allStyles)
 
     try {
         const convertedCss = sass.compileString(allStylesConverted)
@@ -532,10 +471,10 @@ const transformCMSData = function (data) {
 
         //transforming page data
         if (value.publisher.data.modules) {
-            value.publisher.data.modules = transformCMSMods(value.publisher.data.modules)
+            value.publisher.data.modules = transformPageModules(value.publisher.data.modules)
             newData.push(value)
         } else if (value.backup.data) {
-            value.backup.data.modules = transformCMSMods(value.backup.data.modules)
+            value.backup.data.modules = transformPageModules(value.backup.data.modules)
             newData.push(value)
         } else {
             newData.push(value)
