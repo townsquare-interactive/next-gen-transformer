@@ -1,15 +1,13 @@
 const {
     transformCMSData,
-    addMultipleS3,
     updatePageList,
-    addFileS3,
     transformPagesData,
     createOrEditLayout,
     deletePages,
-    addAssetFromSiteToS3,
-    getFileS3,
     createGlobalStylesheet,
 } = require('../src/controllers/cms-controller')
+
+const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3-functions.ts')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 const express = require('express')
@@ -44,7 +42,6 @@ router.post('/save', async (req, res) => {
 
         if (req.body.savedData.favicon) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
-
             await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
         }
 
@@ -68,6 +65,7 @@ router.post('/save', async (req, res) => {
 
         //Adding new siteData file after saved
         await addFileS3(req.body.siteData, `${basePath}/siteData`)
+
         res.json('posting to s3 folder: ' + basePath)
     } catch (err) {
         console.error(err)
