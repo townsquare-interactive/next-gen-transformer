@@ -220,7 +220,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                     } */
 
                     let imagePriority = false
-                    if (value.lazy === 'off' || value.lazy === '') {
+                    if (value.lazy === 'off') {
                         imagePriority = true
                     } /*   else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
                         imagePriority = true
