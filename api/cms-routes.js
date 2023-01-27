@@ -7,7 +7,7 @@ const {
     createGlobalStylesheet,
 } = require('../src/controllers/cms-controller')
 
-const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3-functions.ts')
+const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3Functions.js')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 const express = require('express')

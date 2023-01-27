@@ -18,7 +18,7 @@ const {
     determineModType,
 } = require('../utils')
 
-const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3-functions.ts')
+const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
 
 const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
     console.log('page transformer started')
@@ -220,7 +220,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                     } */
 
                     let imagePriority = false
-                    if (value.lazy === 'off') {
+                    if (value.lazy === 'off' || value.lazy === '') {
                         imagePriority = true
                     } /*   else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
                         imagePriority = true
