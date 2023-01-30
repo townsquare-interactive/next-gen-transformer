@@ -104,14 +104,13 @@ const deletePages = async (pages, basePath) => {
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
         if (!(oldPageList.pages[i].id in pages)) {
-            console.log('page', oldPageList.pages[i])
             newPageList.push(oldPageList.pages[i])
         } else {
             await deleteFileS3(`${basePath}/pages/${oldPageList.pages[i].slug}.json`)
         }
     }
 
-    return newPageList
+    return newPageList ? { pages: newPageList } : oldPageList
 
     //return oldPageList
 }
@@ -140,7 +139,7 @@ const addPagesToList = (pageListFile, page) => {
                 id: pageData.id,
                 page_type: pageData.page_type,
             })
-            //console.log('new page added:', pageData.title)
+            console.log('new page added:', pageData.title)
         }
     }
 }
