@@ -18,7 +18,7 @@ const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
     if (type === 'json') {
         try {
             const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
-            return type === 'json' ? JSON.parse(data.Body.toString('utf-8')) : data.Body.toString('utf-8')
+            return JSON.parse(data.Body.toString('utf-8'))
         } catch (err) {
             console.log('file  not found in S3, creating new file')
             return rtnObj
@@ -26,7 +26,6 @@ const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
     } else {
         try {
             const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
-            console.log(key)
             return data.Body.toString('utf-8')
         } catch (err) {
             console.log('css file not in s3')

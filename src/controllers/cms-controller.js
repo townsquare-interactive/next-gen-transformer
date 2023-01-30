@@ -104,20 +104,22 @@ const deletePages = async (pages, basePath) => {
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
         if (!(oldPageList.pages[i].id in pages)) {
+            console.log('page', oldPageList.pages[i])
             newPageList.push(oldPageList.pages[i])
         } else {
             await deleteFileS3(`${basePath}/pages/${oldPageList.pages[i].slug}.json`)
         }
     }
 
-    return oldPageList
+    return newPageList
+
+    //return oldPageList
 }
 
 //Update pagelist file in s3 or create if not already there
 const updatePageList = async (page, basePath) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
-
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
     addPagesToList(pageListFile, page)
     //Can use add file when ready, instead of addpagelist logging

@@ -46,7 +46,7 @@ router.post('/save', async (req, res) => {
         }
 
         if (req.body.savedData.deletePages) {
-            const pageListUrl = `${basePath}/pages/page-list.json`
+            const pageListUrl = `${basePath}/pages/page-list`
             const updatedPageList = await deletePages(req.body.savedData.deletePages, basePath)
             await addFileS3(updatedPageList, pageListUrl)
         }
