@@ -111,8 +111,6 @@ const deletePages = async (pages, basePath) => {
     }
 
     return newPageList ? { pages: newPageList } : oldPageList
-
-    //return oldPageList
 }
 
 //Update pagelist file in s3 or create if not already there

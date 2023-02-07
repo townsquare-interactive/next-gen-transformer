@@ -481,6 +481,8 @@ const createColorClasses = (themeStyles) => {
     .header-background{background-color:var(--header-background);} 
     .social-bar-background{background-color:var(--social-background);} 
     .promo-background{background-color:var(--promo);}
+    .cta{background-color:var(--promo);}
+    .cta:hover{background-color:var(--promo2);}
     `
 
     let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
