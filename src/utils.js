@@ -89,7 +89,9 @@ function transformcontact(contactInfo, siteName) {
         }, */
     ]
 
-    const multiPhones = contactInfo.phone.length > 1
+    const multiPhones = contactInfo.phone.length > 1 ? true : false
+
+    const hideEmail = !multiPhones && contactInfo.email.length > 1
 
     for (x in contactInfo.phone) {
         if (contactInfo.phone[x]) {
@@ -112,7 +114,7 @@ function transformcontact(contactInfo, siteName) {
                 link: `mailto:${contactInfo.email[x].email}`,
                 icon: icons.email,
                 content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
-                active: contactInfo.email[x] ? true : false,
+                active: hideEmail ? false : contactInfo.email[x] ? true : false,
             }
 
             contactLinks.push(email)
