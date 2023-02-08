@@ -73,7 +73,7 @@ function transformcontact(contactInfo, siteName) {
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
 
     const contactLinks = [
-        {
+        /* {
             cName: 'phone',
             link: 'tel:' + contactInfo.phone[0].number,
             icon: icons.phone,
@@ -86,17 +86,50 @@ function transformcontact(contactInfo, siteName) {
             icon: icons.email,
             content: contactInfo.email[0].name + ':' + contactInfo.email[0].email,
             active: contactInfo.email[0] ? true : false,
-        },
-        {
-            cName: 'map',
-            link: mapLink,
-            icon: icons.location,
-            content: contactInfo.address.name,
-            active: contactInfo.address ? true : false,
-        },
+        }, */
     ]
 
-    contactInfo = { ...contactInfo, contactLinks: contactLinks }
+    const multiPhones = contactInfo.phone.length > 1
+
+    for (x in contactInfo.phone) {
+        if (contactInfo.phone[x]) {
+            const phone = {
+                cName: 'phone',
+                link: 'tel:' + contactInfo.phone[x].number,
+                icon: icons.phone,
+                content: multiPhones ? contactInfo.phone[x].name + ': ' + contactInfo.phone[x].number : contactInfo.phone[x].number,
+                active: contactInfo.phone[x].number ? true : false,
+            }
+
+            contactLinks.push(phone)
+        }
+    }
+
+    for (x in contactInfo.email) {
+        if (contactInfo.email[x]) {
+            const email = {
+                cName: 'email',
+                link: `mailto:${contactInfo.email[x].email}`,
+                icon: icons.email,
+                content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
+                active: contactInfo.email[x] ? true : false,
+            }
+
+            contactLinks.push(email)
+        }
+    }
+
+    const contactMap = {
+        cName: 'map',
+        link: mapLink,
+        icon: icons.location,
+        content: contactInfo.address.name,
+        active: contactInfo.address ? true : false,
+    }
+
+    multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)
+
+    contactInfo = { ...contactInfo, contactLinks: contactLinks, showContactBox: multiPhones }
 
     return contactInfo
 }
@@ -147,7 +180,7 @@ const createLinkAndButtonVariables = (currentItem, modType) => {
 
     const twoButtons = isTwoButtons(currentItem)
 
-    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
+    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article' && !currentItem.desc.includes('<a')
 
     const visibleButton = linkAndBtn(currentItem)
 
@@ -441,7 +474,8 @@ const createColorClasses = (themeStyles) => {
        }
        `
 
-    const textColors = ` .accent-txt{color:var(--txt-accent);} 
+    const textColors = ` body .txt-font a{ color: var(--link);}
+    .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
     .navLink:hover{color: var(--nav-hover);} 
@@ -451,6 +485,8 @@ const createColorClasses = (themeStyles) => {
     .footer-icon:hover{background-color: var(--nav-hover);}
     .current-page{color:var(--nav-current);} 
     .caption-txt{color:var(--caption-txt);}
+    .box-links{color:var(--link);}
+    .box-links:hover{color:var(--nav-hover);}
     `
 
     const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
@@ -459,8 +495,8 @@ const createColorClasses = (themeStyles) => {
     .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
     .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
     .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
-    .close-toggle {color:var(--txt-accent); background-color:var(--promo);}
-    .close-toggle:hover {color:var(--promo); background-color:var(--txt-accent);}
+    .close-toggle {color:var(--txt-accent); background-color:var(--btn-background);}
+    .close-toggle:hover {color:var(--btn-background); background-color:var(--txt-accent);}
     .btn_p4.btn_1 {background-color:var(--promo4); color:var(--txt-accent);}
     .btn_p4.btn_1:hover{color: var(--promo4); background-color: var(--txt-accent);} 
     .btn_p3.btn_1 {background-color:var(--promo3); color:var(--txt-accent);}
@@ -501,8 +537,9 @@ const removeDuplicatesArray = (arr) => {
 const convertSpecialTokens = (str) => {
     const removedBreak = str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
+    const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
 
-    return removedBlank
+    return removedParenthesis
 }
 
 const replaceKey = (value, oldKey, newKey) => {
