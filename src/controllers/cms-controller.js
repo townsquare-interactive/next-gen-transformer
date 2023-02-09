@@ -31,7 +31,9 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             delete value.data.title
         }
 
-        const { pageId, pageTitle, pageSlug, pageType, url } = getPageData(sitePageData, key)
+        const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
+
+        value.seo = seo
 
         if (value.data.modules) {
             const columnStyles = getColumnsCssClass(value.data)
@@ -65,8 +67,9 @@ const getPageData = (sitePageData, key) => {
     const pageSlug = sitePageData[pageId].slug
     const pageType = sitePageData[pageId].page_type
     const url = sitePageData[pageId].url
+    const seo = sitePageData[pageId].seo
 
-    return { pageId, pageTitle, pageSlug, pageType, url }
+    return { pageId, pageTitle, pageSlug, pageType, url, seo }
 }
 
 //grab content between <style> tags and add scss page to s3
