@@ -182,7 +182,8 @@ const createLinkAndButtonVariables = (currentItem, modType) => {
 
     const twoButtons = isTwoButtons(currentItem)
 
-    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article' && !currentItem.desc.includes('<a')
+    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
+    // && !currentItem.desc.includes('<a')
 
     const visibleButton = linkAndBtn(currentItem)
 
@@ -263,7 +264,7 @@ function linkAndBtn(currentItem) {
 }
 
 function isGridCaption(item) {
-    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
+    if (item.headline || item.subheader) {
         return true
     } else {
         return false

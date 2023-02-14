@@ -241,7 +241,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
 
-                    const hasGridCaption = modType === 'PhotoGrid' ? isGridCaption(currentItem) : false
+                    //const hasGridCaption = modType === 'PhotoGrid' ? isGridCaption(currentItem) : false
 
                     //update each item's data
                     value.items[i] = {
@@ -254,7 +254,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                         visibleButton: visibleButton,
                         isBeaconHero: isBeaconHero,
                         imagePriority: imagePriority,
-                        hasGridCaption: hasGridCaption,
+                        //hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
                     }
                 }
