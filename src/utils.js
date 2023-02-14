@@ -442,7 +442,7 @@ const createColorClasses = (themeStyles) => {
         --sh: ${themeStyles['subHeadingColor']};
         --txt: ${themeStyles['textColor']};
         --link: ${themeStyles['linkColor']};
-        --txt-hover: ${themeStyles['linkHover']};
+        --link-hover: ${themeStyles['linkHover']};
         --btn-txt: ${themeStyles['btnText']};
         --btn-background: ${themeStyles['btnBackground']};
         --txt-accent: ${themeStyles['textColorAccent']};
@@ -494,7 +494,7 @@ const createColorClasses = (themeStyles) => {
     const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
     .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
     .btn_2{color: var(--link); border-color: var(--link);} 
-    .btn_2:hover{color: var(--btn-background); border-color: var(--btn-background);} 
+    .btn_2:hover{color: var(--link-hover); border-color: var(--link-hover);} 
     .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
     .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
     .close-toggle {color:var(--txt-accent); background-color:var(--btn-background);}
@@ -508,7 +508,7 @@ const createColorClasses = (themeStyles) => {
     .btn_p4.btn_2 {border-color:var(--promo4); color:var(--promo4);}
     .btn_p3.btn_2 {border-color:var(--promo3); color:var(--promo3);}
     .btn_p2.btn_2 {border-color:var(--promo2); color:var(--promo2);}
-    .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--promo); color:var(--promo);}
+    .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--link-hover); color:var(--link-hover);}
 
     `
 
