@@ -235,7 +235,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                         value.items[i].desc = convertSpecialTokens(currentItem.desc)
                     }
 
-                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType)
+                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType, value.columns)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
 

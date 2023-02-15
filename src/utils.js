@@ -175,7 +175,7 @@ const determineNavParent = (menu) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-const createLinkAndButtonVariables = (currentItem, modType) => {
+const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
 
     const singleButton = isOneButton(currentItem)
@@ -187,6 +187,22 @@ const createLinkAndButtonVariables = (currentItem, modType) => {
 
     const visibleButton = linkAndBtn(currentItem)
 
+    const determineBtnSize = (btnSize, modType, columns) => {
+        if (btnSize?.includes('lg') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
+            return 'btn_lg'
+        } else if (btnSize?.includes('xl') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
+            return 'btn_xl'
+        } else if (btnSize?.includes('sm') || columns == 3 || columns == 4) {
+            return 'btn_sm'
+        } else if (btnSize?.includes('xs')) {
+            return 'btn_xs'
+        } else if ((btnSize?.includes('md') || !btnSize) && (columns == 1 || columns == 2)) {
+            return 'btn_md'
+        } else {
+            return 'btn_md'
+        }
+    }
+
     const buttonList = [
         {
             name: 'btn1',
@@ -196,7 +212,7 @@ const createLinkAndButtonVariables = (currentItem, modType) => {
             label: currentItem.actionlbl,
             active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
             btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
-            btnSize: currentItem.btnSize,
+            btnSize: determineBtnSize(currentItem.btnSize, modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
         },
         {
@@ -207,7 +223,7 @@ const createLinkAndButtonVariables = (currentItem, modType) => {
             label: currentItem.actionlbl2,
             active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
             btnType: currentItem.btnType2,
-            btnSize: currentItem.btnSize2,
+            btnSize: determineBtnSize(currentItem.btnSize2, modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
         },
     ]
@@ -264,7 +280,7 @@ function linkAndBtn(currentItem) {
 }
 
 function isGridCaption(item) {
-    if (item.headline || item.subheader) {
+    if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
         return true
     } else {
         return false
