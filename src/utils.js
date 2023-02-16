@@ -72,22 +72,7 @@ function transformcontact(contactInfo, siteName) {
 
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
 
-    const contactLinks = [
-        /* {
-            cName: 'phone',
-            link: 'tel:' + contactInfo.phone[0].number,
-            icon: icons.phone,
-            content: contactInfo.phone[0].number,
-            active: contactInfo.phone[0].number ? true : false,
-        },
-        {
-            cName: 'email',
-            link: `mailto:${contactInfo.email[0].email}`,
-            icon: icons.email,
-            content: contactInfo.email[0].name + ':' + contactInfo.email[0].email,
-            active: contactInfo.email[0] ? true : false,
-        }, */
-    ]
+    const contactLinks = []
 
     const multiPhones = contactInfo.phone.length > 1 ? true : false
 
@@ -214,6 +199,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
             btnSize: determineBtnSize(currentItem.btnSize, modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
+            blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
         },
         {
             name: 'btn2',
@@ -225,6 +211,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             btnType: currentItem.btnType2,
             btnSize: determineBtnSize(currentItem.btnSize2, modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
+            blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
         },
     ]
 
@@ -493,7 +480,7 @@ const createColorClasses = (themeStyles) => {
        }
        `
 
-    const textColors = ` body .txt-font a{ color: var(--link);}
+    const textColors = ` body .txt-font .dsc a{ color: var(--link);}
     .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
