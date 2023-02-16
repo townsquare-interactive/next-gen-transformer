@@ -169,8 +169,8 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
     }
 
     const globalFile = {
-        logos: file.logos.header.slots[0] || file.logos.header.slots[1] || file.logos.header.slots[2] || '',
-        mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '',
+        logos: file.logos,
+        /* mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '', */
         footerLogos: file.logos.footer.slots[0] || '',
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: file.settings
