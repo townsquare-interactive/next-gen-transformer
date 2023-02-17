@@ -34,6 +34,8 @@ const determineModType = (type) => {
         return 'PhotoGrid'
     } else if (type === 'banner_1') {
         return 'Banner'
+    } else if (type === 'parallax_1') {
+        return 'Parallax'
     } else {
         return type
     }

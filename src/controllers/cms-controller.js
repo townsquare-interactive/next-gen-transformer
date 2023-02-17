@@ -201,6 +201,8 @@ const transformPageModules = (moduleList, themeStyles) => {
 
             //let imageCount = 0
 
+            const isSingleColumn = moduleList.filter((e) => Object.keys(e).length != 0).length === 2
+
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
                 modCount += 1
@@ -266,7 +268,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                     newModule = { ...value }
                 }
 
-                const modData = { ...newModule, modId: key, modCount: modCount }
+                const modData = { ...newModule, modId: key, modCount: modCount, columnLocation: i, isSingleColumn: isSingleColumn }
                 const newItem = { attributes: modData, componentType: modType }
 
                 newData.push(newItem)
