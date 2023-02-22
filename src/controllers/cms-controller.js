@@ -259,6 +259,21 @@ const transformPageModules = (moduleList, themeStyles) => {
                         //hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
                     }
+
+                    if (currentItem.image) {
+                        const imageType = !['no_sizing', 'no_set_height'].includes(currentItem.imgsize)
+                            ? 'crop'
+                            : modType === 'Banner'
+                            ? 'crop'
+                            : modType === 'Parallax'
+                            ? 'crop'
+                            : 'nocrop'
+
+                        value.items[i] = {
+                            ...value.items[i],
+                            imageType: imageType,
+                        }
+                    }
                 }
 
                 let newModule
