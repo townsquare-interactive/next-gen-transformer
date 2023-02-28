@@ -209,7 +209,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 const modType = determineModType(value.type)
 
-                if (modType === 'PhotoGrid' || modType === 'Banner') {
+                if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
                 }
 
@@ -218,10 +218,6 @@ const transformPageModules = (moduleList, themeStyles) => {
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
-
-                    /*                     if (currentItem.image) {
-                        imageCount += 1
-                    } */
 
                     let imagePriority = false
                     if (value.lazy === 'off') {
