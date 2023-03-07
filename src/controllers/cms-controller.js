@@ -55,9 +55,30 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             const newSeoFile = { ...currentFile, seo: value.seo }
             newData.push(newSeoFile)
         }
+
+        /* let preloadImage = ''
+
+        for (let i = 0; i <= value.data.modules.length; ++i) {
+            //modules
+            if (value.data.modules[i]) {
+                for (const [key, mod] of Object.entries(value.data.modules[i])) {
+                    //items
+
+                    for (let x = 0; x < mod.attributes.items.length; x++) {
+                        if (mod.lazy === 'off') {
+                            imagePriority = true
+                            preloadImage = mod.items[0].image
+                            console.log('pre', preloadImage)
+                        }
+                    }
+                }
+            }
+        }
+        newData.push({ preloadImage: preloadImage }) */
     }
 
     pageData.pages = newData
+    pageData = { ...pageData }
     return pageData
 }
 
@@ -215,6 +236,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 let itemCount = 0
                 //loop for each item
+
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
