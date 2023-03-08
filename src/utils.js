@@ -198,7 +198,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             icon: btnIconConvert(currentItem.icon || ''),
             label: currentItem.actionlbl,
             active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
-            btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType),
+            btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType, 1),
             btnSize: determineBtnSize(currentItem.btnSize, modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
             blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
@@ -210,7 +210,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             icon: btnIconConvert(currentItem.icon2 || ''),
             label: currentItem.actionlbl2,
             active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
-            btnType: currentItem.btnType2,
+            btnType: currentItem.btnType2 ? currentItem.btnType2 : isPromoButton(currentItem, modType, 2),
             btnSize: determineBtnSize(currentItem.btnSize2, modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
             blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
@@ -319,17 +319,22 @@ const alternatePromoColors = (items, themeStyles, well) => {
     return items
 }
 
-const isPromoButton = (items, modType) => {
-    if (modType === 'Parallax' && items.modColor1 && !items.image) {
+const isPromoButton = (items, modType, btnNum) => {
+    if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
         return 'btn_override'
-    } else if ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image)) {
+    } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
+        return 'btn2_override'
+    } else if (btnNum === 1 && ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image))) {
         return 'btn_promo'
-    } else if ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1)) {
+    } else if (btnNum === 1 && modType === 'Banner' && !items.image) {
+        /*  else if (btnNum === 1 && ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1))) {
         return 'btn_override'
-    } else if (modType === 'Banner' && !items.image) {
+    } */
         return 'btn_promo'
-    } else {
+    } else if (btnNum === 1) {
         return 'btn_1'
+    } else {
+        return 'btn_2'
     }
 }
 
