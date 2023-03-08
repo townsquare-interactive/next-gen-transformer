@@ -320,7 +320,9 @@ const alternatePromoColors = (items, themeStyles, well) => {
 }
 
 const isPromoButton = (items, modType) => {
-    if ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image)) {
+    if (modType === 'Parallax' && items.modColor1 && !items.image) {
+        return 'btn_override'
+    } else if ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image)) {
         return 'btn_promo'
     } else if ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1)) {
         return 'btn_override'
