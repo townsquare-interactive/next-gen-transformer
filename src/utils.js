@@ -504,6 +504,7 @@ const createColorClasses = (themeStyles) => {
     .caption-txt{color:var(--caption-txt);}
     .box-links{color:var(--link);}
     .box-links:hover{color:var(--nav-hover);}
+    .testimonial-txt-color{color:var(--btn-background);}
     `
 
     const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
