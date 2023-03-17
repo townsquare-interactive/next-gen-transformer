@@ -36,6 +36,8 @@ const determineModType = (type) => {
         return 'Banner'
     } else if (type === 'parallax_1') {
         return 'Parallax'
+    } else if (type === 'testimonials_1') {
+        return 'Testimonials'
     } else {
         return type
     }
@@ -438,10 +440,10 @@ const createFontCss = (fonts) => {
     const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
     const uniqueFontGroup = removeDuplicatesArray(fontTypes)
     const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
-    const fontClasses = ` body {font-family:${bodyFont.label};}
-    .hd-font{font-family:${headlineFont.label};} 
-    .txt-font{font-family:${bodyFont.label};}
-    .feat-font{font-family:${featuredFont.label};}
+    const fontClasses = ` body {font-family:${bodyFont.label}}
+    .hd-font{font-family:${headlineFont.label}} 
+    .txt-font{font-family:${bodyFont.label}}
+    .feat-font{font-family:${featuredFont.label}}
     `
 
     return { fontImportGroup, fontClasses }

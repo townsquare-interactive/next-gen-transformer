@@ -171,6 +171,8 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
     console.log('layout edit')
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
+    const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
+
     //adding socials from sitedata
     function transformSocial(file) {
         const social = []
@@ -208,6 +210,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         cmsUrl: file.config.website.url || '',
         s3Folder: basePath,
         favicon: stripImageFolders(file.config.website.favicon.src) || '',
+        fontImport: fontImportGroup + fontClasses,
     }
 
     return globalFile
@@ -326,7 +329,8 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     const allPageStyles = await getAllCssPages(currentPageList, basePath)
 
-    let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
+    //let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
+    let allStyles = fontClasses + colorClasses + customCss + allPageStyles
 
     const allStylesConverted = convertSpecialTokens(allStyles)
 
@@ -357,6 +361,7 @@ const getAllCssPages = async (currentPageList, basePath) => {
 const transformCMSData = function (data) {
     let newData = []
     const pageListData = []
+
     for (const [key, value] of Object.entries(data.pages)) {
         //creating file for pagelist
         pageListData.push(createPageList(value))
