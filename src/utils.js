@@ -340,6 +340,48 @@ const isPromoButton = (items, modType, btnNum) => {
     }
 }
 
+const createItemStyles = (items, well, modType) => {
+    for (let i = 0; i < items.length; i++) {
+        let itemStyle
+        const currentItem = items[i]
+        if (modType === 'Parallax') {
+            if (!currentItem.modColor1 && well != '1' && !currentItem.image) {
+                //itemStyle = `background: ${currentItem.modColor1};`
+                itemStyle = { background: `${currentItem.modColor1}` }
+            } else if (currentItem.modColor1 && well === '1' && !currentItem.image) {
+                itemStyle = { background: `var(--accent-background);` }
+            } else if (currentItem.modColor1 && well === '1') {
+                itemStyle = { background: ` ${currentItem.modColor1};` }
+            } else if (well === '1' && !currentItem.image) {
+                itemStyle = {
+                    backgroundImage: ` linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]});`,
+                }
+            } else if (!currentItem.image) {
+                itemStyle = { background: ` ${currentItem.promoColor};` }
+            } else {
+                itemStyle = {}
+            }
+        } else if (modType === 'Banner') {
+            if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity) {
+                itemStyle = { background: `${item.modColor1}` }
+            } else if (well === '1' && !currentItem.image) {
+                itemStyle = {
+                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
+                }
+            } else if (currentItem.promoColor) {
+                itemStyle = { background: `${currentItem.promoColor}` }
+            } else {
+                itemStyle = {}
+            }
+        }
+
+        items[i] = { ...items[i], itemStyle: itemStyle }
+
+        //banner
+    }
+    return items
+}
+
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
@@ -506,16 +548,9 @@ const createColorClasses = (themeStyles) => {
     .box-links:hover{color:var(--nav-hover);}
     .testimonial-txt-color{color:var(--btn-background);}
     .testimonials-mod.well .hero {
-    &.item, .desc {
-        color:var(--hero-txt);
-
-    }
-    .stars, .quotes, .hd, .sh {
-        color:var(--txt-accent);
-    }
+    &.item, .desc {color:var(--hero-txt);}
+    .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
 }
-
-
     `
 
     const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
@@ -598,4 +633,5 @@ module.exports = {
     createFontCss,
     createLinkAndButtonVariables,
     determineModType,
+    createItemStyles,
 }

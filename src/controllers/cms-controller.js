@@ -16,6 +16,7 @@ const {
     createFontCss,
     createLinkAndButtonVariables,
     determineModType,
+    createItemStyles,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -193,8 +194,6 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
 
     const globalFile = {
         logos: file.logos,
-        /* mobileLogos: file.logos.mobile.slots[0] || file.logos.mobile.slots[1] || file.logos.mobile.slots[2] || '', */
-        footerLogos: file.logos.footer.slots[0] || '',
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: file.settings
             ? transformcontact(file.settings.contact.contact_list.wide.items[0], file.config.website.site_title)
@@ -235,6 +234,10 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
+                }
+
+                if (modType === 'Parallax' || modType === 'Banner') {
+                    value.items = createItemStyles(value.items, value.well, modType)
                 }
 
                 let itemCount = 0
