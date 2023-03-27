@@ -363,7 +363,7 @@ const createItemStyles = (items, well, modType) => {
             }
         } else if (modType === 'Banner') {
             if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity) {
-                itemStyle = { background: `${item.modColor1}` }
+                itemStyle = { background: `${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
