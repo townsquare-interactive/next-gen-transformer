@@ -38,6 +38,8 @@ const determineModType = (type) => {
         return 'Parallax'
     } else if (type === 'testimonials_1') {
         return 'Testimonials'
+    } else if (type === 'card_1' || type === 'card_2') {
+        return 'Card'
     } else {
         return type
     }
