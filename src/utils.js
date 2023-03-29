@@ -549,7 +549,7 @@ const createColorClasses = (themeStyles) => {
     .box-links{color:var(--link);}
     .box-links:hover{color:var(--nav-hover);}
     .testimonial-txt-color{color:var(--btn-background);}
-    .testimonials-mod.well .hero {
+    .testimonials-mod.well .hero, .card-mod .hero{
     &.item, .desc {color:var(--hero-txt);}
     .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
 }
@@ -585,7 +585,7 @@ const createColorClasses = (themeStyles) => {
     .promo-background{background-color:var(--promo);}
     .cta{background-color:var(--promo);}
     .cta:hover{background-color:var(--promo2);}
-    .testimonials-mod .hero-background{background-color:var(--hero-background);}
+    .testimonials-mod .hero-background, .card-mod .hero-background {background-color:var(--hero-background);}
     `
 
     let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
