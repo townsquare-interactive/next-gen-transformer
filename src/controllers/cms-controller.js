@@ -17,6 +17,7 @@ const {
     createLinkAndButtonVariables,
     determineModType,
     createItemStyles,
+    createBtnStyles,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -261,6 +262,9 @@ const transformPageModules = (moduleList, themeStyles) => {
                         value.items[i].desc = convertSpecialTokens(currentItem.desc)
                     }
 
+                    //create button styles
+                    const btnStyles = createBtnStyles(value, modType, key, themeStyles, currentItem, itemCount)
+
                     const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType, value.columns)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
@@ -282,6 +286,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                         imagePriority: imagePriority,
                         //hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
+                        btnStyles: btnStyles,
                     }
 
                     if (currentItem.image) {

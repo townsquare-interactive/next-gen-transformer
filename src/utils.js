@@ -224,6 +224,18 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
 }
 
+const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount) => {
+    let btnStyles
+    if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
+        btnStyles = `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}} `
+    }
+    btnStyles =
+        btnStyles +
+        `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor}} #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1}}  #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent } #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}; `
+
+    return btnStyles
+}
+
 function isButton(item) {
     if (item.actionlbl || item.actionlbl2) {
         return true
@@ -586,6 +598,7 @@ const createColorClasses = (themeStyles) => {
     .cta{background-color:var(--promo);}
     .cta:hover{background-color:var(--promo2);}
     .testimonials-mod .hero-background, .card-mod .hero-background {background-color:var(--hero-background);}
+    .caption-background{background-color:var(--caption-background);}
     `
 
     let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
@@ -636,4 +649,5 @@ module.exports = {
     createLinkAndButtonVariables,
     determineModType,
     createItemStyles,
+    createBtnStyles,
 }
