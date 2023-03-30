@@ -226,12 +226,13 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
 
 const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount) => {
     let btnStyles
+
+    btnStyles = `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor}} #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1}}  #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent } #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}; `
+
     if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
-        btnStyles = `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}} `
+        btnStyles =
+            btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}} `
     }
-    btnStyles =
-        btnStyles +
-        `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor}} #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1}}  #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent } #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}; `
 
     return btnStyles
 }
