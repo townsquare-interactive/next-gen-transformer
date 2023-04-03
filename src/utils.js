@@ -105,7 +105,7 @@ function transformcontact(contactInfo, siteName) {
                 link: `mailto:${contactInfo.email[x].email}`,
                 icon: icons.email,
                 content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
-                active: hideEmail ? false : contactInfo.email[x] ? true : false,
+                active: hideEmail ? false : contactInfo.email[x].email ? true : false,
             }
 
             contactLinks.push(email)
