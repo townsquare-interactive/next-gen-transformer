@@ -18,6 +18,7 @@ const {
     determineModType,
     createItemStyles,
     createBtnStyles,
+    createImageSizes,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -209,7 +210,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
         s3Folder: basePath,
-        favicon: stripImageFolders(file.config.website.favicon.src) || '',
+        favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
         fontImport: fontClasses,
     }
 
@@ -265,6 +266,8 @@ const transformPageModules = (moduleList, themeStyles) => {
                     //create button styles
                     const btnStyles = createBtnStyles(value, modType, key, themeStyles, currentItem, itemCount)
 
+                    const nextImageSizes = createImageSizes(modType, value.columns)
+
                     const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType, value.columns)
 
                     const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
@@ -287,10 +290,11 @@ const transformPageModules = (moduleList, themeStyles) => {
                         //hasGridCaption: hasGridCaption,
                         itemCount: itemCount,
                         btnStyles: btnStyles,
+                        nextImageSizes: nextImageSizes,
                     }
 
                     if (currentItem.image) {
-                        const imageType = !['no_sizing', 'no_set_height'].includes(currentItem.imgsize)
+                        const imageType = !['no_sizing', 'no_set_height'].includes(value.imgsize)
                             ? 'crop'
                             : modType === 'Banner'
                             ? 'crop'

@@ -237,6 +237,22 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
     return btnStyles
 }
 
+const createImageSizes = (modType, columns) => {
+    if (modType === 'Parallax' || modType === 'Banner') {
+        //return '100vw'
+        return 'large'
+    } else if (modType === 'Testimonials') {
+        //return '130px'
+        return 'testimonial'
+    } else if (columns === 3 || columns === 4) {
+        //return `(max-width: 768px)100vw,(max-width: 1024px)50vw,33vw`
+        return 'columns'
+    } else {
+        //return `(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px`
+        return 'normal'
+    }
+}
+
 function isButton(item) {
     if (item.actionlbl || item.actionlbl2) {
         return true
@@ -364,15 +380,15 @@ const createItemStyles = (items, well, modType) => {
                 //itemStyle = `background: ${currentItem.modColor1};`
                 itemStyle = { background: `${currentItem.modColor1}` }
             } else if (currentItem.modColor1 && well === '1' && !currentItem.image) {
-                itemStyle = { background: `var(--accent-background);` }
+                itemStyle = { background: `var(--accent-background)` }
             } else if (currentItem.modColor1 && well === '1') {
-                itemStyle = { background: ` ${currentItem.modColor1};` }
+                itemStyle = { background: ` ${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
                     backgroundImage: ` linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]});`,
                 }
             } else if (!currentItem.image) {
-                itemStyle = { background: ` ${currentItem.promoColor};` }
+                itemStyle = { background: ` ${currentItem.promoColor}` }
             } else {
                 itemStyle = {}
             }
@@ -651,4 +667,5 @@ module.exports = {
     determineModType,
     createItemStyles,
     createBtnStyles,
+    createImageSizes,
 }

@@ -40,7 +40,7 @@ router.post('/save', async (req, res) => {
 
         await addFileS3(globalFile, `${basePath}/layout`)
 
-        if (req.body.savedData.favicon) {
+        if (req.body.savedData.favicon && req.body.savedData.favicon.src != null) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
             await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
         }
