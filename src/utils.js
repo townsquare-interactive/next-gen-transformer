@@ -227,11 +227,26 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
 const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount) => {
     let btnStyles
 
-    btnStyles = `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor}} #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1}}  #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent } #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}; `
+    btnStyles = `#id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}}   #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent; } `
+
+    if (currentItem.promoColor) {
+        btnStyles =
+            btnStyles +
+            `#id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}
+            #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}`
+    }
+
+    if (currentItem.modColor1) {
+        btnStyles =
+            btnStyles +
+            `#id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1};}
+        #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};}
+        `
+    }
 
     if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
         btnStyles =
-            btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}} `
+            btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; `
     }
 
     return btnStyles
@@ -239,17 +254,17 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
 
 const createImageSizes = (modType, columns) => {
     if (modType === 'Parallax' || modType === 'Banner') {
-        //return '100vw'
-        return 'large'
+        return '100vw'
+        //return 'large'
     } else if (modType === 'Testimonials') {
-        //return '130px'
-        return 'testimonial'
+        return '130px'
+        //return 'testimonial'
     } else if (columns === 3 || columns === 4) {
-        //return `(max-width: 768px)100vw,(max-width: 1024px)50vw,33vw`
-        return 'columns'
+        return `(max-width: 768px)100vw,(max-width: 1024px)50vw,33vw`
+        //return 'columns'
     } else {
-        //return `(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px`
-        return 'normal'
+        return `(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px`
+        //return 'normal'
     }
 }
 
@@ -385,7 +400,7 @@ const createItemStyles = (items, well, modType) => {
                 itemStyle = { background: ` ${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
-                    backgroundImage: ` linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]});`,
+                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]});`,
                 }
             } else if (!currentItem.image) {
                 itemStyle = { background: ` ${currentItem.promoColor}` }
