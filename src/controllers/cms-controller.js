@@ -19,6 +19,7 @@ const {
     createItemStyles,
     createBtnStyles,
     createImageSizes,
+    isOneButton,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -263,8 +264,13 @@ const transformPageModules = (moduleList, themeStyles) => {
                         value.items[i].desc = convertSpecialTokens(currentItem.desc)
                     }
 
+                    let isFeatureButton
+                    if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && currentItem.isFeatured === 'active' && isOneButton(currentItem)) {
+                        isFeatureButton = true
+                    }
+
                     //create button styles
-                    const btnStyles = createBtnStyles(value, modType, key, themeStyles, currentItem, itemCount)
+                    const btnStyles = createBtnStyles(value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton)
 
                     const nextImageSizes = createImageSizes(modType, value.columns)
 
@@ -291,6 +297,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                         itemCount: itemCount,
                         btnStyles: btnStyles,
                         nextImageSizes: nextImageSizes,
+                        isFeatureButton: isFeatureButton,
                     }
 
                     if (currentItem.image) {

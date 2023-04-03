@@ -224,7 +224,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
 }
 
-const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount) => {
+const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
     let btnStyles
 
     btnStyles = `#id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}}   #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent; } `
@@ -244,9 +244,13 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
         `
     }
 
-    if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
+    if (isFeatureButton) {
+        btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
+    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
         btnStyles =
-            btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; `
+            btnStyles +
+            `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
+            `
     }
 
     return btnStyles
@@ -617,7 +621,7 @@ const createColorClasses = (themeStyles) => {
     .btn_p3.btn_2 {border-color:var(--promo3); color:var(--promo3);}
     .btn_p2.btn_2 {border-color:var(--promo2); color:var(--promo2);}
     .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--link-hover); color:var(--link-hover);}
-
+    .hero .one-btn-w .btn_1.btn_w {color: var(--txt-accent); background-color: var(--hero-btn-background);}
     `
 
     const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
@@ -683,4 +687,5 @@ module.exports = {
     createItemStyles,
     createBtnStyles,
     createImageSizes,
+    isOneButton,
 }
