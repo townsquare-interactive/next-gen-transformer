@@ -131,20 +131,22 @@ const transformNav = (menu) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
         //loop through first submenu
-        if (menu[i].title) {
-            for (let x = 0; x < menu[i].submenu.length; x++) {
-                const subMenu1 = menu[i].submenu[x]
+
+        for (let x = 0; x < menu[i].submenu.length; x++) {
+            const subMenu1 = menu[i].submenu[x]
+            if (menu[i].title) {
                 const subSlug = subMenu1.title.replace(/\s+/g, '-')
                 menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase() }
                 //loop through second submenu
-            }
-        }
-        if (menu[i].submenu[x]) {
-            for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
-                const subMenu2 = menu[i].submenu[x].submenu[k]
-                if (subMenu2.title) {
-                    const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
-                    menu[i].submenu[x].submenu[k] = { ...subMenu2, slug: subSlug2.toLowerCase() }
+
+                if (menu[i].submenu[x]) {
+                    for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
+                        const subMenu2 = menu[i].submenu[x].submenu[k]
+                        if (subMenu2.title) {
+                            const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
+                            menu[i].submenu[x].submenu[k] = { ...subMenu2, slug: subSlug2.toLowerCase() }
+                        }
+                    }
                 }
             }
         }
@@ -252,7 +254,7 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
 
     if (isFeatureButton) {
         btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
-    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax') {
+    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && !isFeatureButton) {
         btnStyles =
             btnStyles +
             `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
