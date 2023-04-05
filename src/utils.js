@@ -414,7 +414,7 @@ const createItemStyles = (items, well, modType) => {
                 itemStyle = { background: ` ${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
-                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]});`,
+                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]})`,
                 }
             } else if (!currentItem.image) {
                 itemStyle = { background: ` ${currentItem.promoColor}` }
