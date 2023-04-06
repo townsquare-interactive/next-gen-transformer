@@ -338,6 +338,22 @@ function isGridCaption(item) {
     }
 }
 
+const createGallerySettings = (settings) => {
+    const interval = parseFloat(settings.interval)
+    const restartdelay = parseFloat(settings.restartdelay)
+
+    const newSettings = {
+        autoplay: settings.autoplay == 0 ? false : true,
+        pauseOnHover: settings.pauseonhover == 0 ? false : true,
+        animation: settings.animation || 'slidein',
+        effect: settings.effect || 'slide',
+        interval: interval <= 0 ? 5000 : interval ? interval * 1000 : 5000,
+        restartDelay: restartdelay <= 0 ? 2500 : restartdelay ? restartdelay * 1000 : 2500,
+    }
+
+    return newSettings
+}
+
 const alternatePromoColors = (items, themeStyles, well) => {
     const colorList = Array(items.length)
         .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
@@ -697,4 +713,5 @@ module.exports = {
     createBtnStyles,
     createImageSizes,
     isOneButton,
+    createGallerySettings,
 }

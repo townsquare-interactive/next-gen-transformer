@@ -20,6 +20,7 @@ const {
     createBtnStyles,
     createImageSizes,
     isOneButton,
+    createGallerySettings,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -226,7 +227,6 @@ const transformPageModules = (moduleList, themeStyles) => {
             let modCount = 0
 
             //let imageCount = 0
-
             const isSingleColumn = moduleList.filter((e) => Object.keys(e).length != 0).length === 2
 
             //each actual page module
@@ -234,6 +234,11 @@ const transformPageModules = (moduleList, themeStyles) => {
                 modCount += 1
 
                 const modType = determineModType(value.type)
+
+                //transform Photo Gallery Settings
+                if (modType === 'PhotoGallery' && value.settings) {
+                    value.settings = createGallerySettings(value.settings)
+                }
 
                 if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax' || modType === 'PhotoGallery') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
