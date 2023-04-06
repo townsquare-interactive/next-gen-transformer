@@ -237,19 +237,19 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
 const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
     let btnStyles
 
-    btnStyles = `#id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']}}   #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent; } `
+    btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
 
     if (currentItem.promoColor) {
         btnStyles =
             btnStyles +
-            `#id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}
-            #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}`
+            `  #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
+            #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`
     }
 
     if (currentItem.modColor1) {
         btnStyles =
             btnStyles +
-            `#id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1};}
+            ` #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1};}
         #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};}
         `
     }
@@ -267,7 +267,7 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
 }
 
 const createImageSizes = (modType, columns) => {
-    if (modType === 'Parallax' || modType === 'Banner') {
+    if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
         return '100vw'
         //return 'large'
     } else if (modType === 'Testimonials') {
@@ -382,9 +382,9 @@ const alternatePromoColors = (items, themeStyles, well) => {
 }
 
 const isPromoButton = (items, modType, btnNum) => {
-    if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
+    if ((modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') && items.modColor1 && btnNum === 1) {
         return 'btn_override'
-    } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
+    } else if ((modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') && items.modColor1 && btnNum === 2) {
         return 'btn2_override'
     } else if (btnNum === 1 && ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image))) {
         return 'btn_promo'
@@ -405,23 +405,22 @@ const createItemStyles = (items, well, modType) => {
         let itemStyle
         const currentItem = items[i]
         if (modType === 'Parallax') {
-            if (!currentItem.modColor1 && well != '1' && !currentItem.image) {
-                //itemStyle = `background: ${currentItem.modColor1};`
+            if (currentItem.modColor1 && well != '1' && !currentItem.image) {
                 itemStyle = { background: `${currentItem.modColor1}` }
             } else if (currentItem.modColor1 && well === '1' && !currentItem.image) {
                 itemStyle = { background: `var(--accent-background)` }
             } else if (currentItem.modColor1 && well === '1') {
-                itemStyle = { background: ` ${currentItem.modColor1}` }
+                itemStyle = { background: `${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]})`,
                 }
             } else if (!currentItem.image) {
-                itemStyle = { background: ` ${currentItem.promoColor}` }
+                itemStyle = { background: `${currentItem.promoColor}` }
             } else {
                 itemStyle = {}
             }
-        } else if (modType === 'Banner') {
+        } else if (modType === 'Banner' || modType === 'PhotoGallery') {
             if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity) {
                 itemStyle = { background: `${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
@@ -607,7 +606,7 @@ const createColorClasses = (themeStyles) => {
     .box-links{color:var(--link);}
     .box-links:hover{color:var(--nav-hover);}
     .testimonial-txt-color{color:var(--btn-background);}
-    .testimonials-mod.well .hero, .card-mod .hero{
+    .testimonials-mod.well .hero, .card-mod .hero, photogallery-mod.well .hero{
     &.item, .desc {color:var(--hero-txt);}
     .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
 }

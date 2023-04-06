@@ -235,11 +235,11 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 const modType = determineModType(value.type)
 
-                if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax') {
+                if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax' || modType === 'PhotoGallery') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
                 }
 
-                if (modType === 'Parallax' || modType === 'Banner') {
+                if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
                     value.items = createItemStyles(value.items, value.well, modType)
                 }
 
