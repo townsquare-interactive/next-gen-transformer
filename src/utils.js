@@ -398,9 +398,9 @@ const alternatePromoColors = (items, themeStyles, well) => {
 }
 
 const isPromoButton = (items, modType, btnNum) => {
-    if ((modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') && items.modColor1 && btnNum === 1) {
+    if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
         return 'btn_override'
-    } else if ((modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') && items.modColor1 && btnNum === 2) {
+    } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
         return 'btn2_override'
     } else if (btnNum === 1 && ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image))) {
         return 'btn_promo'
