@@ -622,7 +622,7 @@ const createColorClasses = (themeStyles) => {
     .box-links{color:var(--link);}
     .box-links:hover{color:var(--nav-hover);}
     .testimonial-txt-color{color:var(--btn-background);}
-    .testimonials-mod.well .hero, .card-mod .hero, photogallery-mod.well .hero{
+    .testimonials-mod.well .hero, .card-mod .hero, .photogallery-mod.well .hero{
     &.item, .desc {color:var(--hero-txt);}
     .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
 }
