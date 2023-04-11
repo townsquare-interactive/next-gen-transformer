@@ -338,7 +338,7 @@ function isGridCaption(item) {
     }
 }
 
-const createGallerySettings = (settings) => {
+const createGallerySettings = (settings, blockSwitch1) => {
     const interval = parseFloat(settings.interval)
     const restartdelay = parseFloat(settings.restartdelay)
 
@@ -349,6 +349,7 @@ const createGallerySettings = (settings) => {
         effect: settings.effect || 'slide',
         interval: interval <= 0 ? 5000 : interval ? interval * 1000 : 5000,
         restartDelay: restartdelay <= 0 ? 2500 : restartdelay ? restartdelay * 1000 : 2500,
+        mobileResize: blockSwitch1 == 0 ? false : true,
     }
 
     return newSettings

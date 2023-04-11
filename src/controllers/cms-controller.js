@@ -237,7 +237,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 //transform Photo Gallery Settings
                 if (modType === 'PhotoGallery' && value.settings) {
-                    value.settings = createGallerySettings(value.settings)
+                    value.settings = createGallerySettings(value.settings, value.blockSwitch1)
                 }
 
                 if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax' || modType === 'PhotoGallery') {
@@ -270,7 +270,15 @@ const transformPageModules = (moduleList, themeStyles) => {
                     }
 
                     let isFeatureButton
-                    if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && currentItem.isFeatured === 'active' && isOneButton(currentItem)) {
+                    if (
+                        value.well &&
+                        modType != 'PhotoGrid' &&
+                        modType != 'Parallax' &&
+                        modType != 'PhotoGallery' &&
+                        currentItem.isFeatured === 'active' &&
+                        isOneButton(currentItem) &&
+                        modType != 'PhotoGallery'
+                    ) {
                         isFeatureButton = true
                     }
 
