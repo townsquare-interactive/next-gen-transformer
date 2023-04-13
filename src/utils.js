@@ -256,7 +256,7 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
 
     if (isFeatureButton) {
         btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
-    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && !isFeatureButton) {
+    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
         btnStyles =
             btnStyles +
             `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
