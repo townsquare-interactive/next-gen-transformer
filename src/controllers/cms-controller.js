@@ -213,7 +213,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         cmsUrl: file.config.website.url || '',
         s3Folder: basePath,
         favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
-        fontImport: fontClasses,
+        fontImport: fontImportGroup,
     }
 
     return globalFile
