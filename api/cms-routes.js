@@ -63,7 +63,7 @@ router.post('/save', async (req, res) => {
             await addFileS3(globalStyles, `${basePath}/global`, 'css')
         }
 
-        //Adding new siteData file after saved
+        //Adding new siteData file after saving
         await addFileS3(req.body.siteData, `${basePath}/siteData`)
 
         res.json('posting to s3 folder: ' + basePath)
