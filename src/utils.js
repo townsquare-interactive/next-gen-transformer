@@ -40,7 +40,7 @@ const determineModType = (type) => {
         return 'Testimonials'
     } else if (type === 'card_1' || type === 'card_2') {
         return 'Card'
-    } else if (type === 'photo_gallery_1') {
+    } else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
         return 'PhotoGallery'
     } else {
         return type
