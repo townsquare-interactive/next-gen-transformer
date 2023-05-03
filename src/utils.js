@@ -1,3 +1,5 @@
+const z = require('zod')
+
 function socialConvert(str) {
     let icon = iconConvert(str)
     if (icon === 'google') {
@@ -36,7 +38,7 @@ const determineModType = (type) => {
         return 'Banner'
     } else if (type === 'parallax_1') {
         return 'Parallax'
-    } else if (type === 'testimonials_1') {
+    } else if (type === 'testimonials_1' || type === 'testimonials_2') {
         return 'Testimonials'
     } else if (type === 'card_1' || type === 'card_2') {
         return 'Card'
@@ -338,9 +340,11 @@ function isGridCaption(item) {
     }
 }
 
-const createGallerySettings = (settings, blockSwitch1) => {
-    const interval = parseFloat(settings.interval)
-    const restartdelay = parseFloat(settings.restartdelay)
+const createGallerySettings = (settings, blockSwitch1, type) => {
+    //convert to numbers
+    const schemaNum = z.coerce.number()
+    const interval = schemaNum.parse(settings.interval)
+    const restartDelay = schemaNum.parse(settings.restartdelay)
 
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,
@@ -348,8 +352,9 @@ const createGallerySettings = (settings, blockSwitch1) => {
         animation: settings.animation || 'slidein',
         effect: settings.effect || 'slide',
         interval: interval <= 0 ? 5000 : interval ? interval * 1000 : 5000,
-        restartDelay: restartdelay <= 0 ? 2500 : restartdelay ? restartdelay * 1000 : 2500,
+        restartDelay: restartDelay <= 0 ? 2500 : restartDelay ? restartDelay * 1000 : 2500,
         mobileResize: blockSwitch1 == 0 ? false : true,
+        useThumbnail: type === 'photo_gallery_2' || false,
     }
 
     return newSettings

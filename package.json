@@ -22,7 +22,8 @@
         "mongodb": "^4.8.1",
         "mongoose": "^6.5.2",
         "nodemon": "^2.0.19",
-        "request-promise": "^4.2.6"
+        "request-promise": "^4.2.6",
+        "zod": "^3.21.4"
     },
     "devDependencies": {
         "sass": "^1.57.1",

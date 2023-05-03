@@ -237,7 +237,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 //transform Photo Gallery Settings
                 if (modType === 'PhotoGallery' && value.settings) {
-                    value.settings = createGallerySettings(value.settings, value.blockSwitch1)
+                    value.settings = createGallerySettings(value.settings, value.blockSwitch1, value.type)
                 }
 
                 if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax' || modType === 'PhotoGallery') {
