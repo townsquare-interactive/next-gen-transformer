@@ -408,7 +408,10 @@ const isPromoButton = (items, modType, btnNum) => {
         return 'btn_override'
     } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
         return 'btn2_override'
-    } else if (btnNum === 1 && ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image))) {
+    } else if (
+        btnNum === 1 &&
+        ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image) || (modType === 'PhotoGallery' && !items.image))
+    ) {
         return 'btn_promo'
     } else if (btnNum === 1 && modType === 'Banner' && !items.image) {
         /*  else if (btnNum === 1 && ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1))) {
@@ -443,9 +446,9 @@ const createItemStyles = (items, well, modType) => {
                 itemStyle = {}
             }
         } else if (modType === 'Banner' || modType === 'PhotoGallery') {
-            if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity) {
+            if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity && modType === 'Banner') {
                 itemStyle = { background: `${currentItem.modColor1}` }
-            } else if (well === '1' && !currentItem.image) {
+            } else if (well === '1' && !currentItem.image && modType === 'Banner') {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
