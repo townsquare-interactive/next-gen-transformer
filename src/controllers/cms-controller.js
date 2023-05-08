@@ -245,7 +245,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                 }
 
                 if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
-                    value.items = createItemStyles(value.items, value.well, modType)
+                    value.items = createItemStyles(value.items, value.well, modType, value.type)
                 }
 
                 let itemCount = 0

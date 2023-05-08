@@ -425,7 +425,7 @@ const isPromoButton = (items, modType, btnNum) => {
     }
 }
 
-const createItemStyles = (items, well, modType) => {
+const createItemStyles = (items, well, modType, type) => {
     for (let i = 0; i < items.length; i++) {
         let itemStyle
         const currentItem = items[i]
@@ -448,7 +448,7 @@ const createItemStyles = (items, well, modType) => {
         } else if (modType === 'Banner' || modType === 'PhotoGallery') {
             if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity && modType === 'Banner') {
                 itemStyle = { background: `${currentItem.modColor1}` }
-            } else if (well === '1' && !currentItem.image && modType === 'Banner') {
+            } else if (well === '1' && !currentItem.image && (modType === 'Banner' || type === 'photo_gallery_2')) {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
