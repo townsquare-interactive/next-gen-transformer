@@ -343,15 +343,17 @@ function isGridCaption(item) {
 const createGallerySettings = (settings, blockSwitch1, type) => {
     //convert to numbers
     const schemaNum = z.coerce.number()
-    const interval = schemaNum.parse(settings.interval)
+    const interval = schemaNum.parse(settings.interval) * 1000
     const restartDelay = schemaNum.parse(settings.restartdelay)
+
+    console.log('interval', interval)
 
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,
         pauseOnHover: settings.pauseonhover == 0 ? false : true,
         animation: settings.animation || 'slidein',
         effect: settings.effect || 'slide',
-        interval: interval <= 0 ? 5000 : interval ? interval * 1000 : 5000,
+        interval: interval <= 0 ? 5000 : interval,
         restartDelay: restartDelay <= 0 ? 2500 : restartDelay ? restartDelay * 1000 : 2500,
         mobileResize: blockSwitch1 == 0 ? false : true,
         useThumbnail: type === 'photo_gallery_2' || false,

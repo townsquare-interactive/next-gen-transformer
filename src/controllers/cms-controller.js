@@ -236,7 +236,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                 const modType = determineModType(value.type)
 
                 //transform Photo Gallery Settings
-                if (modType === 'PhotoGallery' && value.settings) {
+                if ((modType === 'PhotoGallery' || modType === 'Testimonials') && value.settings) {
                     value.settings = createGallerySettings(value.settings, value.blockSwitch1, value.type)
                 }
 
@@ -247,6 +247,8 @@ const transformPageModules = (moduleList, themeStyles) => {
                 if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
                     value.items = createItemStyles(value.items, value.well, modType, value.type)
                 }
+
+                //testimonial carousel height
 
                 let itemCount = 0
                 //loop for each item
