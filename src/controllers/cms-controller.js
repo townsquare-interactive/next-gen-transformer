@@ -15,12 +15,13 @@ const {
     replaceKey,
     createFontCss,
     createLinkAndButtonVariables,
-    determineModType,
+    determineModRenderType,
     createItemStyles,
     createBtnStyles,
     createImageSizes,
     isOneButton,
     createGallerySettings,
+    modVariationType,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -233,19 +234,20 @@ const transformPageModules = (moduleList, themeStyles) => {
             for (const [key, value] of Object.entries(moduleList[i])) {
                 modCount += 1
 
-                const modType = determineModType(value.type)
+                const modRenderType = determineModRenderType(value.type)
+                value.type = modVariationType(value.type)
 
                 //transform Photo Gallery Settings
-                if ((modType === 'PhotoGallery' || modType === 'Testimonials') && value.settings) {
+                if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && value.settings) {
                     value.settings = createGallerySettings(value.settings, value.blockSwitch1, value.type)
                 }
 
-                if (modType === 'PhotoGrid' || modType === 'Banner' || modType === 'Parallax' || modType === 'PhotoGallery') {
+                if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
                     value.items = alternatePromoColors(value.items, themeStyles, value.well)
                 }
 
-                if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
-                    value.items = createItemStyles(value.items, value.well, modType, value.type)
+                if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
+                    value.items = createItemStyles(value.items, value.well, modRenderType, value.type)
                 }
 
                 //testimonial carousel height
@@ -274,28 +276,32 @@ const transformPageModules = (moduleList, themeStyles) => {
                     let isFeatureButton
                     if (
                         value.well &&
-                        modType != 'PhotoGrid' &&
-                        modType != 'Parallax' &&
-                        modType != 'PhotoGallery' &&
+                        modRenderType != 'PhotoGrid' &&
+                        modRenderType != 'Parallax' &&
+                        modRenderType != 'PhotoGallery' &&
                         currentItem.isFeatured === 'active' &&
                         isOneButton(currentItem) &&
-                        modType != 'PhotoGallery'
+                        modRenderType != 'PhotoGallery'
                     ) {
                         isFeatureButton = true
                     }
 
                     //create button styles
-                    const btnStyles = createBtnStyles(value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton)
+                    const btnStyles = createBtnStyles(value, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
 
-                    const nextImageSizes = createImageSizes(modType, value.columns)
+                    const nextImageSizes = createImageSizes(modRenderType, value.columns)
 
-                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modType, value.columns)
+                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
+                        currentItem,
+                        modRenderType,
+                        value.columns
+                    )
 
-                    const isBeaconHero = modType === 'article' && currentItem.isFeatured === 'active' ? true : false
+                    const isBeaconHero = modRenderType === 'article' && currentItem.isFeatured === 'active' ? true : false
 
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
 
-                    //const hasGridCaption = modType === 'PhotoGrid' ? isGridCaption(currentItem) : false
+                    //const hasGridCaption = modRenderType === 'PhotoGrid' ? isGridCaption(currentItem) : false
 
                     //update each item's data
                     value.items[i] = {
@@ -318,9 +324,9 @@ const transformPageModules = (moduleList, themeStyles) => {
                     if (currentItem.image) {
                         const imageType = !['no_sizing', 'no_set_height'].includes(value.imgsize)
                             ? 'crop'
-                            : modType === 'Banner'
+                            : modRenderType === 'Banner'
                             ? 'crop'
-                            : modType === 'Parallax'
+                            : modRenderType === 'Parallax'
                             ? 'crop'
                             : 'nocrop'
 
@@ -339,7 +345,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                 }
 
                 const modData = { ...newModule, modId: key, modCount: modCount, columnLocation: i, isSingleColumn: isSingleColumn }
-                const newItem = { attributes: modData, componentType: modType }
+                const newItem = { attributes: modData, componentType: modRenderType }
 
                 newData.push(newItem)
             }

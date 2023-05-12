@@ -29,7 +29,7 @@ function iconConvert(str) {
     }
 }
 
-const determineModType = (type) => {
+const determineModRenderType = (type) => {
     if (type.includes('article')) {
         return 'Article'
     } else if (type === 'photo_grid') {
@@ -44,6 +44,17 @@ const determineModType = (type) => {
         return 'Card'
     } else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
         return 'PhotoGallery'
+    } else {
+        return type
+    }
+}
+
+//cleaning up module type names that are not specific
+const modVariationType = (type) => {
+    if (type === 'testimonials_2') {
+        return 'review_carousel'
+    } else if (type === 'photo_gallery_2') {
+        return 'thumbnail_gallery'
     } else {
         return type
     }
@@ -346,8 +357,6 @@ const createGallerySettings = (settings, blockSwitch1, type) => {
     const interval = schemaNum.parse(settings.interval) * 1000
     const restartDelay = schemaNum.parse(settings.restartdelay)
 
-    console.log('interval', interval)
-
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,
         pauseOnHover: settings.pauseonhover == 0 ? false : true,
@@ -356,7 +365,7 @@ const createGallerySettings = (settings, blockSwitch1, type) => {
         interval: interval <= 0 ? 5000 : interval,
         restartDelay: restartDelay <= 0 ? 2500 : restartDelay ? restartDelay * 1000 : 2500,
         mobileResize: blockSwitch1 == 0 ? false : true,
-        useThumbnail: type === 'photo_gallery_2' || false,
+        useThumbnail: type === 'thumbnail_gallery' || false,
     }
 
     return newSettings
@@ -450,7 +459,7 @@ const createItemStyles = (items, well, modType, type) => {
         } else if (modType === 'Banner' || modType === 'PhotoGallery') {
             if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity && modType === 'Banner') {
                 itemStyle = { background: `${currentItem.modColor1}` }
-            } else if (well === '1' && !currentItem.image && (modType === 'Banner' || type === 'photo_gallery_2')) {
+            } else if (well === '1' && !currentItem.image && (modType === 'Banner' || type === 'thumbnail_gallery')) {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
@@ -719,10 +728,11 @@ module.exports = {
     convertSpecialTokens,
     createFontCss,
     createLinkAndButtonVariables,
-    determineModType,
+    determineModRenderType,
     createItemStyles,
     createBtnStyles,
     createImageSizes,
     isOneButton,
     createGallerySettings,
+    modVariationType,
 }
