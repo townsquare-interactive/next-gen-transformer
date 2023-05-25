@@ -77,6 +77,12 @@ const stripUrl = (url) => {
     return removeProtocol.replace(/\..*/, '')
 }
 
+//strip anything between / ... /
+const stripSiteAndUrl = (url) => {
+    const removedSiteAndDomain = url.match(/\/(.*)$/)
+    return removedSiteAndDomain[0]
+}
+
 const stripImageFolders = (file) => {
     const result = file.substring(file.lastIndexOf('/') + 1)
     return result
@@ -151,7 +157,7 @@ const transformNav = (menu) => {
             const subMenu1 = menu[i].submenu[x]
             if (menu[i].title) {
                 const subSlug = subMenu1.title.replace(/\s+/g, '-')
-                menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase() }
+                menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase(), url: stripSiteAndUrl(subMenu1.url) }
                 //loop through second submenu
 
                 if (menu[i].submenu[x]) {
@@ -159,14 +165,18 @@ const transformNav = (menu) => {
                         const subMenu2 = menu[i].submenu[x].submenu[k]
                         if (subMenu2.title) {
                             const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
-                            menu[i].submenu[x].submenu[k] = { ...subMenu2, slug: subSlug2.toLowerCase() }
+                            menu[i].submenu[x].submenu[k] = {
+                                ...subMenu2,
+                                slug: subSlug2.toLowerCase(),
+                                url: stripSiteAndUrl(menu[i].submenu[x].submenu[k].url),
+                            }
                         }
                     }
                 }
             }
         }
 
-        menu[i] = { ...menu[i], slug: slug.toLowerCase() }
+        menu[i] = { ...menu[i], slug: slug.toLowerCase(), url: stripSiteAndUrl(menu[i].url) }
     }
 
     return determineNavParent(menu)
