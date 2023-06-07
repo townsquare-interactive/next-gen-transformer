@@ -618,7 +618,7 @@ const createColorClasses = (themeStyles) => {
         --hero-btn-background: ${themeStyles['heroBtnBackground']};
         --hero-link: ${themeStyles['heroLink']};
         --hero-link-hover: ${themeStyles['heroLinkHover']};
-        --caption-text: ${themeStyles['captionText']};
+        --caption-txt: ${themeStyles['captionText']};
         --caption-background: ${themeStyles['captionBackground']};
         --nav-txt: ${themeStyles['NavText']};
         --nav-hover: ${themeStyles['navHover']};
