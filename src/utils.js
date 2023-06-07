@@ -668,8 +668,8 @@ const createColorClasses = (themeStyles) => {
     .btn_2:hover{color: var(--link-hover); border-color: var(--link-hover);} 
     .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
     .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
-    .close-toggle {color:var(--txt-accent); background-color:var(--btn-background);}
-    .close-toggle:hover {color:var(--btn-background); background-color:var(--txt-accent);}
+    .close-toggle {color:var(--btn-txt); background-color:var(--btn-background);}
+    .close-toggle:hover {color:var(--btn-background); background-color:var(--btn-txt);}
     .btn_p4.btn_1 {background-color:var(--promo4); color:var(--txt-accent);}
     .btn_p4.btn_1:hover{color: var(--promo4); background-color: var(--txt-accent);} 
     .btn_p3.btn_1 {background-color:var(--promo3); color:var(--txt-accent);}
