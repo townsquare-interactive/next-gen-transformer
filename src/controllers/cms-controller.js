@@ -197,6 +197,85 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         return social
     }
 
+    const contactFormData = {
+        formTitle: 'Contact Us',
+        formFields: [
+            {
+                name: 'fName',
+                placeholder: 'Enter Name',
+                type: 'text',
+                label: 'First Name',
+                isReq: true,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                name: 'lName',
+                placeholder: 'Enter Name',
+                type: 'text',
+                label: 'Last Name',
+                isReq: true,
+                fieldType: 'input',
+                isVisible: true,
+            },
+
+            {
+                name: 'email',
+                // placeholder:'Enter Name',
+                type: 'email',
+                label: 'Email',
+                isReq: true,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                name: 'phone',
+                // placeholder:'Enter Name',
+                type: 'phone',
+                label: 'Phone',
+                isReq: false,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                label: 'Message',
+                name: 'messagebox',
+                isReq: true,
+                fieldType: 'textarea',
+                isVisible: true,
+            },
+            {
+                label: 'Address',
+                subLabel: 'Street Address',
+                name: 'street',
+                isReq: false,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                label: 'Zip Code',
+                name: 'zip',
+                isReq: false,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                label: 'City',
+                name: 'city',
+                isReq: false,
+                fieldType: 'input',
+                isVisible: true,
+            },
+            {
+                label: 'State',
+                name: 'state',
+                isReq: false,
+                fieldType: 'input',
+                isVisible: true,
+            },
+        ],
+    }
+
     const globalFile = {
         logos: file.logos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
@@ -215,6 +294,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         s3Folder: basePath,
         favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
         fontImport: fontImportGroup,
+        contactFormData: contactFormData,
     }
 
     return globalFile
