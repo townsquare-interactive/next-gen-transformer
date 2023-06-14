@@ -222,6 +222,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
                 datacenter: 'us21',
                 auth: process.env.MAILCHIMP_API_KEY,
             },
+            zapierUrl: process.env.ZAPIER_URL,
         },
     }
 
