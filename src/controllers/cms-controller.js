@@ -366,6 +366,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: true,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'sm',
                             },
                             {
                                 name: 'lName',
@@ -375,6 +376,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: true,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'sm',
                             },
 
                             {
@@ -385,6 +387,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: true,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 name: 'phone',
@@ -394,6 +397,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: false,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 label: 'Message',
@@ -401,6 +405,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: true,
                                 fieldType: 'textarea',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 label: 'Address',
@@ -409,6 +414,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: false,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 label: 'Zip Code',
@@ -416,6 +422,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: false,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 label: 'City',
@@ -423,6 +430,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: false,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                             {
                                 label: 'State',
@@ -430,6 +438,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                                 isReq: false,
                                 fieldType: 'input',
                                 isVisible: true,
+                                size: 'md',
                             },
                         ],
                     }
