@@ -144,18 +144,18 @@ const deletePages = async (pages, basePath) => {
 }
 
 //Update pagelist file in s3 or create if not already there
-const updatePageList = async (page, basePath) => {
+const updatePageList = async (page, basePath, siteData, themeStyles) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
-    addPagesToList(pageListFile, page)
+    addPagesToList(pageListFile, page, basePath, siteData, themeStyles)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
 }
 
 //add page object to pagelist
-const addPagesToList = (pageListFile, page) => {
+const addPagesToList = async (pageListFile, page, basePath, siteData, themeStyles) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         pageData = page[i].data
@@ -164,10 +164,29 @@ const addPagesToList = (pageListFile, page) => {
                 name: pageData.title,
                 slug: pageData.slug,
                 url: pageData.url,
-                id: pageData.id,
+                id: Number(pageData.id),
                 page_type: pageData.page_type,
             })
             console.log('new page added:', pageData.title)
+
+            //need to update nav here
+            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
+
+            //add new page to nav
+            oldSiteData.cmsNav.push({
+                name: pageData.title,
+                title: pageData.title,
+                slug: pageData.slug,
+                url: pageData.url,
+                ID: pageData.id,
+                menu_order: oldSiteData.cmsNav.length,
+                menu_item_parent: 0,
+            })
+
+            console.log('new page added', oldSiteData.cmsNav)
+
+            //update global file with new nav
+            await addFileS3(oldSiteData, `${basePath}/layout`)
         }
     }
 }

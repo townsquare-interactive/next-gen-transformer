@@ -1,11 +1,4 @@
-const {
-    transformCMSData,
-    updatePageList,
-    transformPagesData,
-    createOrEditLayout,
-    deletePages,
-    createGlobalStylesheet,
-} = require('../src/controllers/cms-controller')
+const { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } = require('../src/controllers/cms-controller')
 
 const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3Functions.js')
 
@@ -22,6 +15,10 @@ router.post('/save', async (req, res) => {
 
         const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
 
+        let globalFile
+        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles)
+        await addFileS3(globalFile, `${basePath}/layout`)
+
         let newPageList
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
@@ -32,13 +29,8 @@ router.post('/save', async (req, res) => {
                 await addFileS3(newPageData.pages[i], `${basePath}/pages/${newPageData.pages[i].data.slug}`)
             }
             // update/create pagelist
-            newPageList = await updatePageList(newPageData.pages, basePath)
+            newPageList = await updatePageList(newPageData.pages, basePath, req.body.siteData, themeStyles)
         }
-
-        let globalFile
-        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles)
-
-        await addFileS3(globalFile, `${basePath}/layout`)
 
         if (req.body.savedData.favicon && req.body.savedData.favicon.src != null) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
@@ -101,7 +93,7 @@ router.post('/cms', async (req, res) => {
 })
 
 //takes all site data and adds pages using backup data
-router.post('/migrate', async (req, res) => {
+/* router.post('/migrate', async (req, res) => {
     const newData = transformCMSData(req.body)
     const basePath = stripUrl(req.body.config.website.url)
 
@@ -112,6 +104,6 @@ router.post('/migrate', async (req, res) => {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
     }
-})
+}) */
 
 module.exports = router
