@@ -278,7 +278,7 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
     if (currentItem.modColor1) {
         btnStyles =
             btnStyles +
-            ` #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.modColor1};}
+            ` #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['captionText']};} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['captionText']}; background-color: ${currentItem.modColor1};}
         #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};}
         `
     }
@@ -469,6 +469,9 @@ const createItemStyles = (items, well, modType, type) => {
                 }
             } else if (!currentItem.image) {
                 itemStyle = { background: `${currentItem.promoColor}` }
+            } else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
+                let modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`)
+                itemStyle = { background: modBackground }
             } else {
                 itemStyle = {}
             }
