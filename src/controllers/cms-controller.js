@@ -7,7 +7,7 @@ const {
     getColumnsCssClass,
     transformcontact,
     transformNav,
-    isGridCaption,
+    //isGridCaption,
     alternatePromoColors,
     stripImageFolders,
     createColorClasses,
@@ -260,24 +260,19 @@ const transformPageModules = (moduleList, themeStyles) => {
                     value.items = createItemStyles(value.items, value.well, modRenderType, value.type)
                 }
 
-                //testimonial carousel height
-
                 let itemCount = 0
                 //loop for each item
-
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
 
+                    //Change lazy loading to off for first module in photogallery
+                    value.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : value.lazy
+
                     let imagePriority = false
                     if (value.lazy === 'off') {
                         imagePriority = true
-                    } /*   else if ((modCount === 1 && itemCount <= 4) || imageCount <= 2) {
-                        imagePriority = true
-                    } else {
-                        imagePriority = false
-                    } */
-
+                    }
                     //replace line breaks from cms
                     if (value.items[i].desc) {
                         value.items[i].desc = convertSpecialTokens(currentItem.desc)
@@ -307,11 +302,10 @@ const transformPageModules = (moduleList, themeStyles) => {
                         value.columns
                     )
 
+                    //check if article is beach and hero
                     const isBeaconHero = modRenderType === 'article' && currentItem.isFeatured === 'active' ? true : false
 
                     const imageIcon = btnIconConvert(value.items[i].icon3 || '')
-
-                    //const hasGridCaption = modRenderType === 'PhotoGrid' ? isGridCaption(currentItem) : false
 
                     //update each item's data
                     value.items[i] = {
@@ -331,6 +325,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                         isFeatureButton: isFeatureButton,
                     }
 
+                    //decide if image is to be cropped to a certain dimension
                     if (currentItem.image) {
                         const imageType = !['no_sizing', 'no_set_height'].includes(value.imgsize)
                             ? 'crop'
@@ -347,6 +342,7 @@ const transformPageModules = (moduleList, themeStyles) => {
                     }
                 }
 
+                //replace class with customClassName
                 let newModule
                 if (value.class) {
                     newModule = replaceKey(value, 'class', 'customClassName')
@@ -354,9 +350,11 @@ const transformPageModules = (moduleList, themeStyles) => {
                     newModule = { ...value }
                 }
 
+                //add contactFormData in form object
                 if (modRenderType === 'ContactFormRoutes') {
                     const contactFormData = {
                         formTitle: 'Contact Us',
+                        formService: 'webhook',
                         formFields: [
                             {
                                 name: 'fName',
@@ -485,8 +483,6 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
         //error catch if code passed is not correct scss/css
         console.log('custom css ' + e.name + ': ' + e.message)
         return `/* ${e.message.toString()} */` + allStyles
-
-        //return
     }
 }
 
