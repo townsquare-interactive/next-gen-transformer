@@ -29,7 +29,7 @@ router.post('/save', async (req, res) => {
                 await addFileS3(newPageData.pages[i], `${basePath}/pages/${newPageData.pages[i].data.slug}`)
             }
             // update/create pagelist
-            newPageList = await updatePageList(newPageData.pages, basePath, req.body.siteData, themeStyles)
+            newPageList = await updatePageList(newPageData.pages, basePath)
         }
 
         if (req.body.savedData.favicon && req.body.savedData.favicon.src != null) {

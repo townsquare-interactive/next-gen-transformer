@@ -144,18 +144,18 @@ const deletePages = async (pages, basePath) => {
 }
 
 //Update pagelist file in s3 or create if not already there
-const updatePageList = async (page, basePath, siteData, themeStyles) => {
+const updatePageList = async (page, basePath) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
-    addPagesToList(pageListFile, page, basePath, siteData, themeStyles)
+    addPagesToList(pageListFile, page, basePath)
     //Can use add file when ready, instead of addpagelist logging
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
 }
 
 //add page object to pagelist
-const addPagesToList = async (pageListFile, page, basePath, siteData, themeStyles) => {
+const addPagesToList = async (pageListFile, page, basePath) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         pageData = page[i].data
@@ -169,25 +169,29 @@ const addPagesToList = async (pageListFile, page, basePath, siteData, themeStyle
             })
             console.log('new page added:', pageData.title)
 
-            //need to update nav here
-            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
-
-            //add new page to nav
-            oldSiteData.cmsNav.push({
-                name: pageData.title,
-                title: pageData.title,
-                slug: pageData.slug,
-                url: pageData.url,
-                ID: pageData.id,
-                menu_order: oldSiteData.cmsNav.length,
-                menu_item_parent: 0,
-            })
-
-            console.log('new page added', oldSiteData.cmsNav)
-
-            //update global file with new nav
-            await addFileS3(oldSiteData, `${basePath}/layout`)
+            await addNewPageToNav(pageData, basePath)
         }
+    }
+}
+
+const addNewPageToNav = async (pageData, basePath) => {
+    //Get layout file to update nav
+    let oldSiteData = await getFileS3(`${basePath}/layout.json`)
+
+    if (oldSiteData) {
+        //add new page to nav
+        oldSiteData.cmsNav.push({
+            name: pageData.title,
+            title: pageData.title,
+            slug: pageData.slug,
+            url: pageData.url,
+            ID: pageData.id,
+            menu_order: oldSiteData.cmsNav.length,
+            menu_item_parent: 0,
+        })
+
+        //update global file with new nav
+        await addFileS3(oldSiteData, `${basePath}/layout`)
     }
 }
 

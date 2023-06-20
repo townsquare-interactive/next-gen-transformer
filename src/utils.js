@@ -664,25 +664,25 @@ const createColorClasses = (themeStyles) => {
 }
     `
 
-    const btnStyles = ` .btn_1{color: var(--txt-accent); background-color: var(--btn-background);} 
-    .btn_1:hover{color: var(--btn-background); background-color: var(--txt-accent);} 
+    const btnStyles = ` .btn_1{color: var(--btn-txt); background-color: var(--btn-background);} 
+    .btn_1:hover{color: var(--btn-background); background-color: var(--btn-txt);} 
     .btn_2{color: var(--link); border-color: var(--link);} 
     .btn_2:hover{color: var(--link-hover); border-color: var(--link-hover);} 
-    .btn_alt{color: var(--promo); background-color: var(--txt-accent);} 
-    .btn_alt:hover{color: var(--txt-accent); background-color: var(--promo);}
+    .btn_alt{color: var(--promo); background-color: var(--btn-txt);} 
+    .btn_alt:hover{color: var(--btn-txt); background-color: var(--promo);}
     .close-toggle {color:var(--btn-txt); background-color:var(--btn-background);}
     .close-toggle:hover {color:var(--btn-background); background-color:var(--btn-txt);}
-    .btn_p4.btn_1 {background-color:var(--promo4); color:var(--txt-accent);}
-    .btn_p4.btn_1:hover{color: var(--promo4); background-color: var(--txt-accent);} 
-    .btn_p3.btn_1 {background-color:var(--promo3); color:var(--txt-accent);}
-    .btn_p3.btn_1:hover{color: var(--promo3); background-color: var(--txt-accent);} 
-    .btn_p2.btn_1 {background-color:var(--promo2); color:var(--txt-accent);}
-    .btn_p2.btn_1:hover{color: var(--promo2); background-color: var(--txt-accent);} 
+    .btn_p4.btn_1 {background-color:var(--promo4); color:var(--btn-txt);}
+    .btn_p4.btn_1:hover{color: var(--promo4); background-color: var(--btn-txt);} 
+    .btn_p3.btn_1 {background-color:var(--promo3); color:var(--btn-txt);}
+    .btn_p3.btn_1:hover{color: var(--promo3); background-color: var(--btn-txt);} 
+    .btn_p2.btn_1 {background-color:var(--promo2); color:var(--btn-txt);}
+    .btn_p2.btn_1:hover{color: var(--promo2); background-color: var(--btn-txt);} 
     .btn_p4.btn_2 {border-color:var(--promo4); color:var(--promo4);}
     .btn_p3.btn_2 {border-color:var(--promo3); color:var(--promo3);}
     .btn_p2.btn_2 {border-color:var(--promo2); color:var(--promo2);}
     .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--link-hover); color:var(--link-hover);}
-    .hero .one-btn-w .btn_1.btn_w {color: var(--txt-accent); background-color: var(--hero-btn-background);}
+    .hero .one-btn-w .btn_1.btn_w {color: var(--btn-txt); background-color: var(--hero-btn-background);}
     `
 
     const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
