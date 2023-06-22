@@ -1,120 +1,101 @@
-"use strict";
-const z = require('zod');
+'use strict'
+const z = require('zod')
 function socialConvert(str) {
-    let icon = iconConvert(str);
+    let icon = iconConvert(str)
     if (icon === 'google') {
-        return ['fab', 'google'];
-    }
-    else if (icon === 'facebook') {
-        return ['fab', 'facebook'];
-    }
-    else if (icon === 'instagram') {
-        return ['fab', 'instagram'];
-    }
-    else if (icon === 'twitter') {
-        return ['fab', 'twitter'];
-    }
-    else {
-        return ['fas', 'rocket'];
+        return ['fab', 'google']
+    } else if (icon === 'facebook') {
+        return ['fab', 'facebook']
+    } else if (icon === 'instagram') {
+        return ['fab', 'instagram']
+    } else if (icon === 'twitter') {
+        return ['fab', 'twitter']
+    } else {
+        return ['fas', 'rocket']
     }
 }
 function iconConvert(str) {
     if (str.indexOf('google') !== -1) {
-        return 'google';
-    }
-    else if (str.indexOf('facebook') !== -1) {
-        return 'facebook';
-    }
-    else if (str.indexOf('instagram') !== -1) {
-        return 'instagram';
-    }
-    else if (str.indexOf('twitter') !== -1) {
-        return 'twitter';
-    }
-    else {
-        return 'social';
+        return 'google'
+    } else if (str.indexOf('facebook') !== -1) {
+        return 'facebook'
+    } else if (str.indexOf('instagram') !== -1) {
+        return 'instagram'
+    } else if (str.indexOf('twitter') !== -1) {
+        return 'twitter'
+    } else {
+        return 'social'
     }
 }
 const determineModRenderType = (type) => {
     if (type.includes('article')) {
-        return 'Article';
+        return 'Article'
+    } else if (type === 'photo_grid') {
+        return 'PhotoGrid'
+    } else if (type === 'banner_1') {
+        return 'Banner'
+    } else if (type === 'parallax_1') {
+        return 'Parallax'
+    } else if (type === 'testimonials_1' || type === 'testimonials_2') {
+        return 'Testimonials'
+    } else if (type === 'card_1' || type === 'card_2') {
+        return 'Card'
+    } else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
+        return 'PhotoGallery'
+    } else if (type === 'plugin') {
+        return 'ContactFormRoutes'
+    } else {
+        return type
     }
-    else if (type === 'photo_grid') {
-        return 'PhotoGrid';
-    }
-    else if (type === 'banner_1') {
-        return 'Banner';
-    }
-    else if (type === 'parallax_1') {
-        return 'Parallax';
-    }
-    else if (type === 'testimonials_1' || type === 'testimonials_2') {
-        return 'Testimonials';
-    }
-    else if (type === 'card_1' || type === 'card_2') {
-        return 'Card';
-    }
-    else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
-        return 'PhotoGallery';
-    }
-    else if (type === 'plugin') {
-        return 'ContactFormRoutes';
-    }
-    else {
-        return type;
-    }
-};
+}
 //cleaning up module type names that are not specific
 const modVariationType = (type) => {
     if (type === 'testimonials_2') {
-        return 'review_carousel';
+        return 'review_carousel'
+    } else if (type === 'photo_gallery_2') {
+        return 'thumbnail_gallery'
+    } else {
+        return type
     }
-    else if (type === 'photo_gallery_2') {
-        return 'thumbnail_gallery';
-    }
-    else {
-        return type;
-    }
-};
+}
 function btnIconConvert(icon) {
     if (icon) {
         //replaces fas fa-rocket with faRocket
-        const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : '';
-        const stripIcon = icon.replace(iconPrefix, '');
-        const iconModel = stripIcon.replace(/^(.*?)-/, '');
-        return { iconPrefix: iconPrefix, iconModel: iconModel };
+        const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : ''
+        const stripIcon = icon.replace(iconPrefix, '')
+        const iconModel = stripIcon.replace(/^(.*?)-/, '')
+        return { iconPrefix: iconPrefix, iconModel: iconModel }
     }
 }
 //Strip url of protocol and .production / .com
 const stripUrl = (url) => {
-    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '');
-    return removeProtocol.replace(/\..*/, '');
-};
+    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
+    return removeProtocol.replace(/\..*/, '')
+}
 //strip anything between / ... /
 const stripSiteAndUrl = (url) => {
     if (url === '#') {
-        return '#';
+        return '#'
+    } else {
+        const removedSiteAndDomain = url.match(/\/(.*)$/)
+        return removedSiteAndDomain[0]
     }
-    else {
-        const removedSiteAndDomain = url.match(/\/(.*)$/);
-        return removedSiteAndDomain[0];
-    }
-};
+}
 const stripImageFolders = (file) => {
-    const result = file.substring(file.lastIndexOf('/') + 1);
-    return result;
-};
+    const result = file.substring(file.lastIndexOf('/') + 1)
+    return result
+}
 function transformcontact(contactInfo, siteName) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
         location: ['fas', 'location-pin'],
-    };
-    const newAdd = contactInfo.address.street.replaceAll(' ', '+');
-    const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip;
-    const contactLinks = [];
-    const multiPhones = contactInfo.phone.length > 1 ? true : false;
-    const hideEmail = !multiPhones && contactInfo.email.length > 1;
+    }
+    const newAdd = contactInfo.address.street.replaceAll(' ', '+')
+    const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
+    const contactLinks = []
+    const multiPhones = contactInfo.phone.length > 1 ? true : false
+    const hideEmail = !multiPhones && contactInfo.email.length > 1
     for (x in contactInfo.phone) {
         if (contactInfo.phone[x]) {
             const phone = {
@@ -123,8 +104,8 @@ function transformcontact(contactInfo, siteName) {
                 icon: icons.phone,
                 content: multiPhones ? contactInfo.phone[x].name + ': ' + contactInfo.phone[x].number : contactInfo.phone[x].number,
                 active: contactInfo.phone[x].number ? true : false,
-            };
-            contactLinks.push(phone);
+            }
+            contactLinks.push(phone)
         }
     }
     for (x in contactInfo.email) {
@@ -135,8 +116,8 @@ function transformcontact(contactInfo, siteName) {
                 icon: icons.email,
                 content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
                 active: hideEmail ? false : contactInfo.email[x].email ? true : false,
-            };
-            contactLinks.push(email);
+            }
+            contactLinks.push(email)
         }
     }
     const contactMap = {
@@ -145,79 +126,86 @@ function transformcontact(contactInfo, siteName) {
         icon: icons.location,
         content: contactInfo.address.name,
         active: contactInfo.address ? true : false,
-    };
-    multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap);
-    contactInfo = Object.assign(Object.assign({}, contactInfo), { contactLinks: contactLinks, showContactBox: multiPhones });
-    return contactInfo;
+    }
+    multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)
+    contactInfo = Object.assign(Object.assign({}, contactInfo), { contactLinks: contactLinks, showContactBox: multiPhones })
+    return contactInfo
 }
 const transformNav = (menu) => {
     for (let i = 0; i < menu.length; i++) {
-        const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : '';
+        const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
         //loop through first submenu
         for (let x = 0; x < menu[i].submenu.length; x++) {
-            const subMenu1 = menu[i].submenu[x];
+            const subMenu1 = menu[i].submenu[x]
             if (menu[i].title) {
-                const subSlug = subMenu1.title.replace(/\s+/g, '-');
-                menu[i].submenu[x] = Object.assign(Object.assign({}, subMenu1), { slug: subSlug.toLowerCase(), url: subMenu1.url ? stripSiteAndUrl(subMenu1.url) : '' });
+                const subSlug = subMenu1.title.replace(/\s+/g, '-')
+                menu[i].submenu[x] = Object.assign(Object.assign({}, subMenu1), {
+                    slug: subSlug.toLowerCase(),
+                    url: subMenu1.url ? stripSiteAndUrl(subMenu1.url) : '',
+                })
                 //loop through second submenu
                 if (menu[i].submenu[x]) {
                     for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
-                        const subMenu2 = menu[i].submenu[x].submenu[k];
+                        const subMenu2 = menu[i].submenu[x].submenu[k]
                         if (subMenu2.title) {
-                            const subSlug2 = subMenu2.title.replace(/\s+/g, '-');
-                            menu[i].submenu[x].submenu[k] = Object.assign(Object.assign({}, subMenu2), { slug: subSlug2.toLowerCase(), url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x].submenu[k].url) : '' });
+                            const subSlug2 = subMenu2.title.replace(/\s+/g, '-')
+                            menu[i].submenu[x].submenu[k] = Object.assign(Object.assign({}, subMenu2), {
+                                slug: subSlug2.toLowerCase(),
+                                url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x].submenu[k].url) : '',
+                            })
                         }
                     }
                 }
             }
         }
-        menu[i] = Object.assign(Object.assign({}, menu[i]), { slug: slug.toLowerCase(), url: menu[i].url ? stripSiteAndUrl(menu[i].url) : '' });
+        menu[i] = Object.assign(Object.assign({}, menu[i]), { slug: slug.toLowerCase(), url: menu[i].url ? stripSiteAndUrl(menu[i].url) : '' })
     }
-    return determineNavParent(menu);
-};
+    return determineNavParent(menu)
+}
 const determineNavParent = (menu) => {
-    let editTable = [];
+    let editTable = []
     for (let i = 0; i < menu.length; i++) {
         //create table of items that have parent
         if (menu[i].menu_item_parent == 0) {
             //Sometimes submenu is not passed but we can use menu_item_parent
             if (!menu[i].submenu) {
-                let submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent);
-                let newTable = submenu.length != 0 ? Object.assign(Object.assign({}, menu[i]), { submenu }) : menu[i];
-                editTable.push(newTable);
+                let submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent)
+                let newTable = submenu.length != 0 ? Object.assign(Object.assign({}, menu[i]), { submenu }) : menu[i]
+                editTable.push(newTable)
             }
         }
     }
-    return editTable.length != 0 ? editTable : menu;
-};
+    return editTable.length != 0 ? editTable : menu
+}
 const createLinkAndButtonVariables = (currentItem, modType, columns) => {
-    var _a, _b, _c, _d;
-    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true;
-    const singleButton = isOneButton(currentItem);
-    const twoButtons = isTwoButtons(currentItem);
-    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article';
+    var _a, _b, _c, _d
+    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
+    const singleButton = isOneButton(currentItem)
+    const twoButtons = isTwoButtons(currentItem)
+    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
     // && !currentItem.desc.includes('<a')
-    const visibleButton = linkAndBtn(currentItem);
+    const visibleButton = linkAndBtn(currentItem)
     const determineBtnSize = (btnSize, modType, columns) => {
-        if ((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('lg')) && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
-            return 'btn_lg';
+        if (
+            (btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('lg')) &&
+            (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')
+        ) {
+            return 'btn_lg'
+        } else if (
+            (btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('xl')) &&
+            (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')
+        ) {
+            return 'btn_xl'
+        } else if ((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('sm')) || columns == 3 || columns == 4) {
+            return 'btn_sm'
+        } else if (btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('xs')) {
+            return 'btn_xs'
+        } else if (((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('md')) || !btnSize) && (columns == 1 || columns == 2)) {
+            return 'btn_md'
+        } else {
+            return 'btn_md'
         }
-        else if ((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('xl')) && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
-            return 'btn_xl';
-        }
-        else if ((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('sm')) || columns == 3 || columns == 4) {
-            return 'btn_sm';
-        }
-        else if (btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('xs')) {
-            return 'btn_xs';
-        }
-        else if (((btnSize === null || btnSize === void 0 ? void 0 : btnSize.includes('md')) || !btnSize) && (columns == 1 || columns == 2)) {
-            return 'btn_md';
-        }
-        else {
-            return 'btn_md';
-        }
-    };
+    }
     const buttonList = [
         {
             name: 'btn1',
@@ -229,7 +217,11 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType, 1),
             btnSize: determineBtnSize(currentItem.btnSize, modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
-            blockBtn: ((_a = currentItem.btnSize) === null || _a === void 0 ? void 0 : _a.includes('btn_block')) ? true : ((_b = currentItem.btnSize) === null || _b === void 0 ? void 0 : _b.includes('btn_blk')) ? true : false,
+            blockBtn: ((_a = currentItem.btnSize) === null || _a === void 0 ? void 0 : _a.includes('btn_block'))
+                ? true
+                : ((_b = currentItem.btnSize) === null || _b === void 0 ? void 0 : _b.includes('btn_blk'))
+                ? true
+                : false,
         },
         {
             name: 'btn2',
@@ -241,113 +233,111 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             btnType: currentItem.btnType2 ? currentItem.btnType2 : isPromoButton(currentItem, modType, 2),
             btnSize: determineBtnSize(currentItem.btnSize2, modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
-            blockBtn: ((_c = currentItem.btnSize2) === null || _c === void 0 ? void 0 : _c.includes('btn_block')) ? true : ((_d = currentItem.btnSize2) === null || _d === void 0 ? void 0 : _d.includes('btn_blk')) ? true : false,
+            blockBtn: ((_c = currentItem.btnSize2) === null || _c === void 0 ? void 0 : _c.includes('btn_block'))
+                ? true
+                : ((_d = currentItem.btnSize2) === null || _d === void 0 ? void 0 : _d.includes('btn_blk'))
+                ? true
+                : false,
         },
-    ];
-    return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList };
-};
+    ]
+    return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
+}
 const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
-    let btnStyles;
-    btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `;
+    let btnStyles
+    btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
     if (currentItem.promoColor) {
         btnStyles =
             btnStyles +
-                `  #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
-            #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`;
+            `  #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
+            #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`
     }
     if (currentItem.modColor1) {
         btnStyles =
             btnStyles +
-                ` #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['captionText']};} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['captionText']}; background-color: ${currentItem.modColor1};}
+            ` #id_${key} .item_${itemCount} .btn_override {color: ${currentItem.modColor1}; background-color: ${themeStyles['captionText']};} #id_${key} .item_${itemCount} .btn_override:hover{color: ${themeStyles['captionText']}; background-color: ${currentItem.modColor1};}
         #id_${key} .item_${itemCount} .btn2_override:hover{color: ${currentItem.modColor1}; background-color: ${themeStyles['textColorAccent']};}
-        `;
+        `
     }
     if (isFeatureButton) {
-        btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`;
-    }
-    else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
+        btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
+    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
         btnStyles =
             btnStyles +
-                `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
-            `;
+            `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
+            `
     }
-    return btnStyles;
-};
+    return btnStyles
+}
 const createImageSizes = (modType, columns) => {
     if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
-        return '100vw';
+        return '100vw'
         //return 'large'
-    }
-    else if (modType === 'Testimonials') {
-        return '130px';
+    } else if (modType === 'Testimonials') {
+        return '130px'
         //return 'testimonial'
-    }
-    else if (columns === 3 || columns === 4) {
-        return `(max-width: 768px)100vw,(max-width: 1024px)50vw,33vw`;
+    } else if (columns === 3 || columns === 4) {
+        return `(max-width: 768px)100vw,(max-width: 1024px)50vw,33vw`
         //return 'columns'
-    }
-    else {
-        return `(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px`;
+    } else {
+        return `(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px`
         //return 'normal'
     }
-};
+}
 function isButton(item) {
     if (item.actionlbl || item.actionlbl2) {
-        return true;
-    }
-    else {
-        return false;
+        return true
+    } else {
+        return false
     }
 }
 function isLink(item) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2) {
-        return true;
-    }
-    else {
-        return false;
+        return true
+    } else {
+        return false
     }
 }
 function isOneButton(currentItem) {
-    if ((currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
-        (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))) {
-        return true;
-    }
-    else {
-        return false;
+    if (
+        (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
+        (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
+    ) {
+        return true
+    } else {
+        return false
     }
 }
 function isTwoButtons(currentItem) {
     if (currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink) && (currentItem.pagelink2 || currentItem.weblink2)) {
-        return true;
-    }
-    else {
-        return false;
+        return true
+    } else {
+        return false
     }
 }
 function linkAndBtn(currentItem) {
-    if ((currentItem.actionlbl && currentItem.pagelink) ||
+    if (
+        (currentItem.actionlbl && currentItem.pagelink) ||
         (currentItem.actionlbl && currentItem.weblink) ||
         (currentItem.actionlbl2 && currentItem.pagelink2) ||
-        (currentItem.actionlbl2 && currentItem.weblink2)) {
-        return true;
-    }
-    else {
-        return false;
+        (currentItem.actionlbl2 && currentItem.weblink2)
+    ) {
+        return true
+    } else {
+        return false
     }
 }
 function isGridCaption(item) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
-        return true;
-    }
-    else {
-        return false;
+        return true
+    } else {
+        return false
     }
 }
 const createGallerySettings = (settings, blockSwitch1, type) => {
     //convert to numbers
-    const schemaNum = z.coerce.number();
-    const interval = schemaNum.parse(settings.interval) * 1000;
-    const restartDelay = schemaNum.parse(settings.restartdelay);
+    const schemaNum = z.coerce.number()
+    const interval = schemaNum.parse(settings.interval) * 1000
+    const restartDelay = schemaNum.parse(settings.restartdelay)
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,
         pauseOnHover: settings.pauseonhover == 0 ? false : true,
@@ -357,125 +347,113 @@ const createGallerySettings = (settings, blockSwitch1, type) => {
         restartDelay: restartDelay <= 0 ? 2500 : restartDelay ? restartDelay * 1000 : 2500,
         mobileResize: blockSwitch1 == 0 ? false : true,
         useThumbnail: type === 'thumbnail_gallery' || false,
-    };
-    return newSettings;
-};
+    }
+    return newSettings
+}
 const alternatePromoColors = (items, themeStyles, well) => {
     const colorList = Array(items.length)
         .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
-        .flat();
+        .flat()
     const textureImageList = Array(items.length)
         .fill([
-        {
-            image: `/subtle-white-feathers.png`,
-            gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
-        },
-        {
-            image: '/shattered-dark.png',
-            gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
-        },
-        {
-            image: '/fabric-of-squares.png',
-            gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
-        },
-        {
-            image: '/cartographer.png',
-            gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
-        },
-        {
-            image: `/bright-squares.png`,
-            gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
-        },
-    ])
-        .flat();
+            {
+                image: `/subtle-white-feathers.png`,
+                gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
+            },
+            {
+                image: '/shattered-dark.png',
+                gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
+            },
+            {
+                image: '/fabric-of-squares.png',
+                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
+            },
+            {
+                image: '/cartographer.png',
+                gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
+            },
+            {
+                image: `/bright-squares.png`,
+                gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
+            },
+        ])
+        .flat()
     //let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
         if (!items[i].image) {
-            items[i] = Object.assign(Object.assign({}, items[i]), { promoColor: colorList[i], textureImage: well == '1' ? textureImageList[i] : '' });
+            items[i] = Object.assign(Object.assign({}, items[i]), { promoColor: colorList[i], textureImage: well == '1' ? textureImageList[i] : '' })
             //noImgCount += 1
-        }
-        else {
-            items[i] = Object.assign(Object.assign({}, items[i]), { promoColor: colorList[i] });
+        } else {
+            items[i] = Object.assign(Object.assign({}, items[i]), { promoColor: colorList[i] })
         }
     }
-    return items;
-};
+    return items
+}
 const isPromoButton = (items, modType, btnNum) => {
     if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
-        return 'btn_override';
-    }
-    else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
-        return 'btn2_override';
-    }
-    else if (btnNum === 1 &&
-        ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image) || (modType === 'PhotoGallery' && !items.image))) {
-        return 'btn_promo';
-    }
-    else if (btnNum === 1 && modType === 'Banner' && !items.image) {
+        return 'btn_override'
+    } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
+        return 'btn2_override'
+    } else if (
+        btnNum === 1 &&
+        ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image) || (modType === 'PhotoGallery' && !items.image))
+    ) {
+        return 'btn_promo'
+    } else if (btnNum === 1 && modType === 'Banner' && !items.image) {
         /*  else if (btnNum === 1 && ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1))) {
         return 'btn_override'
     } */
-        return 'btn_promo';
+        return 'btn_promo'
+    } else if (btnNum === 1) {
+        return 'btn_1'
+    } else {
+        return 'btn_2'
     }
-    else if (btnNum === 1) {
-        return 'btn_1';
-    }
-    else {
-        return 'btn_2';
-    }
-};
+}
 const createItemStyles = (items, well, modType, type) => {
-    var _a, _b;
+    var _a, _b
     for (let i = 0; i < items.length; i++) {
-        let itemStyle;
-        const currentItem = items[i];
+        let itemStyle
+        const currentItem = items[i]
         if (modType === 'Parallax') {
             if (currentItem.modColor1 && well != '1' && !currentItem.image) {
-                itemStyle = { background: `${currentItem.modColor1}` };
-            }
-            else if (currentItem.modColor1 && well === '1' && !currentItem.image) {
-                itemStyle = { background: `var(--accent-background)` };
-            }
-            else if (currentItem.modColor1 && well === '1') {
-                itemStyle = { background: `${currentItem.modColor1}` };
-            }
-            else if (well === '1' && !currentItem.image) {
+                itemStyle = { background: `${currentItem.modColor1}` }
+            } else if (currentItem.modColor1 && well === '1' && !currentItem.image) {
+                itemStyle = { background: `var(--accent-background)` }
+            } else if (currentItem.modColor1 && well === '1') {
+                itemStyle = { background: `${currentItem.modColor1}` }
+            } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]})`,
-                };
+                }
+            } else if (!currentItem.image) {
+                itemStyle = { background: `${currentItem.promoColor}` }
+            } else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
+                let modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`)
+                itemStyle = { background: modBackground }
+            } else {
+                itemStyle = {}
             }
-            else if (!currentItem.image) {
-                itemStyle = { background: `${currentItem.promoColor}` };
-            }
-            else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
-                let modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`);
-                itemStyle = { background: modBackground };
-            }
-            else {
-                itemStyle = {};
-            }
-        }
-        else if (modType === 'Banner' || modType === 'PhotoGallery') {
+        } else if (modType === 'Banner' || modType === 'PhotoGallery') {
             if (currentItem.modColor1 && !currentItem.image && !currentItem.modOpacity && modType === 'Banner') {
-                itemStyle = { background: `${currentItem.modColor1}` };
-            }
-            else if (well === '1' && !currentItem.image && (modType === 'Banner' || type === 'thumbnail_gallery')) {
+                itemStyle = { background: `${currentItem.modColor1}` }
+            } else if (well === '1' && !currentItem.image && (modType === 'Banner' || type === 'thumbnail_gallery')) {
                 itemStyle = {
-                    backgroundImage: `linear-gradient(-45deg, ${(_a = currentItem.textureImage) === null || _a === void 0 ? void 0 : _a.gradientColors[0]}, ${(_b = currentItem.textureImage) === null || _b === void 0 ? void 0 : _b.gradientColors[1]})`,
-                };
-            }
-            else if (currentItem.promoColor) {
-                itemStyle = { background: `${currentItem.promoColor}` };
-            }
-            else {
-                itemStyle = {};
+                    backgroundImage: `linear-gradient(-45deg, ${(_a = currentItem.textureImage) === null || _a === void 0 ? void 0 : _a.gradientColors[0]}, ${
+                        (_b = currentItem.textureImage) === null || _b === void 0 ? void 0 : _b.gradientColors[1]
+                    })`,
+                }
+            } else if (currentItem.promoColor) {
+                itemStyle = { background: `${currentItem.promoColor}` }
+            } else {
+                itemStyle = {}
             }
         }
-        items[i] = Object.assign(Object.assign({}, items[i]), { itemStyle: itemStyle });
+        items[i] = Object.assign(Object.assign({}, items[i]), { itemStyle: itemStyle })
         //banner
     }
-    return items;
-};
+    return items
+}
 const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
@@ -515,9 +493,8 @@ const setColors = (cmsColors, cmsTheme) => {
             promoColor4: cmsColors.color_34.value,
             promoColor5: cmsColors.color_35.value,
             promoColor6: cmsColors.color_36.value,
-        };
-    }
-    else {
+        }
+    } else {
         return {
             promoColor: cmsColors === null || cmsColors === void 0 ? void 0 : cmsColors.color_3.value,
             textColor: cmsColors === null || cmsColors === void 0 ? void 0 : cmsColors.color_3a.value,
@@ -540,58 +517,48 @@ const setColors = (cmsColors, cmsTheme) => {
             navCurrent: cmsColors.color_19.value,
             captionText: cmsColors.color_16.value,
             captionBackground: cmsColors.color_17.value,
-        };
+        }
     }
-};
+}
 const getColumnsCssClass = (page) => {
     if (page.sections[1].wide == '938' || page.sections[1].wide == '988') {
-        return 'full-column';
+        return 'full-column'
+    } else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
+        return 'half-columns'
+    } else if (page.sections[1].wide == '316' && page.sections[2].wide == '316' && page.sections[3].wide == '316') {
+        return 'third-columns'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '232' && page.sections[4].wide == '232') {
+        return 'fourth-columns'
+    } else if (page.sections[1].wide == '652' && page.sections[2].wide == '316') {
+        return 'two-third_one-third'
+    } else if (page.sections[1].wide == '316' && page.sections[2].wide == '652') {
+        return 'one-third_two-third'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '736') {
+        return 'one-fourth_three-fourth'
+    } else if (page.sections[1].wide == '736' && page.sections[2].wide == '232') {
+        return 'three-fourth_one-fourth'
+    } else if (page.sections[1].wide == '484' && page.sections[2].wide == '232' && page.sections[3].wide == '232') {
+        return 'half_one-fourth_one-fourth'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '484') {
+        return 'one-fourth_one-fourth_half'
+    } else if (page.sections[1].wide == '232' && page.sections[2].wide == '484' && page.sections[3].wide == '232') {
+        return 'one-fourth_half_one-fourth'
     }
-    else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
-        return 'half-columns';
-    }
-    else if (page.sections[1].wide == '316' && page.sections[2].wide == '316' && page.sections[3].wide == '316') {
-        return 'third-columns';
-    }
-    else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '232' && page.sections[4].wide == '232') {
-        return 'fourth-columns';
-    }
-    else if (page.sections[1].wide == '652' && page.sections[2].wide == '316') {
-        return 'two-third_one-third';
-    }
-    else if (page.sections[1].wide == '316' && page.sections[2].wide == '652') {
-        return 'one-third_two-third';
-    }
-    else if (page.sections[1].wide == '232' && page.sections[2].wide == '736') {
-        return 'one-fourth_three-fourth';
-    }
-    else if (page.sections[1].wide == '736' && page.sections[2].wide == '232') {
-        return 'three-fourth_one-fourth';
-    }
-    else if (page.sections[1].wide == '484' && page.sections[2].wide == '232' && page.sections[3].wide == '232') {
-        return 'half_one-fourth_one-fourth';
-    }
-    else if (page.sections[1].wide == '232' && page.sections[2].wide == '232' && page.sections[3].wide == '484') {
-        return 'one-fourth_one-fourth_half';
-    }
-    else if (page.sections[1].wide == '232' && page.sections[2].wide == '484' && page.sections[3].wide == '232') {
-        return 'one-fourth_half_one-fourth';
-    }
-};
+}
 const createFontCss = (fonts) => {
-    const headlineFont = fonts.list[fonts.sections.hdrs.value];
-    const bodyFont = fonts.list[fonts.sections.body.value];
-    const featuredFont = fonts.list[fonts.sections.feat.value];
-    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google];
-    const uniqueFontGroup = removeDuplicatesArray(fontTypes);
-    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`;
+    const headlineFont = fonts.list[fonts.sections.hdrs.value]
+    const bodyFont = fonts.list[fonts.sections.body.value]
+    const featuredFont = fonts.list[fonts.sections.feat.value]
+    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
     const fontClasses = ` body {font-family:${bodyFont.label}}
     .hd-font{font-family:${headlineFont.label}} 
     .txt-font{font-family:${bodyFont.label}}
     .feat-font{font-family:${featuredFont.label}}
-    `;
-    return { fontImportGroup, fontClasses };
-};
+    `
+    return { fontImportGroup, fontClasses }
+}
 const createColorClasses = (themeStyles) => {
     const colorVars = `
     :root {
@@ -632,11 +599,12 @@ const createColorClasses = (themeStyles) => {
         --promo5: ${themeStyles['promoColor5']};
         --promo6: ${themeStyles['promoColor6']};
        }
-       `;
+       `
     const textColors = ` body .txt-font .dsc a{ color: var(--link);}
     .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
+    .txt-color-sh{color:var(--sh);} 
     .navLink:hover{color: var(--nav-hover);} 
     .navLink{color:var(--nav-txt);} 
     .social-icon{color:var(--nav-txt);} 
@@ -651,7 +619,7 @@ const createColorClasses = (themeStyles) => {
     &.item, .desc {color:var(--hero-txt);}
     .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
 }
-    `;
+    `
     const btnStyles = ` .btn_1{color: var(--btn-txt); background-color: var(--btn-background);} 
     .btn_1:hover{color: var(--btn-background); background-color: var(--btn-txt);} 
     .btn_2{color: var(--link); border-color: var(--link);} 
@@ -671,7 +639,7 @@ const createColorClasses = (themeStyles) => {
     .btn_p2.btn_2 {border-color:var(--promo2); color:var(--promo2);}
     .btn_p4.btn_2:hover, .btn_p3.btn_2:hover , .btn_p2.btn_2:hover  {border-color:var(--link-hover); color:var(--link-hover);}
     .hero .one-btn-w .btn_1.btn_w {color: var(--btn-txt); background-color: var(--hero-btn-background);}
-    `;
+    `
     const backgroundStyles = ` .border-background{background-color:var(--accent-background);} 
     .hero-background{background-color:var(--promo);} 
     .content-background{background-color:var(--content-background);} 
@@ -683,30 +651,30 @@ const createColorClasses = (themeStyles) => {
     .cta:hover{background-color:var(--promo2);}
     .testimonials-mod .hero-background, .card-mod .hero-background {background-color:var(--hero-background);}
     .caption-background{background-color:var(--caption-background);}
-    `;
-    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles;
-    return colorStyles;
-};
+    `
+    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
+    return colorStyles
+}
 //reuseables
 const removeDuplicatesArray = (arr) => {
     let uniqueArr = arr.filter((c, index) => {
-        return arr.indexOf(c) === index;
-    });
-    return uniqueArr;
-};
+        return arr.indexOf(c) === index
+    })
+    return uniqueArr
+}
 const convertSpecialTokens = (str) => {
-    const removedBreak = str.replaceAll('[rn]', '\n');
-    const removedBlank = removedBreak.replaceAll('[t]', ' ');
-    const removedParenthesis = removedBlank.replaceAll('&quot;', "'");
-    return removedParenthesis;
-};
+    const removedBreak = str.replaceAll('[rn]', '\n')
+    const removedBlank = removedBreak.replaceAll('[t]', ' ')
+    const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
+    return removedParenthesis
+}
 const replaceKey = (value, oldKey, newKey) => {
     if (oldKey !== newKey && value[oldKey]) {
-        Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey));
-        delete value[oldKey];
+        Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
+        delete value[oldKey]
     }
-    return Object.assign({}, value);
-};
+    return Object.assign({}, value)
+}
 module.exports = {
     socialConvert,
     btnIconConvert,
@@ -731,5 +699,5 @@ module.exports = {
     isOneButton,
     createGallerySettings,
     modVariationType,
-};
+}
 //# sourceMappingURL=utils.js.map
