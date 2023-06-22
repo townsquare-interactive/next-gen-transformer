@@ -651,6 +651,7 @@ const createColorClasses = (themeStyles) => {
     .accent-txt{color:var(--txt-accent);} 
     .txt-color{color:var(--txt);} 
     .txt-color-hd{color:var(--hd);} 
+    .txt-color-sh{color:var(--sh);} 
     .navLink:hover{color: var(--nav-hover);} 
     .navLink{color:var(--nav-txt);} 
     .social-icon{color:var(--nav-txt);} 
