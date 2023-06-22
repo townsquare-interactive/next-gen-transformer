@@ -3,6 +3,21 @@ const { updatePageList, transformPagesData, createOrEditLayout, deletePages, cre
 const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3Functions.js')
 
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
+
+const engines = require('../src/translation-engines/basic')
+
+const { publish } = require('../src/output/index.js')
+
+/* import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../src/controllers/cms-controller.js'
+
+import { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } from '../src/s3Functions.js'
+
+import { stripUrl, setColors, stripImageFolders } from '../src/utils.js'
+
+import engines from '../src/translation-engines/basic.js'
+
+import publish from '../src/output/index.' */
+
 const express = require('express')
 const router = express.Router()
 
@@ -61,6 +76,19 @@ router.post('/save', async (req, res) => {
         res.json('posting to s3 folder: ' + basePath)
     } catch (err) {
         console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
+router.post('/site-data/basic', async (req, res) => {
+    try {
+        //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
+        const data = engines.basic.translate()
+
+        await publish({ ...data })
+        res.json('posting to s3 folder: ' + 'basic')
+    } catch (err) {
+        console.log(err)
         res.status(500).json({ err: 'Something went wrong' })
     }
 })

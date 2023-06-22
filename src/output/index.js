@@ -1,5 +1,7 @@
 const { addAssetFromSiteToS3, addFileS3 } = require('../s3Functions')
 
+//import { PublishData } from '../../types'
+
 const publish = async (data) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles } = data
 
@@ -10,7 +12,7 @@ const publish = async (data) => {
     //adding each page to s3
     for (let i = 0; i < pages.length; i++) {
         //rewrite page list every time to passed page
-        pageList.push({ name: pages[i].data.name, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
+        pageList.push({ name: pages[i].data.title, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
         await addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`)
     }
 
