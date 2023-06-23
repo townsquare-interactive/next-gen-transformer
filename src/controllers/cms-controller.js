@@ -174,23 +174,29 @@ const addPagesToList = async (pageListFile, page, basePath) => {
     }
 }
 
+//Adding a new page does not automatically add it to nav unless we do this
 const addNewPageToNav = async (pageData, basePath) => {
     //Get layout file to update nav
     let oldSiteData = await getFileS3(`${basePath}/layout.json`)
 
-    if (oldSiteData) {
+    const newPageData = {
+        name: pageData.title,
+        title: pageData.title,
+        slug: pageData.slug,
+        url: pageData.url,
+        ID: pageData.id,
+        menu_order: oldSiteData?.cmsNav ? oldSiteData.cmsNav.length : 1,
+        menu_item_parent: 0,
+    }
+
+    if (oldSiteData?.cmsNav) {
         //add new page to nav
-        oldSiteData.cmsNav.push({
-            name: pageData.title,
-            title: pageData.title,
-            slug: pageData.slug,
-            url: pageData.url,
-            ID: pageData.id,
-            menu_order: oldSiteData.cmsNav.length,
-            menu_item_parent: 0,
-        })
+        oldSiteData.cmsNav.push(newPageData)
 
         //update global file with new nav
+        await addFileS3(oldSiteData, `${basePath}/layout`)
+    } else if (oldSiteData) {
+        oldSiteData = { ...oldSiteData, cmsNav: [newPageData] }
         await addFileS3(oldSiteData, `${basePath}/layout`)
     }
 }
