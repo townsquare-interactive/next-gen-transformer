@@ -28,35 +28,56 @@ const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = requir
 
 const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
     console.log('page transformer started')
+    console.log(pageData)
     let newPages = []
     let newData = []
 
+    //for each page
     for (const [key, value] of Object.entries(pageData)) {
-        if (value.data.title) {
-            console.log('name found', value.data.title)
-            delete value.data.title
+        const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
+        //if no data add data
+        console.log('data', value.data ? 'there is data' : 'not doA', 'attrs', value.attrs)
+        if (Object.keys(value.data).length === 0 && value.attrs) {
+            console.log('nooooooooo data')
+            const oldPageName = sitePageData[key].backup.attrs.slug
+            console.log('old page name', oldPageName)
+            console.log('new slug', value.attrs.slug)
+            let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageName}.json`)
+
+            oldPageFile.data = { ...oldPageFile.data, slug: value.attrs.slug, title: value.attrs.title }
+            console.log('the old new', oldPageFile)
+            newData.push(oldPageFile)
+
+            //value = { ...value, data: sitePageData[pageId].backup.data, seo: sitePageData[pageId].backup.seo }
         }
 
-        const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
-
-        value.seo = seo
-
-        if (value.data.modules) {
-            const columnStyles = getColumnsCssClass(value.data)
-
-            //adding site data to pages
-            value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
-
-            createPageScss(value.data, pageSlug, basePath)
-
-            //transforming page data
-            if (value.data.modules) {
-                value.data.modules = transformPageModules(value.data.modules, themeStyles)
-                newPages.push(value)
+        //check here if data is found, if not its a page name change if (attrs)
+        if (value.data) {
+            if (value.data.title) {
+                console.log('name found', value.data.title)
+                delete value.data.title
             }
 
-            newData = newPages
-        } else if (value.seo) {
+            value.seo = seo
+
+            if (value.data.modules) {
+                const columnStyles = getColumnsCssClass(value.data)
+
+                //adding site data to pages
+                value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
+
+                createPageScss(value.data, pageSlug, basePath)
+
+                //transforming page data
+                if (value.data.modules) {
+                    value.data.modules = transformPageModules(value.data.modules, themeStyles)
+                    newPages.push(value)
+                }
+
+                newData = newPages
+            }
+        }
+        if (value.seo) {
             const currentFile = await getFileS3(`${basePath}/pages/${pageSlug}.json`)
             const newSeoFile = { ...currentFile, seo: value.seo }
             newData.push(newSeoFile)
@@ -81,9 +102,18 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             }
         }
         newData.push({ preloadImage: preloadImage }) */
-    }
+    } /* else {
+            //need to update title and slug here
+            //get page from s3 based off 
+
+
+            ///orrrrr get page data from siteData and still replace
+            const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
+            value = {...value, data:sitePageData[pageId].backup.data, seo:sitePageData[pageId].backup.seo  }
+        } */
 
     pageData.pages = newData
+
     pageData = { ...pageData }
     return pageData
 }

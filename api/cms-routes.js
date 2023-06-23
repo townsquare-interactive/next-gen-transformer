@@ -38,12 +38,13 @@ router.post('/save', async (req, res) => {
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
             const newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath)
+            console.log('new data:', newPageData)
 
-            //adding each page to s3
+            //adding each page to s3 (may need to move to controller)
             for (let i = 0; i < newPageData.pages.length; i++) {
                 await addFileS3(newPageData.pages[i], `${basePath}/pages/${newPageData.pages[i].data.slug}`)
             }
-            // update/create pagelist
+            // update/create pagelist (uses new page )
             newPageList = await updatePageList(newPageData.pages, basePath)
         }
 
