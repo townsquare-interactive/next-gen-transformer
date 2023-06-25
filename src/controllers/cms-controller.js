@@ -47,7 +47,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
 
             //change nav to change new page
             let oldSiteData = await getFileS3(`${basePath}/layout.json`)
-            let oldNav = oldNav
+            let oldNav = oldSiteData.cmsNav
             //filter array to update nav spot with changed page name
             if (oldNav.findIndex((x) => x.slug === oldPageSlug) != -1) {
                 var foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
