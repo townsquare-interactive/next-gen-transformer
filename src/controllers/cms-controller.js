@@ -35,20 +35,31 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
     //for each page
     for (const [key, value] of Object.entries(pageData)) {
         const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
-        //if no data add data
-        console.log('data', value.data ? 'there is data' : 'not doA', 'attrs', value.attrs)
+
+        //covering page name change
         if (Object.keys(value.data).length === 0 && value.attrs) {
-            console.log('nooooooooo data')
-            const oldPageName = sitePageData[key].backup.attrs.slug
-            console.log('old page name', oldPageName)
-            console.log('new slug', value.attrs.slug)
-            let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageName}.json`)
+            const oldPageSlug = sitePageData[key].backup.attrs.slug
+            let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
 
             oldPageFile.data = { ...oldPageFile.data, slug: value.attrs.slug, title: value.attrs.title }
-            console.log('the old new', oldPageFile)
+
             newData.push(oldPageFile)
 
-            //value = { ...value, data: sitePageData[pageId].backup.data, seo: sitePageData[pageId].backup.seo }
+            //change nav to change new page
+            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
+            let oldNav = oldNav
+            //filter array to update nav spot with changed page name
+            if (oldNav.findIndex((x) => x.slug === oldPageSlug) != -1) {
+                var foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
+                const newField = {
+                    ...oldNav[foundIndex],
+                    slug: value.attrs.slug,
+                    title: value.attrs.title,
+                    url: oldNav[foundIndex].url.replace(oldPageSlug, value.attrs.slug),
+                }
+                oldNav[foundIndex] = newField
+                await addFileS3(oldSiteData, `${basePath}/layout`)
+            }
         }
 
         //check here if data is found, if not its a page name change if (attrs)
@@ -76,8 +87,9 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
 
                 newData = newPages
             }
-        }
-        if (value.seo) {
+
+            //seo change without page data
+        } else if (Object.keys(value.seo).length === 0) {
             const currentFile = await getFileS3(`${basePath}/pages/${pageSlug}.json`)
             const newSeoFile = { ...currentFile, seo: value.seo }
             newData.push(newSeoFile)
@@ -102,20 +114,9 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             }
         }
         newData.push({ preloadImage: preloadImage }) */
-    } /* else {
-            //need to update title and slug here
-            //get page from s3 based off 
+    }
 
-
-            ///orrrrr get page data from siteData and still replace
-            const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
-            value = {...value, data:sitePageData[pageId].backup.data, seo:sitePageData[pageId].backup.seo  }
-        } */
-
-    pageData.pages = newData
-
-    pageData = { ...pageData }
-    return pageData
+    return { pages: newData }
 }
 
 const getPageData = (sitePageData, key) => {
@@ -233,7 +234,6 @@ const addNewPageToNav = async (pageData, basePath) => {
 
 //Create or edit layout file
 const createOrEditLayout = async (file, basePath, themeStyles) => {
-    console.log('layout edit')
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -256,12 +256,18 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         return social
     }
 
+    // transform contact link/data
+    let contactInfo
+    if (file.settings.contact.contact_list.wide.items[0]) {
+        contactInfo = transformcontact(file.settings.contact.contact_list.wide.items[0])
+    } else {
+        contactInfo = currentLayout.contact || ''
+    }
+
     const globalFile = {
         logos: file.logos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
-        contact: file.settings
-            ? transformcontact(file.settings.contact.contact_list.wide.items[0], file.config.website.site_title)
-            : currentLayout.contact || '',
+        contact: contactInfo,
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
@@ -274,7 +280,6 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         s3Folder: basePath,
         favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
         fontImport: fontImportGroup,
-        //contactFormData: contactFormData,
         config: {
             mailChimp: {
                 audId: 'd0b2dd1631',

@@ -8,16 +8,6 @@ const engines = require('../src/translation-engines/basic')
 
 const { publish } = require('../src/output/index.js')
 
-/* import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../src/controllers/cms-controller.js'
-
-import { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } from '../src/s3Functions.js'
-
-import { stripUrl, setColors, stripImageFolders } from '../src/utils.js'
-
-import engines from '../src/translation-engines/basic.js'
-
-import publish from '../src/output/index.' */
-
 const express = require('express')
 const router = express.Router()
 
@@ -38,7 +28,6 @@ router.post('/save', async (req, res) => {
         //Transforming and posting saved page data
         if (req.body.savedData.pages) {
             const newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath)
-            console.log('new data:', newPageData)
 
             //adding each page to s3 (may need to move to controller)
             for (let i = 0; i < newPageData.pages.length; i++) {

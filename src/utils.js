@@ -144,7 +144,7 @@ function transformcontact(contactInfo, siteName) {
         link: mapLink,
         icon: icons.location,
         content: contactInfo.address.name,
-        active: contactInfo.address ? true : false,
+        active: contactInfo.address.street ? true : false,
     }
 
     multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)

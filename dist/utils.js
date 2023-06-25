@@ -85,7 +85,9 @@ const stripImageFolders = (file) => {
     const result = file.substring(file.lastIndexOf('/') + 1)
     return result
 }
-function transformcontact(contactInfo, siteName) {
+
+function transformcontact(contactInfo) {
+    console.log('Transforming contact info')
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
@@ -120,17 +122,20 @@ function transformcontact(contactInfo, siteName) {
             contactLinks.push(email)
         }
     }
+
+    console.log('street', contactInfo.address.street)
     const contactMap = {
         cName: 'map',
         link: mapLink,
         icon: icons.location,
         content: contactInfo.address.name,
-        active: contactInfo.address ? true : false,
+        active: contactInfo.address.street != null ? true : false,
     }
     multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)
     contactInfo = Object.assign(Object.assign({}, contactInfo), { contactLinks: contactLinks, showContactBox: multiPhones })
     return contactInfo
 }
+
 const transformNav = (menu) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
