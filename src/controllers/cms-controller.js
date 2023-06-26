@@ -266,7 +266,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
 
     // transform contact link/data
     let contactInfo
-    if (file.settings.contact.contact_list.wide.items[0]) {
+    if (file.settings && file.settings.contact.contact_list.wide.items[0]) {
         contactInfo = transformcontact(file.settings.contact.contact_list.wide.items[0])
     } else {
         contactInfo = currentLayout.contact || ''
