@@ -16,7 +16,6 @@ const {
     createFontCss,
     createLinkAndButtonVariables,
     determineModRenderType,
-    createItemStyles,
     createBtnStyles,
     createImageSizes,
     isOneButton,
@@ -103,26 +102,6 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             const newSeoFile = { ...currentFile, seo: value.seo }
             newData.push(newSeoFile)
         }
-
-        /* let preloadImage = ''
-
-        for (let i = 0; i <= value.data.modules.length; ++i) {
-            //modules
-            if (value.data.modules[i]) {
-                for (const [key, mod] of Object.entries(value.data.modules[i])) {
-                    //items
-
-                    for (let x = 0; x < mod.attributes.items.length; x++) {
-                        if (mod.lazy === 'off') {
-                            imagePriority = true
-                            preloadImage = mod.items[0].image
-                            console.log('pre', preloadImage)
-                        }
-                    }
-                }
-            }
-        }
-        newData.push({ preloadImage: preloadImage }) */
     }
 
     return { pages: newData }
@@ -283,6 +262,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         url: file.config.website.url,
         composites: file.composites,
         cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList) : currentLayout.cmsNav,
+        seo: file.seo.global_seo_options ? { global: file.seo.global_seo_options } : currentLayout.seo || {},
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
@@ -338,6 +318,12 @@ const transformPageModules = (moduleList, themeStyles) => {
                 for (let i = 0; i < value.items.length; i++) {
                     const currentItem = value.items[i]
                     itemCount += 1
+
+                    //zod type coercian
+                    const schemaNum = z.coerce.number()
+                    if (currentItem.columns) {
+                        value.items[i].columns = schemaNum.parse(value.items[i].columns)
+                    }
 
                     //Change lazy loading to off for first module in photogallery
                     value.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : value.lazy
