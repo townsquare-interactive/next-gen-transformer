@@ -38,11 +38,20 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
 
         //covering page name change
         if (Object.keys(value.data).length === 0 && value.attrs) {
+            console.log('initiated page name change')
             const oldPageSlug = sitePageData[key].backup.attrs.slug
             let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
 
-            oldPageFile.data = { ...oldPageFile.data, slug: value.attrs.slug, title: value.attrs.title }
+            const newSlug = value.attrs.slug
+            const newTitle = value.attrs.title
+            const newUrl = oldNav[foundIndex].url.replace(oldPageSlug, newSlug)
 
+            oldPageFile.data = {
+                ...oldPageFile.data,
+                slug: newSlug,
+                title: newTitle,
+                url: newUrl,
+            }
             newData.push(oldPageFile)
 
             //change nav to change new page
@@ -53,9 +62,9 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
                 var foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
                 const newField = {
                     ...oldNav[foundIndex],
-                    slug: value.attrs.slug,
-                    title: value.attrs.title,
-                    url: oldNav[foundIndex].url.replace(oldPageSlug, value.attrs.slug),
+                    slug: newSlug,
+                    title: newTitle,
+                    url: newUrl,
                 }
                 oldNav[foundIndex] = newField
                 await addFileS3(oldSiteData, `${basePath}/layout`)
@@ -80,13 +89,12 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
                 createPageScss(value.data, pageSlug, basePath)
 
                 //transforming page data
-                if (value.data.modules) {
-                    value.data.modules = transformPageModules(value.data.modules, themeStyles)
-                    newPages.push(value)
-                }
 
-                newData = newPages
+                value.data.modules = transformPageModules(value.data.modules, themeStyles)
+
+                // newData = newPages
             }
+            newData.push(value)
 
             //seo change without page data
         } else if (Object.keys(value.seo).length === 0) {

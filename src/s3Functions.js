@@ -133,14 +133,20 @@ const getCssFile = async (pageSlug, basePath) => {
     }
 
     let cssFile
-    await request(options, function (error, response, body) {
-        if (error || response.statusCode !== 200) {
-            console.log('failed to get file')
+    try {
+        await request(options, function (error, response, body) {
+            cssFile = body.toString('utf-8')
+            /*  if (error || response.statusCode !== 200) {
+            console.log('failed to get css file')
             cssFile = ''
         } else {
             cssFile = body.toString('utf-8')
-        }
-    })
+        } */
+        })
+    } catch (err) {
+        console.log('error getting css page')
+        return ''
+    }
     return cssFile
 }
 
