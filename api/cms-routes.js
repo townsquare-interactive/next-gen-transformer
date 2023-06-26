@@ -21,7 +21,7 @@ router.post('/save', async (req, res) => {
         const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
 
         let globalFile
-        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles)
+        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, url)
         await addFileS3(globalFile, `${basePath}/layout`)
 
         let newPageList

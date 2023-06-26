@@ -221,7 +221,7 @@ const addNewPageToNav = async (pageData, basePath) => {
 }
 
 //Create or edit layout file
-const createOrEditLayout = async (file, basePath, themeStyles) => {
+const createOrEditLayout = async (file, basePath, themeStyles, url) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -261,7 +261,7 @@ const createOrEditLayout = async (file, basePath, themeStyles) => {
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
         url: file.config.website.url,
         composites: file.composites,
-        cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList) : currentLayout.cmsNav,
+        cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList, url) : currentLayout.cmsNav,
         seo: file.seo.global_seo_options ? { global: file.seo.global_seo_options } : currentLayout.seo || {},
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',

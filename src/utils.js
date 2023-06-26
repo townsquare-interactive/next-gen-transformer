@@ -80,12 +80,18 @@ const stripUrl = (url) => {
 }
 
 //strip anything between / ... /
-const stripSiteAndUrl = (url) => {
+const stripSiteAndUrl = (url, siteUrl) => {
     if (url === '#') {
         return '#'
-    } else {
+    } else if (url.includes(siteUrl)) {
+        url = url.replace(siteUrl, '')
+        return url
+    } else if (url.includes('//')) {
         const removedSiteAndDomain = url.match(/\/(.*)$/)
+        console.log('url', removedSiteAndDomain)
         return removedSiteAndDomain[0]
+    } else {
+        return url
     }
 }
 
@@ -154,7 +160,7 @@ function transformcontact(contactInfo, siteName) {
     return contactInfo
 }
 
-const transformNav = (menu) => {
+const transformNav = (menu, siteUrl) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
         //loop through first submenu
@@ -163,7 +169,7 @@ const transformNav = (menu) => {
             const subMenu1 = menu[i].submenu[x]
             if (menu[i].title) {
                 const subSlug = subMenu1.title.replace(/\s+/g, '-')
-                menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase(), url: subMenu1.url ? stripSiteAndUrl(subMenu1.url) : '' }
+                menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase(), url: subMenu1.url ? stripSiteAndUrl(subMenu1.url, siteUrl) : '' }
                 //loop through second submenu
 
                 if (menu[i].submenu[x]) {
@@ -174,7 +180,7 @@ const transformNav = (menu) => {
                             menu[i].submenu[x].submenu[k] = {
                                 ...subMenu2,
                                 slug: subSlug2.toLowerCase(),
-                                url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x].submenu[k].url) : '',
+                                url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x].submenu[k].url, siteUrl) : '',
                             }
                         }
                     }
@@ -182,7 +188,7 @@ const transformNav = (menu) => {
             }
         }
 
-        menu[i] = { ...menu[i], slug: slug.toLowerCase(), url: menu[i].url ? stripSiteAndUrl(menu[i].url) : '' }
+        menu[i] = { ...menu[i], slug: slug.toLowerCase(), url: menu[i].url ? stripSiteAndUrl(menu[i].url, siteUrl) : '' }
     }
 
     return determineNavParent(menu)
