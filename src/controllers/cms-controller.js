@@ -29,7 +29,7 @@ const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = requir
 const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
     console.log('page transformer started')
     console.log(pageData)
-    let newPages = []
+    //let newPages = []
     let newData = []
 
     //for each page
@@ -41,10 +41,12 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             console.log('initiated page name change')
             const oldPageSlug = sitePageData[key].backup.attrs.slug
             let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
+            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
+            let oldNav = oldSiteData.cmsNav
 
             const newSlug = value.attrs.slug
             const newTitle = value.attrs.title
-            const newUrl = oldNav[foundIndex].url.replace(oldPageSlug, newSlug)
+            const newUrl = `/${newSlug}/`
 
             oldPageFile.data = {
                 ...oldPageFile.data,
@@ -55,8 +57,7 @@ const transformPagesData = async (pageData, sitePageData, themeStyles, basePath)
             newData.push(oldPageFile)
 
             //change nav to change new page
-            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
-            let oldNav = oldSiteData.cmsNav
+
             //filter array to update nav spot with changed page name
             if (oldNav.findIndex((x) => x.slug === oldPageSlug) != -1) {
                 var foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
