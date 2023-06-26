@@ -83,6 +83,20 @@ router.post('/site-data/basic', async (req, res) => {
     }
 })
 
+router.post('/site-data/strapi', async (req, res) => {
+    console.log('posted to strapi', req)
+    try {
+        //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
+        const data = engines.basic.translate()
+
+        await publish({ ...data })
+        res.json('posting to s3 folder: ' + 'basic')
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
 //Saving layout file for nav in header/footer
 router.post('/cmsconfig', async (req, res) => {
     const basePath = stripUrl(req.body.config.website.url)

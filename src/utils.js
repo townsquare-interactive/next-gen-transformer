@@ -394,31 +394,29 @@ const createGallerySettings = (settings, blockSwitch1, type) => {
 }
 
 const alternatePromoColors = (items, themeStyles, well) => {
-    const colorList = Array(items.length)
-        .fill([themeStyles.promoColor, themeStyles.promoColor2, themeStyles.promoColor3, themeStyles.promoColor4, themeStyles.promoColor5])
-        .flat()
+    const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--prom5)']).flat()
 
     const textureImageList = Array(items.length)
         .fill([
             {
                 image: `/subtle-white-feathers.png`,
-                gradientColors: [themeStyles.promoColor, themeStyles.promoColor2],
+                gradientColors: ['var(--promo)', 'var(--promo2)'],
             },
             {
                 image: '/shattered-dark.png',
-                gradientColors: [themeStyles.promoColor2, themeStyles.promoColor3],
+                gradientColors: ['var(--promo2)', 'var(--promo3)'],
             },
             {
                 image: '/fabric-of-squares.png',
-                gradientColors: [themeStyles.promoColor3, themeStyles.promoColor4],
+                gradientColors: ['var(--promo3)', 'var(--promo4)'],
             },
             {
                 image: '/cartographer.png',
-                gradientColors: [themeStyles.promoColor4, themeStyles.promoColor5],
+                gradientColors: ['var(--promo4)', 'var(--prom5)'],
             },
             {
                 image: `/bright-squares.png`,
-                gradientColors: [themeStyles.promoColor, themeStyles.promoColor3],
+                gradientColors: ['var(--promo)', 'var(--promo3)'],
             },
         ])
         .flat()

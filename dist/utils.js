@@ -455,7 +455,6 @@ const createItemStyles = (items, well, modType, type) => {
             }
         }
         items[i] = Object.assign(Object.assign({}, items[i]), { itemStyle: itemStyle })
-        //banner
     }
     return items
 }
