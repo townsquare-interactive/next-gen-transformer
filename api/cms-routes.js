@@ -5,6 +5,7 @@ const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('.
 const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
 
 const engines = require('../src/translation-engines/basic')
+const strapiEngine = require('../src/translation-engines/strapi')
 
 const { publish } = require('../src/output/index.js')
 
@@ -84,13 +85,16 @@ router.post('/site-data/basic', async (req, res) => {
 })
 
 router.post('/site-data/strapi', async (req, res) => {
-    console.log('posted to strapi', req)
+    //console.log('posted to strapi', req)
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
-        const data = engines.basic.translate()
+        const data = await strapiEngine.transformStrapi(req.body)
 
         await publish({ ...data })
-        res.json('posting to s3 folder: ' + 'basic')
+        res.json('posting to s3 folder: ' + 'strapi')
+
+        // await publish({ ...data })
+        //res.json('posting to s3 folder: ' + 'basic')
     } catch (err) {
         console.log(err)
         res.status(500).json({ err: 'Something went wrong' })

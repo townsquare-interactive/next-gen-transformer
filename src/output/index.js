@@ -1,4 +1,5 @@
 const { addAssetFromSiteToS3, addFileS3 } = require('../s3Functions')
+const { updatePageList } = require('../controllers/cms-controller')
 
 //import { PublishData } from '../../types'
 
@@ -9,14 +10,22 @@ const publish = async (data) => {
 
     const pageList = []
 
-    //adding each page to s3
-    for (let i = 0; i < pages.length; i++) {
-        //rewrite page list every time to passed page
-        pageList.push({ name: pages[i].data.title, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
-        await addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`)
+    if (pages.length != 0) {
+        //adding each page to s3
+        for (let i = 0; i < pages.length; i++) {
+            //rewrite page list every time to passed page
+            pageList.push({ name: pages[i].data.title, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
+            await addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`)
+        }
+        let newPageList
+        //update pagelist
+        newPageList = await updatePageList(pages, siteIdentifier)
+        console.log(newPageList)
+    } else {
+        console.log('no pages to add')
     }
 
-    await addFileS3({ pages: pageList }, `${siteIdentifier}/pages/page-list`)
+    //await addFileS3({ pages: pageList }, `${siteIdentifier}/pages/page-list`)
 
     if (assets.length != 0) {
         assets.forEach(async (asset) => {

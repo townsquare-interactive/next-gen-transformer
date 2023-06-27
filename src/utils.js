@@ -594,18 +594,25 @@ const getColumnsCssClass = (page) => {
 }
 
 const createFontCss = (fonts) => {
-    const headlineFont = fonts.list[fonts.sections.hdrs.value]
-    const bodyFont = fonts.list[fonts.sections.body.value]
-    const featuredFont = fonts.list[fonts.sections.feat.value]
-    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
-    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
-    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
-    const fontClasses = ` body {font-family:${bodyFont.label}}
+    let fontImportGroup
+    let fontClasses
+
+    if (Object.keys(fonts).length === 0) {
+        fontImportGroup = ''
+        fontClasses = ''
+    } else {
+        const headlineFont = fonts.list[fonts.sections.hdrs.value]
+        const bodyFont = fonts.list[fonts.sections.body.value]
+        const featuredFont = fonts.list[fonts.sections.feat.value]
+        const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+        const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+        fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
+        fontClasses = ` body {font-family:${bodyFont.label}}
     .hd-font{font-family:${headlineFont.label}} 
     .txt-font{font-family:${bodyFont.label}}
     .feat-font{font-family:${featuredFont.label}}
     `
-
+    }
     return { fontImportGroup, fontClasses }
 }
 

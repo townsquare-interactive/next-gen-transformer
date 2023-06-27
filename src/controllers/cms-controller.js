@@ -180,13 +180,13 @@ const addPagesToList = async (pageListFile, page, basePath) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         pageData = page[i].data
-        if (pageListFile.pages.filter((e) => e.name === pageData.title).length === 0) {
+        if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length === 0) {
             pageListFile.pages.push({
                 name: pageData.title,
                 slug: pageData.slug,
-                url: pageData.url,
+                url: pageData.url || pageData.slug,
                 id: Number(pageData.id),
-                page_type: pageData.page_type,
+                page_type: pageData.page_type || '',
             })
             console.log('new page added:', pageData.title)
 
@@ -525,12 +525,18 @@ const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList,
 
     const colorClasses = createColorClasses(themeStyles)
 
-    let customCss = `
+    let customCss = code.CSS
+        ? `
     /*---------------------Custom Code--------------------*/
     ${code.CSS}
     `
-
-    const allPageStyles = await getAllCssPages(currentPageList, basePath)
+        : ''
+    let allPageStyles
+    if (Object.keys(currentPageList).length != 0) {
+        allPageStyles = await getAllCssPages(currentPageList, basePath)
+    } else {
+        allPageStyles = ''
+    }
 
     //let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
     let allStyles = fontClasses + colorClasses + customCss + allPageStyles
