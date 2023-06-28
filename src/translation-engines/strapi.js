@@ -1,38 +1,36 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
+const { transformStrapiNav, determineModRenderType } = require('../strapi-utils')
+const { createItemStyles, createGallerySettings, alternatePromoColors } = require('../utils')
+const z = require('zod')
+
+const schemaNum = z.coerce.number()
 
 const transformStrapi = async (req) => {
-    console.log('save entry', req.entry)
-
-    // i think req.entry.Body is same as strapipages.data[0].Body
+    /*     
+    //can use to generate random ID's
+    const crypto = require('crypto')
+    const id = crypto.randomBytes(16).toString('hex')
+    console.log(id) // => f9b327e70bbcf42494ccb28b2d98e00e */
 
     let pagesList = []
-
     try {
         //need populate=deep to get all records, plugin for strapi
-        const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
-        const strapiPages = await resStrapiPages.json()
+        //const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
+        //const strapiPages = await resStrapiPages.json()
         const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
         const layout = await resLayout.json()
-        //console.log(strapiPages)
-        const firstPage = strapiPages.data[0]
-        const firstItemMod1 = strapiPages.data[0].attributes.Body[0].items[0]
-
-        let oldSiteData = await getFileS3(`${layout.data.attributes.siteIdentifier}/layout.json`, '')
+        const siteIdentifier = layout.data.attributes.siteIdentifier
+        let oldSiteData = await getFileS3(`${siteIdentifier}/layout.json`, '')
         let newNav
-
-        console.log('page from GET ', strapiPages.data[0])
+        const cmsColors = layout.data.attributes.Colors[0]
+        const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
 
         //check if page is same page from get
         /*  if (firstPage.id === req.entry.id) {
             firstPage.attributes.Body[0] = req.entry.Body[0]
             console.log('new page transformed', firstPage.attributes.Body[0].items[0].image[0])
         } */
-
-        const cmsColors = layout.data.attributes.Colors[0]
-        const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
-        //console.log('first page', firstPage)
-        console.log(firstItemMod1)
 
         //create a page for every page passes
 
@@ -50,64 +48,72 @@ const transformStrapi = async (req) => {
             const newMod1FirstItem = req.entry.Body[0].items[0]
             //console.log('attttttys ======================', currentItem)
 
+            let modCount = 0
+            //module loop
             for (i in req.entry.Body) {
+                modCount += 1
                 const currentModule = req.entry.Body[i]
                 const componentType = currentModule.__component === 'module.article-module' ? 'article_3' : 'article_1'
+                //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
+                const modRenderType = determineModRenderType(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
                 const disabled = currentModule.disabled === false ? 'disabled' : ''
                 const imagePriority = currentModule.lazyload
-                const columns = Number(currentModule.columns)
+
+                currentModule.columns = currentModule.columns === null ? 1 : currentModule.columns
+                const columns = schemaNum.parse(currentModule.columns || '1')
+
+                /*------------------- Mod Transforms -------------------------*/
+
+                //transform item styles
+                if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
+                    req.entry.Body[i].items = createItemStyles(currentModule.items, well, modRenderType, componentType)
+                }
+
+                //transform Photo Gallery Settings
+                if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && currentModule.settings) {
+                    req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1, currentModule.type)
+                }
+
+                //create alternating promo colors
+                if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
+                    req.entry.Body[i].items = alternatePromoColors(currentModule.items, cmsColors, currentModule.well)
+                }
+
+                /*------------------- End Mod Transforms -------------------------*/
 
                 //loop through items
+                let itemCount = 0
                 for (t in currentModule.items) {
                     const currentItem = currentModule.items[t]
+                    itemCount += 1
 
                     //move image url
                     if (currentItem.image) {
-                        req.entry.Body[i].items[t] = { ...currentItem, image: currentItem.image[0].url || '' }
+                        req.entry.Body[i].items[t] = { ...currentItem, image: currentItem.image[0].url || '', itemCount: itemCount }
                     }
                 }
 
+                //temp
+                const well = currentModule.border === true ? '1' : ''
+
                 req.entry.Body[i] = {
-                    attributes: { ...currentModule, type: componentType, imgsize: imgsize },
-                    componentType: 'Article',
-                    disabled: disabled,
-                    imagePriority: imagePriority,
-                    columns: columns,
-                }
-            }
-
-            //nav
-            //check for s3 cmsNav / check if page is already there
-
-            if (oldSiteData?.cmsNav) {
-                const theNav = oldSiteData.cmsNav
-                console.log('old nav', oldSiteData.cmsNav)
-                if (theNav.filter((e) => e.slug === req.entry.slug).length === 0) {
-                    theNav.push({
-                        title: req.entry.name,
-                        slug: req.entry.slug,
-                        url: req.entry.url || `/${req.entry.slug}`,
-                        id: req.entry.id,
-                        page_type: '',
-                        menu_item_parent: 0,
-                    })
-                    newNav = theNav
-                    console.log('new page added:')
-                }
-            } else {
-                console.log('new nav created')
-                newNav = [
-                    {
-                        title: req.entry.name,
-                        slug: req.entry.slug,
-                        url: req.entry.url || `/${req.entry.slug}`,
-                        id: req.entry.id,
-                        page_type: '',
-                        menu_item_parent: 0,
+                    attributes: {
+                        ...currentModule,
+                        type: componentType,
+                        imgsize: imgsize,
+                        modId: currentModule.id,
+                        disabled: disabled,
+                        imagePriority: imagePriority,
+                        columns: columns,
+                        well: well,
+                        modCount: modCount,
                     },
-                ]
+                    componentType: modRenderType,
+                }
             }
+
+            newNav = transformStrapiNav(req.entry, oldSiteData.cmsNav)
 
             const newPage = {
                 data: {
@@ -258,49 +264,12 @@ const transformStrapi = async (req) => {
         const siteCustomCss = ''
         const currentPageList = {}
         const fonts = {}
-        const globalStyles = await createGlobalStylesheet(cmsColors, fonts, siteCustomCss, currentPageList, layout.data.attributes.siteIdentifier)
-
-        const cmsNav = [
-            /* {
-                ID: 712524,
-                menu_list_id: 62387,
-                title: 'Home',
-                post_type: 'nav_menu_item',
-                type: null,
-                menu_item_parent: 0,
-                object_id: 641788,
-                object: 'page',
-                target: null,
-                classes: null,
-                menu_order: 1,
-                mi_url: null,
-                url: '/',
-                disabled: false,
-                submenu: [],
-                slug: 'home',
-            },
-            {
-                ID: 733409,
-                menu_list_id: 62387,
-                title: 'newcolumns',
-                post_type: 'nav_menu_item',
-                type: 'post_type',
-                menu_item_parent: 0,
-                object_id: 660622,
-                object: 'page',
-                target: null,
-                classes: null,
-                menu_order: 4,
-                mi_url: null,
-                url: '/newcolumns/',
-                disabled: false,
-            }, */
-        ]
+        const globalStyles = await createGlobalStylesheet(cmsColors, fonts, siteCustomCss, currentPageList, siteIdentifier)
 
         const strapi = {
-            siteIdentifier: layout.data.attributes.siteIdentifier,
+            siteIdentifier: siteIdentifier,
             siteLayout: {
-                cmsNav: newNav || oldSideData.cmsNav || '',
+                cmsNav: newNav || oldSiteData.cmsNav || '',
                 logos: {
                     fonts: [],
                     footer: {

@@ -86,6 +86,43 @@ router.post('/site-data/basic', async (req, res) => {
 
 router.post('/site-data/strapi', async (req, res) => {
     //console.log('posted to strapi', req)
+    const siteIdentifier = 'csutest0216basic2'
+    /* const teamId = process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
+    const tokey = process.env.process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
+
+    const requeststuff = {
+        body: {
+            name: siteIdentifier,
+            environmentVariables: [
+                {
+                    key: 'CMS_PUBLIC_URL',
+                    target: 'production',
+                    gitBranch: 'main',
+                    type: 'system',
+                    value: siteIdentifier,
+                },
+            ],
+            framework: 'nextjs',
+            gitRepository: {
+                repo: 'jedwards4044/next-website',
+                type: 'github',
+            },
+        },
+        headers: {
+            Authorization: `Bearer ${process.env.process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`,
+        },
+        method: 'post',
+    }
+    console.log(requeststuff) 
+
+    try {
+        //vercel new project
+        const fetchProd = await fetch(`https://api.vercel.com/v9/projects?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`, requeststuff)
+        console.log(fetchProd)
+    } catch (err) {
+        console.log('EERRRRROR', err)
+    }*/
+
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
         const data = await strapiEngine.transformStrapi(req.body)
