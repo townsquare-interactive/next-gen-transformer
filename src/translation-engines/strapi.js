@@ -1,4 +1,5 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
+const { getFileS3 } = require('../s3Functions')
 
 const transformStrapi = async (req) => {
     console.log('save entry', req.entry)
@@ -17,6 +18,9 @@ const transformStrapi = async (req) => {
         const firstPage = strapiPages.data[0]
         const firstItemMod1 = strapiPages.data[0].attributes.Body[0].items[0]
 
+        let oldSiteData = await getFileS3(`${layout.data.attributes.siteIdentifier}/layout.json`, '')
+        let newNav
+
         console.log('page from GET ', strapiPages.data[0])
 
         //check if page is same page from get
@@ -26,6 +30,7 @@ const transformStrapi = async (req) => {
         } */
 
         const cmsColors = layout.data.attributes.Colors[0]
+        const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
         //console.log('first page', firstPage)
         console.log(firstItemMod1)
 
@@ -70,6 +75,38 @@ const transformStrapi = async (req) => {
                     imagePriority: imagePriority,
                     columns: columns,
                 }
+            }
+
+            //nav
+            //check for s3 cmsNav / check if page is already there
+
+            if (oldSiteData?.cmsNav) {
+                const theNav = oldSiteData.cmsNav
+                console.log('old nav', oldSiteData.cmsNav)
+                if (theNav.filter((e) => e.slug === req.entry.slug).length === 0) {
+                    theNav.push({
+                        title: req.entry.name,
+                        slug: req.entry.slug,
+                        url: req.entry.url || `/${req.entry.slug}`,
+                        id: req.entry.id,
+                        page_type: '',
+                        menu_item_parent: 0,
+                    })
+                    newNav = theNav
+                    console.log('new page added:')
+                }
+            } else {
+                console.log('new nav created')
+                newNav = [
+                    {
+                        title: req.entry.name,
+                        slug: req.entry.slug,
+                        url: req.entry.url || `/${req.entry.slug}`,
+                        id: req.entry.id,
+                        page_type: '',
+                        menu_item_parent: 0,
+                    },
+                ]
             }
 
             const newPage = {
@@ -223,9 +260,47 @@ const transformStrapi = async (req) => {
         const fonts = {}
         const globalStyles = await createGlobalStylesheet(cmsColors, fonts, siteCustomCss, currentPageList, layout.data.attributes.siteIdentifier)
 
+        const cmsNav = [
+            /* {
+                ID: 712524,
+                menu_list_id: 62387,
+                title: 'Home',
+                post_type: 'nav_menu_item',
+                type: null,
+                menu_item_parent: 0,
+                object_id: 641788,
+                object: 'page',
+                target: null,
+                classes: null,
+                menu_order: 1,
+                mi_url: null,
+                url: '/',
+                disabled: false,
+                submenu: [],
+                slug: 'home',
+            },
+            {
+                ID: 733409,
+                menu_list_id: 62387,
+                title: 'newcolumns',
+                post_type: 'nav_menu_item',
+                type: 'post_type',
+                menu_item_parent: 0,
+                object_id: 660622,
+                object: 'page',
+                target: null,
+                classes: null,
+                menu_order: 4,
+                mi_url: null,
+                url: '/newcolumns/',
+                disabled: false,
+            }, */
+        ]
+
         const strapi = {
             siteIdentifier: layout.data.attributes.siteIdentifier,
             siteLayout: {
+                cmsNav: newNav || oldSideData.cmsNav || '',
                 logos: {
                     fonts: [],
                     footer: {
@@ -249,6 +324,7 @@ const transformStrapi = async (req) => {
                         ],
                         activeSlots: [],
                     },
+
                     header: {
                         pct: 100,
                         slots: [
@@ -258,7 +334,7 @@ const transformStrapi = async (req) => {
                                 markup: '<p>Business Name</p>\n',
                                 hasLinks: false,
                                 alignment: 'left',
-                                image_src: '',
+                                image_src: logo,
                                 image_link: '/',
                             },
                             {
@@ -291,7 +367,7 @@ const transformStrapi = async (req) => {
                                 markup: '',
                                 hasLinks: false,
                                 alignment: 'left',
-                                image_src: '',
+                                image_src: logo,
                                 image_link: '/',
                             },
                             {
