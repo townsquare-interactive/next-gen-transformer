@@ -26,6 +26,9 @@ const transformStrapi = async (req) => {
         const cmsColors = layout.data.attributes.Colors[0]
         const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
 
+        const pageSeo = req.entry.seo[0] || ''
+        console.log('seo time', req.entry.seo)
+
         //check if page is same page from get
         /*  if (firstPage.id === req.entry.id) {
             firstPage.attributes.Body[0] = req.entry.Body[0]
@@ -53,7 +56,15 @@ const transformStrapi = async (req) => {
             for (i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
-                const componentType = currentModule.__component === 'module.article-module' ? 'article_3' : 'article_1'
+                const componentType =
+                    currentModule.__component === 'module.article-module'
+                        ? 'article_3'
+                        : currentModule.__component === 'module.banner-module'
+                        ? 'banner_1'
+                        : 'module.parallax-module'
+                        ? 'parallax_1'
+                        : 'article_1'
+
                 //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
                 const modRenderType = determineModRenderType(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
@@ -65,6 +76,13 @@ const transformStrapi = async (req) => {
 
                 /*------------------- Mod Transforms -------------------------*/
 
+                const well = currentModule.border === true ? '1' : ''
+
+                //create alternating promo colors
+                if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
+                    req.entry.Body[i].items = alternatePromoColors(currentModule.items, cmsColors, well)
+                }
+
                 //transform item styles
                 if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
                     req.entry.Body[i].items = createItemStyles(currentModule.items, well, modRenderType, componentType)
@@ -75,11 +93,6 @@ const transformStrapi = async (req) => {
                     req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1, currentModule.type)
                 }
 
-                //create alternating promo colors
-                if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
-                    req.entry.Body[i].items = alternatePromoColors(currentModule.items, cmsColors, currentModule.well)
-                }
-
                 /*------------------- End Mod Transforms -------------------------*/
 
                 //loop through items
@@ -88,14 +101,18 @@ const transformStrapi = async (req) => {
                     const currentItem = currentModule.items[t]
                     itemCount += 1
 
+                    //modSwitch1 = 1 when no parallax background is used
+                    if (modRenderType === 'Parallax') {
+                        req.entry.Body[i].items[t] = { ...currentItem, modSwitch1: 1 }
+                    }
+
                     //move image url
                     if (currentItem.image) {
-                        req.entry.Body[i].items[t] = { ...currentItem, image: currentItem.image[0].url || '', itemCount: itemCount }
+                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], image: currentItem.image[0].url || '', itemCount: itemCount }
                     }
                 }
 
                 //temp
-                const well = currentModule.border === true ? '1' : ''
 
                 req.entry.Body[i] = {
                     attributes: {
@@ -250,8 +267,8 @@ const transformStrapi = async (req) => {
                 },
                 attrs: {},
                 seo: {
-                    title: null,
-                    descr: null,
+                    title: pageSeo?.title || '',
+                    descr: pageSeo?.descr || '',
                     selectedImages: null,
                     imageOverride: null,
                 },

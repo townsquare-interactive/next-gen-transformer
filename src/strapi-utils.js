@@ -32,9 +32,9 @@ const determineModRenderType = (type) => {
         return 'Article'
     } else if (type === 'photo_grid') {
         return 'PhotoGrid'
-    } else if (type === 'banner_1') {
+    } else if (type === 'module.banner-module') {
         return 'Banner'
-    } else if (type === 'parallax_1') {
+    } else if (type === 'module.parallax-module') {
         return 'Parallax'
     } else if (type === 'testimonials_1' || type === 'testimonials_2') {
         return 'Testimonials'

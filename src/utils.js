@@ -492,6 +492,7 @@ const createItemStyles = (items, well, modType, type) => {
                 itemStyle = {}
             }
         }
+        console.log('item style', itemStyle)
 
         items[i] = { ...items[i], itemStyle: itemStyle }
 
