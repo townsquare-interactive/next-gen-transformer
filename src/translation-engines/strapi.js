@@ -1,6 +1,6 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
-const { transformStrapiNav, determineModRenderType } = require('../strapi-utils')
+const { transformStrapiNav, determineModRenderType, transformTextSize } = require('../strapi-utils')
 const { createItemStyles, createGallerySettings, alternatePromoColors } = require('../utils')
 const z = require('zod')
 
@@ -65,10 +65,12 @@ const transformStrapi = async (req) => {
                         ? 'parallax_1'
                         : 'article_1'
 
+                console.log('mod dis', req.entry.Body)
+
                 //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
                 const modRenderType = determineModRenderType(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
-                const disabled = currentModule.disabled === false ? 'disabled' : ''
+                //const disabled = currentModule.disabled === true ? 'disabled' : ''
                 const imagePriority = currentModule.lazyload
 
                 currentModule.columns = currentModule.columns === null ? 1 : currentModule.columns
@@ -108,7 +110,29 @@ const transformStrapi = async (req) => {
 
                     //move image url
                     if (currentItem.image) {
-                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], image: currentItem.image[0].url || '', itemCount: itemCount }
+                        console.log('image', currentItem.image)
+
+                        req.entry.Body[i].items[t] = {
+                            ...req.entry.Body[i].items[t],
+                            image: currentItem.image[0].url || '',
+                            caption_tag: currentItem.image[0].caption || '',
+                            img_alt_tag: currentItem.image[0].alternativeText || '',
+                        }
+                    }
+
+                    if (currentItem.headSize) {
+                        req.entry.Body[i].items[t].headSize = transformTextSize(req.entry.Body[i].items[t].headSize)
+                    }
+
+                    if (currentItem.descSize) {
+                        req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
+                    }
+
+                    const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
+                    req.entry.Body[i].items[t] = {
+                        ...req.entry.Body[i].items[t],
+                        headerTag: headerTag,
+                        itemCount: itemCount,
                     }
                 }
 
@@ -120,7 +144,7 @@ const transformStrapi = async (req) => {
                         type: componentType,
                         imgsize: imgsize,
                         modId: currentModule.id,
-                        disabled: disabled,
+                        //disabled: disabled,
                         imagePriority: imagePriority,
                         columns: columns,
                         well: well,

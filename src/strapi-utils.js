@@ -49,6 +49,10 @@ const determineModRenderType = (type) => {
     }
 }
 
+const transformTextSize = (size) => {
+    return `font_${size.toLowerCase()}`
+}
+
 /* tires 743.67 dry routing / 
 engine 34 not state inspection
 cabin 43 not state inspection */
@@ -60,4 +64,5 @@ cabin 43 not state inspection */
 module.exports = {
     transformStrapiNav,
     determineModRenderType,
+    transformTextSize,
 }
