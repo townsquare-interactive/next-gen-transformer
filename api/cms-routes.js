@@ -87,8 +87,8 @@ router.post('/site-data/basic', async (req, res) => {
 router.post('/site-data/strapi', async (req, res) => {
     //console.log('posted to strapi', req)
     const siteIdentifier = 'csutest0216basic2'
-    /* const teamId = process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
-    const tokey = process.env.process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
+    const teamId = process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
+    const tokey = process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN
 
     const requeststuff = {
         body: {
@@ -96,9 +96,8 @@ router.post('/site-data/strapi', async (req, res) => {
             environmentVariables: [
                 {
                     key: 'CMS_PUBLIC_URL',
-                    target: 'production',
-                    gitBranch: 'main',
-                    type: 'system',
+                    target: ['production', 'preview', 'development'],
+                    type: 'plain',
                     value: siteIdentifier,
                 },
             ],
@@ -108,20 +107,25 @@ router.post('/site-data/strapi', async (req, res) => {
                 type: 'github',
             },
         },
-        headers: {
-            Authorization: `Bearer ${process.env.process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`,
-        },
-        method: 'post',
     }
-    console.log(requeststuff) 
 
+    console.log(JSON.stringify(requeststuff))
+
+    /*  //DEPLOYS NEW PROJECT TO VERCEL
     try {
-        //vercel new project
-        const fetchProd = await fetch(`https://api.vercel.com/v9/projects?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`, requeststuff)
-        console.log(fetchProd)
+        const rawResponse = await fetch(`https://api.vercel.com/v9/projects?teamId=${teamId}`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokey}`,
+            },
+            body: JSON.stringify(requeststuff.body),
+        })
+        console.log(rawResponse)
     } catch (err) {
         console.log('EERRRRROR', err)
-    }*/
+    } */
 
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles

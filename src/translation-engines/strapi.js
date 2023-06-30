@@ -1,7 +1,7 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
 const { transformStrapiNav, determineModRenderType, transformTextSize } = require('../strapi-utils')
-const { createItemStyles, createGallerySettings, alternatePromoColors } = require('../utils')
+const { createItemStyles, createGallerySettings, alternatePromoColors, createLinkAndButtonVariables } = require('../utils')
 const z = require('zod')
 
 const schemaNum = z.coerce.number()
@@ -16,8 +16,10 @@ const transformStrapi = async (req) => {
     let pagesList = []
     try {
         //need populate=deep to get all records, plugin for strapi
-        //const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
-        //const strapiPages = await resStrapiPages.json()
+        const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
+        const strapiPages = await resStrapiPages.json()
+
+        //console.log('pages', strapiPages.data[0].attributes)
         const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
         const layout = await resLayout.json()
         const siteIdentifier = layout.data.attributes.siteIdentifier
@@ -26,8 +28,8 @@ const transformStrapi = async (req) => {
         const cmsColors = layout.data.attributes.Colors[0]
         const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
 
-        const pageSeo = req.entry.seo[0] || ''
-        console.log('seo time', req.entry.seo)
+        const pageSeo = req.entry.seo ? req.entry.seo[0] : ''
+        //console.log('seo time', req.entry.seo)
 
         //check if page is same page from get
         /*  if (firstPage.id === req.entry.id) {
@@ -47,15 +49,18 @@ const transformStrapi = async (req) => {
             } */
 
         //if page is saved
+        //console.log('ui nav', req.entry.page)
         if (req.entry.slug != null) {
             const newMod1FirstItem = req.entry.Body[0].items[0]
             //console.log('attttttys ======================', currentItem)
+            //console.log(req.entry)
 
             let modCount = 0
             //module loop
             for (i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
+                console.log(currentModule)
                 const componentType =
                     currentModule.__component === 'module.article-module'
                         ? 'article_3'
@@ -64,8 +69,6 @@ const transformStrapi = async (req) => {
                         : 'module.parallax-module'
                         ? 'parallax_1'
                         : 'article_1'
-
-                console.log('mod dis', req.entry.Body)
 
                 //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
                 const modRenderType = determineModRenderType(currentModule.__component)
@@ -110,8 +113,6 @@ const transformStrapi = async (req) => {
 
                     //move image url
                     if (currentItem.image) {
-                        console.log('image', currentItem.image)
-
                         req.entry.Body[i].items[t] = {
                             ...req.entry.Body[i].items[t],
                             image: currentItem.image[0].url || '',
@@ -126,6 +127,49 @@ const transformStrapi = async (req) => {
 
                     if (currentItem.descSize) {
                         req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
+                    }
+
+                    if (currentItem.buttons.length != 0) {
+                        //console.log('testttt', currentItem.buttons[0])
+                        const btn1 = currentItem.buttons[0]
+                        const btn2 = currentItem.buttons[1]
+
+                        console.log('bt1', btn1.pagelink)
+
+                        // console.log('btns', currentItem.buttons)
+
+                        const btnData = {
+                            pagelink: btn1.pagelink ? btn1.pagelink.toLowerCase() : '',
+                            weblink: btn1.extlink ? btn1.extlink.toLowerCase() : '',
+                            pagelink2: btn2.pagelink ? btn2.pagelink.toLowerCase() : '',
+                            weblink2: btn2.extlink ? btn2.extlink.toLowerCase() : '',
+                            actionlbl: btn1.text || '',
+                            actionlbl2: btn2.text || '',
+                            btnSize: '',
+                            btnSize2: '',
+                            newwindow: btn1.ext === true ? 1 : '',
+                            newwindow2: btn2.ext === true ? 1 : '',
+                        }
+
+                        console.log('btnData', btnData)
+
+                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], ...btnData }
+
+                        const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
+                            req.entry.Body[i].items[t],
+                            modRenderType,
+                            columns
+                        )
+                        console.log('btnlist', buttonList)
+
+                        req.entry.Body[i].items[t] = {
+                            ...req.entry.Body[i].items[t],
+                            linkNoBtn: linkNoBtn,
+                            twoButtons: twoButtons,
+                            isWrapLink: isWrapLink,
+                            visibleButton: visibleButton,
+                            buttonList: buttonList,
+                        }
                     }
 
                     const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
