@@ -30,22 +30,46 @@ const transformStrapiNav = (newPage, oldNav) => {
 const determineModRenderType = (type) => {
     if (type.includes('article')) {
         return 'Article'
-    } else if (type === 'photo_grid') {
+    } else if (type === 'module.photogrid-module') {
         return 'PhotoGrid'
     } else if (type === 'module.banner-module') {
         return 'Banner'
     } else if (type === 'module.parallax-module') {
         return 'Parallax'
-    } else if (type === 'testimonials_1' || type === 'testimonials_2') {
+    } else if (type === 'module.testimonials-module') {
         return 'Testimonials'
-    } else if (type === 'card_1' || type === 'card_2') {
+    } else if (type === 'module.card-module') {
         return 'Card'
-    } else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
+    } else if (type === 'module.photogallery-module') {
         return 'PhotoGallery'
     } else if (type === 'module.contact-form') {
         return 'ContactFormRoutes'
     } else {
         return type
+    }
+}
+
+const determineComponentType = (componentType, useCarousel) => {
+    if (componentType === 'module.article-module') {
+        return 'article_3'
+    } else if (componentType === 'module.banner-module') {
+        return 'banner_1'
+    } else if (componentType === 'module.parallax-module') {
+        return 'parallax_1'
+    } else if (componentType === 'module.photogrid-module') {
+        return 'photo_grid'
+    } else if (componentType === 'module.photogallery-module' && useCarousel === true) {
+        return 'thumbnail_gallery'
+    } else if (componentType === 'module.photogallery-module' && useCarousel === false) {
+        return 'photo_gallery_1'
+    } else if (componentType === 'module.testimonials-module' && useCarousel === true) {
+        return 'review_carousel'
+    } else if (componentType === 'module.testimonials-module' && useCarousel === false) {
+        return 'testimonials_1'
+    } else if (componentType === 'module.card-module') {
+        return 'card_1'
+    } else {
+        return 'article_3'
     }
 }
 
@@ -65,4 +89,5 @@ module.exports = {
     transformStrapiNav,
     determineModRenderType,
     transformTextSize,
+    determineComponentType,
 }

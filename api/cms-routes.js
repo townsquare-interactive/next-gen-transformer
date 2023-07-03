@@ -127,6 +127,24 @@ router.post('/site-data/strapi', async (req, res) => {
         console.log('EERRRRROR', err)
     } */
 
+    const newDeploy = await fetch(`https://api.vercel.com/v1/projects/{projectID}/deployments`, {
+        body: {
+            name: 'My Deployment',
+            files: [
+                {
+                    file: '/path/to/file',
+                    data: 'BASE64_ENCODED_CONTENT',
+                },
+            ],
+        },
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${tokey}`,
+        },
+        method: 'post',
+    })
+
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
         const data = await strapiEngine.transformStrapi(req.body)

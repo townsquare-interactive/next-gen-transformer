@@ -1,6 +1,6 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
-const { transformStrapiNav, determineModRenderType, transformTextSize } = require('../strapi-utils')
+const { transformStrapiNav, determineModRenderType, transformTextSize, determineComponentType } = require('../strapi-utils')
 const { createItemStyles, createGallerySettings, alternatePromoColors, createLinkAndButtonVariables, createContactForm } = require('../utils')
 const z = require('zod')
 
@@ -60,14 +60,10 @@ const transformStrapi = async (req) => {
             for (i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
-                const componentType =
-                    currentModule.__component === 'module.article-module'
-                        ? 'article_3'
-                        : currentModule.__component === 'module.banner-module'
-                        ? 'banner_1'
-                        : 'module.parallax-module'
-                        ? 'parallax_1'
-                        : 'article_1'
+                const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
+
+                //types
+                //photo_gallery_1 testimonials_1 review_carousel thumbnail_gallery card_1
 
                 //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
                 const modRenderType = determineModRenderType(currentModule.__component)
@@ -123,7 +119,7 @@ const transformStrapi = async (req) => {
                     console.log(currentItem)
 
                     //modSwitch1 = 1 when no parallax background is used
-                    if (modRenderType === 'Parallax') {
+                    if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
                         req.entry.Body[i].items[t] = { ...currentItem, modSwitch1: 1 }
                     }
 
