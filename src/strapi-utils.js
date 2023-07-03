@@ -42,7 +42,7 @@ const determineModRenderType = (type) => {
         return 'Card'
     } else if (type === 'photo_gallery_1' || type === 'photo_gallery_2') {
         return 'PhotoGallery'
-    } else if (type === 'plugin') {
+    } else if (type === 'module.contact-form') {
         return 'ContactFormRoutes'
     } else {
         return type

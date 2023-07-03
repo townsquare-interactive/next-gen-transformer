@@ -90,7 +90,7 @@ router.post('/site-data/strapi', async (req, res) => {
     const teamId = process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
     const tokey = process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN
 
-    const requeststuff = {
+    /*     const requeststuff = {
         body: {
             name: siteIdentifier,
             environmentVariables: [
@@ -109,7 +109,7 @@ router.post('/site-data/strapi', async (req, res) => {
         },
     }
 
-    console.log(JSON.stringify(requeststuff))
+    console.log(JSON.stringify(requeststuff)) */
 
     /*  //DEPLOYS NEW PROJECT TO VERCEL
     try {

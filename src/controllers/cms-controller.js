@@ -23,6 +23,7 @@ const {
     createGallerySettings,
     modVariationType,
     createItemStyles,
+    createContactForm,
 } = require('../utils')
 
 const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
@@ -413,94 +414,7 @@ const transformPageModules = (moduleList, themeStyles) => {
 
                 //add contactFormData in form object
                 if (modRenderType === 'ContactFormRoutes') {
-                    const contactFormData = {
-                        formTitle: 'Contact Us',
-                        formService: 'webhook',
-                        formFields: [
-                            {
-                                name: 'fName',
-                                placeholder: 'Enter Name',
-                                type: 'text',
-                                label: 'First Name',
-                                isReq: true,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'sm',
-                            },
-                            {
-                                name: 'lName',
-                                placeholder: 'Enter Name',
-                                type: 'text',
-                                label: 'Last Name',
-                                isReq: true,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'sm',
-                            },
-
-                            {
-                                name: 'email',
-                                // placeholder:'Enter Name',
-                                type: 'email',
-                                label: 'Email',
-                                isReq: true,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                name: 'phone',
-                                // placeholder:'Enter Name',
-                                type: 'phone',
-                                label: 'Phone',
-                                isReq: false,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                label: 'Message',
-                                name: 'messagebox',
-                                isReq: true,
-                                fieldType: 'textarea',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                label: 'Address',
-                                subLabel: 'Street Address',
-                                name: 'street',
-                                isReq: false,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                label: 'Zip Code',
-                                name: 'zip',
-                                isReq: false,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                label: 'City',
-                                name: 'city',
-                                isReq: false,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                            {
-                                label: 'State',
-                                name: 'state',
-                                isReq: false,
-                                fieldType: 'input',
-                                isVisible: true,
-                                size: 'md',
-                            },
-                        ],
-                    }
+                    const contactFormData = createContactForm('', '')
                     newModule = {
                         ...newModule,
                         contactFormData: contactFormData,

@@ -1,7 +1,7 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
 const { transformStrapiNav, determineModRenderType, transformTextSize } = require('../strapi-utils')
-const { createItemStyles, createGallerySettings, alternatePromoColors, createLinkAndButtonVariables } = require('../utils')
+const { createItemStyles, createGallerySettings, alternatePromoColors, createLinkAndButtonVariables, createContactForm } = require('../utils')
 const z = require('zod')
 
 const schemaNum = z.coerce.number()
@@ -25,7 +25,7 @@ const transformStrapi = async (req) => {
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let oldSiteData = await getFileS3(`${siteIdentifier}/layout.json`, '')
         let newNav
-        const cmsColors = layout.data.attributes.Colors[0]
+        const cmsColors = layout.data.attributes.colors
         const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
 
         const pageSeo = req.entry.seo ? req.entry.seo[0] : ''
@@ -60,7 +60,6 @@ const transformStrapi = async (req) => {
             for (i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
-                console.log(currentModule)
                 const componentType =
                     currentModule.__component === 'module.article-module'
                         ? 'article_3'
@@ -72,6 +71,7 @@ const transformStrapi = async (req) => {
 
                 //const modRenderType = currentModule.__component === 'module.article-module' ? 'Article' : 'Article'
                 const modRenderType = determineModRenderType(currentModule.__component)
+                console.log(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
                 //const disabled = currentModule.disabled === true ? 'disabled' : ''
                 const imagePriority = currentModule.lazyload
@@ -98,6 +98,20 @@ const transformStrapi = async (req) => {
                     req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1, currentModule.type)
                 }
 
+                //add contactFormData in form object
+                if (modRenderType === 'ContactFormRoutes') {
+                    const contactFormData = createContactForm(currentModule.formTitle || '', currentModule.email || '')
+                    req.entry.Body[i] = {
+                        ...req.entry.Body[i],
+                        contactFormData: contactFormData,
+                        items: [
+                            {
+                                plugin: '[gravity]',
+                            },
+                        ],
+                    }
+                }
+
                 /*------------------- End Mod Transforms -------------------------*/
 
                 //loop through items
@@ -105,6 +119,8 @@ const transformStrapi = async (req) => {
                 for (t in currentModule.items) {
                     const currentItem = currentModule.items[t]
                     itemCount += 1
+
+                    console.log(currentItem)
 
                     //modSwitch1 = 1 when no parallax background is used
                     if (modRenderType === 'Parallax') {
@@ -184,7 +200,7 @@ const transformStrapi = async (req) => {
 
                 req.entry.Body[i] = {
                     attributes: {
-                        ...currentModule,
+                        ...req.entry.Body[i],
                         type: componentType,
                         imgsize: imgsize,
                         modId: currentModule.id,
@@ -196,121 +212,23 @@ const transformStrapi = async (req) => {
                     },
                     componentType: modRenderType,
                 }
+
+                console.log(req.entry.Body[i])
             }
 
             newNav = transformStrapiNav(req.entry, oldSiteData.cmsNav)
 
             const newPage = {
                 data: {
-                    id: '61822',
+                    id: req.entry.id,
                     title: req.entry.name,
                     slug: req.entry.slug,
-                    pageType: 'homepage',
+                    pageType: '',
                     url: `/${req.entry.slug}`,
                     JS: '',
                     type: 'menu',
                     layout: 1,
                     columns: 2,
-                    /*                     modules: [
-                        [
-                            {
-                                attributes: {
-                                    title: '',
-                                    class: '',
-                                    align: '',
-                                    imgsize: 'square_1_1',
-                                    columns: '1',
-                                    type: 'article_1',
-                                    well: '',
-                                    lightbox: '',
-                                    lazy: '',
-                                    blockSwitch1: 1,
-                                    blockField1: '',
-                                    blockField2: '',
-                                    scale_to_fit: '',
-                                    export: 1,
-                                    items: [
-                                        {
-                                            id: '3a0c813a_88b7_4859_93d1_8ee7c98e0e5e',
-                                            headline: newMod1FirstItem.headline,
-                                            subheader: newMod1FirstItem.subheadline,
-                                            image: '',
-                                            captionOn: '',
-                                            icon: '',
-                                            icon2: '',
-                                            icon3: '',
-                                            bkgrd_color: '',
-                                            btnType: '',
-                                            btnType2: '',
-                                            btnSize: '',
-                                            btnSize2: '',
-                                            desc: newMod1FirstItem.desc,
-                                            pagelink: '',
-                                            weblink: '',
-                                            actionlbl: '',
-                                            newwindow: '',
-                                            pagelink2: '',
-                                            weblink2: '',
-                                            actionlbl2: '',
-                                            newwindow2: '',
-                                            align: newMod1FirstItem.align,
-                                            isFeatured: 'active',
-                                            isPlugin: '',
-                                            headerTag: '',
-                                            plugin: '',
-                                            disabled: '',
-                                            pagelinkId: '',
-                                            pagelink2Id: '',
-                                            buttonList: [
-                                                {
-                                                    name: 'btn1',
-                                                    link: '',
-                                                    window: '',
-                                                    label: '',
-                                                    active: false,
-                                                    btnType: 'btn_1',
-                                                    btnSize: 'btn_md',
-                                                    linkType: 'ext',
-                                                    blockBtn: false,
-                                                },
-                                                {
-                                                    name: 'btn2',
-                                                    link: '',
-                                                    window: '',
-                                                    label: '',
-                                                    active: false,
-                                                    btnType: 'btn_2',
-                                                    btnSize: 'btn_md',
-                                                    linkType: 'ext',
-                                                    blockBtn: false,
-                                                },
-                                            ],
-                                            linkNoBtn: false,
-                                            twoButtons: false,
-                                            isWrapLink: false,
-                                            visibleButton: false,
-                                            isBeaconHero: false,
-                                            imagePriority: false,
-                                            itemCount: 1,
-                                            btnStyles:
-                                                ' #id_59782df4_0886_4a25_8a23_814620c0e7a5 .item_1 .btn2_override {color:#0f181f; background-color:transparent;} ',
-                                            nextImageSizes: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px',
-                                        },
-                                    ],
-                                    id: '59782df4_0886_4a25_8a23_814620c0e7a5',
-                                    modId: '59782df4_0886_4a25_8a23_814620c0e7a5',
-                                    modCount: 1,
-                                    columnLocation: 0,
-                                    isSingleColumn: false,
-                                },
-                                componentType: 'Article',
-                            },
-                        ],
-                        [],
-                        [],
-                        [],
-                        [],
-                    ], */
                     modules: [req.entry.Body, [], [], [], []],
                     sections: [
                         {
@@ -511,7 +429,7 @@ const transformStrapi = async (req) => {
                     ],
                     showContactBox: false,
                 },
-                siteName: 'TITLE',
+                siteName: siteIdentifier,
                 url: 'csutest0216.staging7.townsquareinteractive.com',
                 composites: {
                     footer: {
