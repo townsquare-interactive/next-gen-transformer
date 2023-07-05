@@ -10,7 +10,7 @@ const publish = async (data) => {
 
     const pageList = []
 
-    if (pages.length != 0) {
+    if (pages?.length != 0) {
         //adding each page to s3
         for (let i = 0; i < pages.length; i++) {
             //rewrite page list every time to passed page
@@ -27,7 +27,7 @@ const publish = async (data) => {
 
     //await addFileS3({ pages: pageList }, `${siteIdentifier}/pages/page-list`)
 
-    if (assets.length != 0) {
+    if (assets?.length != 0) {
         assets.forEach(async (asset) => {
             await addAssetFromSiteToS3(asset.content, siteIdentifier + '/assets/' + asset.name)
         })
