@@ -7,6 +7,7 @@ const z = require('zod')
 const schemaNum = z.coerce.number()
 
 const transformStrapi = async (req) => {
+    console.log(req)
     /*     
     //can use to generate random ID's
     const crypto = require('crypto')
@@ -27,7 +28,7 @@ const transformStrapi = async (req) => {
         let oldSiteData = await getFileS3(`${siteIdentifier}/layout.json`, '')
         let newNav
         const cmsColors = layout.data.attributes.colors
-        const logo = layout.data?.attributes?.logo?.data.attributes.url || ''
+        const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
 
         const pageSeo = req.entry.seo ? req.entry.seo[0] : ''
         //console.log('seo time', req.entry.seo)
