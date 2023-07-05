@@ -16,11 +16,12 @@ const transformStrapi = async (req) => {
     let pagesList = []
     try {
         //need populate=deep to get all records, plugin for strapi
-        const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
-        const strapiPages = await resStrapiPages.json()
+        //const resStrapiPages = await fetch('http://127.0.0.1:1337/api/pages?populate=deep')
+        //const strapiPages = await resStrapiPages.json()
 
         //console.log('pages', strapiPages.data[0].attributes)
-        const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
+        //const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
+        const resLayout = await fetch('https://shy-frost-8694.fly.dev/api/site-data?populate=deep')
         const layout = await resLayout.json()
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let oldSiteData = await getFileS3(`${siteIdentifier}/layout.json`, '')
