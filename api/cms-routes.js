@@ -127,7 +127,7 @@ router.post('/site-data/strapi', async (req, res) => {
         console.log('EERRRRROR', err)
     } */
 
-    const newDeploy = await fetch(`https://api.vercel.com/v1/projects/{projectID}/deployments`, {
+    /*  const newDeploy = await fetch(`https://api.vercel.com/v1/projects/{projectID}/deployments`, {
         body: {
             name: 'My Deployment',
             files: [
@@ -143,7 +143,7 @@ router.post('/site-data/strapi', async (req, res) => {
             Authorization: `Bearer ${tokey}`,
         },
         method: 'post',
-    })
+    }) */
 
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
