@@ -40,6 +40,7 @@ const transformStrapi = async (req) => {
         let newNav
         const cmsColors = layout.data.attributes.colors
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
+        const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
 
         console.log('this is the nav', nav.length)
 
@@ -510,7 +511,7 @@ const transformStrapi = async (req) => {
                 theme: 'beacon-theme_charlotte',
                 cmsUrl: 'csutest0216.staging7.townsquareinteractive.com',
                 s3Folder: 'csutest0216',
-                favicon: '',
+                favicon: favicon,
                 fontImport:
                     '@import url(https://fonts.googleapis.com/css?family=Oswald:400,700|PT+Sans+Narrow:400,700,400italic,700italic|Montserrat:300,300i,400,400i,700,700i,900,900i|Old+Standard+TT&display=swap);',
                 config: {
