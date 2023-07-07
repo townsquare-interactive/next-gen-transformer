@@ -149,6 +149,8 @@ router.post('/site-data/strapi', async (req, res) => {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
         const data = await strapiEngine.transformStrapi(req.body)
 
+        console.log(data.pages)
+
         await publish({ ...data })
         res.json('posting to s3 folder: ' + 'strapi')
 

@@ -448,6 +448,11 @@ const createItemStyles = (items, well, modType, type) => {
                         (_b = currentItem.textureImage) === null || _b === void 0 ? void 0 : _b.gradientColors[1]
                     })`,
                 }
+            }
+            //added for strapi color overlay
+            else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
+                let modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`)
+                itemStyle = { background: modBackground }
             } else if (currentItem.promoColor) {
                 itemStyle = { background: `${currentItem.promoColor}` }
             } else {

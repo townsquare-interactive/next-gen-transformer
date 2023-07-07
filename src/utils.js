@@ -193,7 +193,7 @@ const createContactForm = (formTitle, email) => {
     return contactFormData
 }
 
-function transformcontact(contactInfo, siteName) {
+function transformcontact(contactInfo) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
@@ -552,6 +552,7 @@ const isPromoButton = (items, modType, btnNum) => {
 const createItemStyles = (items, well, modType, type) => {
     for (let i = 0; i < items.length; i++) {
         let itemStyle
+        let captionStyle
         const currentItem = items[i]
         if (modType === 'Parallax') {
             if (currentItem.modColor1 && well != '1' && !currentItem.image) {
@@ -579,6 +580,9 @@ const createItemStyles = (items, well, modType, type) => {
                 itemStyle = {
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
+            } else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
+                let modBackground = currentItem.modColor1.replace(')', `,${1 - currentItem.modOpacity})`)
+                captionStyle = { background: modBackground }
             } else if (currentItem.promoColor) {
                 itemStyle = { background: `${currentItem.promoColor}` }
             } else {
@@ -587,7 +591,7 @@ const createItemStyles = (items, well, modType, type) => {
         }
         console.log('item style', itemStyle)
 
-        items[i] = { ...items[i], itemStyle: itemStyle }
+        items[i] = { ...items[i], itemStyle: itemStyle, captionStyle: captionStyle || '' }
 
         //banner
     }

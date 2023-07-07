@@ -1,13 +1,21 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
-const { transformStrapiNav, determineModRenderType, transformTextSize, determineComponentType } = require('../strapi-utils')
-const { createItemStyles, createGallerySettings, alternatePromoColors, createLinkAndButtonVariables, createContactForm } = require('../utils')
+const { transformStrapiNav, determineModRenderType, transformTextSize, determineComponentType, convertColumns } = require('../strapi-utils')
+const {
+    createItemStyles,
+    createGallerySettings,
+    alternatePromoColors,
+    createLinkAndButtonVariables,
+    createContactForm,
+    transformcontact,
+    socialConvert,
+} = require('../utils')
 const z = require('zod')
 
 const schemaNum = z.coerce.number()
 
 const transformStrapi = async (req) => {
-    console.log(req)
+    console.log('nav stuff', req.entry)
     /*     
     //can use to generate random ID's
     const crypto = require('crypto')
@@ -21,14 +29,19 @@ const transformStrapi = async (req) => {
         //const strapiPages = await resStrapiPages.json()
 
         //console.log('pages', strapiPages.data[0].attributes)
-        //const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
-        const resLayout = await fetch('https://shy-frost-8694.fly.dev/api/site-data?populate=deep')
+        const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
+        //const resLayout = await fetch('https://shy-frost-8694.fly.dev/api/site-data?populate=deep')
+
+        const resNav = await fetch('http://127.0.0.1:1337/api/navigation/render/1?locale=fr')
+        const nav = await resNav.json()
         const layout = await resLayout.json()
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let oldSiteData = await getFileS3(`${siteIdentifier}/layout.json`, '')
         let newNav
         const cmsColors = layout.data.attributes.colors
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
+
+        console.log('this is the nav', nav.length)
 
         const pageSeo = req.entry.seo ? req.entry.seo[0] : ''
         //console.log('seo time', req.entry.seo)
@@ -52,7 +65,7 @@ const transformStrapi = async (req) => {
 
         //if page is saved
         //console.log('ui nav', req.entry.page)
-        if (req.entry.slug != null) {
+        if (req.entry.slug != null && req.entry.Body) {
             const newMod1FirstItem = req.entry.Body[0].items[0]
             //console.log('attttttys ======================', currentItem)
             //console.log(req.entry)
@@ -75,7 +88,10 @@ const transformStrapi = async (req) => {
                 const imagePriority = currentModule.lazyload
 
                 currentModule.columns = currentModule.columns === null ? 1 : currentModule.columns
-                const columns = schemaNum.parse(currentModule.columns || '1')
+                //const columns = schemaNum.parse(currentModule.columns || '1')
+                const columns = convertColumns(currentModule.columns)
+
+                console.log('cols', columns)
 
                 /*------------------- Mod Transforms -------------------------*/
 
@@ -87,9 +103,6 @@ const transformStrapi = async (req) => {
                 }
 
                 //transform item styles
-                if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
-                    req.entry.Body[i].items = createItemStyles(currentModule.items, well, modRenderType, componentType)
-                }
 
                 //transform Photo Gallery Settings
                 if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && currentModule.settings) {
@@ -118,11 +131,9 @@ const transformStrapi = async (req) => {
                     const currentItem = currentModule.items[t]
                     itemCount += 1
 
-                    console.log(currentItem)
-
                     //modSwitch1 = 1 when no parallax background is used
                     if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
-                        req.entry.Body[i].items[t] = { ...currentItem, modSwitch1: 1 }
+                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modSwitch1: 1 }
                     }
 
                     //move image url
@@ -143,12 +154,15 @@ const transformStrapi = async (req) => {
                         req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
                     }
 
+                    //testimonials stars
+                    if (currentItem.stars) {
+                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], actionlbl: convertColumns(currentItem.stars) }
+                    }
+
                     if (currentItem.buttons.length != 0) {
                         //console.log('testttt', currentItem.buttons[0])
                         const btn1 = currentItem.buttons[0]
                         const btn2 = currentItem.buttons[1]
-
-                        console.log('bt1', btn1.pagelink)
 
                         // console.log('btns', currentItem.buttons)
 
@@ -165,8 +179,6 @@ const transformStrapi = async (req) => {
                             newwindow2: btn2.ext === true ? 1 : '',
                         }
 
-                        console.log('btnData', btnData)
-
                         req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], ...btnData }
 
                         const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
@@ -174,7 +186,6 @@ const transformStrapi = async (req) => {
                             modRenderType,
                             columns
                         )
-                        console.log('btnlist', buttonList)
 
                         req.entry.Body[i].items[t] = {
                             ...req.entry.Body[i].items[t],
@@ -185,6 +196,11 @@ const transformStrapi = async (req) => {
                             buttonList: buttonList,
                         }
                     }
+                    if (req.entry.Body[i].imageOverlay === true) {
+                        const modColor1 = 'rgb(0,0,0)'
+                        const modOpacity = 0.8
+                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modColor1: modColor1, modOpacity: modOpacity }
+                    }
 
                     const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
                     req.entry.Body[i].items[t] = {
@@ -192,6 +208,12 @@ const transformStrapi = async (req) => {
                         headerTag: headerTag,
                         itemCount: itemCount,
                     }
+                }
+
+                //creating item styles
+                if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
+                    console.log(well, modRenderType, componentType)
+                    req.entry.Body[i].items = createItemStyles(req.entry.Body[i].items, well, modRenderType, componentType)
                 }
 
                 //temp
@@ -210,11 +232,7 @@ const transformStrapi = async (req) => {
                     },
                     componentType: modRenderType,
                 }
-
-                console.log(req.entry.Body[i])
             }
-
-            newNav = transformStrapiNav(req.entry, oldSiteData.cmsNav)
 
             const newPage = {
                 data: {
@@ -261,6 +279,46 @@ const transformStrapi = async (req) => {
             pagesList.push(newPage)
         }
 
+        //maybe add check to see if nav option is saved then do this
+        newNav = transformStrapiNav(nav)
+
+        let contactInfo = {
+            address: {
+                city: layout.data?.attributes?.city || '',
+                zip: layout.data?.attributes?.zip || '',
+                name: siteIdentifier,
+                state: layout.data?.attributes?.state || '',
+                street: layout.data?.attributes?.streetAddress || '',
+            },
+            phone: layout.data.attributes.phone,
+            email: [
+                {
+                    name: 'email',
+                    email: layout.data?.attributes?.email || '',
+                    isPrimaryEmail: true,
+                },
+            ],
+        }
+
+        contactInfo = transformcontact(contactInfo)
+
+        console.log(layout.data?.attributes.socialMedia)
+
+        //social media page
+        let socialMediaItems = []
+        if (layout.data?.attributes.socialMedia?.length != 0) {
+            const inputtedSocials = layout.data?.attributes.socialMedia || []
+
+            for (let m = 0; m < inputtedSocials.length; m++) {
+                let url = inputtedSocials[m].url
+                if (!url.includes('http')) {
+                    url = 'http://' + url
+                }
+
+                socialMediaItems.push({ url: url, icon: socialConvert(inputtedSocials[m].url) })
+            }
+        }
+
         //global styles
         const siteCustomCss = ''
         const currentPageList = {}
@@ -270,7 +328,7 @@ const transformStrapi = async (req) => {
         const strapi = {
             siteIdentifier: siteIdentifier,
             siteLayout: {
-                cmsNav: newNav || oldSiteData.cmsNav || '',
+                cmsNav: newNav,
                 logos: {
                     fonts: [],
                     footer: {
@@ -354,8 +412,8 @@ const transformStrapi = async (req) => {
                         429177: '/files/2020/02/tsi_logo2.png',
                     },
                 },
-                social: [],
-                contact: {
+                social: socialMediaItems,
+                /* {
                     email: [
                         {
                             name: '',
@@ -382,11 +440,11 @@ const transformStrapi = async (req) => {
                         },
                     ],
                     address: {
-                        zip: '',
-                        city: '',
-                        name: 'Test 22',
-                        state: '',
-                        street: '',
+                        zip: layout.data?.attributes?.zip || '',
+                        city: layout.data?.attributes?.city || '',
+                        name: siteIdentifier,
+                        state: layout.data?.attributes?.state || '',
+                        street: layout.data?.attributes?.streetAddress || '',
                         street2: '',
                     },
                     hideZip: false,
@@ -426,7 +484,8 @@ const transformStrapi = async (req) => {
                         },
                     ],
                     showContactBox: false,
-                },
+                }, */
+                contact: contactInfo,
                 siteName: siteIdentifier,
                 url: 'csutest0216.staging7.townsquareinteractive.com',
                 composites: {

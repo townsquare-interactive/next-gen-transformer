@@ -13,6 +13,7 @@ const publish = async (data) => {
     if (pages && pages?.length != 0) {
         //adding each page to s3
         for (let i = 0; i < pages.length; i++) {
+            console.log('page posssssssting', `${siteIdentifier}/pages/${pages[i].data.slug}`)
             //rewrite page list every time to passed page
             pageList.push({ name: pages[i].data.title, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
             await addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`)
@@ -20,7 +21,6 @@ const publish = async (data) => {
         let newPageList
         //update pagelist
         newPageList = await updatePageList(pages, siteIdentifier)
-        console.log(newPageList)
     } else {
         console.log('no pages to add')
     }

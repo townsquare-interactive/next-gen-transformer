@@ -1,4 +1,4 @@
-const transformStrapiNav = (newPage, oldNav) => {
+/* const transformStrapiNav = (newPage, oldNav) => {
     //nav
     //check for s3 cmsNav / check if page is already there
     let newNav
@@ -23,6 +23,39 @@ const transformStrapiNav = (newPage, oldNav) => {
         //console.log('new nav created')
         newNav = [newNavItem]
     }
+
+    return newNav
+} */
+
+const transformStrapiNav = (nav) => {
+    //nav
+    //check for s3 cmsNav / check if page is already there
+    let newNav = []
+
+    for (let i = 0; i < nav.length; i++) {
+        const newNavItem = {
+            title: nav[i].title,
+            slug: nav[i].related.slug,
+            url: '/' + nav[i].related.slug,
+            id: nav[i].related.id,
+            page_type: '',
+            menu_item_parent: 0,
+        }
+        newNav.push(newNavItem)
+    }
+
+    /*     if (oldNav) {
+        const theNav = oldNav
+        //console.log('old nav', oldSiteData.cmsNav)
+        if (theNav.filter((e) => e.slug === newPage.slug).length === 0) {
+            theNav.push(newNavItem)
+            newNav = theNav
+            //console.log('new page added:')
+        }
+    } else {
+        //console.log('new nav created')
+        newNav = [newNavItem]
+    } */
 
     return newNav
 }
@@ -73,6 +106,22 @@ const determineComponentType = (componentType, useCarousel) => {
     }
 }
 
+const convertColumns = (columns) => {
+    if (columns === 'one') {
+        return 1
+    } else if (columns === 'two') {
+        return 2
+    } else if (columns === 'three') {
+        return 3
+    } else if (columns === 'four') {
+        return 4
+    } else if (columns === 'five') {
+        return 5
+    } else {
+        return 1
+    }
+}
+
 const transformTextSize = (size) => {
     return `font_${size.toLowerCase()}`
 }
@@ -90,4 +139,5 @@ module.exports = {
     determineModRenderType,
     transformTextSize,
     determineComponentType,
+    convertColumns,
 }
