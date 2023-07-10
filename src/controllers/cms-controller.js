@@ -172,6 +172,8 @@ const updatePageList = async (page, basePath) => {
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
     addPagesToList(pageListFile, page, basePath)
     //Can use add file when ready, instead of addpagelist logging
+    console.log('new page list', pageListFile)
+
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
 }
@@ -181,19 +183,27 @@ const addPagesToList = async (pageListFile, page, basePath) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         pageData = page[i].data
-        if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length === 0) {
-            pageListFile.pages.push({
-                name: pageData.title,
-                slug: pageData.slug,
-                url: pageData.url || pageData.slug,
-                id: Number(pageData.id),
-                page_type: pageData.page_type || '',
-            })
-            console.log('new page added:', pageData.title)
 
-            await addNewPageToNav(pageData, basePath)
+        const newPageItem = {
+            name: pageData.title,
+            slug: pageData.slug,
+            url: pageData.url || pageData.slug,
+            id: Number(pageData.id),
+            page_type: pageData.page_type || '',
+        }
+        //check if page doesn't exist (need a version if it does)
+        if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length === 0) {
+            pageListFile.pages.push(newPageItem)
+
+            //await addNewPageToNav(pageData, basePath)
+
+            //updating existing page data in pagelist
+        } else if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length >= 0) {
+            const pageIdx = pageListFile.pages.findIndex((e) => e.slug === pageData.slug)
+            pageListFile.pages[pageIdx] = newPageItem
         }
     }
+    //return pageListFile
 }
 
 //Adding a new page does not automatically add it to nav unless we do this

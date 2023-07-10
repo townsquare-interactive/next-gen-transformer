@@ -67,7 +67,7 @@ const transformStrapi = async (req) => {
         //if page is saved
         //console.log('ui nav', req.entry.page)
         if (req.entry.slug != null && req.entry.Body) {
-            const newMod1FirstItem = req.entry.Body[0].items[0]
+            //const newMod1FirstItem = req.entry.Body[0].items[0]
             //console.log('attttttys ======================', currentItem)
             //console.log(req.entry)
 
@@ -99,7 +99,12 @@ const transformStrapi = async (req) => {
                 const well = currentModule.border === true ? '1' : ''
 
                 //create alternating promo colors
-                if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
+                if (
+                    modRenderType === 'PhotoGrid' ||
+                    modRenderType === 'Banner' ||
+                    modRenderType === 'Parallax' ||
+                    (modRenderType === 'PhotoGallery' && req.entry.Body[i].items)
+                ) {
                     req.entry.Body[i].items = alternatePromoColors(currentModule.items, cmsColors, well)
                 }
 
@@ -112,7 +117,7 @@ const transformStrapi = async (req) => {
 
                 //add contactFormData in form object
                 if (modRenderType === 'ContactFormRoutes') {
-                    const contactFormData = createContactForm(currentModule.formTitle || '', currentModule.email || '')
+                    const contactFormData = createContactForm(currentModule.formTitle || '', currentModule.email || ('' && req.entry.Body[i].items))
                     req.entry.Body[i] = {
                         ...req.entry.Body[i],
                         contactFormData: contactFormData,
@@ -128,93 +133,97 @@ const transformStrapi = async (req) => {
 
                 //loop through items
                 let itemCount = 0
-                for (t in currentModule.items) {
-                    const currentItem = currentModule.items[t]
-                    itemCount += 1
+                if (req.entry.Body[i].items) {
+                    for (t in currentModule.items) {
+                        const currentItem = currentModule.items[t]
+                        itemCount += 1
 
-                    //modSwitch1 = 1 when no parallax background is used
-                    if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
-                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modSwitch1: 1 }
-                    }
+                        //modSwitch1 = 1 when no parallax background is used
+                        if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
+                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modSwitch1: 1 }
+                        }
 
-                    //move image url
-                    if (currentItem.image) {
+                        //move image url
+                        if (currentItem.image) {
+                            req.entry.Body[i].items[t] = {
+                                ...req.entry.Body[i].items[t],
+                                image: currentItem.image[0].url || '',
+                                caption_tag: currentItem.image[0].caption || '',
+                                img_alt_tag: currentItem.image[0].alternativeText || '',
+                            }
+                        }
+
+                        if (currentItem.headSize) {
+                            req.entry.Body[i].items[t].headSize = transformTextSize(req.entry.Body[i].items[t].headSize)
+                        }
+
+                        if (currentItem.descSize) {
+                            req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
+                        }
+
+                        //testimonials stars
+                        if (currentItem.stars) {
+                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], actionlbl: convertColumns(currentItem.stars) }
+                        }
+
+                        if (currentItem.buttons.length != 0) {
+                            //console.log('testttt', currentItem.buttons[0])
+                            const btn1 = currentItem.buttons[0]
+                            const btn2 = currentItem.buttons[1]
+
+                            // console.log('btns', currentItem.buttons)
+
+                            console.log(currentItem.buttons[0])
+
+                            const btnData = {
+                                pagelink: btn1?.pagelink ? btn1.pagelink.toLowerCase() : '',
+                                weblink: btn1?.extlink ? btn1.extlink.toLowerCase() : '',
+                                pagelink2: btn2?.pagelink ? btn2.pagelink.toLowerCase() : '',
+                                weblink2: btn2?.extlink ? btn2.extlink.toLowerCase() : '',
+                                actionlbl: btn1?.text || '',
+                                actionlbl2: btn2?.text || '',
+                                btnSize: '',
+                                btnSize2: '',
+                                newwindow: btn1?.ext === true ? 1 : '',
+                                newwindow2: btn2?.ext === true ? 1 : '',
+                            }
+
+                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], ...btnData }
+
+                            const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
+                                req.entry.Body[i].items[t],
+                                modRenderType,
+                                columns
+                            )
+
+                            req.entry.Body[i].items[t] = {
+                                ...req.entry.Body[i].items[t],
+                                linkNoBtn: linkNoBtn,
+                                twoButtons: twoButtons,
+                                isWrapLink: isWrapLink,
+                                visibleButton: visibleButton,
+                                buttonList: buttonList,
+                            }
+                        }
+                        if (req.entry.Body[i].imageOverlay === true) {
+                            const modColor1 = 'rgb(0,0,0)'
+                            const modOpacity = 0.8
+                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modColor1: modColor1, modOpacity: modOpacity }
+                        }
+
+                        const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
                         req.entry.Body[i].items[t] = {
                             ...req.entry.Body[i].items[t],
-                            image: currentItem.image[0].url || '',
-                            caption_tag: currentItem.image[0].caption || '',
-                            img_alt_tag: currentItem.image[0].alternativeText || '',
+                            headerTag: headerTag,
+                            itemCount: itemCount,
                         }
                     }
 
-                    if (currentItem.headSize) {
-                        req.entry.Body[i].items[t].headSize = transformTextSize(req.entry.Body[i].items[t].headSize)
+                    //creating item styles
+                    if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
+                        console.log(well, modRenderType, componentType)
+                        req.entry.Body[i].items = createItemStyles(req.entry.Body[i].items, well, modRenderType, componentType)
                     }
-
-                    if (currentItem.descSize) {
-                        req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
-                    }
-
-                    //testimonials stars
-                    if (currentItem.stars) {
-                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], actionlbl: convertColumns(currentItem.stars) }
-                    }
-
-                    if (currentItem.buttons.length != 0) {
-                        //console.log('testttt', currentItem.buttons[0])
-                        const btn1 = currentItem.buttons[0]
-                        const btn2 = currentItem.buttons[1]
-
-                        // console.log('btns', currentItem.buttons)
-
-                        const btnData = {
-                            pagelink: btn1.pagelink ? btn1.pagelink.toLowerCase() : '',
-                            weblink: btn1.extlink ? btn1.extlink.toLowerCase() : '',
-                            pagelink2: btn2.pagelink ? btn2.pagelink.toLowerCase() : '',
-                            weblink2: btn2.extlink ? btn2.extlink.toLowerCase() : '',
-                            actionlbl: btn1.text || '',
-                            actionlbl2: btn2.text || '',
-                            btnSize: '',
-                            btnSize2: '',
-                            newwindow: btn1.ext === true ? 1 : '',
-                            newwindow2: btn2.ext === true ? 1 : '',
-                        }
-
-                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], ...btnData }
-
-                        const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
-                            req.entry.Body[i].items[t],
-                            modRenderType,
-                            columns
-                        )
-
-                        req.entry.Body[i].items[t] = {
-                            ...req.entry.Body[i].items[t],
-                            linkNoBtn: linkNoBtn,
-                            twoButtons: twoButtons,
-                            isWrapLink: isWrapLink,
-                            visibleButton: visibleButton,
-                            buttonList: buttonList,
-                        }
-                    }
-                    if (req.entry.Body[i].imageOverlay === true) {
-                        const modColor1 = 'rgb(0,0,0)'
-                        const modOpacity = 0.8
-                        req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modColor1: modColor1, modOpacity: modOpacity }
-                    }
-
-                    const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
-                    req.entry.Body[i].items[t] = {
-                        ...req.entry.Body[i].items[t],
-                        headerTag: headerTag,
-                        itemCount: itemCount,
-                    }
-                }
-
-                //creating item styles
-                if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
-                    console.log(well, modRenderType, componentType)
-                    req.entry.Body[i].items = createItemStyles(req.entry.Body[i].items, well, modRenderType, componentType)
                 }
 
                 //temp
@@ -240,7 +249,7 @@ const transformStrapi = async (req) => {
                     id: req.entry.id,
                     title: req.entry.name,
                     slug: req.entry.slug,
-                    pageType: '',
+                    page_type: req.entry.homePage === true ? 'homepage' : '',
                     url: `/${req.entry.slug}`,
                     JS: '',
                     type: 'menu',

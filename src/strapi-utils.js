@@ -33,12 +33,13 @@ const transformStrapiNav = (nav) => {
     let newNav = []
 
     for (let i = 0; i < nav.length; i++) {
+        console.log('is hp,', nav[i].related.homePage)
         const newNavItem = {
             title: nav[i].title,
             slug: nav[i].related.slug,
             url: '/' + nav[i].related.slug,
             id: nav[i].related.id,
-            page_type: '',
+            page_type: nav[i].related.homePage === true ? 'homepage' : '',
             menu_item_parent: 0,
         }
         newNav.push(newNavItem)
