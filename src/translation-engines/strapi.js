@@ -1,6 +1,6 @@
 const { createGlobalStylesheet } = require('../controllers/cms-controller')
 const { getFileS3 } = require('../s3Functions')
-const { transformStrapiNav, determineModRenderType, transformTextSize, determineComponentType, convertColumns } = require('../strapi-utils')
+const { transformStrapiNav, determineModRenderType, transformTextSize, determineComponentType, convertColumns, createFonts } = require('../strapi-utils')
 const {
     createItemStyles,
     createGallerySettings,
@@ -9,6 +9,7 @@ const {
     createContactForm,
     transformcontact,
     socialConvert,
+    createFontCss,
 } = require('../utils')
 const z = require('zod')
 
@@ -329,11 +330,19 @@ const transformStrapi = async (req) => {
             }
         }
 
-        //global styles
+        //----------------------global styles ---------------------------------
         const siteCustomCss = ''
         const currentPageList = {}
-        const fonts = {}
-        const globalStyles = await createGlobalStylesheet(cmsColors, fonts, siteCustomCss, currentPageList, siteIdentifier)
+
+        //fonts
+        const strapiFonts = createFonts({
+            headlineFont: layout.data.attributes.headlineFont || 'Lato',
+            bodyFont: layout.data.attributes.bodyFont || 'Lato',
+            featFont: layout.data.attributes.featFont || 'Lato',
+        })
+
+        const { fontImportGroup, fontClasses } = createFontCss(strapiFonts)
+        const globalStyles = await createGlobalStylesheet(cmsColors, strapiFonts, siteCustomCss, currentPageList, siteIdentifier)
 
         const strapi = {
             siteIdentifier: siteIdentifier,
@@ -521,8 +530,7 @@ const transformStrapi = async (req) => {
                 cmsUrl: 'csutest0216.staging7.townsquareinteractive.com',
                 s3Folder: 'csutest0216',
                 favicon: favicon,
-                fontImport:
-                    '@import url(https://fonts.googleapis.com/css?family=Oswald:400,700|PT+Sans+Narrow:400,700,400italic,700italic|Montserrat:300,300i,400,400i,700,700i,900,900i|Old+Standard+TT&display=swap);',
+                fontImport: fontImportGroup,
                 config: {
                     mailChimp: {
                         audId: 'd0b2dd1631',
