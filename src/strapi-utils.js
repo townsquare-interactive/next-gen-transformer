@@ -1,3 +1,4 @@
+const { socialConvert, createContactForm, createLinkAndButtonVariables } = require('./utils')
 /* const transformStrapiNav = (newPage, oldNav) => {
     //nav
     //check for s3 cmsNav / check if page is already there
@@ -33,16 +34,17 @@ const transformStrapiNav = (nav) => {
     let newNav = []
 
     for (let i = 0; i < nav.length; i++) {
-        console.log('is hp,', nav[i].related.homePage)
-        const newNavItem = {
-            title: nav[i].title,
-            slug: nav[i].related.slug,
-            url: '/' + nav[i].related.slug,
-            id: nav[i].related.id,
-            page_type: nav[i].related.homePage === true ? 'homepage' : '',
-            menu_item_parent: 0,
+        if (nav[i].related?.slug) {
+            const newNavItem = {
+                title: nav[i].title,
+                slug: nav[i].related.slug,
+                url: '/' + nav[i].related.slug,
+                id: nav[i].related.id,
+                page_type: nav[i].related.homePage && nav[i].related.homePage === true ? 'homepage' : '',
+                menu_item_parent: 0,
+            }
+            newNav.push(newNavItem)
         }
-        newNav.push(newNavItem)
     }
 
     /*     if (oldNav) {
@@ -121,6 +123,23 @@ const convertColumns = (columns) => {
     } else {
         return 1
     }
+}
+
+const createSocials = (socialMedia) => {
+    let socialMediaItems = []
+    if (socialMedia.length != 0) {
+        const inputtedSocials = socialMedia || []
+
+        for (let m = 0; m < inputtedSocials.length; m++) {
+            let url = inputtedSocials[m].url
+            if (!url.includes('http')) {
+                url = 'http://' + url
+            }
+
+            socialMediaItems.push({ url: url, icon: socialConvert(inputtedSocials[m].url) })
+        }
+    }
+    return socialMediaItems
 }
 
 const transformTextSize = (size) => {
@@ -760,6 +779,120 @@ const createFonts = (fonts) => {
     return newFonts
 }
 
+const setupContactForm = (currentModule) => {
+    const contactFormData = createContactForm(currentModule.formTitle || '', currentModule.email || '')
+    currentModule = {
+        ...currentModule,
+        contactFormData: contactFormData,
+        items: [
+            {
+                plugin: '[gravity]',
+            },
+        ],
+    }
+
+    return currentModule
+}
+
+const createStrapiButtonVars = (currentItem, modRenderType, columns) => {
+    const btn1 = currentItem.buttons[0]
+    const btn2 = currentItem.buttons[1]
+
+    // console.log('btns', currentItem.buttons)
+
+    const btnData = {
+        pagelink: btn1?.pagelink ? btn1.pagelink.toLowerCase() : '',
+        weblink: btn1?.extlink ? btn1.extlink.toLowerCase() : '',
+        pagelink2: btn2?.pagelink ? btn2.pagelink.toLowerCase() : '',
+        weblink2: btn2?.extlink ? btn2.extlink.toLowerCase() : '',
+        actionlbl: btn1?.text || '',
+        actionlbl2: btn2?.text || '',
+        btnSize: '',
+        btnSize2: '',
+        newwindow: btn1?.ext === true ? 1 : '',
+        newwindow2: btn2?.ext === true ? 1 : '',
+    }
+
+    currentItem = { ...currentItem, ...btnData }
+
+    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, columns)
+
+    currentItem = {
+        ...currentItem,
+        linkNoBtn: linkNoBtn,
+        twoButtons: twoButtons,
+        isWrapLink: isWrapLink,
+        visibleButton: visibleButton,
+        buttonList: buttonList,
+    }
+
+    return currentItem
+}
+
+const setDefaultColors = () => {
+    return {
+        id: 6,
+        logoColor: '#2482cb',
+        headingColor: '#fff',
+        subHeadingColor: '#fff',
+        textColor: '#fff',
+        linkColor: '#0f181f',
+        linkHover: '#0f181f',
+        btnText: '#ffbe87',
+        btnBackground: '#0f181f',
+        textColorAccent: '#0f181f',
+        heroSubheadline: '#0d1d24',
+        heroText: '#8a6301',
+        heroBtnText: '#ff7700',
+        heroBtnBackground: '#ff7700',
+        heroLink: '#454545',
+        captionText: '#fff',
+        captionBackground: '#ff7700',
+        NavText: 'rgba(247,247,247,1)',
+        navHover: '#3EB183',
+        navCurrent: '#3EB183',
+        backgroundMain: 'rgba(0,0,0,.2)',
+        bckdContent: 'rgba(65,121,135,1)',
+        headerBackground: 'rgba(16,37,46,1)',
+        BckdHeaderSocial: '#12343d',
+        accentBackgroundColor: '#5b97a6',
+        backgroundHero: '#ffc83d',
+        footerBackground: 'rgba(16,37,46,1)',
+        footerText: '#dbf8ff',
+        footerLink: '#dbf8ff',
+        promoText: '#ffffff',
+        promoColor: '#3eb183',
+        promoColor2: '#00a4fc',
+        promoColor3: '#c9b426',
+        promoColor4: '#e02aa0',
+        promoColor5: '#ff0000',
+        promoColor6: '#ff0000',
+        heroLinkHover: '#30829b',
+    }
+}
+
+const createContactInfo = (attributes, siteIdentifier) => {
+    let contactInfo = {
+        address: {
+            city: attributes.city || '',
+            zip: attributes.zip || '',
+            name: siteIdentifier,
+            state: attributes.state || '',
+            street: attributes.streetAddress || '',
+        },
+        phone: attributes.phone,
+        email: [
+            {
+                name: 'email',
+                email: attributes.email || '',
+                isPrimaryEmail: true,
+            },
+        ],
+    }
+
+    return contactInfo
+}
+
 /* tires 743.67 dry routing / 
 engine 34 not state inspection
 cabin 43 not state inspection */
@@ -775,4 +908,9 @@ module.exports = {
     determineComponentType,
     convertColumns,
     createFonts,
+    createSocials,
+    setupContactForm,
+    createStrapiButtonVars,
+    setDefaultColors,
+    createContactInfo,
 }
