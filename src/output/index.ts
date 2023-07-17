@@ -1,8 +1,9 @@
 import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
+import { PublishData } from '../../types.js'
 
 //import { PublishData } from '../../types'
-export const publish = async (data) => {
+export const publish = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles } = data
 
     await addFileS3(siteLayout, `${siteIdentifier}/layout`)

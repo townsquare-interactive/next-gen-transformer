@@ -11,17 +11,20 @@ import {
     createStrapiButtonVars,
     setDefaultColors,
     createContactInfo,
-} from '../strapi-utils.ts'
+} from '../strapi-utils.js'
 import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
 import z from 'zod'
+import { Request } from '../../types.js'
 
 const schemaNum = z.coerce.number()
+const dbUrl = 'http://127.0.0.1:1337'
 
-export const transformStrapi = async (req) => {
+export const transformStrapi = async (req: Request) => {
+    console.log('request', req)
     let pagesList = []
     try {
-        const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
-        const resNav = await fetch('http://127.0.0.1:1337/api/navigation/render/1?locale=fr')
+        const resLayout = await fetch(`${dbUrl}/api/site-data?populate=deep`)
+        const resNav = await fetch(`${dbUrl}/api/navigation/render/1?locale=fr`)
         const nav = await resNav.json()
         const layout = await resLayout.json()
         const siteIdentifier = layout.data.attributes.siteIdentifier
@@ -36,11 +39,11 @@ export const transformStrapi = async (req) => {
         //if saved type is a page
         if (req.entry.slug != null && req.entry.Body) {
             let modCount = 0
+            let newPages = []
             //module loop
             for (const i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
-                console.log('currrrrrr mod', currentModule)
                 const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
                 const modRenderType = determineModRenderType(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
@@ -87,7 +90,6 @@ export const transformStrapi = async (req) => {
                 if (req.entry.Body[i].items) {
                     for (const t in currentModule.items) {
                         const currentItem = currentModule.items[t]
-                        console.log('coldo item', currentItem)
                         itemCount += 1
 
                         if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
@@ -118,7 +120,7 @@ export const transformStrapi = async (req) => {
                         }
 
                         //convert button data
-                        if (currentItem.buttons.length != 0) {
+                        if (currentItem.buttons?.length != 0) {
                             req.entry.Body[i].items[t] = createStrapiButtonVars(req.entry.Body[i].items[t], modRenderType, columns)
                         }
 
@@ -143,8 +145,8 @@ export const transformStrapi = async (req) => {
                     }
                 }
 
-                //set module style
-                req.entry.Body[i] = {
+                //fully transformed module
+                newPages.push({
                     attributes: {
                         ...req.entry.Body[i],
                         type: componentType,
@@ -157,7 +159,7 @@ export const transformStrapi = async (req) => {
                         modCount: modCount,
                     },
                     componentType: modRenderType,
-                }
+                })
             }
 
             const newPage = {
@@ -171,7 +173,7 @@ export const transformStrapi = async (req) => {
                     type: 'menu',
                     layout: 1,
                     columns: 2,
-                    modules: [req.entry.Body, [], [], [], []],
+                    modules: [newPages, [], [], [], []],
                     sections: [
                         {
                             wide: '1060',

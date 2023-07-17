@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const AWS = require('aws-sdk');
 require('dotenv').config();
 AWS.config.update({
@@ -17,38 +8,38 @@ AWS.config.update({
 });
 const dynamoClient = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = 'dynamo-api';
-const getCharacters = () => __awaiter(void 0, void 0, void 0, function* () {
+const getCharacters = async () => {
     const params = {
         TableName: TABLE_NAME,
     };
-    const characters = yield dynamoClient.scan(params).promise();
+    const characters = await dynamoClient.scan(params).promise();
     return characters;
-});
-const getCharacterById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+};
+const getCharacterById = async (id) => {
     const params = {
         TableName: TABLE_NAME,
         Key: {
             id,
         },
     };
-    return yield dynamoClient.get(params).promise();
-});
-const addOrUpdateCharacter = (character) => __awaiter(void 0, void 0, void 0, function* () {
+    return await dynamoClient.get(params).promise();
+};
+const addOrUpdateCharacter = async (character) => {
     const params = {
         TableName: TABLE_NAME,
         Item: character,
     };
-    return yield dynamoClient.put(params).promise();
-});
-const deleteCharacter = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return await dynamoClient.put(params).promise();
+};
+const deleteCharacter = async (id) => {
     const params = {
         TableName: TABLE_NAME,
         Key: {
             id,
         },
     };
-    return yield dynamoClient.delete(params).promise();
-});
+    return await dynamoClient.delete(params).promise();
+};
 module.exports = {
     dynamoClient,
     getCharacters,
@@ -56,4 +47,4 @@ module.exports = {
     deleteCharacter,
     addOrUpdateCharacter,
 };
-//# sourceMappingURL=dynamo-controller.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZHluYW1vLWNvbnRyb2xsZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvY29udHJvbGxlcnMvZHluYW1vLWNvbnRyb2xsZXIuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBLE1BQU0sR0FBRyxHQUFHLE9BQU8sQ0FBQyxTQUFTLENBQUMsQ0FBQTtBQUM5QixPQUFPLENBQUMsUUFBUSxDQUFDLENBQUMsTUFBTSxFQUFFLENBQUE7QUFFMUIsR0FBRyxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUM7SUFDZCxNQUFNLEVBQUUsT0FBTyxDQUFDLEdBQUcsQ0FBQyxrQkFBa0I7SUFDdEMsV0FBVyxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsaUJBQWlCO0lBQzFDLGVBQWUsRUFBRSxPQUFPLENBQUMsR0FBRyxDQUFDLHdCQUF3QjtDQUN4RCxDQUFDLENBQUE7QUFFRixNQUFNLFlBQVksR0FBRyxJQUFJLEdBQUcsQ0FBQyxRQUFRLENBQUMsY0FBYyxFQUFFLENBQUE7QUFDdEQsTUFBTSxVQUFVLEdBQUcsWUFBWSxDQUFBO0FBRS9CLE1BQU0sYUFBYSxHQUFHLEtBQUssSUFBSSxFQUFFO0lBQzdCLE1BQU0sTUFBTSxHQUFHO1FBQ1gsU0FBUyxFQUFFLFVBQVU7S0FDeEIsQ0FBQTtJQUNELE1BQU0sVUFBVSxHQUFHLE1BQU0sWUFBWSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxPQUFPLEVBQUUsQ0FBQTtJQUM1RCxPQUFPLFVBQVUsQ0FBQTtBQUNyQixDQUFDLENBQUE7QUFFRCxNQUFNLGdCQUFnQixHQUFHLEtBQUssRUFBRSxFQUFFLEVBQUUsRUFBRTtJQUNsQyxNQUFNLE1BQU0sR0FBRztRQUNYLFNBQVMsRUFBRSxVQUFVO1FBQ3JCLEdBQUcsRUFBRTtZQUNELEVBQUU7U0FDTDtLQUNKLENBQUE7SUFDRCxPQUFPLE1BQU0sWUFBWSxDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUMsQ0FBQyxPQUFPLEVBQUUsQ0FBQTtBQUNuRCxDQUFDLENBQUE7QUFFRCxNQUFNLG9CQUFvQixHQUFHLEtBQUssRUFBRSxTQUFTLEVBQUUsRUFBRTtJQUM3QyxNQUFNLE1BQU0sR0FBRztRQUNYLFNBQVMsRUFBRSxVQUFVO1FBQ3JCLElBQUksRUFBRSxTQUFTO0tBQ2xCLENBQUE7SUFDRCxPQUFPLE1BQU0sWUFBWSxDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUMsQ0FBQyxPQUFPLEVBQUUsQ0FBQTtBQUNuRCxDQUFDLENBQUE7QUFFRCxNQUFNLGVBQWUsR0FBRyxLQUFLLEVBQUUsRUFBRSxFQUFFLEVBQUU7SUFDakMsTUFBTSxNQUFNLEdBQUc7UUFDWCxTQUFTLEVBQUUsVUFBVTtRQUNyQixHQUFHLEVBQUU7WUFDRCxFQUFFO1NBQ0w7S0FDSixDQUFBO0lBQ0QsT0FBTyxNQUFNLFlBQVksQ0FBQyxNQUFNLENBQUMsTUFBTSxDQUFDLENBQUMsT0FBTyxFQUFFLENBQUE7QUFDdEQsQ0FBQyxDQUFBO0FBRUQsTUFBTSxDQUFDLE9BQU8sR0FBRztJQUNiLFlBQVk7SUFDWixhQUFhO0lBQ2IsZ0JBQWdCO0lBQ2hCLGVBQWU7SUFDZixvQkFBb0I7Q0FDdkIsQ0FBQSJ9

@@ -1,32 +1,35 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+import { config } from 'dotenv';
+config();
+import express from 'express';
+// @ts-ignore
+import router from './api/cms-routes.js';
+const app = express();
+let routes = router;
+/* if (process.env.DB == 'dynamo') {
+    routes = require('./api/dynamo-routes')
+} else if (process.env.DB == 'mongo') {
+    routes = require('./api/mongo-routes')
+} else if (process.env.DB == 'cms') {
+    routes = require('./api/cms-routes')
+} */
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    // authorized headers for preflight requests
+    // https://developer.mozilla.org/en-US/docs/Glossary/preflight_request
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+    app.options('*', (req, res) => {
+        // allowed XHR methods
+        res.header('Access-Control-Allow-Methods', 'GET, PATCH, PUT, POST, DELETE, OPTIONS');
+        res.send();
     });
-};
-const { addAssetFromSiteToS3, addFileS3 } = require('../s3Functions');
-const publish = (data) => __awaiter(this, void 0, void 0, function* () {
-    const { siteIdentifier, siteLayout, pages, assets, globalStyles } = data;
-    yield addFileS3(siteLayout, `${siteIdentifier}/layout`);
-    let pageList = [];
-    //adding each page to s3
-    for (let i = 0; i < pages.length; i++) {
-        //rewrite page list every time to passed page
-        pageList.push({ name: pages[i].data.name, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id });
-        yield addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`);
-    }
-    yield addFileS3({ pages: pageList }, `${siteIdentifier}/pages/page-list`);
-    if (assets.length != 0) {
-        assets.forEach((asset) => __awaiter(this, void 0, void 0, function* () {
-            yield addAssetFromSiteToS3(asset.content, siteIdentifier + '/assets/' + asset.name);
-        }));
-    }
-    yield addFileS3(globalStyles, `${siteIdentifier}/global`, 'css');
 });
-module.exports = {
-    publish,
-};
-//# sourceMappingURL=index.js.map
+app.use(express.json({ limit: '80mb' }));
+app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000000 }));
+app.use('/api/cms-routes', routes);
+const PORT = process.env.PORT || 8080;
+app.get('/', (req, res) => {
+    res.send(`API Running ${process.env.PORT}`);
+});
+app.listen(PORT, () => console.log(`Server running in port ${PORT}`));
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9pbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsTUFBTSxFQUFFLE1BQU0sUUFBUSxDQUFBO0FBQy9CLE1BQU0sRUFBRSxDQUFBO0FBQ1IsT0FBTyxPQUFPLE1BQU0sU0FBUyxDQUFBO0FBQzdCLGFBQWE7QUFDYixPQUFPLE1BQU0sTUFBTSxxQkFBcUIsQ0FBQTtBQUN4QyxNQUFNLEdBQUcsR0FBRyxPQUFPLEVBQUUsQ0FBQTtBQUVyQixJQUFJLE1BQU0sR0FBRyxNQUFNLENBQUE7QUFDbkI7Ozs7OztJQU1JO0FBRUosR0FBRyxDQUFDLEdBQUcsQ0FBQyxDQUFDLEdBQUcsRUFBRSxHQUFHLEVBQUUsSUFBSSxFQUFFLEVBQUU7SUFDdkIsR0FBRyxDQUFDLE1BQU0sQ0FBQyw2QkFBNkIsRUFBRSxHQUFHLENBQUMsQ0FBQTtJQUU5Qyw0Q0FBNEM7SUFDNUMsc0VBQXNFO0lBQ3RFLEdBQUcsQ0FBQyxNQUFNLENBQUMsOEJBQThCLEVBQUUsZ0RBQWdELENBQUMsQ0FBQTtJQUM1RixJQUFJLEVBQUUsQ0FBQTtJQUVOLEdBQUcsQ0FBQyxPQUFPLENBQUMsR0FBRyxFQUFFLENBQUMsR0FBRyxFQUFFLEdBQUcsRUFBRSxFQUFFO1FBQzFCLHNCQUFzQjtRQUN0QixHQUFHLENBQUMsTUFBTSxDQUFDLDhCQUE4QixFQUFFLHdDQUF3QyxDQUFDLENBQUE7UUFDcEYsR0FBRyxDQUFDLElBQUksRUFBRSxDQUFBO0lBQ2QsQ0FBQyxDQUFDLENBQUE7QUFDTixDQUFDLENBQUMsQ0FBQTtBQUVGLEdBQUcsQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxFQUFFLEtBQUssRUFBRSxNQUFNLEVBQUUsQ0FBQyxDQUFDLENBQUE7QUFDeEMsR0FBRyxDQUFDLEdBQUcsQ0FBQyxPQUFPLENBQUMsVUFBVSxDQUFDLEVBQUUsS0FBSyxFQUFFLE1BQU0sRUFBRSxRQUFRLEVBQUUsSUFBSSxFQUFFLGNBQWMsRUFBRSxPQUFPLEVBQUUsQ0FBQyxDQUFDLENBQUE7QUFFdkYsR0FBRyxDQUFDLEdBQUcsQ0FBQyxpQkFBaUIsRUFBRSxNQUFNLENBQUMsQ0FBQTtBQUVsQyxNQUFNLElBQUksR0FBRyxPQUFPLENBQUMsR0FBRyxDQUFDLElBQUksSUFBSSxJQUFJLENBQUE7QUFFckMsR0FBRyxDQUFDLEdBQUcsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxHQUFHLEVBQUUsR0FBRyxFQUFFLEVBQUU7SUFDdEIsR0FBRyxDQUFDLElBQUksQ0FBQyxlQUFlLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxFQUFFLENBQUMsQ0FBQTtBQUMvQyxDQUFDLENBQUMsQ0FBQTtBQUVGLEdBQUcsQ0FBQyxNQUFNLENBQUMsSUFBSSxFQUFFLEdBQUcsRUFBRSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsMEJBQTBCLElBQUksRUFBRSxDQUFDLENBQUMsQ0FBQSJ9

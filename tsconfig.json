@@ -11,10 +11,12 @@
         "strict": true,
         "noImplicitAny": true,
         "useUnknownInCatchVariables": false,
-        "inlineSourceMap": true
+        "inlineSourceMap": true,
+        "allowJs": true
     },
     "ts-node": {
         "esm": true
     },
-    "lib": ["esnext"]
+    "lib": ["esnext"],
+    "noImplicitAny": false
 }

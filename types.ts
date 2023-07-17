@@ -17,10 +17,10 @@ export interface Page {
     }
     attrs: {}
     seo: {
-        title: null | string
-        descr: null | string
-        selectedImages: null | string
-        imageOverride: null | string
+        title: string
+        descr: string
+        selectedImages: string
+        imageOverride: string
     }
 }
 
@@ -287,11 +287,32 @@ export interface PublishData {
     siteIdentifier: string
     siteLayout: SiteData
     pages: Page[]
-    assets: { url: string; fileName: string }[]
+    assets: { url: string; fileName: string; name: string; content: string }[]
     globalStyles: string
 }
 
 /*------------------------ Strapi Types ------------------------------------ */
+interface Entry {
+    id: number
+    name: string
+    slug: string
+    createdAt: string
+    updatedAt: string
+    publishedAt: string
+    homePage: boolean
+    ai: null | any
+    Body: Array<CurrentModule>
+    seo: null | any
+}
+
+export interface Request {
+    event: string
+    createdAt: string
+    model: string
+    uid: string
+    entry: Entry
+}
+
 export interface ModuleItem {
     id: number
     headline?: string
@@ -300,17 +321,41 @@ export interface ModuleItem {
     headerTagH1?: boolean
     isFeatured?: boolean
     disabled?: boolean
-    headSize?: null | number
+    headSize?: string
     descSize?: string
     subheader?: null | string
-    image?: null | string
-    buttons?: any[]
+    //image?: { alternativeText: string; url: string; caption: string }[]
+    image?: any
+    buttons?: {
+        pagelink?: string
+        extlink?: string
+        text?: string
+        ext?: boolean
+        weblink?: string
+        pagelink2?: string
+        weblink2?: string
+        actionlbl?: string
+        actionlbl2?: string
+        btnSize?: string
+        btnSize2?: string
+        newwindow?: boolean
+        newwindow2?: boolean
+    }[]
     plugin?: string
     linkNoBtn?: boolean
     twoButtons?: boolean
     isWrapLink?: boolean
     visibleButton?: boolean
     buttonList?: any[]
+    caption_tag?: string
+    img_alt_tag?: string
+    stars?: string
+    actionlbl?: string | number
+    modColor1?: string
+    modOpacity?: number
+    headerTag?: string
+    itemCount?: number
+    modSwitch1?: number
 }
 
 /*   interface Button {
@@ -324,12 +369,33 @@ export interface CurrentModule {
     border: boolean
     lazyload: boolean
     imgsize: string
-    columns?: string
-    title?: null | string
+    columns?: string | number
+    title?: string
     disabled: boolean
-    useAnchor: null | boolean
+    useAnchor: boolean
     items: ModuleItem[]
     formTitle?: string
     email?: string
     contactFormData?: any
+    useCarousel?: boolean
+    settings?: CarouselSettings
+    blockSwitch1?: string
+    type?: string
+    imageOverlay?: boolean
+    modId?: string | number
+    imagePriority?: boolean
+    well?: string
+    modCount?: number
+    //attributes: CurrentModule
+    componentType?: string
+}
+export interface CarouselSettings {
+    autoplay: boolean
+    pauseOnHover: boolean
+    effect: string
+    animation: string
+    interval: number
+    restartDelay: number
+    halfSize?: boolean
+    mobileResize: boolean
 }

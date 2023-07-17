@@ -70,7 +70,7 @@ export const determineComponentType = (componentType: string, useCarousel: boole
     }
 }
 
-export const convertColumns = (columns: string) => {
+export const convertColumns = (columns: string | number | undefined) => {
     if (columns === 'one') {
         return 1
     } else if (columns === 'two') {
@@ -103,8 +103,10 @@ export const createSocials = (socialMedia: { url: string }[]) => {
     return socialMediaItems
 }
 
-export const transformTextSize = (size: string) => {
-    return `font_${size.toLowerCase()}`
+export const transformTextSize = (size: string | undefined) => {
+    if (size) {
+        return `font_${size.toLowerCase()}`
+    }
 }
 
 export const createFonts = (fonts: any) => {
