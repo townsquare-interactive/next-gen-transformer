@@ -11,7 +11,7 @@ import {
     createStrapiButtonVars,
     setDefaultColors,
     createContactInfo,
-} from '../strapi-utils.js'
+} from '../strapi-utils.ts'
 import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
 import z from 'zod'
 
@@ -40,6 +40,7 @@ export const transformStrapi = async (req) => {
             for (const i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
+                console.log('currrrrrr mod', currentModule)
                 const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
                 const modRenderType = determineModRenderType(currentModule.__component)
                 const imgsize = currentModule.imgsize || 'square_1_1'
@@ -86,6 +87,7 @@ export const transformStrapi = async (req) => {
                 if (req.entry.Body[i].items) {
                     for (const t in currentModule.items) {
                         const currentItem = currentModule.items[t]
+                        console.log('coldo item', currentItem)
                         itemCount += 1
 
                         if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {

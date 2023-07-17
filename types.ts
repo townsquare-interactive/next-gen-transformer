@@ -290,3 +290,46 @@ export interface PublishData {
     assets: { url: string; fileName: string }[]
     globalStyles: string
 }
+
+/*------------------------ Strapi Types ------------------------------------ */
+export interface ModuleItem {
+    id: number
+    headline?: string
+    desc?: string
+    align?: string
+    headerTagH1?: boolean
+    isFeatured?: boolean
+    disabled?: boolean
+    headSize?: null | number
+    descSize?: string
+    subheader?: null | string
+    image?: null | string
+    buttons?: any[]
+    plugin?: string
+    linkNoBtn?: boolean
+    twoButtons?: boolean
+    isWrapLink?: boolean
+    visibleButton?: boolean
+    buttonList?: any[]
+}
+
+/*   interface Button {
+    // Add button properties here
+    // Specify the property names and types according to your requirements
+  } */
+
+export interface CurrentModule {
+    __component: string
+    id: number | string
+    border: boolean
+    lazyload: boolean
+    imgsize: string
+    columns?: string
+    title?: null | string
+    disabled: boolean
+    useAnchor: null | boolean
+    items: ModuleItem[]
+    formTitle?: string
+    email?: string
+    contactFormData?: any
+}
