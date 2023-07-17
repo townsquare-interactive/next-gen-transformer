@@ -1,9 +1,8 @@
-const { addAssetFromSiteToS3, addFileS3 } = require('../s3Functions')
-const { updatePageList } = require('../controllers/cms-controller')
+import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
+import { updatePageList } from '../controllers/cms-controller.js'
 
 //import { PublishData } from '../../types'
-
-const publish = async (data) => {
+export const publish = async (data) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles } = data
 
     await addFileS3(siteLayout, `${siteIdentifier}/layout`)
@@ -34,8 +33,4 @@ const publish = async (data) => {
     }
 
     await addFileS3(globalStyles, `${siteIdentifier}/global`, 'css')
-}
-
-module.exports = {
-    publish,
 }

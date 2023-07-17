@@ -1,6 +1,6 @@
-const z = require('zod')
+import z from 'zod'
 
-function socialConvert(str) {
+export function socialConvert(str) {
     let icon = iconConvert(str)
     if (icon === 'google') {
         return ['fab', 'google']
@@ -15,7 +15,7 @@ function socialConvert(str) {
     }
 }
 
-function iconConvert(str) {
+export function iconConvert(str) {
     if (str.indexOf('google') !== -1) {
         return 'google'
     } else if (str.indexOf('facebook') !== -1) {
@@ -29,7 +29,7 @@ function iconConvert(str) {
     }
 }
 
-const determineModRenderType = (type) => {
+export const determineModRenderType = (type) => {
     if (type.includes('article')) {
         return 'Article'
     } else if (type === 'photo_grid') {
@@ -52,7 +52,7 @@ const determineModRenderType = (type) => {
 }
 
 //cleaning up module type names that are not specific
-const modVariationType = (type) => {
+export const modVariationType = (type) => {
     if (type === 'testimonials_2') {
         return 'review_carousel'
     } else if (type === 'photo_gallery_2') {
@@ -62,7 +62,7 @@ const modVariationType = (type) => {
     }
 }
 
-function btnIconConvert(icon) {
+export function btnIconConvert(icon) {
     if (icon) {
         //replaces fas fa-rocket with faRocket
         const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : ''
@@ -74,13 +74,13 @@ function btnIconConvert(icon) {
 }
 
 //Strip url of protocol and .production / .com
-const stripUrl = (url) => {
+export const stripUrl = (url) => {
     const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
     return removeProtocol.replace(/\..*/, '')
 }
 
 //strip anything between / ... /
-const stripSiteAndUrl = (url, siteUrl) => {
+export const stripSiteAndUrl = (url, siteUrl) => {
     if (url === '#') {
         return '#'
     } else if (url.includes(siteUrl)) {
@@ -95,12 +95,12 @@ const stripSiteAndUrl = (url, siteUrl) => {
     }
 }
 
-const stripImageFolders = (file) => {
+export const stripImageFolders = (file) => {
     const result = file.substring(file.lastIndexOf('/') + 1)
     return result
 }
 
-const createContactForm = (formTitle, email) => {
+export const createContactForm = (formTitle, email) => {
     const contactFormData = {
         formTitle: formTitle || 'Contact Us Today',
         formService: 'webhook',
@@ -193,7 +193,7 @@ const createContactForm = (formTitle, email) => {
     return contactFormData
 }
 
-function transformcontact(contactInfo) {
+export function transformcontact(contactInfo) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
@@ -210,7 +210,7 @@ function transformcontact(contactInfo) {
 
     const hideEmail = !multiPhones && contactInfo.email.length > 1
 
-    for (x in contactInfo.phone) {
+    for (const x in contactInfo.phone) {
         if (contactInfo.phone[x]) {
             const phone = {
                 cName: 'phone',
@@ -224,7 +224,7 @@ function transformcontact(contactInfo) {
         }
     }
 
-    for (x in contactInfo.email) {
+    for (const x in contactInfo.email) {
         if (contactInfo.email[x]) {
             const email = {
                 cName: 'email',
@@ -253,7 +253,7 @@ function transformcontact(contactInfo) {
     return contactInfo
 }
 
-const transformNav = (menu, siteUrl) => {
+export const transformNav = (menu, siteUrl) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
         //loop through first submenu
@@ -287,7 +287,7 @@ const transformNav = (menu, siteUrl) => {
     return determineNavParent(menu)
 }
 
-const determineNavParent = (menu) => {
+export const determineNavParent = (menu) => {
     let editTable = []
     for (let i = 0; i < menu.length; i++) {
         //create table of items that have parent
@@ -304,7 +304,7 @@ const determineNavParent = (menu) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-const createLinkAndButtonVariables = (currentItem, modType, columns) => {
+export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
 
     const singleButton = isOneButton(currentItem)
@@ -362,7 +362,7 @@ const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
 }
 
-const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
+export const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
     let btnStyles
 
     btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
@@ -394,7 +394,7 @@ const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCoun
     return btnStyles
 }
 
-const createImageSizes = (modType, columns) => {
+export const createImageSizes = (modType, columns) => {
     if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
         return '100vw'
         //return 'large'
@@ -410,7 +410,7 @@ const createImageSizes = (modType, columns) => {
     }
 }
 
-function isButton(item) {
+export function isButton(item) {
     if (item.actionlbl || item.actionlbl2) {
         return true
     } else {
@@ -418,7 +418,7 @@ function isButton(item) {
     }
 }
 
-function isLink(item) {
+export function isLink(item) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2) {
         return true
     } else {
@@ -426,7 +426,7 @@ function isLink(item) {
     }
 }
 
-function isOneButton(currentItem) {
+export function isOneButton(currentItem) {
     if (
         (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
         (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
@@ -437,7 +437,7 @@ function isOneButton(currentItem) {
     }
 }
 
-function isTwoButtons(currentItem) {
+export function isTwoButtons(currentItem) {
     if (currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink) && (currentItem.pagelink2 || currentItem.weblink2)) {
         return true
     } else {
@@ -445,7 +445,7 @@ function isTwoButtons(currentItem) {
     }
 }
 
-function linkAndBtn(currentItem) {
+export function linkAndBtn(currentItem) {
     if (
         (currentItem.actionlbl && currentItem.pagelink) ||
         (currentItem.actionlbl && currentItem.weblink) ||
@@ -458,7 +458,7 @@ function linkAndBtn(currentItem) {
     }
 }
 
-function isGridCaption(item) {
+export function isGridCaption(item) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
         return true
     } else {
@@ -466,7 +466,7 @@ function isGridCaption(item) {
     }
 }
 
-const createGallerySettings = (settings, blockSwitch1, type) => {
+export const createGallerySettings = (settings, blockSwitch1, type) => {
     //convert to numbers
     const schemaNum = z.coerce.number()
     const interval = schemaNum.parse(settings.interval) * 1000
@@ -486,7 +486,7 @@ const createGallerySettings = (settings, blockSwitch1, type) => {
     return newSettings
 }
 
-const alternatePromoColors = (items, themeStyles, well) => {
+export const alternatePromoColors = (items, themeStyles, well) => {
     const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--prom5)']).flat()
 
     const textureImageList = Array(items.length)
@@ -527,7 +527,7 @@ const alternatePromoColors = (items, themeStyles, well) => {
     return items
 }
 
-const isPromoButton = (items, modType, btnNum) => {
+export const isPromoButton = (items, modType, btnNum) => {
     if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
         return 'btn_override'
     } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
@@ -549,7 +549,7 @@ const isPromoButton = (items, modType, btnNum) => {
     }
 }
 
-const createItemStyles = (items, well, modType, type) => {
+export const createItemStyles = (items, well, modType, type) => {
     for (let i = 0; i < items.length; i++) {
         let itemStyle
         let captionStyle
@@ -598,7 +598,7 @@ const createItemStyles = (items, well, modType, type) => {
     return items
 }
 
-const setColors = (cmsColors, cmsTheme) => {
+export const setColors = (cmsColors, cmsTheme) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
             logoColor: cmsColors.color_1.value,
@@ -665,7 +665,7 @@ const setColors = (cmsColors, cmsTheme) => {
     }
 }
 
-const getColumnsCssClass = (page) => {
+export const getColumnsCssClass = (page) => {
     if (page.sections[1].wide == '938' || page.sections[1].wide == '988') {
         return 'full-column'
     } else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
@@ -691,7 +691,7 @@ const getColumnsCssClass = (page) => {
     }
 }
 
-const createFontCss = (fonts) => {
+export const createFontCss = (fonts) => {
     let fontImportGroup
     let fontClasses
 
@@ -714,7 +714,7 @@ const createFontCss = (fonts) => {
     return { fontImportGroup, fontClasses }
 }
 
-const createColorClasses = (themeStyles) => {
+export const createColorClasses = (themeStyles) => {
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -817,14 +817,14 @@ const createColorClasses = (themeStyles) => {
 }
 
 //reuseables
-const removeDuplicatesArray = (arr) => {
+export const removeDuplicatesArray = (arr) => {
     let uniqueArr = arr.filter((c, index) => {
         return arr.indexOf(c) === index
     })
     return uniqueArr
 }
 
-const convertSpecialTokens = (str) => {
+export const convertSpecialTokens = (str) => {
     const removedBreak = str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
     const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
@@ -832,7 +832,7 @@ const convertSpecialTokens = (str) => {
     return removedParenthesis
 }
 
-const replaceKey = (value, oldKey, newKey) => {
+export const replaceKey = (value, oldKey, newKey) => {
     if (oldKey !== newKey && value[oldKey]) {
         Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
         delete value[oldKey]
@@ -840,7 +840,7 @@ const replaceKey = (value, oldKey, newKey) => {
     return { ...value }
 }
 
-module.exports = {
+/* export default {
     socialConvert,
     btnIconConvert,
     setColors,
@@ -866,3 +866,4 @@ module.exports = {
     modVariationType,
     createContactForm,
 }
+ */

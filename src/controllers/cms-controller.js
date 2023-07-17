@@ -1,8 +1,9 @@
-require('dotenv').config()
-const sass = require('sass')
-const z = require('zod')
+import { config } from 'dotenv'
+config()
+import sass from 'sass'
+import z from 'zod'
 
-const {
+import {
     socialConvert,
     btnIconConvert,
     getColumnsCssClass,
@@ -24,11 +25,11 @@ const {
     modVariationType,
     createItemStyles,
     createContactForm,
-} = require('../utils')
+} from '../utils.js'
 
-const { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } = require('../s3Functions.js')
+import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
-const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
+export const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
     console.log('page transformer started')
     console.log(pageData)
     //let newPages = []
@@ -149,7 +150,7 @@ const createPageScss = async (pageData, pageSlug, basePath) => {
     await addFileS3(pageCss, `${basePath}/styles/${pageSlug}`, 'scss')
 }
 
-const deletePages = async (pages, basePath) => {
+export const deletePages = async (pages, basePath) => {
     console.log('deleter started')
     const oldPageList = await getFileS3(`${basePath}/pages/page-list.json`)
     let newPageList = []
@@ -166,7 +167,7 @@ const deletePages = async (pages, basePath) => {
 }
 
 //Update pagelist file in s3 or create if not already there
-const updatePageList = async (page, basePath) => {
+export const updatePageList = async (page, basePath) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
@@ -182,7 +183,7 @@ const updatePageList = async (page, basePath) => {
 const addPagesToList = async (pageListFile, page, basePath) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
-        pageData = page[i].data
+        let pageData = page[i].data
 
         const newPageItem = {
             name: pageData.title,
@@ -207,7 +208,7 @@ const addPagesToList = async (pageListFile, page, basePath) => {
 }
 
 //Adding a new page does not automatically add it to nav unless we do this
-const addNewPageToNav = async (pageData, basePath) => {
+export const addNewPageToNav = async (pageData, basePath) => {
     //Get layout file to update nav
     let oldSiteData = await getFileS3(`${basePath}/layout.json`)
 
@@ -234,7 +235,7 @@ const addNewPageToNav = async (pageData, basePath) => {
 }
 
 //Create or edit layout file
-const createOrEditLayout = async (file, basePath, themeStyles, url) => {
+export const createOrEditLayout = async (file, basePath, themeStyles, url) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -442,7 +443,7 @@ const transformPageModules = (moduleList, themeStyles) => {
     return columnsData
 }
 
-const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, basePath) => {
+export const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, basePath) => {
     console.log('global css changed --------')
 
     const { fontImportGroup, fontClasses } = createFontCss(fonts)
@@ -489,7 +490,7 @@ const getAllCssPages = async (currentPageList, basePath) => {
 }
 
 //used for migrate, probably delete later
-const transformCMSData = function (data) {
+export const transformCMSData = function (data) {
     let newData = []
     const pageListData = []
 
@@ -516,7 +517,7 @@ const transformCMSData = function (data) {
     return { data: data, pageList: pageList }
 }
 
-const createPageList = (value) => {
+export const createPageList = (value) => {
     const pageData = {
         name: value.title,
         slug: value.slug,
@@ -527,11 +528,11 @@ const createPageList = (value) => {
     return pageData
 }
 
-module.exports = {
+/* export default {
     transformCMSData,
     updatePageList,
     transformPagesData,
     createOrEditLayout,
     deletePages,
     createGlobalStylesheet,
-}
+} */

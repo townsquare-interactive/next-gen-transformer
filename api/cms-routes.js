@@ -1,15 +1,15 @@
-const { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } = require('../src/controllers/cms-controller')
+import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../src/controllers/cms-controller.js'
 
-const { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } = require('../src/s3Functions.js')
+import { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } from '../src/s3Functions.js'
 
-const { stripUrl, setColors, stripImageFolders } = require('../src/utils')
+import { stripUrl, setColors, stripImageFolders } from '../src/utils.js'
 
-const engines = require('../src/translation-engines/basic')
-const strapiEngine = require('../src/translation-engines/strapi')
+import engines from '../src/translation-engines/basic.js'
+import { transformStrapi } from '../src/translation-engines/strapi.js'
 
-const { publish } = require('../src/output/index.js')
+import { publish } from '../src/output/index.js'
 
-const express = require('express')
+import express from 'express'
 const router = express.Router()
 
 //chnage to save data
@@ -147,7 +147,7 @@ router.post('/site-data/strapi', async (req, res) => {
 
     try {
         //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
-        const data = await strapiEngine.transformStrapi(req.body)
+        const data = await transformStrapi(req.body)
 
         console.log(data.pages)
 
@@ -203,4 +203,4 @@ router.post('/cms', async (req, res) => {
     }
 }) */
 
-module.exports = router
+export default router

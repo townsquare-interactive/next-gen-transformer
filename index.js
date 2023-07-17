@@ -1,15 +1,17 @@
-require('dotenv').config()
-const express = require('express')
+import { config } from 'dotenv'
+config()
+import express from 'express'
+import router from './api/cms-routes.js'
 const app = express()
 
-let routes
-if (process.env.DB == 'dynamo') {
+let routes = router
+/* if (process.env.DB == 'dynamo') {
     routes = require('./api/dynamo-routes')
 } else if (process.env.DB == 'mongo') {
     routes = require('./api/mongo-routes')
 } else if (process.env.DB == 'cms') {
     routes = require('./api/cms-routes')
-}
+} */
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')

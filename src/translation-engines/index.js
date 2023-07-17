@@ -1,5 +1,5 @@
-const { basic } = require('./basic')
-const { transformStrapi } = require('./strapi')
+import { basic } from './basic'
+import { transformStrapi } from './strapi'
 
 module.exports = {
     basic,

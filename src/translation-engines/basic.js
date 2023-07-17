@@ -639,6 +639,4 @@ const basic = {
     },
 }
 
-module.exports = {
-    basic,
-}
+export default basic

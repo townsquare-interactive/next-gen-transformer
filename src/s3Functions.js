@@ -1,9 +1,10 @@
-require('dotenv').config()
-const request = require('request-promise')
+import { config } from 'dotenv'
+config()
+import request from 'request-promise'
 const tsiBucket = 'townsquareinteractive'
 const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 
-const AWS = require('aws-sdk')
+import AWS from 'aws-sdk'
 
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
@@ -14,7 +15,7 @@ AWS.config.update({
 const s3 = new AWS.S3()
 
 //Get S3 object and return, if not found return passed object
-const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
+export const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
     if (type === 'json') {
         try {
             const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
@@ -35,7 +36,7 @@ const getFileS3 = async (key, rtnObj = { pages: [] }, type = 'json') => {
 }
 
 //add file to s3 bucket
-const addFileS3 = async (file, key, fileType = 'json') => {
+export const addFileS3 = async (file, key, fileType = 'json') => {
     const s3ContentType = fileType.includes('css') ? 'text/css' : 'application/json'
     const body = fileType === 'json' ? JSON.stringify(file) : file
 
@@ -54,7 +55,7 @@ const addFileS3 = async (file, key, fileType = 'json') => {
     console.log('File Placed')
 }
 
-const addAssetFromSiteToS3 = async (file, key) => {
+export const addAssetFromSiteToS3 = async (file, key) => {
     var options = {
         uri: 'http://' + file,
         encoding: null,
@@ -83,7 +84,7 @@ const addAssetFromSiteToS3 = async (file, key) => {
 }
 
 //adding a page file for each page in cms data
-const addMultipleS3 = async (data, pageList, basePath) => {
+export const addMultipleS3 = async (data, pageList, basePath) => {
     const pages = data.pages
 
     //adding page list file to s3
@@ -99,7 +100,7 @@ const addMultipleS3 = async (data, pageList, basePath) => {
 }
 
 //add any file, pass it the file and key for filename
-const addFileS3List = async (file, key) => {
+export const addFileS3List = async (file, key) => {
     //console.log('File to be added', file)
 
     await s3
@@ -113,7 +114,7 @@ const addFileS3List = async (file, key) => {
     console.log('S3 File Added')
 }
 
-const deleteFileS3 = async (key) => {
+export const deleteFileS3 = async (key) => {
     console.log('File to be deleted', key)
 
     await s3
@@ -126,7 +127,7 @@ const deleteFileS3 = async (key) => {
     console.log('S3 File Deleted')
 }
 
-const getCssFile = async (pageSlug, basePath) => {
+export const getCssFile = async (pageSlug, basePath) => {
     var options = {
         uri: `${bucketUrl}/${basePath}/styles/${pageSlug}.scss`,
         encoding: null,
@@ -150,7 +151,7 @@ const getCssFile = async (pageSlug, basePath) => {
     return cssFile
 }
 
-module.exports = {
+/* export default {
     addMultipleS3,
     addFileS3,
     addAssetFromSiteToS3,
@@ -158,4 +159,4 @@ module.exports = {
     getCssFile,
     addFileS3List,
     deleteFileS3,
-}
+} */

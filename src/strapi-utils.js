@@ -1,4 +1,4 @@
-const { socialConvert, createContactForm, createLinkAndButtonVariables } = require('./utils')
+import { socialConvert, createContactForm, createLinkAndButtonVariables } from './utils.js'
 /* const transformStrapiNav = (newPage, oldNav) => {
     //nav
     //check for s3 cmsNav / check if page is already there
@@ -28,7 +28,7 @@ const { socialConvert, createContactForm, createLinkAndButtonVariables } = requi
     return newNav
 } */
 
-const transformStrapiNav = (nav) => {
+export const transformStrapiNav = (nav) => {
     //nav
     //check for s3 cmsNav / check if page is already there
     let newNav = []
@@ -63,7 +63,7 @@ const transformStrapiNav = (nav) => {
     return newNav
 }
 
-const determineModRenderType = (type) => {
+export const determineModRenderType = (type) => {
     if (type.includes('article')) {
         return 'Article'
     } else if (type === 'module.photogrid-module') {
@@ -85,7 +85,7 @@ const determineModRenderType = (type) => {
     }
 }
 
-const determineComponentType = (componentType, useCarousel) => {
+export const determineComponentType = (componentType, useCarousel) => {
     if (componentType === 'module.article-module') {
         return 'article_3'
     } else if (componentType === 'module.banner-module') {
@@ -109,7 +109,7 @@ const determineComponentType = (componentType, useCarousel) => {
     }
 }
 
-const convertColumns = (columns) => {
+export const convertColumns = (columns) => {
     if (columns === 'one') {
         return 1
     } else if (columns === 'two') {
@@ -125,7 +125,7 @@ const convertColumns = (columns) => {
     }
 }
 
-const createSocials = (socialMedia) => {
+export const createSocials = (socialMedia) => {
     let socialMediaItems = []
     if (socialMedia.length != 0) {
         const inputtedSocials = socialMedia || []
@@ -142,11 +142,11 @@ const createSocials = (socialMedia) => {
     return socialMediaItems
 }
 
-const transformTextSize = (size) => {
+export const transformTextSize = (size) => {
     return `font_${size.toLowerCase()}`
 }
 
-const createFonts = (fonts) => {
+export const createFonts = (fonts) => {
     const newFonts = {
         sections: {
             hdrs: {
@@ -779,7 +779,7 @@ const createFonts = (fonts) => {
     return newFonts
 }
 
-const setupContactForm = (currentModule) => {
+export const setupContactForm = (currentModule) => {
     const contactFormData = createContactForm(currentModule.formTitle || '', currentModule.email || '')
     currentModule = {
         ...currentModule,
@@ -794,7 +794,7 @@ const setupContactForm = (currentModule) => {
     return currentModule
 }
 
-const createStrapiButtonVars = (currentItem, modRenderType, columns) => {
+export const createStrapiButtonVars = (currentItem, modRenderType, columns) => {
     const btn1 = currentItem.buttons[0]
     const btn2 = currentItem.buttons[1]
 
@@ -829,7 +829,7 @@ const createStrapiButtonVars = (currentItem, modRenderType, columns) => {
     return currentItem
 }
 
-const setDefaultColors = () => {
+export const setDefaultColors = () => {
     return {
         id: 6,
         logoColor: '#2482cb',
@@ -871,7 +871,7 @@ const setDefaultColors = () => {
     }
 }
 
-const createContactInfo = (attributes, siteIdentifier) => {
+export const createContactInfo = (attributes, siteIdentifier) => {
     let contactInfo = {
         address: {
             city: attributes.city || '',
@@ -901,7 +901,7 @@ cabin 43 not state inspection */
 //kelly edge(185ea) 65k limited tread no road hazard (all price 1227)
 //
 
-module.exports = {
+/* export default {
     transformStrapiNav,
     determineModRenderType,
     transformTextSize,
@@ -913,4 +913,4 @@ module.exports = {
     createStrapiButtonVars,
     setDefaultColors,
     createContactInfo,
-}
+} */

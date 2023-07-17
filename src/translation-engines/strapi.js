@@ -1,5 +1,5 @@
-const { createGlobalStylesheet } = require('../controllers/cms-controller')
-const {
+import { createGlobalStylesheet } from '../controllers/cms-controller.js'
+import {
     transformStrapiNav,
     determineModRenderType,
     transformTextSize,
@@ -11,13 +11,13 @@ const {
     createStrapiButtonVars,
     setDefaultColors,
     createContactInfo,
-} = require('../strapi-utils')
-const { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } = require('../utils')
-const z = require('zod')
+} from '../strapi-utils.js'
+import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
+import z from 'zod'
 
 const schemaNum = z.coerce.number()
 
-const transformStrapi = async (req) => {
+export const transformStrapi = async (req) => {
     let pagesList = []
     try {
         const resLayout = await fetch('http://127.0.0.1:1337/api/site-data?populate=deep')
@@ -37,7 +37,7 @@ const transformStrapi = async (req) => {
         if (req.entry.slug != null && req.entry.Body) {
             let modCount = 0
             //module loop
-            for (i in req.entry.Body) {
+            for (const i in req.entry.Body) {
                 modCount += 1
                 const currentModule = req.entry.Body[i]
                 const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
@@ -84,7 +84,7 @@ const transformStrapi = async (req) => {
                 //loop through items
                 let itemCount = 0
                 if (req.entry.Body[i].items) {
-                    for (t in currentModule.items) {
+                    for (const t in currentModule.items) {
                         const currentItem = currentModule.items[t]
                         itemCount += 1
 
@@ -366,8 +366,4 @@ const transformStrapi = async (req) => {
         console.log(error)
         return { error: 'Strapi fetch error' }
     }
-}
-
-module.exports = {
-    transformStrapi,
 }
