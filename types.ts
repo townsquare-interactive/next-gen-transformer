@@ -14,6 +14,7 @@ export interface Page {
         hideTitle: boolean
         head_script: string
         columnStyles: string
+        page_type?: string
     }
     attrs: {}
     seo: {
@@ -103,6 +104,45 @@ interface Button {
     btnSize: string
     linkType: string
     blockBtn: boolean
+}
+
+export interface ThemeStyles {
+    logoColor: string
+    headingColor: string
+    subHeadingColor: string
+    textColor: string
+    linkColor: string
+    linkHover: string
+    btnText: string
+    btnBackground: string
+    textColorAccent: string
+    heroSubheadline: string
+    heroText: string
+    heroBtnText: string
+    heroBtnBackground: string
+    heroLink: string
+    heroLinkHover: string
+    captionText: string
+    captionBackground: string
+    NavText: string
+    navHover: string
+    navCurrent: string
+    backgroundMain: string
+    bckdContent: string
+    headerBackground: string
+    BckdHeaderSocial: string
+    accentBackgroundColor: string
+    backgroundHero: string
+    footerBackground: string
+    footerText: string
+    footerLink: string
+    promoText: string
+    promoColor: string
+    promoColor2: string
+    promoColor3: string
+    promoColor4: string
+    promoColor5: string
+    promoColor6: string
 }
 
 interface Section {
@@ -289,6 +329,281 @@ export interface PublishData {
     pages: Page[]
     assets: { url: string; fileName: string; name: string; content: string }[]
     globalStyles: string
+}
+
+export interface Layout {
+    logos: {
+        fonts: any[]
+        footer: {
+            pct: number
+            slots: {
+                show: number
+                type: string
+                markup: string
+                hasLinks: boolean
+                alignment: string
+                image_src: string
+                image_link: string
+                image_link_ext?: string
+            }[]
+            activeSlots: number[]
+        }
+        header: {
+            pct: number
+            slots: {
+                show: number
+                type: string
+                markup: string
+                hasLinks: boolean
+                alignment: string
+                image_src: string
+                image_link: string
+            }[]
+            activeSlots: number[]
+        }
+        mobile: {
+            pct: number
+            slots: {
+                show: number
+                type: string
+                markup: string
+                hasLinks: boolean
+                alignment: string
+                image_src: string
+                image_link: string
+                image_link_ext?: string
+            }[]
+            activeSlots: number[]
+        }
+        list: { [key: string]: string }
+    }
+    social: {
+        id: number
+        name: string
+        format: string
+        label: string
+        value: string
+        enabled: number
+        input: [string, string]
+        url: string
+        icon: [string, string]
+    }[]
+    contact: {
+        email: {
+            name: string
+            email: string
+            disabled: string
+            isPrimaryEmail: boolean
+        }[]
+        hours: {
+            friday: string
+            monday: string
+            sunday: string
+            tuesday: string
+            saturday: string
+            thursday: string
+            wednesday: string
+        }
+        phone: {
+            name: string
+            number: string
+            disabled: string
+            isPrimaryPhone: boolean
+        }[]
+        address: {
+            zip: string
+            city: string
+            name: string
+            state: string
+            street: string
+            street2: string
+        }
+        hideZip: boolean
+        advanced: {
+            lat: string
+            long: string
+        }
+        disabled: string
+        hideCity: boolean
+        hideState: boolean
+        isPrimary: boolean
+        hideAddress: boolean
+        displayInMap: boolean
+        hideAddress2: boolean
+        displayInFooter: boolean
+        selectedPrimaryEmailLabel: string
+        selectedPrimaryPhoneLabel: string
+        selectedPrimaryPhoneNumber: string
+        selectedPrimaryEmailAddress: string
+        contactLinks: {
+            cName: string
+            link: string
+            icon: [string, string]
+            content: string
+            active: boolean
+        }[]
+        showContactBox: boolean
+    }
+    siteName: string
+    phoneNumber: string
+    email: string
+    url: string
+    composites: {
+        footer: {
+            type: string
+            layout: null
+            columns: number
+            modules: {
+                type: string
+                items: {
+                    text: string
+                    title: string
+                    filter: boolean
+                    component: string
+                    nav_menu?: number
+                }[]
+            }
+            sections: null
+        }
+    }
+    cmsNav: {
+        ID: number
+        menu_list_id: number
+        title: string
+        post_type: string
+        type: string | null
+        menu_item_parent: number | string
+        object_id: number
+        object: string
+        target: null
+        classes: null
+        menu_order: number
+        mi_url: null
+        url: string
+        disabled: boolean
+        submenu: {
+            ID: number
+            menu_list_id: number
+            title: string
+            post_type: string
+            type: string
+            menu_item_parent: number
+            object_id: number
+            object: string
+            target: null
+            classes: null
+            menu_order: number
+            mi_url: null
+            url: string
+            disabled: boolean
+            submenu: never[]
+            slug: string
+        }[]
+        slug: string
+    }[]
+    seo: {
+        global: {
+            aiosp_page_title_format: string
+            aiosp_description_format: string
+            aiosp_404_title_format: string
+        }
+    }
+    cmsColors: ThemeStyles
+    theme: string
+    cmsUrl: string
+    s3Folder: string
+    favicon: string
+    fontImport: string
+    config: {
+        mailChimp: {
+            audId: string
+            datacenter: string
+            auth: string
+        }
+        zapierUrl: string
+        makeUrl: string
+    }
+}
+
+export interface CMSPage {
+    data: {
+        id: string
+        title: string
+        slug: string
+        pageType: string
+        url: string
+        JS: string
+        type: string
+        layout: number
+        columns: number
+        modules: Module[][]
+        sections: Section[]
+        hideTitle: boolean
+        head_script: string
+        columnStyles: string
+        page_type: string
+    }
+    attrs: {}
+    seo: {
+        title: string
+        descr: string
+        selectedImages: string
+        imageOverride: string
+    }
+    head_script?: string
+    JS?: string
+    title: string
+    slug: string
+    page_type: string
+    url: string
+    id: string
+}
+
+export interface LunaModuleItem {
+    id: string
+    desc: string
+    image: string
+    plugin: string
+    weblink: string
+    disabled: string
+    headline: string
+    isPlugin: string
+    pagelink: string
+    actionlbl: string
+    headerTag: string
+    imageSize: any
+    newwindow: string
+    pagelink2: string
+    subheader: string
+    isFeatured: string
+    pagelinkId: string
+    pagelink2Id: string
+}
+
+export interface LunaModuleSettings {
+    effect: string
+    autoplay: string
+    interval: string
+    pauseonhover: string
+    restartdelay: string
+}
+
+export interface LunaModule {
+    uid: string
+    lazy: string
+    type: string
+    well: string
+    align: string
+    class: string
+    items: ModuleItem[]
+    title: string
+    export: number
+    columns: string
+    imgsize: string
+    lightbox: string
+    settings: LunaModuleSettings
+    blockSwitch1: number
+    scale_to_fit: string
 }
 
 /*------------------------ Strapi Types ------------------------------------ */

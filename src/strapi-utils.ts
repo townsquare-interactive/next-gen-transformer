@@ -1,4 +1,3 @@
-// @ts-ignore
 import { socialConvert, createContactForm, createLinkAndButtonVariables } from './utils.js'
 import { CurrentModule, ModuleItem } from '../types.js'
 

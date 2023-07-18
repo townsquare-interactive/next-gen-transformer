@@ -23,10 +23,9 @@ export const transformStrapi = async (req: Request) => {
     console.log('request', req)
     let pagesList = []
     try {
-        const resLayout = await fetch(`${dbUrl}/api/site-data?populate=deep`)
-        const resNav = await fetch(`${dbUrl}/api/navigation/render/1?locale=fr`)
-        const nav = await resNav.json()
-        const layout = await resLayout.json()
+        const [resLayout, resNav] = await Promise.all([fetch(`${dbUrl}/api/site-data?populate=deep`), fetch(`${dbUrl}/api/navigation/render/1?locale=fr`)])
+        const [layout, nav] = await Promise.all([resLayout.json(), resNav.json()])
+
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let newNav
         let cmsColors = layout.data.attributes.colors
@@ -222,7 +221,7 @@ export const transformStrapi = async (req: Request) => {
 
         //----------------------global styles ---------------------------------
         const siteCustomCss = ''
-        const currentPageList = {}
+        let currentPageList = ''
 
         //fonts
         const strapiFonts = createFonts({
@@ -239,13 +238,10 @@ export const transformStrapi = async (req: Request) => {
             siteLayout: {
                 cmsNav: newNav,
                 logos: {
-                    //fonts: [],
                     footer: {
                         pct: null,
                         slots: [
                             {
-                                //show: 0,
-                                //type: 'text',
                                 markup: '',
                                 hasLinks: false,
                                 alignment: 'left',
@@ -259,11 +255,8 @@ export const transformStrapi = async (req: Request) => {
                                 markup: '',
                             },
                         ],
-                        //activeSlots: [],
                     },
-
                     header: {
-                        //pct: 100,
                         slots: [
                             {
                                 show: 1,
@@ -316,10 +309,6 @@ export const transformStrapi = async (req: Request) => {
                         ],
                         activeSlots: [],
                     },
-                    /* list: {
-                        429176: '/files/2020/02/tsi_logo2-dark.png',
-                        429177: '/files/2020/02/tsi_logo2.png',
-                    }, */
                 },
                 social: socialMediaItems,
                 contact: contactInfo,
@@ -332,16 +321,8 @@ export const transformStrapi = async (req: Request) => {
                         columns: 2,
                         modules: {
                             type: 'composite',
-                            items: [
-                                //footer nav
-                                /*  {
-                                    title: '',
-                                    nav_menu: 5530,
-                                    component: 'nav_menu',
-                                }, */
-                            ],
+                            items: [],
                         },
-                        //sections: null,
                     },
                 },
                 cmsColors: cmsColors,

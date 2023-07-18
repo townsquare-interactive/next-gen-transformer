@@ -1,7 +1,6 @@
 import { config } from 'dotenv'
 config()
 import express from 'express'
-// @ts-ignore
 import router from './api/cms-routes.js'
 const app = express()
 

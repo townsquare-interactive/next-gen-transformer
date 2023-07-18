@@ -29,7 +29,9 @@ import {
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
-export const transformPagesData = async (pageData, sitePageData, themeStyles, basePath) => {
+import { CMSPage, ThemeStyles, Layout, Page, LunaModule } from '../../types.js'
+
+export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string) => {
     console.log('page transformer started')
     console.log(pageData)
     //let newPages = []
@@ -44,7 +46,7 @@ export const transformPagesData = async (pageData, sitePageData, themeStyles, ba
             console.log('initiated page name change')
             const oldPageSlug = sitePageData[key].backup.attrs.slug
             let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
-            let oldSiteData = await getFileS3(`${basePath}/layout.json`)
+            let oldSiteData: Layout = await getFileS3(`${basePath}/layout.json`)
             let oldNav = oldSiteData.cmsNav
 
             const newSlug = value.attrs.slug
@@ -111,8 +113,8 @@ export const transformPagesData = async (pageData, sitePageData, themeStyles, ba
     return { pages: newData }
 }
 
-const getPageData = (sitePageData, key) => {
-    const pageId = key
+const getPageData = (sitePageData: CMSPage[], key: string) => {
+    const pageId: any = key
     const pageTitle = sitePageData[pageId].title
     const pageSlug = sitePageData[pageId].slug
     const pageType = sitePageData[pageId].page_type
@@ -123,7 +125,7 @@ const getPageData = (sitePageData, key) => {
 }
 
 //grab content between <style> tags and add scss page to s3
-const createPageScss = async (pageData, pageSlug, basePath) => {
+const createPageScss = async (pageData: CMSPage, pageSlug: string, basePath: string) => {
     let pageCss
 
     if (pageData.JS || pageData.head_script) {
@@ -150,7 +152,7 @@ const createPageScss = async (pageData, pageSlug, basePath) => {
     await addFileS3(pageCss, `${basePath}/styles/${pageSlug}`, 'scss')
 }
 
-export const deletePages = async (pages, basePath) => {
+export const deletePages = async (pages: CMSPage[], basePath: string) => {
     console.log('deleter started')
     const oldPageList = await getFileS3(`${basePath}/pages/page-list.json`)
     let newPageList = []
@@ -167,7 +169,7 @@ export const deletePages = async (pages, basePath) => {
 }
 
 //Update pagelist file in s3 or create if not already there
-export const updatePageList = async (page, basePath) => {
+export const updatePageList = async (page: CMSPage[] | Page[], basePath: string) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list.json`
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
@@ -180,7 +182,7 @@ export const updatePageList = async (page, basePath) => {
 }
 
 //add page object to pagelist
-const addPagesToList = async (pageListFile, page, basePath) => {
+const addPagesToList = async (pageListFile: { pages: [{ slug: string }] }, page: CMSPage[] | Page[], basePath: string) => {
     //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         let pageData = page[i].data
@@ -196,7 +198,7 @@ const addPagesToList = async (pageListFile, page, basePath) => {
         if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length === 0) {
             pageListFile.pages.push(newPageItem)
 
-            //await addNewPageToNav(pageData, basePath)
+            //await addNewPageToNav(pageData, basePath:string)
 
             //updating existing page data in pagelist
         } else if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length >= 0) {
@@ -208,7 +210,7 @@ const addPagesToList = async (pageListFile, page, basePath) => {
 }
 
 //Adding a new page does not automatically add it to nav unless we do this
-export const addNewPageToNav = async (pageData, basePath) => {
+export const addNewPageToNav = async (pageData: CMSPage, basePath: string) => {
     //Get layout file to update nav
     let oldSiteData = await getFileS3(`${basePath}/layout.json`)
 
@@ -235,13 +237,13 @@ export const addNewPageToNav = async (pageData, basePath) => {
 }
 
 //Create or edit layout file
-export const createOrEditLayout = async (file, basePath, themeStyles, url) => {
+export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
 
     //adding socials from sitedata
-    function transformSocial(file) {
+    function transformSocial(file: any) {
         const social = []
 
         for (let i = 0; i < file.settings.social.services.length; i++) {
@@ -297,7 +299,7 @@ export const createOrEditLayout = async (file, basePath, themeStyles, url) => {
     return globalFile
 }
 
-const transformPageModules = (moduleList, themeStyles) => {
+const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles) => {
     let columnsData = []
     for (let i = 0; i <= moduleList.length; ++i) {
         if (moduleList[i]) {
@@ -305,7 +307,7 @@ const transformPageModules = (moduleList, themeStyles) => {
             let modCount = 0
 
             //let imageCount = 0
-            const isSingleColumn = moduleList.filter((e) => Object.keys(e).length != 0).length === 2
+            const isSingleColumn = moduleList.filter((e: any) => Object.keys(e).length != 0).length === 2
 
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
@@ -443,7 +445,7 @@ const transformPageModules = (moduleList, themeStyles) => {
     return columnsData
 }
 
-export const createGlobalStylesheet = async (themeStyles, fonts, code, currentPageList, basePath) => {
+export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: any, code: any, currentPageList: any, basePath: string) => {
     console.log('global css changed --------')
 
     const { fontImportGroup, fontClasses } = createFontCss(fonts)
@@ -457,8 +459,11 @@ export const createGlobalStylesheet = async (themeStyles, fonts, code, currentPa
     `
         : ''
     let allPageStyles
-    if (Object.keys(currentPageList).length != 0) {
-        allPageStyles = await getAllCssPages(currentPageList, basePath)
+    if (currentPageList) {
+        console.log('yesssssssssss', currentPageList)
+        if (Object.keys(currentPageList).length != 0) {
+            allPageStyles = await getAllCssPages(currentPageList, basePath)
+        }
     } else {
         allPageStyles = ''
     }
@@ -478,7 +483,7 @@ export const createGlobalStylesheet = async (themeStyles, fonts, code, currentPa
     }
 }
 
-const getAllCssPages = async (currentPageList, basePath) => {
+const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, basePath: string) => {
     const allPageCss = []
     for (let i = 0; i < currentPageList.pages.length; i++) {
         const pageSlug = currentPageList.pages[i].slug
@@ -490,9 +495,9 @@ const getAllCssPages = async (currentPageList, basePath) => {
 }
 
 //used for migrate, probably delete later
-export const transformCMSData = function (data) {
-    let newData = []
-    const pageListData = []
+/* export const transformCMSData = function (data:any) {
+    let newData:any = []
+    const pageListData:any = []
 
     for (const [key, value] of Object.entries(data.pages)) {
         //creating file for pagelist
@@ -515,9 +520,9 @@ export const transformCMSData = function (data) {
 
     //returned transformed whole page json and pagelist
     return { data: data, pageList: pageList }
-}
+} */
 
-export const createPageList = (value) => {
+export const createPageList = (value: { title: string; slug: string; id: String; page_type: string }) => {
     const pageData = {
         name: value.title,
         slug: value.slug,

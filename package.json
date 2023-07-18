@@ -33,6 +33,7 @@
         "@babel/preset-env": "^7.22.9",
         "@types/express": "^4.17.17",
         "@types/node": "^20.4.2",
+        "@types/request-promise": "^4.1.48",
         "nodemon": "^3.0.1",
         "sass": "^1.57.1",
         "ts-node": "^10.9.1",
