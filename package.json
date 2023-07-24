@@ -6,8 +6,8 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon index.ts",
-        "dev": "nodemon index.ts"
+        "start": "nodemon --transpile-only index.ts",
+        "dev": "nodemon --transpile-only index.ts"
     },
     "author": "",
     "license": "ISC",

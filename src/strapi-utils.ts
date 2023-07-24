@@ -1,5 +1,5 @@
-import { socialConvert, createContactForm, createLinkAndButtonVariables } from './utils.js'
-import { CurrentModule, ModuleItem } from '../types.js'
+import { socialConvert, createContactForm, createLinkAndButtonVariables, getAddressCoords } from './utils.js'
+import { CurrentModule, Email, ModuleItem, Phone } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
     //nav
@@ -836,18 +836,38 @@ export const setDefaultColors = () => {
     }
 }
 
-export const createContactInfo = (
-    attributes: { city: string; zip: string; state: string; streetAddress: string; phone: string; email: string },
+const createAddress = async (attributes: { city: string; zip: string; state: string; streetAddress: string; phone: Phone[]; email: Email[] }) => {
+    const addy = {
+        street: attributes.streetAddress || '',
+        zip: attributes.zip || '',
+        state: attributes.state || '',
+        city: attributes.city || '',
+    }
+    console.log('addy', addy)
+    let mapCoords
+    if (addy.zip && addy.state && addy.city) {
+        mapCoords = await getAddressCoords(addy)
+        console.log(mapCoords)
+    } else {
+        mapCoords = { lat: '', long: '' }
+    }
+
+    return {
+        ...addy,
+        coordinates: mapCoords.lat ? [mapCoords.lat, mapCoords.long] : [],
+    }
+}
+
+export const createContactInfo = async (
+    attributes: { city: string; zip: string; state: string; streetAddress: string; phone: Phone[]; email: Email[] },
     siteIdentifier: string
 ) => {
+    //create address with coordnates
+
+    const newAddy = await createAddress(attributes)
+
     let contactInfo = {
-        address: {
-            city: attributes.city || '',
-            zip: attributes.zip || '',
-            name: siteIdentifier,
-            state: attributes.state || '',
-            street: attributes.streetAddress || '',
-        },
+        address: newAddy,
         phone: attributes.phone,
         email: [
             {

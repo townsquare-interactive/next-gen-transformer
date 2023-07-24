@@ -1,6 +1,7 @@
 import z from 'zod'
+import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, Page, ThemeStyles } from '../types'
 
-export function socialConvert(str) {
+export function socialConvert(str: string) {
     let icon = iconConvert(str)
     if (icon === 'google') {
         return ['fab', 'google']
@@ -15,7 +16,7 @@ export function socialConvert(str) {
     }
 }
 
-export function iconConvert(str) {
+export function iconConvert(str: string) {
     if (str.indexOf('google') !== -1) {
         return 'google'
     } else if (str.indexOf('facebook') !== -1) {
@@ -29,7 +30,7 @@ export function iconConvert(str) {
     }
 }
 
-export const determineModRenderType = (type) => {
+export const determineModRenderType = (type: string) => {
     if (type.includes('article')) {
         return 'Article'
     } else if (type === 'photo_grid') {
@@ -52,7 +53,7 @@ export const determineModRenderType = (type) => {
 }
 
 //cleaning up module type names that are not specific
-export const modVariationType = (type) => {
+export const modVariationType = (type: string) => {
     if (type === 'testimonials_2') {
         return 'review_carousel'
     } else if (type === 'photo_gallery_2') {
@@ -62,7 +63,7 @@ export const modVariationType = (type) => {
     }
 }
 
-export function btnIconConvert(icon) {
+export function btnIconConvert(icon: string) {
     if (icon) {
         //replaces fas fa-rocket with faRocket
         const iconPrefix = icon.includes('fas') ? 'fas' : icon.includes('far') ? 'far' : icon.includes('fab') ? 'fab' : ''
@@ -74,13 +75,13 @@ export function btnIconConvert(icon) {
 }
 
 //Strip url of protocol and .production / .com
-export const stripUrl = (url) => {
+export const stripUrl = (url: string) => {
     const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
     return removeProtocol.replace(/\..*/, '')
 }
 
 //strip anything between / ... /
-export const stripSiteAndUrl = (url, siteUrl) => {
+export const stripSiteAndUrl = (url: string, siteUrl: string) => {
     if (url === '#') {
         return '#'
     } else if (url.includes(siteUrl)) {
@@ -89,18 +90,22 @@ export const stripSiteAndUrl = (url, siteUrl) => {
     } else if (url.includes('//')) {
         const removedSiteAndDomain = url.match(/\/(.*)$/)
         console.log('url', removedSiteAndDomain)
-        return removedSiteAndDomain[0]
+        if (removedSiteAndDomain) {
+            return removedSiteAndDomain[0]
+        } else {
+            return ''
+        }
     } else {
         return url
     }
 }
 
-export const stripImageFolders = (file) => {
+export const stripImageFolders = (file: string) => {
     const result = file.substring(file.lastIndexOf('/') + 1)
     return result
 }
 
-export const createContactForm = (formTitle, email) => {
+export const createContactForm = (formTitle: string, email: string) => {
     const contactFormData = {
         formTitle: formTitle || 'Contact Us Today',
         formService: 'webhook',
@@ -193,14 +198,14 @@ export const createContactForm = (formTitle, email) => {
     return contactFormData
 }
 
-export function transformcontact(contactInfo) {
+export function transformcontact(contactInfo: Contact) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
         location: ['fas', 'location-pin'],
     }
 
-    const newAdd = contactInfo.address.street.replaceAll(' ', '+')
+    const newAdd = contactInfo.address.street?.replaceAll(' ', '+')
 
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
 
@@ -242,18 +247,18 @@ export function transformcontact(contactInfo) {
         cName: 'map',
         link: mapLink,
         icon: icons.location,
-        content: contactInfo.address.name,
+        content: contactInfo.address.name || '',
         active: contactInfo.address.street ? true : false,
     }
 
     multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)
 
-    contactInfo = { ...contactInfo, contactLinks: contactLinks, showContactBox: multiPhones }
+    contactInfo = { ...contactInfo, address: { ...contactInfo.address, url: mapLink }, contactLinks: contactLinks, showContactBox: multiPhones }
 
     return contactInfo
 }
 
-export const transformNav = (menu, siteUrl) => {
+export const transformNav = (menu: CMSNavItem[], siteUrl: string) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
         //loop through first submenu
@@ -273,7 +278,7 @@ export const transformNav = (menu, siteUrl) => {
                             menu[i].submenu[x].submenu[k] = {
                                 ...subMenu2,
                                 slug: subSlug2.toLowerCase(),
-                                url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x].submenu[k].url, siteUrl) : '',
+                                url: menu[i].submenu[x].submenu[k].url ? stripSiteAndUrl(menu[i].submenu[x]?.submenu[k].url, siteUrl) : '',
                             }
                         }
                     }
@@ -287,7 +292,7 @@ export const transformNav = (menu, siteUrl) => {
     return determineNavParent(menu)
 }
 
-export const determineNavParent = (menu) => {
+export const determineNavParent = (menu: CMSNavItem[]) => {
     let editTable = []
     for (let i = 0; i < menu.length; i++) {
         //create table of items that have parent
@@ -304,7 +309,7 @@ export const determineNavParent = (menu) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
+export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number) => {
     const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
 
     const singleButton = isOneButton(currentItem)
@@ -316,7 +321,7 @@ export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
 
     const visibleButton = linkAndBtn(currentItem)
 
-    const determineBtnSize = (btnSize, modType, columns) => {
+    const determineBtnSize = (btnSize: string, modType: string, columns: number) => {
         if (btnSize?.includes('lg') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
             return 'btn_lg'
         } else if (btnSize?.includes('xl') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
@@ -341,7 +346,7 @@ export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             label: currentItem.actionlbl,
             active: currentItem.actionlbl && (currentItem.pagelink || currentItem.weblink) ? true : false,
             btnType: currentItem.btnType ? currentItem.btnType : isPromoButton(currentItem, modType, 1),
-            btnSize: determineBtnSize(currentItem.btnSize, modType, columns),
+            btnSize: determineBtnSize(currentItem.btnSize || '', modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
             blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
         },
@@ -353,7 +358,7 @@ export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
             label: currentItem.actionlbl2,
             active: currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2) ? true : false,
             btnType: currentItem.btnType2 ? currentItem.btnType2 : isPromoButton(currentItem, modType, 2),
-            btnSize: determineBtnSize(currentItem.btnSize2, modType, columns),
+            btnSize: determineBtnSize(currentItem.btnSize2 || '', modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
             blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
         },
@@ -362,7 +367,15 @@ export const createLinkAndButtonVariables = (currentItem, modType, columns) => {
     return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
 }
 
-export const createBtnStyles = (value, modType, key, themeStyles, currentItem, itemCount, isFeatureButton) => {
+export const createBtnStyles = (
+    value: LunaModule,
+    modType: string,
+    key: string,
+    themeStyles: ThemeStyles,
+    currentItem: LunaModuleItem,
+    itemCount: number,
+    isFeatureButton?: boolean
+) => {
     let btnStyles
 
     btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
@@ -394,7 +407,7 @@ export const createBtnStyles = (value, modType, key, themeStyles, currentItem, i
     return btnStyles
 }
 
-export const createImageSizes = (modType, columns) => {
+export const createImageSizes = (modType: string, columns: number) => {
     if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
         return '100vw'
         //return 'large'
@@ -410,7 +423,7 @@ export const createImageSizes = (modType, columns) => {
     }
 }
 
-export function isButton(item) {
+export function isButton(item: LunaModuleItem) {
     if (item.actionlbl || item.actionlbl2) {
         return true
     } else {
@@ -418,7 +431,7 @@ export function isButton(item) {
     }
 }
 
-export function isLink(item) {
+export function isLink(item: LunaModuleItem) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2) {
         return true
     } else {
@@ -426,7 +439,7 @@ export function isLink(item) {
     }
 }
 
-export function isOneButton(currentItem) {
+export function isOneButton(currentItem: LunaModuleItem) {
     if (
         (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
         (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
@@ -437,7 +450,7 @@ export function isOneButton(currentItem) {
     }
 }
 
-export function isTwoButtons(currentItem) {
+export function isTwoButtons(currentItem: LunaModuleItem) {
     if (currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink) && (currentItem.pagelink2 || currentItem.weblink2)) {
         return true
     } else {
@@ -445,7 +458,7 @@ export function isTwoButtons(currentItem) {
     }
 }
 
-export function linkAndBtn(currentItem) {
+export function linkAndBtn(currentItem: LunaModuleItem) {
     if (
         (currentItem.actionlbl && currentItem.pagelink) ||
         (currentItem.actionlbl && currentItem.weblink) ||
@@ -458,7 +471,7 @@ export function linkAndBtn(currentItem) {
     }
 }
 
-export function isGridCaption(item) {
+export function isGridCaption(item: LunaModuleItem) {
     if (item.pagelink || item.pagelink2 || item.weblink || item.weblink2 || item.headline || item.subheader) {
         return true
     } else {
@@ -466,7 +479,7 @@ export function isGridCaption(item) {
     }
 }
 
-export const createGallerySettings = (settings, blockSwitch1, type) => {
+export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: string | number, type: string) => {
     //convert to numbers
     const schemaNum = z.coerce.number()
     const interval = schemaNum.parse(settings.interval) * 1000
@@ -486,7 +499,7 @@ export const createGallerySettings = (settings, blockSwitch1, type) => {
     return newSettings
 }
 
-export const alternatePromoColors = (items, themeStyles, well) => {
+export const alternatePromoColors = (items: LunaModuleItem[], themeStyles: ThemeStyles, well: string) => {
     const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--prom5)']).flat()
 
     const textureImageList = Array(items.length)
@@ -527,17 +540,17 @@ export const alternatePromoColors = (items, themeStyles, well) => {
     return items
 }
 
-export const isPromoButton = (items, modType, btnNum) => {
-    if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 1) {
+export const isPromoButton = (item: LunaModuleItem, modType: string, btnNum: number) => {
+    if ((modType === 'Parallax' || modType === 'Banner') && item.modColor1 && btnNum === 1) {
         return 'btn_override'
-    } else if ((modType === 'Parallax' || modType === 'Banner') && items.modColor1 && btnNum === 2) {
+    } else if ((modType === 'Parallax' || modType === 'Banner') && item.modColor1 && btnNum === 2) {
         return 'btn2_override'
     } else if (
         btnNum === 1 &&
-        ((modType === 'PhotoGrid' && !items.image) || (modType === 'Parallax' && !items.image) || (modType === 'PhotoGallery' && !items.image))
+        ((modType === 'PhotoGrid' && !item.image) || (modType === 'Parallax' && !item.image) || (modType === 'PhotoGallery' && !item.image))
     ) {
         return 'btn_promo'
-    } else if (btnNum === 1 && modType === 'Banner' && !items.image) {
+    } else if (btnNum === 1 && modType === 'Banner' && !item.image) {
         /*  else if (btnNum === 1 && ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1))) {
         return 'btn_override'
     } */
@@ -549,7 +562,7 @@ export const isPromoButton = (items, modType, btnNum) => {
     }
 }
 
-export const createItemStyles = (items, well, modType, type) => {
+export const createItemStyles = (items: LunaModuleItem[], well: string, modType: string, type: string) => {
     for (let i = 0; i < items.length; i++) {
         let itemStyle
         let captionStyle
@@ -563,7 +576,7 @@ export const createItemStyles = (items, well, modType, type) => {
                 itemStyle = { background: `${currentItem.modColor1}` }
             } else if (well === '1' && !currentItem.image) {
                 itemStyle = {
-                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage.gradientColors[0]}, ${currentItem.textureImage.gradientColors[1]})`,
+                    backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
             } else if (!currentItem.image) {
                 itemStyle = { background: `${currentItem.promoColor}` }
@@ -598,7 +611,7 @@ export const createItemStyles = (items, well, modType, type) => {
     return items
 }
 
-export const setColors = (cmsColors, cmsTheme) => {
+export const setColors = (cmsColors: any, cmsTheme: string) => {
     if (cmsTheme === 'beacon-theme_charlotte') {
         return {
             logoColor: cmsColors.color_1.value,
@@ -665,7 +678,7 @@ export const setColors = (cmsColors, cmsTheme) => {
     }
 }
 
-export const getColumnsCssClass = (page) => {
+export const getColumnsCssClass = (page: CMSPage) => {
     if (page.sections[1].wide == '938' || page.sections[1].wide == '988') {
         return 'full-column'
     } else if (page.sections[1].wide == '484' && page.sections[2].wide == '484') {
@@ -691,7 +704,7 @@ export const getColumnsCssClass = (page) => {
     }
 }
 
-export const createFontCss = (fonts) => {
+export const createFontCss = (fonts: any) => {
     let fontImportGroup
     let fontClasses
 
@@ -714,7 +727,7 @@ export const createFontCss = (fonts) => {
     return { fontImportGroup, fontClasses }
 }
 
-export const createColorClasses = (themeStyles) => {
+export const createColorClasses = (themeStyles: ThemeStyles) => {
     const colorVars = `
     :root {
         --logo: ${themeStyles['logoColor']};
@@ -816,15 +829,23 @@ export const createColorClasses = (themeStyles) => {
     return colorStyles
 }
 
+export async function getAddressCoords(address: any) {
+    const url = `https://nominatim.openstreetmap.org/search?street=${address.street}&city=${address.city}&state=${address.state}&postalcode${address.zip}&format=json`
+    const resCoords = await fetch(encodeURI(url))
+    const coords = await resCoords.json()
+
+    return { lat: coords[0].lat, long: coords[0].lon }
+}
+
 //reuseables
-export const removeDuplicatesArray = (arr) => {
+export const removeDuplicatesArray = (arr: any[]) => {
     let uniqueArr = arr.filter((c, index) => {
         return arr.indexOf(c) === index
     })
     return uniqueArr
 }
 
-export const convertSpecialTokens = (str) => {
+export const convertSpecialTokens = (str: string) => {
     const removedBreak = str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
     const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
@@ -832,9 +853,14 @@ export const convertSpecialTokens = (str) => {
     return removedParenthesis
 }
 
-export const replaceKey = (value, oldKey, newKey) => {
+const oldObj = {
+    className: 'test',
+}
+
+export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: string) => {
     if (oldKey !== newKey && value[oldKey]) {
-        Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
+        value[newKey] = value[oldKey]
+        //Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
         delete value[oldKey]
     }
     return { ...value }

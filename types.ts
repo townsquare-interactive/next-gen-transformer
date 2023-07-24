@@ -69,17 +69,17 @@ interface Item {
     pagelink?: string
     weblink?: string
     actionlbl?: string
-    newwindow?: string
+    newwindow?: string | number
     pagelink2?: string
     weblink2?: string
     actionlbl2?: string
-    newwindow2?: string
+    newwindow2?: string | number
     align?: string
     isFeatured: string
     isPlugin?: string
     headerTag: string
     plugin?: string
-    disabled: string
+    disabled: boolean | string
     pagelinkId?: string
     pagelink2Id?: string
     buttonList: Button[]
@@ -181,9 +181,9 @@ interface Slot {
     image_link: string
 }
 
-interface Contact {
-    email: Email[]
-    hours: {
+export interface Contact {
+    email: any
+    hours?: {
         friday: string
         monday: string
         sunday: string
@@ -196,36 +196,48 @@ interface Contact {
     address: {
         zip: string
         city: string
-        name: string
+        name?: string
         state: string
         street: string
-        street2: string
+        street2?: string
+        coordinates?: string[]
+        url?: string
     }
-    hideZip: boolean
-    advanced: {
+    hideZip?: boolean
+    advanced?: {
         lat: string
         long: string
     }
-    disabled: string
-    hideCity: boolean
-    hideState: boolean
-    isPrimary: boolean
-    hideAddress: boolean
-    displayInMap: boolean
-    hideAddress2: boolean
-    displayInFooter: boolean
-    contactLinks: ContactLink[]
-    showContactBox: boolean
+    disabled?: boolean | string
+    hideCity?: boolean
+    hideState?: boolean
+    isPrimary?: boolean
+    hideAddress?: boolean
+    displayInMap?: boolean
+    hideAddress2?: boolean
+    displayInFooter?: boolean
+    contactLinks?: ContactLink[]
+    showContactBox?: boolean
 }
 
-interface Email {
+export interface Attributes {
+    city: string
+    zip: string
+    state: string
+    streetAddress: string
+    phone: Phone[]
+    email: Email[]
+    name?: string
+}
+
+export interface Email {
     name: string
     email: string
     disabled: string
     isPrimaryEmail: boolean
 }
 
-interface Phone {
+export interface Phone {
     name: string
     number: string
     disabled: string
@@ -388,62 +400,7 @@ export interface Layout {
         url: string
         icon: [string, string]
     }[]
-    contact: {
-        email: {
-            name: string
-            email: string
-            disabled: string
-            isPrimaryEmail: boolean
-        }[]
-        hours: {
-            friday: string
-            monday: string
-            sunday: string
-            tuesday: string
-            saturday: string
-            thursday: string
-            wednesday: string
-        }
-        phone: {
-            name: string
-            number: string
-            disabled: string
-            isPrimaryPhone: boolean
-        }[]
-        address: {
-            zip: string
-            city: string
-            name: string
-            state: string
-            street: string
-            street2: string
-        }
-        hideZip: boolean
-        advanced: {
-            lat: string
-            long: string
-        }
-        disabled: string
-        hideCity: boolean
-        hideState: boolean
-        isPrimary: boolean
-        hideAddress: boolean
-        displayInMap: boolean
-        hideAddress2: boolean
-        displayInFooter: boolean
-        selectedPrimaryEmailLabel: string
-        selectedPrimaryPhoneLabel: string
-        selectedPrimaryPhoneNumber: string
-        selectedPrimaryEmailAddress: string
-        contactLinks: {
-            cName: string
-            link: string
-            icon: [string, string]
-            content: string
-            active: boolean
-        }[]
-        showContactBox: boolean
-    }
+    contact: Contact
     siteName: string
     phoneNumber: string
     email: string
@@ -466,41 +423,7 @@ export interface Layout {
             sections: null
         }
     }
-    cmsNav: {
-        ID: number
-        menu_list_id: number
-        title: string
-        post_type: string
-        type: string | null
-        menu_item_parent: number | string
-        object_id: number
-        object: string
-        target: null
-        classes: null
-        menu_order: number
-        mi_url: null
-        url: string
-        disabled: boolean
-        submenu: {
-            ID: number
-            menu_list_id: number
-            title: string
-            post_type: string
-            type: string
-            menu_item_parent: number
-            object_id: number
-            object: string
-            target: null
-            classes: null
-            menu_order: number
-            mi_url: null
-            url: string
-            disabled: boolean
-            submenu: never[]
-            slug: string
-        }[]
-        slug: string
-    }[]
+    cmsNav: CMSNavItem[]
     seo: {
         global: {
             aiosp_page_title_format: string
@@ -523,6 +446,42 @@ export interface Layout {
         zapierUrl: string
         makeUrl: string
     }
+}
+
+export interface CMSNavItem {
+    ID: number
+    menu_list_id: number
+    title: string
+    post_type: string
+    type: string | null
+    menu_item_parent: number | string
+    object_id: number
+    object: string
+    target: null
+    classes: null
+    menu_order: number
+    mi_url: null
+    url: string
+    disabled: boolean | string
+    slug: string
+    submenu: {
+        ID: number
+        menu_list_id: number
+        title: string
+        post_type: string
+        type: string
+        menu_item_parent: number
+        object_id: number
+        object?: string
+        target?: string
+        classes?: string
+        menu_order: number
+        mi_url?: string
+        url: string
+        disabled?: boolean
+        submenu: any[]
+        slug: string
+    }[]
 }
 
 export interface CMSPage {
@@ -557,35 +516,52 @@ export interface CMSPage {
     page_type: string
     url: string
     id: string
+    sections: Section[]
 }
 
 export interface LunaModuleItem {
-    id: string
-    desc: string
-    image: string
-    plugin: string
-    weblink: string
-    disabled: string
-    headline: string
-    isPlugin: string
-    pagelink: string
-    actionlbl: string
-    headerTag: string
-    imageSize: any
-    newwindow: string
-    pagelink2: string
-    subheader: string
-    isFeatured: string
-    pagelinkId: string
-    pagelink2Id: string
+    id: string | number
+    desc?: string
+    image?: string
+    plugin?: string
+    weblink?: string
+    weblink2?: string
+    disabled?: string | boolean
+    headline?: string
+    isPlugin?: boolean
+    pagelink?: string
+    actionlbl?: string | number
+    actionlbl2?: string
+    headerTag?: string
+    imageSize?: any
+    newwindow?: string | number
+    newwindow2?: string | number
+    pagelink2?: string
+    subheader?: string
+    isFeatured?: string | boolean
+    pagelinkId?: string
+    pagelink2Id?: string
+    icon?: string
+    icon2?: string
+    btnType?: string
+    btnSize?: string
+    btnType2?: string
+    btnSize2?: string
+    promoColor?: string
+    modColor1?: string
+    textureImage?: { gradientColors: string[] }
+    modOpacity?: number
+    itemStyle?: {}
+    captionStyle?: any
 }
 
 export interface LunaModuleSettings {
     effect: string
-    autoplay: string
+    autoplay: string | number
     interval: string
-    pauseonhover: string
+    pauseonhover: string | number
     restartdelay: string
+    animation: string
 }
 
 export interface LunaModule {
@@ -595,13 +571,13 @@ export interface LunaModule {
     well: string
     align: string
     class: string
-    items: ModuleItem[]
+    items: ModuleItem[] | LunaModuleItem[]
     title: string
     export: number
     columns: string
     imgsize: string
     lightbox: string
-    settings: LunaModuleSettings
+    settings: CarouselSettings
     blockSwitch1: number
     scale_to_fit: string
 }
@@ -628,17 +604,17 @@ export interface Request {
     entry: Entry
 }
 
-export interface ModuleItem {
-    id: number
+export interface ModuleItem extends LunaModuleItem {
+    id: number | string
     headline?: string
     desc?: string
     align?: string
     headerTagH1?: boolean
-    isFeatured?: boolean
-    disabled?: boolean
+    isFeatured?: string | boolean
+    disabled?: boolean | string
     headSize?: string
     descSize?: string
-    subheader?: null | string
+    subheader?: string
     //image?: { alternativeText: string; url: string; caption: string }[]
     image?: any
     buttons?: {
@@ -686,7 +662,7 @@ export interface CurrentModule {
     imgsize: string
     columns?: string | number
     title?: string
-    disabled: boolean
+    disabled: boolean | string
     useAnchor: boolean
     items: ModuleItem[]
     formTitle?: string
@@ -705,12 +681,14 @@ export interface CurrentModule {
     componentType?: string
 }
 export interface CarouselSettings {
-    autoplay: boolean
-    pauseOnHover: boolean
-    effect: string
-    animation: string
-    interval: number
-    restartDelay: number
+    autoplay?: number | string | boolean
+    pauseonhover?: number | string | boolean
+    pauseOnHover?: number | string | boolean
+    effect?: string
+    animation?: string
+    interval?: number
     halfSize?: boolean
-    mobileResize: boolean
+    mobileResize?: boolean
+    restartdelay?: number
+    restartDelay?: number
 }

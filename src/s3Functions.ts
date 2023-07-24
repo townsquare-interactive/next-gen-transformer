@@ -155,13 +155,3 @@ export const getCssFile = async (pageSlug: string, basePath: string) => {
     }
     return cssFile
 }
-
-/* export default {
-    addMultipleS3,
-    addFileS3,
-    addAssetFromSiteToS3,
-    getFileS3,
-    getCssFile,
-    addFileS3List,
-    deleteFileS3,
-} */

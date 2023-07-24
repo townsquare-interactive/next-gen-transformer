@@ -12,9 +12,9 @@ import {
     setDefaultColors,
     createContactInfo,
 } from '../strapi-utils.js'
-import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
+import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss, replaceKey, getAddressCoords } from '../utils.js'
 import z from 'zod'
-import { Request } from '../../types.js'
+import { Contact, Request, Email, Phone } from '../../types.js'
 
 const schemaNum = z.coerce.number()
 const dbUrl = 'http://127.0.0.1:1337'
@@ -32,7 +32,6 @@ export const transformStrapi = async (req: Request) => {
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
         const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
         const pageSeo = req.entry.seo || ''
-
         let anchorTags = []
 
         //if saved type is a page
@@ -66,7 +65,7 @@ export const transformStrapi = async (req: Request) => {
 
                 //transform Photo Gallery Settings
                 if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && currentModule.settings) {
-                    req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1, currentModule.type)
+                    req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1 || '', currentModule.type || '')
                 }
 
                 //add contactFormData in form object
@@ -81,6 +80,13 @@ export const transformStrapi = async (req: Request) => {
                         link: `#id_${currentModule.id}`,
                     })
                 }
+
+                //key test
+                const newObj = {
+                    name: 'josh',
+                }
+
+                replaceKey(newObj, 'name', 'newName')
 
                 /*------------------- End Mod Transforms -------------------------*/
 
@@ -144,7 +150,7 @@ export const transformStrapi = async (req: Request) => {
                     }
                 }
 
-                //fully transformed module
+                //fully transformed page
                 newPages.push({
                     attributes: {
                         ...req.entry.Body[i],
@@ -215,12 +221,16 @@ export const transformStrapi = async (req: Request) => {
             cmsColors = setDefaultColors()
         }
 
-        let contactInfo = createContactInfo(layout.data.attributes, siteIdentifier)
+        //const coords = await getAddressCoords(addy)
+        //console.log(coords)
+
+        let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = transformcontact(contactInfo)
+        console.log('contact info,', contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
 
         //----------------------global styles ---------------------------------
-        const siteCustomCss = ''
+        const siteCustomCss = { CSS: '' }
         let currentPageList = ''
 
         //fonts
@@ -239,7 +249,6 @@ export const transformStrapi = async (req: Request) => {
                 cmsNav: newNav,
                 logos: {
                     footer: {
-                        pct: null,
                         slots: [
                             {
                                 markup: '',
@@ -261,7 +270,7 @@ export const transformStrapi = async (req: Request) => {
                             {
                                 show: 1,
                                 type: 'text',
-                                markup: '<p>Business Name</p>\n',
+                                markup: '',
                                 hasLinks: false,
                                 alignment: 'left',
                                 image_src: logo,
@@ -289,7 +298,6 @@ export const transformStrapi = async (req: Request) => {
                         activeSlots: [0],
                     },
                     mobile: {
-                        pct: null,
                         slots: [
                             {
                                 show: 0,
@@ -331,6 +339,7 @@ export const transformStrapi = async (req: Request) => {
                 s3Folder: siteIdentifier,
                 favicon: favicon,
                 fontImport: fontImportGroup,
+                //all used for forms right now
                 config: {
                     mailChimp: {
                         audId: 'd0b2dd1631',

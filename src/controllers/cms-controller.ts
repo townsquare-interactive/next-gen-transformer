@@ -445,7 +445,7 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
     return columnsData
 }
 
-export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: any, code: any, currentPageList: any, basePath: string) => {
+export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: any, code: { CSS: string }, currentPageList: any, basePath: string) => {
     console.log('global css changed --------')
 
     const { fontImportGroup, fontClasses } = createFontCss(fonts)
