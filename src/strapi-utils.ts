@@ -40,6 +40,8 @@ export const determineModRenderType = (type: string) => {
         return 'PhotoGallery'
     } else if (type === 'module.contact-form') {
         return 'ContactFormRoutes'
+    } else if (type === 'module.map-module') {
+        return 'Map'
     } else {
         return type
     }

@@ -34,6 +34,11 @@ export const transformStrapi = async (req: Request) => {
         const pageSeo = req.entry.seo || ''
         let anchorTags = []
 
+        let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
+        contactInfo = transformcontact(contactInfo)
+        console.log('contact info,', contactInfo)
+        const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
+
         //if saved type is a page
         if (req.entry.slug != null && req.entry.Body) {
             let modCount = 0
@@ -71,6 +76,10 @@ export const transformStrapi = async (req: Request) => {
                 //add contactFormData in form object
                 if (modRenderType === 'ContactFormRoutes') {
                     req.entry.Body[i] = setupContactForm(req.entry.Body[i])
+                }
+                //add contactFormData in form object
+                if (modRenderType === 'Map') {
+                    req.entry.Body[i] = { ...req.entry.Body[i], address: contactInfo.address }
                 }
 
                 //anchor tags
@@ -223,11 +232,6 @@ export const transformStrapi = async (req: Request) => {
 
         //const coords = await getAddressCoords(addy)
         //console.log(coords)
-
-        let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
-        contactInfo = transformcontact(contactInfo)
-        console.log('contact info,', contactInfo)
-        const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
 
         //----------------------global styles ---------------------------------
         const siteCustomCss = { CSS: '' }

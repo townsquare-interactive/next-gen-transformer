@@ -181,6 +181,17 @@ interface Slot {
     image_link: string
 }
 
+export interface Address {
+    zip: string
+    city: string
+    name?: string
+    state: string
+    street: string
+    street2?: string
+    coordinates?: string[]
+    url?: string
+}
+
 export interface Contact {
     email: any
     hours?: {
@@ -193,16 +204,7 @@ export interface Contact {
         wednesday: string
     }
     phone: Phone[]
-    address: {
-        zip: string
-        city: string
-        name?: string
-        state: string
-        street: string
-        street2?: string
-        coordinates?: string[]
-        url?: string
-    }
+    address: Address
     hideZip?: boolean
     advanced?: {
         lat: string
@@ -679,6 +681,7 @@ export interface CurrentModule {
     modCount?: number
     //attributes: CurrentModule
     componentType?: string
+    address?: Address
 }
 export interface CarouselSettings {
     autoplay?: number | string | boolean
