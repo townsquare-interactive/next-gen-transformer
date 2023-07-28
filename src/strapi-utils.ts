@@ -2,6 +2,7 @@ import { socialConvert, createContactForm, createLinkAndButtonVariables, getAddr
 import { CurrentModule, Email, ModuleItem, Phone } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
+    console.log('running strapi transformmmm--------------------------------')
     //nav
     //check for s3 cmsNav / check if page is already there
     let newNav = []

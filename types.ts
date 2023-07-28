@@ -682,6 +682,13 @@ export interface CurrentModule {
     //attributes: CurrentModule
     componentType?: string
     address?: Address
+    anchorLink?: string
+    extraSettings?: {
+        border: boolean
+        lazyload: boolean
+        imgsize: string
+        columns?: string | number
+    }
 }
 export interface CarouselSettings {
     autoplay?: number | string | boolean

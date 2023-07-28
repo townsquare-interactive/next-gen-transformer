@@ -12,19 +12,24 @@ import {
     setDefaultColors,
     createContactInfo,
 } from '../strapi-utils.js'
-import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss, replaceKey, getAddressCoords } from '../utils.js'
+import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
+import { getFileS3 } from '../s3Functions.js'
 import z from 'zod'
-import { Contact, Request, Email, Phone } from '../../types.js'
+import { Contact, Request } from '../../types.js'
 
 const schemaNum = z.coerce.number()
 const dbUrl = 'http://127.0.0.1:1337'
 
 export const transformStrapi = async (req: Request) => {
-    console.log('request', req)
     let pagesList = []
+
     try {
-        const [resLayout, resNav] = await Promise.all([fetch(`${dbUrl}/api/site-data?populate=deep`), fetch(`${dbUrl}/api/navigation/render/1?locale=fr`)])
-        const [layout, nav] = await Promise.all([resLayout.json(), resNav.json()])
+        const [resLayout, resNav, resPages] = await Promise.all([
+            fetch(`${dbUrl}/api/site-data?populate=deep`),
+            fetch(`${dbUrl}/api/navigation/render/1?locale=fr`),
+            fetch(`${dbUrl}/api/pages?populate=deep`),
+        ])
+        const [layout, nav, pages] = await Promise.all([resLayout.json(), resNav.json(), resPages.json()])
 
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let newNav
@@ -36,8 +41,24 @@ export const transformStrapi = async (req: Request) => {
 
         let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = transformcontact(contactInfo)
-        console.log('contact info,', contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
+
+        //get nav object
+        const currentLayoutS3 = await getFileS3(`${siteIdentifier}/layout.json`)
+
+        if (currentLayoutS3.cmsNav) {
+            console.log('we have a nav', currentLayoutS3.cmsNav)
+        } else {
+            currentLayoutS3.cmsNav = []
+        }
+        console.log('nav plugin', nav)
+        console.log('is single page', layout.data?.attributes.singlePageSite)
+
+        //maybe add check to see if nav option is saved then do this
+        newNav = layout.data?.attributes.singlePageSite ? currentLayoutS3.cmsNav : transformStrapiNav(nav)
+        console.log('transssss----- nav', newNav)
+
+        // console.log('cms pages', pages.data[0].attributes)
 
         //if saved type is a page
         if (req.entry.slug != null && req.entry.Body) {
@@ -49,14 +70,16 @@ export const transformStrapi = async (req: Request) => {
                 const currentModule = req.entry.Body[i]
                 const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
                 const modRenderType = determineModRenderType(currentModule.__component)
-                const imgsize = currentModule.imgsize || 'square_1_1'
-                const imagePriority = currentModule.lazyload
+
+                const imgsize = currentModule.extraSettings?.imgsize || currentModule.imgsize || 'landscape_16_9'
+                const imagePriority = currentModule.extraSettings?.lazyload || currentModule.lazyload || true
                 currentModule.columns = currentModule.columns === null ? 1 : currentModule.columns
                 const columns = convertColumns(currentModule.columns)
+                const border = currentModule.extraSettings?.border || currentModule.border || false
+
+                const well = border === true ? '1' : ''
 
                 /*------------------- Mod Transforms -------------------------*/
-
-                const well = currentModule.border === true ? '1' : ''
 
                 //create alternating promo colors
                 if (
@@ -84,18 +107,21 @@ export const transformStrapi = async (req: Request) => {
 
                 //anchor tags
                 if (req.entry.Body[i].title && req.entry.Body[i].useAnchor === true) {
+                    const anchorLink = req.entry.Body[i].title + `_${currentModule.id}`
+
                     anchorTags.push({
-                        name: req.entry.Body[i].title,
-                        link: `#id_${currentModule.id}`,
+                        title: req.entry.Body[i].title,
+                        url: '#' + anchorLink,
+                        menu_item_parent: 0,
                     })
-                }
+                    req.entry.Body[i].anchorLink = anchorLink
 
-                //key test
-                const newObj = {
-                    name: 'josh',
-                }
+                    //need to also create cmsnav for this if OnePage?
 
-                replaceKey(newObj, 'name', 'newName')
+                    if (layout.data?.attributes.singlePageSite === true) {
+                        newNav = anchorTags
+                    }
+                }
 
                 /*------------------- End Mod Transforms -------------------------*/
 
@@ -221,9 +247,6 @@ export const transformStrapi = async (req: Request) => {
 
             pagesList.push(newPage)
         }
-
-        //maybe add check to see if nav option is saved then do this
-        newNav = transformStrapiNav(nav)
 
         //set default colors if none exist
         if (!cmsColors) {
