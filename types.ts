@@ -555,6 +555,7 @@ export interface LunaModuleItem {
     modOpacity?: number
     itemStyle?: {}
     captionStyle?: any
+    extraItemSettings?: extraItemSettings
 }
 
 export interface LunaModuleSettings {
@@ -702,3 +703,13 @@ export interface CarouselSettings {
     restartdelay?: number
     restartDelay?: number
 }
+
+export interface extraItemSettings {
+    headSize?: string
+    descSize?: string
+    isFeatured?: string
+    headerTagH1?: boolean
+    disabled?: boolean
+}
+
+export type anchorTags = { title?: string; url?: string; menu_item_parent?: number }[]

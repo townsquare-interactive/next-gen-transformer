@@ -11,11 +11,13 @@ import {
     createStrapiButtonVars,
     setDefaultColors,
     createContactInfo,
+    addItemExtraSettings,
+    createAnchorLinksArr,
 } from '../strapi-utils.js'
 import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
 import { getFileS3 } from '../s3Functions.js'
 import z from 'zod'
-import { Contact, Request } from '../../types.js'
+import { Contact, Request, anchorTags } from '../../types.js'
 
 const schemaNum = z.coerce.number()
 const dbUrl = 'http://127.0.0.1:1337'
@@ -37,7 +39,7 @@ export const transformStrapi = async (req: Request) => {
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
         const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
         const pageSeo = req.entry.seo || ''
-        let anchorTags = []
+        let anchorTags: anchorTags = []
 
         let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = transformcontact(contactInfo)
@@ -46,19 +48,38 @@ export const transformStrapi = async (req: Request) => {
         //get nav object
         const currentLayoutS3 = await getFileS3(`${siteIdentifier}/layout.json`)
 
-        if (currentLayoutS3.cmsNav) {
-            console.log('we have a nav', currentLayoutS3.cmsNav)
-        } else {
+        if (!currentLayoutS3.cmsNav) {
             currentLayoutS3.cmsNav = []
         }
-        console.log('nav plugin', nav)
-        console.log('is single page', layout.data?.attributes.singlePageSite)
 
         //maybe add check to see if nav option is saved then do this
         newNav = layout.data?.attributes.singlePageSite ? currentLayoutS3.cmsNav : transformStrapiNav(nav)
-        console.log('transssss----- nav', newNav)
 
-        // console.log('cms pages', pages.data[0].attributes)
+        //Create anchor link nav
+        if (layout.data?.attributes.singlePageSite === true) {
+            for (const p in pages.data) {
+                console.log('attributes', pages.data[p].attributes)
+                if (pages.data[p].attributes.homePage === true) {
+                    console.log('running aanchor thing')
+                    for (const j in pages.data[p].attributes.Body) {
+                        const firstPageMods = pages.data[p].attributes.Body
+                        if (firstPageMods[j].title && firstPageMods[j].useAnchor === true) {
+                            const { anchorLink, transformedAnchorTags } = createAnchorLinksArr(firstPageMods[j], anchorTags)
+
+                            anchorTags = transformedAnchorTags
+                            newNav = anchorTags
+
+                            if (req.entry.slug != null && req.entry.Body) {
+                                if (req.entry.Body.length != 0) {
+                                    req.entry.Body[j].anchorLink = anchorLink
+                                }
+                                //}
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         //if saved type is a page
         if (req.entry.slug != null && req.entry.Body) {
@@ -78,6 +99,9 @@ export const transformStrapi = async (req: Request) => {
                 const border = currentModule.extraSettings?.border || currentModule.border || false
 
                 const well = border === true ? '1' : ''
+
+                // req.entry.Body[i].anchorLink = anchorLinks[i][req.entry.Body[i].id] ? anchorLinks[i][req.entry.Body[i].id].link : ''
+                //filter array to see if modId matches num
 
                 /*------------------- Mod Transforms -------------------------*/
 
@@ -105,24 +129,6 @@ export const transformStrapi = async (req: Request) => {
                     req.entry.Body[i] = { ...req.entry.Body[i], address: contactInfo.address }
                 }
 
-                //anchor tags
-                if (req.entry.Body[i].title && req.entry.Body[i].useAnchor === true) {
-                    const anchorLink = req.entry.Body[i].title + `_${currentModule.id}`
-
-                    anchorTags.push({
-                        title: req.entry.Body[i].title,
-                        url: '#' + anchorLink,
-                        menu_item_parent: 0,
-                    })
-                    req.entry.Body[i].anchorLink = anchorLink
-
-                    //need to also create cmsnav for this if OnePage?
-
-                    if (layout.data?.attributes.singlePageSite === true) {
-                        newNav = anchorTags
-                    }
-                }
-
                 /*------------------- End Mod Transforms -------------------------*/
 
                 //loop through items
@@ -131,6 +137,11 @@ export const transformStrapi = async (req: Request) => {
                     for (const t in currentModule.items) {
                         const currentItem = currentModule.items[t]
                         itemCount += 1
+
+                        //converting extra settings
+                        if (currentModule.items[t].extraItemSettings) {
+                            req.entry.Body[i].items[t] = addItemExtraSettings(req.entry.Body[i].items[t])
+                        }
 
                         if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
                             req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modSwitch1: 1 }
@@ -192,7 +203,6 @@ export const transformStrapi = async (req: Request) => {
                         type: componentType,
                         imgsize: imgsize,
                         modId: currentModule.id,
-                        //disabled: disabled,
                         imagePriority: imagePriority,
                         columns: columns,
                         well: well,
@@ -252,9 +262,6 @@ export const transformStrapi = async (req: Request) => {
         if (!cmsColors) {
             cmsColors = setDefaultColors()
         }
-
-        //const coords = await getAddressCoords(addy)
-        //console.log(coords)
 
         //----------------------global styles ---------------------------------
         const siteCustomCss = { CSS: '' }

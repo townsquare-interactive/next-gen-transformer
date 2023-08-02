@@ -1,5 +1,5 @@
 import { socialConvert, createContactForm, createLinkAndButtonVariables, getAddressCoords } from './utils.js'
-import { CurrentModule, Email, ModuleItem, Phone } from '../types.js'
+import { CurrentModule, Email, ModuleItem, Phone, anchorTags } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
     console.log('running strapi transformmmm--------------------------------')
@@ -882,6 +882,46 @@ export const createContactInfo = async (
     }
 
     return contactInfo
+}
+
+export const addItemExtraSettings = (item: ModuleItem) => {
+    const itemExtraSettings = item.extraItemSettings
+    const headSize = itemExtraSettings?.headSize ? itemExtraSettings.headSize : 'MD'
+    const descSize = itemExtraSettings?.descSize ? itemExtraSettings.descSize : 'MD'
+    const isFeatured = itemExtraSettings?.isFeatured ? itemExtraSettings.isFeatured : false
+    const headerTagH1 = itemExtraSettings?.headerTagH1 ? itemExtraSettings.headerTagH1 : false
+    const disabled = itemExtraSettings?.disabled ? itemExtraSettings.disabled : false
+
+    return {
+        ...item,
+        headSize: headSize,
+        descSize: descSize,
+        isFeatured: isFeatured,
+        headerTagH1: headerTagH1,
+        disabled: disabled,
+    }
+}
+
+export const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => {
+    let anchorLink = module.title?.replace(' ', '-') || ''
+
+    //console.log('uri', encodeURI(anchorLink))
+
+    let anchorItem = {
+        title: module.title,
+        url: '#' + anchorLink,
+        menu_item_parent: 0,
+    }
+
+    //if duplicate url, add modId to url
+    if (anchorTags.filter((e) => e.url === anchorItem.url).length > 0) {
+        anchorLink = anchorLink + `_${module.id}`
+        anchorItem.url = anchorItem.url + `_${module.id}`
+    }
+
+    anchorTags.push(anchorItem)
+
+    return { anchorLink: anchorLink, transformedAnchorTags: anchorTags }
 }
 
 /* tires 743.67 dry routing / 

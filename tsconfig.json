@@ -12,7 +12,9 @@
         "noImplicitAny": true,
         "useUnknownInCatchVariables": false,
         "inlineSourceMap": true,
-        "allowJs": true
+        "allowJs": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "ignoreDeprecations": "5.0"
     },
     "ts-node": {
         "esm": true

@@ -831,10 +831,15 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
 
 export async function getAddressCoords(address: any) {
     const url = `https://nominatim.openstreetmap.org/search?street=${address.street}&city=${address.city}&state=${address.state}&postalcode${address.zip}&format=json`
-    const resCoords = await fetch(encodeURI(url))
-    const coords = await resCoords.json()
+    try {
+        const resCoords = await fetch(encodeURI(url))
+        const coords = await resCoords.json()
 
-    return { lat: coords[0].lat, long: coords[0].lon }
+        return { lat: coords[0].lat, long: coords[0].lon }
+    } catch (err) {
+        console.log(err)
+        return { lat: 0, long: 0 }
+    }
 }
 
 //reuseables

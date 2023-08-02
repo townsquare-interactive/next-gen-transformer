@@ -1,0 +1,540 @@
+{
+    "version": 2,
+    "data": {
+        "plugin::upload.file": {
+            "70": {
+                "id": 70,
+                "name": "las-vegas.png",
+                "alternativeText": null,
+                "caption": null,
+                "hash": "las_vegas_a2ba756020",
+                "ext": ".png",
+                "mime": "image/png",
+                "url": "https://townsquareinteractive.s3.amazonaws.com/strapi-images/strapi/las_vegas_a2ba756020.png",
+                "createdAt": "2023-07-12T14:40:59.040Z",
+                "updatedAt": "2023-07-28T15:15:15.554Z",
+                "createdBy": null,
+                "updatedBy": null
+            }
+        },
+        "plugin::upload.folder": {},
+        "contact.social-media": {
+            "9": {
+                "id": 9,
+                "url": "facebook.com/travel"
+            }
+        },
+        "contact.phone": {
+            "7": {
+                "id": 7,
+                "name": "Phone",
+                "number": "89322933944"
+            }
+        },
+        "colors.colors": {
+            "14": {
+                "id": 14,
+                "logoColor": "#3a87c2",
+                "headingColor": "#fff",
+                "subHeadingColor": "#fff",
+                "textColor": "#fff",
+                "linkColor": "#0f181f",
+                "linkHover": "#0f181f",
+                "btnText": "#ffbe87",
+                "btnBackground": "#0f181f",
+                "textColorAccent": "#0f181f",
+                "heroSubheadline": "#0d1d24",
+                "heroText": "#8a6301",
+                "heroBtnText": "#ff7700",
+                "heroBtnBackground": "#ff7700",
+                "heroLink": "#454545",
+                "captionText": "#fff",
+                "captionBackground": "#ff7700",
+                "NavText": "rgba(247,247,247,1)",
+                "navHover": "#3EB183",
+                "navCurrent": "#3EB183",
+                "backgroundMain": "rgba(0,0,0,.2)",
+                "bckdContent": "rgba(65,121,135,1)",
+                "headerBackground": "rgba(16,37,46,1)",
+                "BckdHeaderSocial": "#12343d",
+                "accentBackgroundColor": "#5b97a6",
+                "backgroundHero": "#ffc83d",
+                "footerBackground": "rgba(16,37,46,1)",
+                "footerText": "#dbf8ff",
+                "footerLink": "#dbf8ff",
+                "promoText": "#ffffff",
+                "promoColor": "#3eb183",
+                "promoColor2": "#00a4fc",
+                "promoColor3": "#c9b426",
+                "promoColor4": "#e02aa0",
+                "promoColor5": "#ff0000",
+                "promoColor6": "#ff0000",
+                "heroLinkHover": "#30829b"
+            }
+        },
+        "api::site-data.site-data": {
+            "7": {
+                "id": 7,
+                "siteIdentifier": "wanderlustadventures",
+                "createdAt": "2023-07-12T14:43:04.201Z",
+                "updatedAt": "2023-07-27T19:02:36.459Z",
+                "publishedAt": "2023-07-12T14:43:07.418Z",
+                "city": "Charlotte",
+                "state": "NC",
+                "streetAddress": "17035 Soho Drive",
+                "zip": "28204",
+                "email": "jodwards222@aol.com",
+                "headlineFont": "Josefin-Sans",
+                "bodyFont": "Lato",
+                "featFont": "Josefin-Sans",
+                "singlePageSite": null,
+                "logo": 70,
+                "colors": 14,
+                "phone": [7],
+                "socialMedia": [9],
+                "favicon": null,
+                "createdBy": null,
+                "updatedBy": null
+            }
+        },
+        "module.map-module": {
+            "3": {
+                "id": 3,
+                "mapTitle": "Visit Us"
+            }
+        },
+        "buttons.item-button": {},
+        "item.testimonials-item": {
+            "9": {
+                "id": 9,
+                "headline": "First Review",
+                "subheader": null,
+                "desc": "I think this place is pretty cool",
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "stars": "five",
+                "image": null,
+                "buttons": []
+            },
+            "10": {
+                "id": 10,
+                "headline": "Rick L",
+                "subheader": null,
+                "desc": "I also think this place is great and would like to come to it again..",
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "stars": "five",
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.testimonials-module": {
+            "4": {
+                "id": 4,
+                "title": "Reviews",
+                "border": false,
+                "lazyload": false,
+                "columns": "one",
+                "disabled": false,
+                "imgsize": "square_1_1",
+                "useCarousel": false,
+                "useAnchor": true,
+                "items": [9, 10]
+            }
+        },
+        "item.photogrid-item": {
+            "26": {
+                "id": 26,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            },
+            "27": {
+                "id": 27,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            },
+            "28": {
+                "id": 28,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            },
+            "29": {
+                "id": 29,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            },
+            "30": {
+                "id": 30,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            },
+            "31": {
+                "id": 31,
+                "headline": null,
+                "subheader": null,
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.photogrid-module": {
+            "5": {
+                "id": 5,
+                "title": "Gallery",
+                "border": false,
+                "lazyload": true,
+                "columns": "four",
+                "disabled": false,
+                "imgsize": "widescreen_16_9",
+                "useAnchor": true,
+                "items": [26, 27, 28, 29, 30, 31]
+            }
+        },
+        "item.photogallery-item": {},
+        "module.photogallery-module": {},
+        "item.card-item": {
+            "6": {
+                "id": 6,
+                "headline": "Start Your Adventure Today",
+                "subheader": "Locations all over the world",
+                "desc": "Discover the world's most captivating destinations with Wanderlust Adventures. Whether you yearn for the sun-kissed beaches of Bali, the awe-inspiring landscapes of the Swiss Alps, or the vibrant city life of Tokyo, we have an array of handpicked destinations to entice every traveler. Our carefully curated selection of hotels, resorts, and lodges ensures that you indulge in luxurious comfort and immerse yourself in the local charm. With our insider knowledge, we will guide you to the hidden gems and must-see attractions, providing you with an insider's perspective that goes beyond the typical tourist experience.",
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.card-module": {
+            "6": {
+                "id": 6,
+                "title": "Cards",
+                "border": false,
+                "lazyload": true,
+                "disabled": false,
+                "imgsize": "widescreen_16_9",
+                "useAnchor": true,
+                "items": [6]
+            }
+        },
+        "module.contact-form": {
+            "8": {
+                "id": 8,
+                "formTitle": "Contact Us"
+            }
+        },
+        "item.parallax-item": {
+            "9": {
+                "id": 9,
+                "headline": "ooooHello",
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": "center",
+                "subheader": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.parallax-module": {
+            "9": {
+                "id": 9,
+                "title": null,
+                "border": false,
+                "lazyload": false,
+                "imgsize": "widescreen_16_9",
+                "imageOverlay": false,
+                "items": [9]
+            }
+        },
+        "item.banner-item": {
+            "7": {
+                "id": 7,
+                "headline": "Contact us Today!",
+                "desc": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "align": null,
+                "subheader": null,
+                "headSize": null,
+                "descSize": null,
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.banner-module": {
+            "8": {
+                "id": 8,
+                "title": "Banner",
+                "border": false,
+                "lazyload": true,
+                "imgsize": "widescreen_16_9",
+                "columns": "one",
+                "disabled": false,
+                "useAnchor": true,
+                "items": [7]
+            }
+        },
+        "settings.extra-settings": {},
+        "item.article-item": {
+            "36": {
+                "id": 36,
+                "headline": null,
+                "desc": "Embark on an unforgettable journey with Wanderlust Adventures, the ultimate destination for wanderers seeking thrilling escapades and awe-inspiring experiences. With their expertly curated itineraries, Wanderlust Adventures takes you on a magical odyssey to the most exotic corners of the world. Imagine immersing yourself in the vibrant streets of Marrakech, savoring the tantalizing flavors of Moroccan cuisine, and getting lost in the enchanting maze of the medina. Or perhaps you prefer the tranquil serenity of Bali, where you can unwind amidst lush rice terraces, pamper yourself with rejuvenating spa treatments, and witness breathtaking sunsets on pristine beaches. Whatever your heart desires, Wanderlust Adventures has the perfect package for you, ensuring every moment is filled with wonder, excitement, and pure bliss. Get ready to create lifelong memories and let your wanderlust be ignited like never before!",
+                "align": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "headSize": null,
+                "descSize": null,
+                "subheader": null,
+                "image": null,
+                "buttons": []
+            },
+            "37": {
+                "id": 37,
+                "headline": null,
+                "desc": "Discover the world's most captivating destinations with Wanderlust Adventures. Whether you yearn for the sun-kissed beaches of Bali, the awe-inspiring landscapes of the Swiss Alps, or the vibrant city life of Tokyo, we have an array of handpicked destinations to entice every traveler. Our carefully curated selection of hotels, resorts, and lodges ensures that you indulge in luxurious comfort and immerse yourself in the local charm. With our insider knowledge, we will guide you to the hidden gems and must-see attractions, providing you with an insider's perspective that goes beyond the typical tourist experience.Discover the world's most captivating destinations with Wanderlust Adventures. Whether you yearn for the sun-kissed beaches of Bali, the awe-inspiring landscapes of the Swiss Alps, or the vibrant city life of Tokyo, we have an array of handpicked destinations to entice every traveler. Our carefully curated selection of hotels, resorts, and lodges ensures that you indulge in luxurious comfort and immerse yourself in the local charm. With our insider knowledge, we will guide you to the hidden gems and must-see attractions, providing you with an insider's perspective that goes beyond the typical tourist experience.Discover the world's most captivating destinations with Wanderlust Adventures. Whether you yearn for the sun-kissed beaches of Bali, the awe-inspiring landscapes of the Swiss Alps, or the vibrant city life of Tokyo, we have an array of handpicked destinations to entice every traveler. Our carefully curated selection of hotels, resorts, and lodges ensures that you indulge in luxurious comfort and immerse yourself in the local charm. With our insider knowledge, we will guide you to the hidden gems and must-see attractions, providing you with an insider's perspective that goes beyond the typical tourist experience.Discover the world's most captivating destinations with Wanderlust Adventures. Whether you yearn for the sun-kissed beaches of Bali, the awe-inspiring landscapes of the Swiss Alps, or the vibrant city life of Tokyo, we have an array of handpicked destinations to entice every traveler. Our carefully curated selection of hotels, resorts, and lodges ensures that you indulge in luxurious comfort and immerse yourself in the local charm. With our insider knowledge, we will guide you to the hidden gems and must-see attractions, providing you with an insider's perspective that goes beyond the typical tourist experience.ss",
+                "align": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "headSize": null,
+                "descSize": null,
+                "subheader": null,
+                "image": null,
+                "buttons": []
+            },
+            "38": {
+                "id": 38,
+                "headline": "Explore the Extraordinary2",
+                "desc": "Join us at Wanderlust Adventures, and let us ignite the spark of wanderlust within you. Embark on a transformative journey that will leave you with lifelong memories and a deeper understanding of the world we share. With our dedication to impeccable service and our passion for creating exceptional travel experiences, we are your trusted companion in exploring the extraordinary. Get ready to embark on the adventure of a lifetime. Let your wanderlust take flight with Wanderlust Adventures!",
+                "align": "center",
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "headSize": null,
+                "descSize": "SM",
+                "subheader": null,
+                "image": null,
+                "buttons": []
+            },
+            "39": {
+                "id": 39,
+                "headline": "Testing Page",
+                "desc": null,
+                "align": null,
+                "headerTagH1": false,
+                "isFeatured": false,
+                "disabled": false,
+                "headSize": null,
+                "descSize": null,
+                "subheader": null,
+                "image": null,
+                "buttons": []
+            }
+        },
+        "module.article-module": {
+            "30": {
+                "id": 30,
+                "columns": "one",
+                "title": null,
+                "disabled": false,
+                "useAnchor": false,
+                "items": [37],
+                "extraSettings": null
+            },
+            "31": {
+                "id": 31,
+                "columns": "one",
+                "title": "About Us",
+                "disabled": false,
+                "useAnchor": true,
+                "items": [36],
+                "extraSettings": null
+            },
+            "32": {
+                "id": 32,
+                "columns": "one",
+                "title": null,
+                "disabled": false,
+                "useAnchor": null,
+                "items": [38],
+                "extraSettings": null
+            },
+            "33": {
+                "id": 33,
+                "columns": "one",
+                "title": null,
+                "disabled": false,
+                "useAnchor": null,
+                "items": [39],
+                "extraSettings": null
+            }
+        },
+        "pagedata.seo": {
+            "8": {
+                "id": 8,
+                "title": "Wanderlust Adventures",
+                "descr": null
+            }
+        },
+        "api::page.page": {
+            "23": {
+                "id": 23,
+                "name": "Home",
+                "slug": "home",
+                "createdAt": "2023-07-12T14:46:16.837Z",
+                "updatedAt": "2023-07-27T18:44:32.209Z",
+                "publishedAt": "2023-07-12T14:47:45.623Z",
+                "homePage": true,
+                "ai": null,
+                "Body": [
+                    {
+                        "__component": "module.parallax-module",
+                        "id": 9
+                    },
+                    {
+                        "__component": "module.card-module",
+                        "id": 6
+                    },
+                    {
+                        "__component": "module.article-module",
+                        "id": 30
+                    },
+                    {
+                        "__component": "module.testimonials-module",
+                        "id": 4
+                    },
+                    {
+                        "__component": "module.article-module",
+                        "id": 31
+                    },
+                    {
+                        "__component": "module.photogrid-module",
+                        "id": 5
+                    },
+                    {
+                        "__component": "module.map-module",
+                        "id": 3
+                    },
+                    {
+                        "__component": "module.banner-module",
+                        "id": 8
+                    }
+                ],
+                "seo": 8,
+                "createdBy": null,
+                "updatedBy": null
+            },
+            "24": {
+                "id": 24,
+                "name": "Contact",
+                "slug": "contact",
+                "createdAt": "2023-07-12T14:49:03.747Z",
+                "updatedAt": "2023-07-17T21:04:03.901Z",
+                "publishedAt": "2023-07-12T14:49:55.817Z",
+                "homePage": false,
+                "ai": null,
+                "Body": [
+                    {
+                        "__component": "module.article-module",
+                        "id": 32
+                    },
+                    {
+                        "__component": "module.contact-form",
+                        "id": 8
+                    }
+                ],
+                "seo": null,
+                "createdBy": null,
+                "updatedBy": null
+            },
+            "25": {
+                "id": 25,
+                "name": "test",
+                "slug": "test",
+                "createdAt": "2023-07-12T14:59:13.386Z",
+                "updatedAt": "2023-07-12T14:59:13.386Z",
+                "publishedAt": null,
+                "homePage": false,
+                "ai": null,
+                "Body": [
+                    {
+                        "__component": "module.article-module",
+                        "id": 33
+                    }
+                ],
+                "seo": null,
+                "createdBy": null,
+                "updatedBy": null
+            }
+        }
+    }
+}
