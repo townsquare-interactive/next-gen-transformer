@@ -12,14 +12,14 @@ import {
     setDefaultColors,
     createContactInfo,
     addItemExtraSettings,
-    createAnchorLinksArr,
+    manageAnchorLinks,
 } from '../strapi-utils.js'
 import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
 import { getFileS3 } from '../s3Functions.js'
-import z from 'zod'
+//import z from 'zod'
 import { Contact, Request, anchorTags } from '../../types.js'
 
-const schemaNum = z.coerce.number()
+//const schemaNum = z.coerce.number()
 const dbUrl = 'http://127.0.0.1:1337'
 
 export const transformStrapi = async (req: Request) => {
@@ -31,16 +31,14 @@ export const transformStrapi = async (req: Request) => {
             fetch(`${dbUrl}/api/navigation/render/1?locale=fr`),
             fetch(`${dbUrl}/api/pages?populate=deep`),
         ])
-        const [layout, nav, pages] = await Promise.all([resLayout.json(), resNav.json(), resPages.json()])
-
+        const [layout, nav, pages]: any[] = await Promise.all([resLayout.json(), resNav.json(), resPages.json()])
+        //zod check these ^^ if you don't want them to be any
         const siteIdentifier = layout.data.attributes.siteIdentifier
         let newNav
         let cmsColors = layout.data.attributes.colors
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
         const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
         const pageSeo = req.entry.seo || ''
-        let anchorTags: anchorTags = []
-
         let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = transformcontact(contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
@@ -55,30 +53,14 @@ export const transformStrapi = async (req: Request) => {
         //maybe add check to see if nav option is saved then do this
         newNav = layout.data?.attributes.singlePageSite ? currentLayoutS3.cmsNav : transformStrapiNav(nav)
 
+        let modAnchorLinks: { modId: number | string; anchorLink: string }[] = []
+        let anchorTags: anchorTags = []
         //Create anchor link nav
         if (layout.data?.attributes.singlePageSite === true) {
-            for (const p in pages.data) {
-                console.log('attributes', pages.data[p].attributes)
-                if (pages.data[p].attributes.homePage === true) {
-                    console.log('running aanchor thing')
-                    for (const j in pages.data[p].attributes.Body) {
-                        const firstPageMods = pages.data[p].attributes.Body
-                        if (firstPageMods[j].title && firstPageMods[j].useAnchor === true) {
-                            const { anchorLink, transformedAnchorTags } = createAnchorLinksArr(firstPageMods[j], anchorTags)
-
-                            anchorTags = transformedAnchorTags
-                            newNav = anchorTags
-
-                            if (req.entry.slug != null && req.entry.Body) {
-                                if (req.entry.Body.length != 0) {
-                                    req.entry.Body[j].anchorLink = anchorLink
-                                }
-                                //}
-                            }
-                        }
-                    }
-                }
-            }
+            const { moddedAnchorTags, moddedNewNav, moddedModAnchorLinks } = manageAnchorLinks(pages, anchorTags, newNav, modAnchorLinks)
+            modAnchorLinks = moddedModAnchorLinks
+            anchorTags = moddedAnchorTags
+            newNav = moddedNewNav
         }
 
         //if saved type is a page
@@ -86,14 +68,22 @@ export const transformStrapi = async (req: Request) => {
             let modCount = 0
             let newPages = []
             //module loop
+
             for (const i in req.entry.Body) {
                 modCount += 1
-                const currentModule = req.entry.Body[i]
+                let currentModule = req.entry.Body[i]
                 const componentType = determineComponentType(currentModule.__component, currentModule.useCarousel || false)
                 const modRenderType = determineModRenderType(currentModule.__component)
 
                 const imgsize = currentModule.extraSettings?.imgsize || currentModule.imgsize || 'landscape_16_9'
-                const imagePriority = currentModule.extraSettings?.lazyload || currentModule.lazyload || true
+
+                const imagePriority =
+                    currentModule.extraSettings?.lazyload != null
+                        ? currentModule.extraSettings?.lazyload
+                        : currentModule.lazyload != null
+                        ? currentModule.lazyload
+                        : true
+
                 currentModule.columns = currentModule.columns === null ? 1 : currentModule.columns
                 const columns = convertColumns(currentModule.columns)
                 const border = currentModule.extraSettings?.border || currentModule.border || false
@@ -110,100 +100,107 @@ export const transformStrapi = async (req: Request) => {
                     modRenderType === 'PhotoGrid' ||
                     modRenderType === 'Banner' ||
                     modRenderType === 'Parallax' ||
-                    (modRenderType === 'PhotoGallery' && req.entry.Body[i].items)
+                    (modRenderType === 'PhotoGallery' && currentModule.items)
                 ) {
-                    req.entry.Body[i].items = alternatePromoColors(currentModule.items, cmsColors, well)
+                    currentModule.items = alternatePromoColors(currentModule.items, cmsColors, well)
                 }
 
                 //transform Photo Gallery Settings
                 if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && currentModule.settings) {
-                    req.entry.Body[i].settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1 || '', currentModule.type || '')
+                    currentModule.settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1 || '', currentModule.type || '')
                 }
 
                 //add contactFormData in form object
                 if (modRenderType === 'ContactFormRoutes') {
-                    req.entry.Body[i] = setupContactForm(req.entry.Body[i])
+                    currentModule = setupContactForm(currentModule)
                 }
                 //add contactFormData in form object
                 if (modRenderType === 'Map') {
-                    req.entry.Body[i] = { ...req.entry.Body[i], address: contactInfo.address }
+                    currentModule = { ...currentModule, address: contactInfo.address }
                 }
 
                 /*------------------- End Mod Transforms -------------------------*/
 
                 //loop through items
                 let itemCount = 0
-                if (req.entry.Body[i].items) {
+                if (currentModule.items) {
                     for (const t in currentModule.items) {
                         const currentItem = currentModule.items[t]
                         itemCount += 1
 
                         //converting extra settings
                         if (currentModule.items[t].extraItemSettings) {
-                            req.entry.Body[i].items[t] = addItemExtraSettings(req.entry.Body[i].items[t])
+                            currentModule.items[t] = addItemExtraSettings(currentModule.items[t])
                         }
 
                         if (modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
-                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modSwitch1: 1 }
+                            currentModule.items[t] = { ...currentModule.items[t], modSwitch1: 1 }
                         }
 
                         //settings image data (uses first image)
                         if (currentItem.image) {
-                            req.entry.Body[i].items[t] = {
-                                ...req.entry.Body[i].items[t],
+                            currentModule.items[t] = {
+                                ...currentModule.items[t],
                                 image: currentItem.image[0].url || '',
                                 caption_tag: currentItem.image[0].caption || '',
                                 img_alt_tag: currentItem.image[0].alternativeText || '',
+                                imagePriority: imagePriority,
                             }
                         }
 
                         if (currentItem.headSize) {
-                            req.entry.Body[i].items[t].headSize = transformTextSize(req.entry.Body[i].items[t].headSize)
+                            currentModule.items[t].headSize = transformTextSize(currentModule.items[t].headSize)
                         }
 
                         if (currentItem.descSize) {
-                            req.entry.Body[i].items[t].descSize = transformTextSize(req.entry.Body[i].items[t].descSize)
+                            currentModule.items[t].descSize = transformTextSize(currentModule.items[t].descSize)
                         }
 
                         //testimonials stars
                         if (currentItem.stars) {
-                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], actionlbl: convertColumns(currentItem.stars) }
+                            currentModule.items[t] = { ...currentModule.items[t], actionlbl: convertColumns(currentItem.stars) }
                         }
 
                         //convert button data
                         if (currentItem.buttons?.length != 0) {
-                            req.entry.Body[i].items[t] = createStrapiButtonVars(req.entry.Body[i].items[t], modRenderType, columns)
+                            currentModule.items[t] = createStrapiButtonVars(currentModule.items[t], modRenderType, columns)
                         }
 
                         //add image overlay for parallax/photogallery
-                        if (req.entry.Body[i].imageOverlay === true) {
+                        if (currentModule.imageOverlay === true) {
                             const modColor1 = 'rgb(0,0,0)'
                             const modOpacity = 0.8
-                            req.entry.Body[i].items[t] = { ...req.entry.Body[i].items[t], modColor1: modColor1, modOpacity: modOpacity }
+                            currentModule.items[t] = { ...currentModule.items[t], modColor1: modColor1, modOpacity: modOpacity }
                         }
 
                         const headerTag = currentItem.headerTagH1 === true ? 'h1' : ''
-                        req.entry.Body[i].items[t] = {
-                            ...req.entry.Body[i].items[t],
+                        currentModule.items[t] = {
+                            ...currentModule.items[t],
                             headerTag: headerTag,
                             itemCount: itemCount,
                         }
                     }
 
+                    //individ anchor links
+                    if (modAnchorLinks.filter((e) => e.modId === currentModule.id).length > 0) {
+                        const modAnchorLink = modAnchorLinks.filter((e) => e.modId === currentModule.id)
+                        console.log('theeee linkkkk', modAnchorLink)
+                        currentModule.anchorLink = modAnchorLink[0].anchorLink
+                    }
+
                     //creating item styles
                     if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
-                        req.entry.Body[i].items = createItemStyles(req.entry.Body[i].items, well, modRenderType, componentType)
+                        currentModule.items = createItemStyles(currentModule.items, well, modRenderType, componentType)
                     }
                 }
 
                 //fully transformed page
                 newPages.push({
                     attributes: {
-                        ...req.entry.Body[i],
+                        ...currentModule,
                         type: componentType,
                         imgsize: imgsize,
                         modId: currentModule.id,
-                        imagePriority: imagePriority,
                         columns: columns,
                         well: well,
                         modCount: modCount,

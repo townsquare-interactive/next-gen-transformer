@@ -523,6 +523,7 @@ export interface CMSPage {
 
 export interface LunaModuleItem {
     id: string | number
+    title?: string
     desc?: string
     image?: string
     plugin?: string
@@ -556,6 +557,7 @@ export interface LunaModuleItem {
     itemStyle?: {}
     captionStyle?: any
     extraItemSettings?: extraItemSettings
+    useAnchor?: boolean
 }
 
 export interface LunaModuleSettings {
@@ -595,7 +597,7 @@ interface Entry {
     publishedAt: string
     homePage: boolean
     ai: null | any
-    Body: Array<CurrentModule>
+    Body: CurrentModule[]
     seo: null | any
 }
 
@@ -650,6 +652,7 @@ export interface ModuleItem extends LunaModuleItem {
     headerTag?: string
     itemCount?: number
     modSwitch1?: number
+    imagePriority?: boolean
 }
 
 /*   interface Button {
@@ -684,7 +687,7 @@ export interface CurrentModule {
     componentType?: string
     address?: Address
     anchorLink?: string
-    extraSettings?: {
+    extraSettings: {
         border: boolean
         lazyload: boolean
         imgsize: string
@@ -713,3 +716,96 @@ export interface extraItemSettings {
 }
 
 export type anchorTags = { title?: string; url?: string; menu_item_parent?: number }[]
+
+////Strapi Pages
+interface ImageFormat {
+    name: string
+    hash: string
+    ext: string
+    mime: string
+    path: null
+    width: number
+    height: number
+    size: number
+    url: string
+}
+
+interface ImageData {
+    id: number
+    attributes: {
+        name: string
+        alternativeText: null
+        caption: null
+        width: number
+        height: number
+        formats: {
+            thumbnail: ImageFormat
+            small: ImageFormat
+            medium: ImageFormat
+            large: ImageFormat
+        }
+        hash: string
+        ext: string
+        mime: string
+        size: number
+        url: string
+        previewUrl: null
+        provider: string
+        provider_metadata: null
+        createdAt: string
+        updatedAt: string
+    }
+}
+
+interface ParallaxItem {
+    id: number
+    headline: string | null
+    subheader: string | null
+    desc: string | null
+    disabled: boolean
+    align: string | null
+    image: { data: ImageData[] }
+    buttons: any[] // Update this with the correct button type if available
+    extraItemSettings: {
+        id: number
+        headSize: null
+        descSize: null
+        isFeatured: boolean
+        headerTagH1: boolean
+        disabled: boolean
+    }
+}
+
+/*   interface ModuleItem {
+    id: number;
+    __component: string;
+    title: string | null;
+    columns?: string;
+    disabled: boolean;
+    useAnchor?: boolean;
+    items: ParallaxItem[];
+    extraSettings: {
+      id: number;
+      lazyload: boolean;
+      border: boolean;
+      imgsize: string;
+    };
+    Body: any[]; // Update this with the correct module type if available
+  } */
+
+export interface StrapiPageData {
+    data: {
+        id: number
+        attributes: {
+            name: string
+            slug: string
+            createdAt: string
+            updatedAt: string
+            publishedAt: string
+            homePage: boolean
+            ai: any // Update this with the correct type if available
+            Body: CurrentModule[]
+            seo: any // Update this with the correct type if available
+        }
+    }[]
+}

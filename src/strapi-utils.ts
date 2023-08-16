@@ -1,5 +1,5 @@
 import { socialConvert, createContactForm, createLinkAndButtonVariables, getAddressCoords } from './utils.js'
-import { CurrentModule, Email, ModuleItem, Phone, anchorTags } from '../types.js'
+import { CurrentModule, Email, ModuleItem, Page, Phone, StrapiPageData, anchorTags } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
     console.log('running strapi transformmmm--------------------------------')
@@ -902,7 +902,7 @@ export const addItemExtraSettings = (item: ModuleItem) => {
     }
 }
 
-export const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => {
+const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => {
     let anchorLink = module.title?.replace(' ', '-') || ''
 
     //console.log('uri', encodeURI(anchorLink))
@@ -922,6 +922,33 @@ export const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTa
     anchorTags.push(anchorItem)
 
     return { anchorLink: anchorLink, transformedAnchorTags: anchorTags }
+}
+
+export const manageAnchorLinks = (
+    pages: StrapiPageData,
+    anchorTags: anchorTags,
+    newNav: any,
+    modAnchorLinks: { modId: number | string; anchorLink: string }[]
+) => {
+    for (const p in pages.data) {
+        if (pages.data[p].attributes.homePage === true) {
+            //modules loop
+            for (const j in pages.data[p].attributes.Body) {
+                const firstPageMods = pages.data[p].attributes.Body //change later to homepage
+                if (firstPageMods[j].title && firstPageMods[j].useAnchor === true) {
+                    const { anchorLink, transformedAnchorTags } = createAnchorLinksArr(firstPageMods[j], anchorTags)
+
+                    anchorTags = transformedAnchorTags
+                    newNav = anchorTags
+
+                    //create array from anchorlinks for modules, used below when updating page data
+                    modAnchorLinks.push({ modId: firstPageMods[j].id, anchorLink: anchorLink })
+                }
+            }
+        }
+    }
+
+    return { moddedAnchorTags: anchorTags, moddedNewNav: newNav, moddedModAnchorLinks: modAnchorLinks }
 }
 
 /* tires 743.67 dry routing / 
