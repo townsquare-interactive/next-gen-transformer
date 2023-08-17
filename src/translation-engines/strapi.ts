@@ -19,11 +19,28 @@ import { getFileS3 } from '../s3Functions.js'
 //import z from 'zod'
 import { Contact, Request, anchorTags } from '../../types.js'
 
+/* import { exec } from 'child_process'
+
+exec('npm run strapi import -- -f export_new.tar.gz.enc', (error, stdout, stderr) => {
+    if (error) {
+        console.log(`error: ${error.message}`)
+        return
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`)
+        return
+    }
+    console.log(`stdout: ${stdout}`)
+})
+ */
 //const schemaNum = z.coerce.number()
 const dbUrl = 'http://127.0.0.1:1337'
 
 export const transformStrapi = async (req: Request) => {
     let pagesList = []
+
+    //console.log('lets check the req', req, req.entry)
+    //console.log('this will check for draft==========================', req.entry.publishedAt ? 'this is published' : 'this is draft', req)
 
     try {
         const [resLayout, resNav, resPages] = await Promise.all([
@@ -42,6 +59,8 @@ export const transformStrapi = async (req: Request) => {
         let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = transformcontact(contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
+
+        const usingPreviewMode = layout.data.attributes.usePreviewMode === true ? true : false
 
         //get nav object
         const currentLayoutS3 = await getFileS3(`${siteIdentifier}/layout.json`)
@@ -89,9 +108,6 @@ export const transformStrapi = async (req: Request) => {
                 const border = currentModule.extraSettings?.border || currentModule.border || false
 
                 const well = border === true ? '1' : ''
-
-                // req.entry.Body[i].anchorLink = anchorLinks[i][req.entry.Body[i].id] ? anchorLinks[i][req.entry.Body[i].id].link : ''
-                //filter array to see if modId matches num
 
                 /*------------------- Mod Transforms -------------------------*/
 
@@ -184,7 +200,6 @@ export const transformStrapi = async (req: Request) => {
                     //individ anchor links
                     if (modAnchorLinks.filter((e) => e.modId === currentModule.id).length > 0) {
                         const modAnchorLink = modAnchorLinks.filter((e) => e.modId === currentModule.id)
-                        console.log('theeee linkkkk', modAnchorLink)
                         currentModule.anchorLink = modAnchorLink[0].anchorLink
                     }
 
@@ -276,6 +291,7 @@ export const transformStrapi = async (req: Request) => {
 
         const strapi = {
             siteIdentifier: siteIdentifier,
+            usingPreviewMode: usingPreviewMode,
             siteLayout: {
                 cmsNav: newNav,
                 logos: {

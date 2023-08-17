@@ -460,7 +460,6 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         : ''
     let allPageStyles
     if (currentPageList) {
-        console.log('yesssssssssss', currentPageList)
         if (Object.keys(currentPageList).length != 0) {
             allPageStyles = await getAllCssPages(currentPageList, basePath)
         }
@@ -470,7 +469,6 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
 
     //let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
     let allStyles = fontClasses + colorClasses + customCss + allPageStyles
-
     const allStylesConverted = convertSpecialTokens(allStyles)
 
     try {
@@ -478,7 +476,7 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         return convertedCss.css
     } catch (e) {
         //error catch if code passed is not correct scss/css
-        console.log('custom css ' + e.name + ': ' + e.message)
+
         return `/* ${e.message.toString()} */` + allStyles
     }
 }

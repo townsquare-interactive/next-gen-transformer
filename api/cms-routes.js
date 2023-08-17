@@ -18,7 +18,6 @@ router.post('/save', async (req, res) => {
         //grab url to make S3 folder name
         const url = req.body.siteData.config.website.url
         const basePath = stripUrl(url)
-
         const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
 
         let globalFile
@@ -38,8 +37,14 @@ router.post('/save', async (req, res) => {
             newPageList = await updatePageList(newPageData.pages, basePath)
         }
 
-        if (req.body.savedData.favicon && req.body.savedData.favicon.src != null) {
+        if (req.body.savedData.favicon) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
+            console.log(
+                'favicon time',
+                req.body.savedData.favicon,
+                req.body.siteData.config.website.url + req.body.savedData.favicon,
+                basePath + '/assets/' + faviconName
+            )
             await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
         }
 

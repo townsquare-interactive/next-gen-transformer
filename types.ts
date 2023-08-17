@@ -339,6 +339,7 @@ export interface SiteData {
 
 export interface PublishData {
     siteIdentifier: string
+    usingPreviewMode?: boolean
     siteLayout: SiteData
     pages: Page[]
     assets: { url: string; fileName: string; name: string; content: string }[]

@@ -1,37 +1,41 @@
-import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
+import { addAssetFromSiteToS3, addFileS3, moveAllS3Objs } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import { PublishData } from '../../types.js'
 
 //import { PublishData } from '../../types'
 export const publish = async (data: PublishData) => {
-    const { siteIdentifier, siteLayout, pages, assets, globalStyles } = data
+    const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode } = data
 
-    await addFileS3(siteLayout, `${siteIdentifier}/layout`)
+    const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
+
+    await addFileS3(siteLayout, `${s3SitePath}/layout`)
 
     const pageList = []
+
+    // await moveAllS3Objs()
 
     if (pages && pages?.length != 0) {
         //adding each page to s3
         for (let i = 0; i < pages.length; i++) {
-            console.log('page posting', `${siteIdentifier}/pages/${pages[i].data.slug}`)
+            console.log('page posting', `${s3SitePath}/pages/${pages[i].data.slug}`)
             //rewrite page list every time to passed page
             pageList.push({ name: pages[i].data.title, slug: pages[i].data.slug, url: pages[i].data.url, id: pages[i].data.id })
-            await addFileS3(pages[i], `${siteIdentifier}/pages/${pages[i].data.slug}`)
+            await addFileS3(pages[i], `${s3SitePath}/pages/${pages[i].data.slug}`)
         }
         let newPageList
         //update pagelist
-        newPageList = await updatePageList(pages, siteIdentifier)
+        newPageList = await updatePageList(pages, s3SitePath)
     } else {
         console.log('no pages to add')
     }
 
-    //await addFileS3({ pages: pageList }, `${siteIdentifier}/pages/page-list`)
+    //await addFileS3({ pages: pageList }, `${s3SitePath}/pages/page-list`)
 
     if (assets && assets?.length != 0) {
         assets.forEach(async (asset) => {
-            await addAssetFromSiteToS3(asset.content, siteIdentifier + '/assets/' + asset.name)
+            await addAssetFromSiteToS3(asset.content, s3SitePath + '/assets/' + asset.name)
         })
     }
 
-    await addFileS3(globalStyles, `${siteIdentifier}/global`, 'css')
+    await addFileS3(globalStyles, `${s3SitePath}/global`, 'css')
 }
