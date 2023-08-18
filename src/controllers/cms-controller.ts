@@ -278,6 +278,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         url: file.config.website.url,
         composites: file.composites,
         cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList, url) : currentLayout.cmsNav,
+        navAlign: file.navigation ? file.navigation.menu_alignment : 'left',
         seo: file.seo.global_seo_options ? { global: file.seo.global_seo_options } : currentLayout.seo || {},
         cmsColors: themeStyles,
         theme: file.design.themes.selected || '',
