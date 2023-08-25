@@ -380,6 +380,8 @@ export const createBtnStyles = (
 
     btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
 
+    console.log('btn stuff', modType)
+
     if (currentItem.promoColor) {
         btnStyles =
             btnStyles +
@@ -397,10 +399,13 @@ export const createBtnStyles = (
 
     if (isFeatureButton) {
         btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
-    } else if (value.well && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
+    } else if ((value.well || modType === 'Card') && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
         btnStyles =
-            btnStyles +
+            /* btnStyles +
             `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
+            ` */
+            btnStyles +
+            `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['btnBackground']}; background-color: ${themeStyles['btnText']}}; 
             `
     }
 
