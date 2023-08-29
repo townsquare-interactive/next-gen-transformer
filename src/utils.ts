@@ -856,7 +856,8 @@ export const removeDuplicatesArray = (arr: any[]) => {
 }
 
 export const convertSpecialTokens = (str: string) => {
-    const removedBreak = str.replaceAll('[rn]', '\n')
+    //const removedBreak = str.replaceAll('[rn]', '\n')
+    const removedBreak = str.replaceAll('[rn]', '<br>')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
     const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
 
@@ -875,6 +876,60 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
     }
     return { ...value }
 }
+
+function removeUndefinedTags(inputText: string) {
+    const regex = /<p>undefined<\/p>/g
+    const cleanedText = inputText.replace(regex, '')
+    return cleanedText
+}
+function removeUnwrappedLists(text: string) {
+    // Define a regular expression to match 'ul' or 'ol' not enclosed in '<' symbols
+    const regex = /(?<!<)(ul|ol)(?![>/])/g
+
+    // Remove 'ul' or 'ol' not enclosed in '<' symbols
+    const cleanedText = text.replace(regex, '')
+
+    return cleanedText
+}
+
+//Need to wrap <p> tags around text that does not contain list tags
+function wrapTextWithPTags(text: string) {
+    // Define a regular expression to match text outside <ul> or <ol> tags
+    const regex = /(<\/?(ul|ol)[^>]*>)|([^<]+)/g
+
+    // Split the text based on the regex and process each part
+    const parts = text.split(regex)
+
+    // Initialize a flag to keep track of whether we're inside <ul> or <ol> tags
+    let insideList = false
+
+    // Process each part and wrap text in <p> tags if not inside a list
+    const result = parts.map((part) => {
+        if (part === '<ul>' || part === '<ol>') {
+            insideList = true
+            return part
+        } else if (part === '</ul>' || part === '</ol>') {
+            insideList = false
+            return part
+        } else if (!insideList && part?.trim() !== '') {
+            return `<p>${part}</p>`
+        }
+        return part
+    })
+
+    const removedUnwrapped = removeUnwrappedLists(result.join(''))
+    const removedUndefined = removeUndefinedTags(removedUnwrapped)
+    return removedUndefined
+}
+
+export const convertDescText = (desc: string) => {
+    const wrappedText = wrapTextWithPTags(desc)
+    const convertedDesc = convertSpecialTokens(wrappedText)
+    return convertedDesc
+}
+
+// Example usage:
+//const inputText = 'This is a paragraph.<ul><li>List item 1</li><li>List item 2</li></ul>This is another paragraph.'
 
 /* export default {
     socialConvert,
