@@ -352,10 +352,7 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                     }
                     //replace line breaks from cms
                     if (value.items[i].desc) {
-                        console.log('og desc', value.items[i].desc)
-                        //value.items[i].desc = convertSpecialTokens(currentItem.desc)
                         value.items[i].desc = convertDescText(currentItem.desc)
-                        console.log('new desc', value.items[i].desc)
                     }
 
                     let isFeatureButton

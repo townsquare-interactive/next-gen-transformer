@@ -1,21 +1,24 @@
 import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../src/controllers/cms-controller.js'
 
-import { addAssetFromSiteToS3, getFileS3, addMultipleS3, addFileS3 } from '../src/s3Functions.js'
+import { addAssetFromSiteToS3, getFileS3, addFileS3 } from '../src/s3Functions.js'
 
 import { stripUrl, setColors, stripImageFolders } from '../src/utils.js'
 
 import engines from '../src/translation-engines/basic.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
+import { transformLuna } from '../src/translation-engines/luna.js'
 
 import { publish } from '../src/output/index.js'
 
 import express from 'express'
 const router = express.Router()
 
-//chnage to save data
+//save from luna cms
 router.post('/save', async (req, res) => {
     try {
-        //grab url to make S3 folder name
+        const url = req.body.siteData.config.website.url
+        const basePath = stripUrl(url)
+        /*  //grab url to make S3 folder name
         const url = req.body.siteData.config.website.url
         const basePath = stripUrl(url)
         const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
@@ -67,7 +70,13 @@ router.post('/save', async (req, res) => {
         }
 
         //Adding new siteData file after saving
-        await addFileS3(req.body.siteData, `${basePath}/siteData`)
+        await addFileS3(req.body.siteData, `${basePath}/siteData`) */
+
+        const data = await transformLuna(req)
+
+        console.log(data.pages)
+
+        await publish({ ...data })
 
         res.json('posting to s3 folder: ' + basePath)
     } catch (err) {
@@ -90,32 +99,6 @@ router.post('/site-data/basic', async (req, res) => {
 })
 
 router.post('/site-data/strapi', async (req, res) => {
-    //console.log('posted to strapi', req)
-    const siteIdentifier = 'csutest0216basic2'
-    const teamId = process.env.NEXT_PUBLIC_VERCEL_TEAM_ID
-    const tokey = process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN
-
-    /*     const requeststuff = {
-        body: {
-            name: siteIdentifier,
-            environmentVariables: [
-                {
-                    key: 'CMS_PUBLIC_URL',
-                    target: ['production', 'preview', 'development'],
-                    type: 'plain',
-                    value: siteIdentifier,
-                },
-            ],
-            framework: 'nextjs',
-            gitRepository: {
-                repo: 'jedwards4044/next-website',
-                type: 'github',
-            },
-        },
-    }
-
-    console.log(JSON.stringify(requeststuff)) */
-
     /*  //DEPLOYS NEW PROJECT TO VERCEL
     try {
         const rawResponse = await fetch(`https://api.vercel.com/v9/projects?teamId=${teamId}`, {
@@ -151,7 +134,6 @@ router.post('/site-data/strapi', async (req, res) => {
     }) */
 
     try {
-        //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
         const data = await transformStrapi(req.body)
 
         console.log(data.pages)

@@ -12,8 +12,6 @@ export const publish = async (data: PublishData) => {
 
     const pageList = []
 
-    // await moveAllS3Objs()
-
     if (pages && pages?.length != 0) {
         //adding each page to s3
         for (let i = 0; i < pages.length; i++) {

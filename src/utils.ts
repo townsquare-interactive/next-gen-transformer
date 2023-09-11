@@ -771,6 +771,17 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
         --promo4: ${themeStyles['promoColor4']};
         --promo5: ${themeStyles['promoColor5']};
         --promo6: ${themeStyles['promoColor6']};
+
+        $promocomp:complement(${themeStyles['promoColor']});
+        --promocomp:#{$promocomp};
+        $promoinv1:invert(${themeStyles['promoColor']});
+        --promoinv1:#{$promoinv1};
+        $promoinv2:invert(${themeStyles['promoColor']},20);
+        --promoinv2:#{$promoinv2};
+        $promolighten:lighten(${themeStyles['promoColor']},30);
+        --promolighten:#{$promolighten};
+        --promoHSL: ${colorToHSL(themeStyles['promoColor'])};
+
        }
        `
 
@@ -877,14 +888,14 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
     return { ...value }
 }
 
-function removeUndefinedTags(inputText: string) {
+/* function removeUndefinedTags(inputText: string) {
     const regex = /<p>undefined<\/p>/g
     const cleanedText = inputText.replace(regex, '')
     return cleanedText
-}
+} */
 function removeUnwrappedLists(text: string) {
     // Define a regular expression to match 'ul' or 'ol' not enclosed in '<' symbols
-    const regex = /(?<!<)(ul|ol)(?![>/])/g
+    const regex = /(?<!<)(ul|ol|b|div|span)(?![>/])/g
 
     // Remove 'ul' or 'ol' not enclosed in '<' symbols
     const cleanedText = text.replace(regex, '')
@@ -894,8 +905,8 @@ function removeUnwrappedLists(text: string) {
 
 //Need to wrap <p> tags around text that does not contain list tags
 function wrapTextWithPTags(text: string) {
-    // Define a regular expression to match text outside <ul> or <ol> tags
-    const regex = /(<\/?(ul|ol)[^>]*>)|([^<]+)/g
+    // Match text outside <ul> or <ol> tags
+    const regex = /(<\/?(ul|ol|b|div|span)[^>]*>)|([^<]+)/g
 
     // Split the text based on the regex and process each part
     const parts = text.split(regex)
@@ -905,12 +916,14 @@ function wrapTextWithPTags(text: string) {
 
     // Process each part and wrap text in <p> tags if not inside a list
     const result = parts.map((part) => {
-        if (part === '<ul>' || part === '<ol>') {
+        if (part === '<ul>' || part === '<ol>' || part === '<b>' || part === '<div>' || part === '<span>') {
             insideList = true
             return part
-        } else if (part === '</ul>' || part === '</ol>') {
+        } else if (part === '</ul>' || part === '</ol>' || part === '</b>' || part === '</div>' || part === '/<span>') {
             insideList = false
             return part
+        } else if (part === undefined) {
+            return ''
         } else if (!insideList && part?.trim() !== '') {
             return `<p>${part}</p>`
         }
@@ -918,8 +931,7 @@ function wrapTextWithPTags(text: string) {
     })
 
     const removedUnwrapped = removeUnwrappedLists(result.join(''))
-    const removedUndefined = removeUndefinedTags(removedUnwrapped)
-    return removedUndefined
+    return removedUnwrapped
 }
 
 export const convertDescText = (desc: string) => {
@@ -928,33 +940,72 @@ export const convertDescText = (desc: string) => {
     return convertedDesc
 }
 
-// Example usage:
-//const inputText = 'This is a paragraph.<ul><li>List item 1</li><li>List item 2</li></ul>This is another paragraph.'
+//converts hex or rgb to HSL
+export function colorToHSL(color: string) {
+    // Function to convert RGB to HSL
+    function rgbToHSL(r: number, g: number, b: number): string {
+        r /= 255
+        g /= 255
+        b /= 255
 
-/* export default {
-    socialConvert,
-    btnIconConvert,
-    setColors,
-    getColumnsCssClass,
-    transformcontact,
-    determineNavParent,
-    stripUrl,
-    isGridCaption,
-    alternatePromoColors,
-    stripImageFolders,
-    replaceKey,
-    createColorClasses,
-    transformNav,
-    convertSpecialTokens,
-    createFontCss,
-    createLinkAndButtonVariables,
-    determineModRenderType,
-    createItemStyles,
-    createBtnStyles,
-    createImageSizes,
-    isOneButton,
-    createGallerySettings,
-    modVariationType,
-    createContactForm,
+        const max = Math.max(r, g, b)
+        const min = Math.min(r, g, b)
+
+        let h = 0,
+            s,
+            l = (max + min) / 2
+
+        if (max === min) {
+            // Achromatic (gray)
+            h = s = 0
+        } else {
+            const d: number = max - min
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0)
+                    break
+                case g:
+                    h = (b - r) / d + 2
+                    break
+                case b:
+                    h = (r - g) / d + 4
+                    break
+            }
+
+            h /= 6
+        }
+
+        // Convert hue to degrees
+        h *= 360
+
+        // Round values to integers or fractions as needed
+        h = Math.round(h)
+        s = Math.round(s * 100)
+        l = Math.round(l * 100)
+
+        return `hsl(${h}, ${s}%, ${l}%)`
+    }
+
+    // Remove whitespace and convert to lowercase for case-insensitive comparison
+    color = color.replace(/\s/g, '').toLowerCase()
+
+    if (color.startsWith('#')) {
+        // Hex color value
+        return rgbToHSL(parseInt(color.slice(1, 3), 16), parseInt(color.slice(3, 5), 16), parseInt(color.slice(5, 7), 16))
+    } else if (color.startsWith('rgb(') && color.endsWith(')')) {
+        // RGB color value
+        const rgbValues = color.slice(4, -1).split(',')
+        if (rgbValues.length === 3) {
+            const r = parseInt(rgbValues[0])
+            const g = parseInt(rgbValues[1])
+            const b = parseInt(rgbValues[2])
+            return rgbToHSL(r, g, b)
+        }
+    } else {
+        // If the input doesn't match either format, return an error message or default value
+        console.log('invalid color format')
+        return color
+    }
 }
- */

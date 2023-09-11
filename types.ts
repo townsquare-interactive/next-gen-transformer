@@ -328,7 +328,7 @@ export interface SiteData {
     composites: {
         footer: Composite
     }
-    cmsColors: CmsColors
+    cmsColors: ThemeStyles
     theme: string
     cmsUrl: string
     s3Folder: string
@@ -809,4 +809,83 @@ export interface StrapiPageData {
             seo: any // Update this with the correct type if available
         }
     }[]
+}
+
+export interface LunaRequest {
+    body: {
+        savedData: {
+            pages?: CMSPage
+            navs?: any
+            favicon?: string
+            deletePages?: CMSPage[]
+            colors?: ColorsObject
+            fonts?: Fonts
+            code?: { CSS: string }
+        }
+        siteData: LunaSiteData
+    }
+}
+interface ColorsObject {
+    [key: string]: Color
+}
+
+interface Color {
+    key: string
+    type: string
+    label: string
+    value: string
+}
+
+interface LunaSiteData {
+    vars: any
+    design: LunaDesign
+    navigation: any
+    settings: any
+    config: any
+    pages: CMSPage
+    navs?: any
+    favicon?: string
+}
+
+interface LunaDesign {
+    colors?: ColorsObject
+    fonts?: Fonts
+    code: { CSS: string }
+    themes: { selected: string }
+}
+
+const colors: ColorsObject = {
+    color_1: {
+        key: 'color_1',
+        type: 'hex',
+        label: 'Logo',
+        value: '#ffffff',
+    },
+    // Add the rest of your color definitions here...
+}
+
+interface Font {
+    label: string
+    value: string
+    family: string
+}
+
+interface SectionFonts {
+    [key: string]: Font
+}
+
+interface Fonts {
+    sections: {
+        hdrs: SectionFonts
+        body: SectionFonts
+        feat: SectionFonts
+    }
+    TinyMCE: Record<string, string>
+    googleFonts: string
+}
+
+interface Font {
+    label: string
+    value: string
+    family: string
 }

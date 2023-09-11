@@ -904,6 +904,7 @@ export const addItemExtraSettings = (item: ModuleItem) => {
 
 const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => {
     let anchorLink = module.title?.replace(' ', '-') || ''
+    console.log('title', module.title, 'link', anchorLink)
 
     //console.log('uri', encodeURI(anchorLink))
 
@@ -935,6 +936,7 @@ export const manageAnchorLinks = (
             //modules loop
             for (const j in pages.data[p].attributes.Body) {
                 const firstPageMods = pages.data[p].attributes.Body //change later to homepage
+                console.log('the mod', firstPageMods[j])
                 if (firstPageMods[j].title && firstPageMods[j].useAnchor === true) {
                     const { anchorLink, transformedAnchorTags } = createAnchorLinksArr(firstPageMods[j], anchorTags)
 

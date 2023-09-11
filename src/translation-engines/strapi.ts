@@ -200,6 +200,7 @@ export const transformStrapi = async (req: Request) => {
                     //individ anchor links
                     if (modAnchorLinks.filter((e) => e.modId === currentModule.id).length > 0) {
                         const modAnchorLink = modAnchorLinks.filter((e) => e.modId === currentModule.id)
+                        console.log('anchor links checking', currentModule.id, modAnchorLink)
                         currentModule.anchorLink = modAnchorLink[0].anchorLink
                     }
 
