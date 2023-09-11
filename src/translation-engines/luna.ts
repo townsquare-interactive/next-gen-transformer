@@ -24,10 +24,6 @@ export const transformLuna = async (req: LunaRequest) => {
         if (req.body.savedData.pages) {
             newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath)
 
-            //adding each page to s3 (may need to move to controller)
-            /*   for (let i = 0; i < newPageData.pages.length; i++) {
-                //await addFileS3(newPageData.pages[i], `${basePath}/pages/${newPageData.pages[i].data.slug}`)
-            } */
             // update/create pagelist (uses new page )
             newPageList = await updatePageList(newPageData.pages, basePath)
         }
@@ -40,7 +36,6 @@ export const transformLuna = async (req: LunaRequest) => {
                 req.body.siteData.config.website.url + req.body.savedData.favicon,
                 basePath + '/assets/' + faviconName
             )
-            //await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
         }
 
         if (req.body.savedData.deletePages) {
@@ -52,12 +47,7 @@ export const transformLuna = async (req: LunaRequest) => {
         if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code || req.body.savedData.pages) {
             const currentPageList = await getFileS3(`${basePath}/pages/page-list.json`)
             globalStyles = await createGlobalStylesheet(themeStyles, req.body.siteData.design.fonts, req.body.siteData.design.code, currentPageList, basePath)
-            //await addFileS3(globalStyles, `${basePath}/global`, 'css')
         }
-
-        //Adding new siteData file after saving
-        //await addFileS3(req.body.siteData, `${basePath}/siteData`)
-        //res.json('posting to s3 folder: ' + basePath)
 
         const luna = {
             siteIdentifier: basePath,

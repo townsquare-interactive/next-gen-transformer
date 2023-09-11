@@ -1,13 +1,7 @@
-import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../src/controllers/cms-controller.js'
-
-import { addAssetFromSiteToS3, getFileS3, addFileS3 } from '../src/s3Functions.js'
-
-import { stripUrl, setColors, stripImageFolders } from '../src/utils.js'
-
-import engines from '../src/translation-engines/basic.js'
+import { addFileS3 } from '../src/s3Functions.js'
+import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
-
 import { publish } from '../src/output/index.js'
 
 import express from 'express'
@@ -18,64 +12,8 @@ router.post('/save', async (req, res) => {
     try {
         const url = req.body.siteData.config.website.url
         const basePath = stripUrl(url)
-        /*  //grab url to make S3 folder name
-        const url = req.body.siteData.config.website.url
-        const basePath = stripUrl(url)
-        const themeStyles = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
-
-        let globalFile
-        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, url)
-        await addFileS3(globalFile, `${basePath}/layout`)
-
-        let newPageList
-        //Transforming and posting saved page data
-        if (req.body.savedData.pages) {
-            const newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath)
-
-            //adding each page to s3 (may need to move to controller)
-            for (let i = 0; i < newPageData.pages.length; i++) {
-                await addFileS3(newPageData.pages[i], `${basePath}/pages/${newPageData.pages[i].data.slug}`)
-            }
-            // update/create pagelist (uses new page )
-            newPageList = await updatePageList(newPageData.pages, basePath)
-        }
-
-        if (req.body.savedData.favicon) {
-            const faviconName = stripImageFolders(req.body.savedData.favicon)
-            console.log(
-                'favicon time',
-                req.body.savedData.favicon,
-                req.body.siteData.config.website.url + req.body.savedData.favicon,
-                basePath + '/assets/' + faviconName
-            )
-            await addAssetFromSiteToS3(req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
-        }
-
-        if (req.body.savedData.deletePages) {
-            const pageListUrl = `${basePath}/pages/page-list`
-            const updatedPageList = await deletePages(req.body.savedData.deletePages, basePath)
-            await addFileS3(updatedPageList, pageListUrl)
-        }
-
-        if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code || req.body.savedData.pages) {
-            const currentPageList = await getFileS3(`${basePath}/pages/page-list.json`, 'json')
-            const globalStyles = await createGlobalStylesheet(
-                themeStyles,
-                req.body.siteData.design.fonts,
-                req.body.siteData.design.code,
-                currentPageList,
-                basePath
-            )
-            await addFileS3(globalStyles, `${basePath}/global`, 'css')
-        }
-
-        //Adding new siteData file after saving
-        await addFileS3(req.body.siteData, `${basePath}/siteData`) */
 
         const data = await transformLuna(req)
-
-        console.log(data.pages)
-
         await publish({ ...data })
 
         res.json('posting to s3 folder: ' + basePath)
@@ -85,19 +23,7 @@ router.post('/save', async (req, res) => {
     }
 })
 
-router.post('/site-data/basic', async (req, res) => {
-    try {
-        //siteIdentifier, themeStyles, siteLayout, pages, assets, globalStyles
-        const data = engines.basic.translate()
-
-        await publish({ ...data })
-        res.json('posting to s3 folder: ' + 'basic')
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({ err: 'Something went wrong' })
-    }
-})
-
+//save from strapi webhook
 router.post('/site-data/strapi', async (req, res) => {
     /*  //DEPLOYS NEW PROJECT TO VERCEL
     try {
@@ -149,19 +75,17 @@ router.post('/site-data/strapi', async (req, res) => {
     }
 })
 
-//Saving layout file for nav in header/footer
-router.post('/cmsconfig', async (req, res) => {
-    const basePath = stripUrl(req.body.config.website.url)
-
+/* router.post('/site-data/basic', async (req, res) => {
     try {
-        const globalFile = await createOrEditLayout(req.body, basePath)
-        await addFileS3(globalFile, `${basePath}/layout`)
-        res.json(globalFile)
+        const data = engines.basic.translate()
+
+        await publish({ ...data })
+        res.json('posting to s3 folder: ' + 'basic')
     } catch (err) {
-        console.error(err)
+        console.log(err)
         res.status(500).json({ err: 'Something went wrong' })
     }
-})
+}) */
 
 //save all of site data in one file to s3
 router.post('/cms', async (req, res) => {
