@@ -906,8 +906,6 @@ const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => 
     let anchorLink = module.title?.replace(' ', '-') || ''
     console.log('title', module.title, 'link', anchorLink)
 
-    //console.log('uri', encodeURI(anchorLink))
-
     let anchorItem = {
         title: module.title,
         url: '#' + anchorLink,
