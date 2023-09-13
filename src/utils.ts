@@ -895,7 +895,7 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
 } */
 function removeUnwrappedLists(text: string) {
     // Define a regular expression to match 'ul' or 'ol' not enclosed in '<' symbols
-    const regex = /(?<!<)(ul|ol|b|div|span)(?![>/])/g
+    const regex = /(?<!<)(ul|ol|div|span)(?![>/])/g
 
     // Remove 'ul' or 'ol' not enclosed in '<' symbols
     const cleanedText = text.replace(regex, '')
@@ -904,7 +904,7 @@ function removeUnwrappedLists(text: string) {
 }
 
 //Need to wrap <p> tags around text that does not contain list tags
-function wrapTextWithPTags(text: string) {
+export function wrapTextWithPTags(text: string) {
     // Match text outside <ul> or <ol> tags
     const regex = /(<\/?(ul|ol|b|div|span)[^>]*>)|([^<]+)/g
 
@@ -914,6 +914,9 @@ function wrapTextWithPTags(text: string) {
     // Initialize a flag to keep track of whether we're inside <ul> or <ol> tags
     let insideList = false
 
+    //tags we don't want to include
+    const tags = ['ul', 'ol', 'b', 'div', 'span']
+
     // Process each part and wrap text in <p> tags if not inside a list
     const result = parts.map((part) => {
         if (part === '<ul>' || part === '<ol>' || part === '<b>' || part === '<div>' || part === '<span>') {
@@ -922,15 +925,17 @@ function wrapTextWithPTags(text: string) {
         } else if (part === '</ul>' || part === '</ol>' || part === '</b>' || part === '</div>' || part === '/<span>') {
             insideList = false
             return part
-        } else if (part === undefined) {
+        } else if (part === undefined || part === '' || part === ' ' || tags.includes(part)) {
             return ''
-        } else if (!insideList && part?.trim() !== '') {
+        } else if (!insideList && part != ' ' && part?.trim() !== '') {
+            console.log('part:', part)
             return `<p>${part}</p>`
         }
         return part
     })
 
-    const removedUnwrapped = removeUnwrappedLists(result.join(''))
+    //const removedUnwrapped = removeUnwrappedLists(result.join(''))
+    const removedUnwrapped = result.join('')
     return removedUnwrapped
 }
 
