@@ -1,5 +1,5 @@
-import { wrapTextWithPTags } from './utils'
-import { it, describe, expect, test } from 'vitest'
+import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey } from './utils'
+import { it, describe, expect } from 'vitest'
 
 describe('Wrap with P Tags', () => {
     it('should wrap plain text inside of a P tag', () => {
@@ -13,12 +13,83 @@ describe('Wrap with P Tags', () => {
             '<p>Hello There </p><ul><li>Yes</li></ul><p>Here is some more text</p>'
         )
     })
-    it('should wrap text with p tags that are not inside the ul or div tags', () => {
-        expect(wrapTextWithPTags('Hello There <ul><li>Yes</li></ul>Here is some more text<div>not this</div>but this')).toBe(
-            '<p>Hello There </p><ul><li>Yes</li></ul><p>Here is some more text</p><div>not this</div><p>but this</p>'
+    it('should wrap text with p tags that are not inside the ol or div tags', () => {
+        expect(wrapTextWithPTags('Hello There <Ol><li>Yes</li></Ol>Here is some more text<div>not this</div>but this')).toBe(
+            '<p>Hello There </p><ol><li>Yes</li></ol><p>Here is some more text</p><div>not this</div><p>but this</p>'
         )
     })
-    it('should correctly add p tags around <b>', () => {
+    it('should correctly add p tags around text not including <b>', () => {
         expect(wrapTextWithPTags('Hello There <b>yes</b>helob ul')).toBe('<p>Hello There </p><b>yes</b><p>helob ul</p>')
+    })
+    it('should handle <i> tags the same way>', () => {
+        expect(wrapTextWithPTags('Hello There <i>yes</i>helob ul')).toBe('<p>Hello There </p><i>yes</i><p>helob ul</p>')
+    })
+    it('should handle uppercase <B> tag', () => {
+        expect(wrapTextWithPTags('Hello There <B>yes</B>helob')).toBe('<p>Hello There </p><b>yes</b><p>helob</p>')
+    })
+})
+
+describe('Is Promo button', () => {
+    let item = { image: '', modColor1: '', id: '1' }
+    let modType = 'Article'
+    let btnNum = 1
+    it('should return btn_1', () => {
+        expect(isPromoButton(item, modType, btnNum)).toBe('btn_1')
+    })
+    it('should return btn_2 when changign btnNum to 2', () => {
+        // btnNum = 2
+        expect(isPromoButton(item, modType, 2)).toBe('btn_2')
+    })
+    it('should return promo_button because of Parallax', () => {
+        expect(isPromoButton(item, 'Parallax', btnNum)).toBe('btn_promo')
+    })
+    it('should return btn_override with modColor and parallax', () => {
+        item = { ...item, modColor1: 'red' }
+        expect(isPromoButton(item, 'Parallax', btnNum)).toBe('btn_override')
+    })
+    it('should return btn2_override when changing to btnNum=2', () => {
+        /*        item = { ...item, modColor1: 'red' }
+        btnNum = 2 */
+        expect(isPromoButton({ ...item, modColor1: 'red' }, 'Parallax', 2)).toBe('btn2_override')
+    })
+})
+
+describe('Remove Duplicates Array', () => {
+    it('should remove duplicates from the array', () => {
+        /*        item = { ...item, modColor1: 'red' }
+        btnNum = 2 */
+        expect(removeDuplicatesArray(['red', 'red'])).toStrictEqual(['red'])
+    })
+    it('should leave array with no duplicates unchanged', () => {
+        /*        item = { ...item, modColor1: 'red' }
+        btnNum = 2 */
+        expect(removeDuplicatesArray(['red', 'blue'])).toStrictEqual(['red', 'blue'])
+    })
+})
+
+//convertSpecialTokens
+describe('Convert Special Tokens', () => {
+    it('should leave plain text unchanged', () => {
+        expect(convertSpecialTokens('plain text')).toBe('plain text')
+    })
+    it('should convert [rn] to <br>', () => {
+        expect(convertSpecialTokens('plain text[rn]')).toBe('plain text<br>')
+    })
+    it('should convert [t] to a blank space', () => {
+        expect(convertSpecialTokens('plain text[t]')).toBe('plain text ')
+    })
+    it('should convert &quot; to a single quote', () => {
+        expect(convertSpecialTokens('plain text&quot;')).toBe("plain text'")
+    })
+})
+
+describe('Replace Key', () => {
+    const obj = { name: 'josh' }
+    it('should change the key name to firstname', () => {
+        expect(replaceKey({ name: 'josh' }, 'name', 'firstname')).toStrictEqual({ firstname: 'josh' })
+    })
+
+    it('should remain unchanged when key is not present', () => {
+        expect(replaceKey({ name: 'josh' }, 'job', 'ocupation')).toStrictEqual({ name: 'josh' })
     })
 })

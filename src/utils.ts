@@ -875,16 +875,16 @@ export const convertSpecialTokens = (str: string) => {
     return removedParenthesis
 }
 
-const oldObj = {
-    className: 'test',
-}
-
 export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: string) => {
     if (oldKey !== newKey && value[oldKey]) {
+        console.log(oldKey, 'exits?')
         value[newKey] = value[oldKey]
         //Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
         delete value[oldKey]
+    } else if ([oldKey]) {
+        console.log('key is not in obj')
     }
+    console.log('how is value')
     return { ...value }
 }
 
@@ -893,7 +893,7 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
     const cleanedText = inputText.replace(regex, '')
     return cleanedText
 } */
-function removeUnwrappedLists(text: string) {
+/* function removeUnwrappedLists(text: string) {
     // Define a regular expression to match 'ul' or 'ol' not enclosed in '<' symbols
     const regex = /(?<!<)(ul|ol|div|span)(?![>/])/g
 
@@ -902,11 +902,11 @@ function removeUnwrappedLists(text: string) {
 
     return cleanedText
 }
-
+ */
 //Need to wrap <p> tags around text that does not contain list tags
 export function wrapTextWithPTags(text: string) {
-    // Match text outside <ul> or <ol> tags
-    const regex = /(<\/?(ul|ol|b|div|span)[^>]*>)|([^<]+)/g
+    // Match text outside of html tags
+    const regex = /(<\/?(ul|ol|b|div|span|i)[^>]*>)|([^<]+)/gi
 
     // Split the text based on the regex and process each part
     const parts = text.split(regex)
@@ -914,18 +914,36 @@ export function wrapTextWithPTags(text: string) {
     // Initialize a flag to keep track of whether we're inside <ul> or <ol> tags
     let insideList = false
 
-    //tags we don't want to include
-    const tags = ['ul', 'ol', 'b', 'div', 'span']
+    //tags we want to include
+    const tags = ['ul', 'ol', 'b', 'div', 'span', 'i']
 
     // Process each part and wrap text in <p> tags if not inside a list
     const result = parts.map((part) => {
-        if (part === '<ul>' || part === '<ol>' || part === '<b>' || part === '<div>' || part === '<span>') {
+        const lowerCasePart = part?.toLowerCase()
+        if (
+            lowerCasePart === '<ul>' ||
+            lowerCasePart === '<ol>' ||
+            lowerCasePart === '<b>' ||
+            lowerCasePart === '<i>' ||
+            lowerCasePart === '<div>' ||
+            lowerCasePart === '<span>'
+            //tags.includes(`<${lowerCasePart}>`)
+        ) {
             insideList = true
-            return part
-        } else if (part === '</ul>' || part === '</ol>' || part === '</b>' || part === '</div>' || part === '/<span>') {
+            return lowerCasePart
+        } else if (
+            lowerCasePart === '</ul>' ||
+            lowerCasePart === '</ol>' ||
+            lowerCasePart === '</b>' ||
+            lowerCasePart === '</div>' ||
+            lowerCasePart === '</span>' ||
+            lowerCasePart === '</i>'
+            //tags.includes(`</${lowerCasePart}>`)
+        ) {
             insideList = false
-            return part
-        } else if (part === undefined || part === '' || part === ' ' || tags.includes(part)) {
+            console.log('cp:', lowerCasePart)
+            return lowerCasePart
+        } else if (part === undefined || part === '' || part === ' ' || tags.includes(lowerCasePart)) {
             return ''
         } else if (!insideList && part != ' ' && part?.trim() !== '') {
             console.log('part:', part)
