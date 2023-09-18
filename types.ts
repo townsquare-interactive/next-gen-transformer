@@ -492,7 +492,7 @@ export interface CMSPage {
         id: string
         title: string
         slug: string
-        pageType: string
+        pageType?: string
         url: string
         JS: string
         type: string
@@ -507,10 +507,10 @@ export interface CMSPage {
     }
     attrs: {}
     seo: {
-        title: string
-        descr: string
-        selectedImages: string
-        imageOverride: string
+        title?: string
+        descr?: string
+        selectedImages?: string
+        imageOverride?: string
     }
     head_script?: string
     JS?: string

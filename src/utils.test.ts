@@ -37,7 +37,6 @@ describe('Is Promo button', () => {
         expect(isPromoButton(item, modType, btnNum)).toBe('btn_1')
     })
     it('should return btn_2 when changign btnNum to 2', () => {
-        // btnNum = 2
         expect(isPromoButton(item, modType, 2)).toBe('btn_2')
     })
     it('should return promo_button because of Parallax', () => {
@@ -48,26 +47,19 @@ describe('Is Promo button', () => {
         expect(isPromoButton(item, 'Parallax', btnNum)).toBe('btn_override')
     })
     it('should return btn2_override when changing to btnNum=2', () => {
-        /*        item = { ...item, modColor1: 'red' }
-        btnNum = 2 */
         expect(isPromoButton({ ...item, modColor1: 'red' }, 'Parallax', 2)).toBe('btn2_override')
     })
 })
 
 describe('Remove Duplicates Array', () => {
     it('should remove duplicates from the array', () => {
-        /*        item = { ...item, modColor1: 'red' }
-        btnNum = 2 */
         expect(removeDuplicatesArray(['red', 'red'])).toStrictEqual(['red'])
     })
     it('should leave array with no duplicates unchanged', () => {
-        /*        item = { ...item, modColor1: 'red' }
-        btnNum = 2 */
         expect(removeDuplicatesArray(['red', 'blue'])).toStrictEqual(['red', 'blue'])
     })
 })
 
-//convertSpecialTokens
 describe('Convert Special Tokens', () => {
     it('should leave plain text unchanged', () => {
         expect(convertSpecialTokens('plain text')).toBe('plain text')

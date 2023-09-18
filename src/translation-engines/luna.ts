@@ -12,7 +12,7 @@ export const transformLuna = async (req: LunaRequest) => {
 
         let globalFile
         globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, url)
-        await addFileS3(globalFile, `${basePath}/layout`)
+        /*    await addFileS3(globalFile, `${basePath}/layout`) */
 
         let newPageList
         //Transforming and posting saved page data

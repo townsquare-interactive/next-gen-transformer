@@ -7,7 +7,8 @@
     "scripts": {
         "test": "vitest",
         "start": "nodemon --transpile-only index.ts",
-        "dev": "nodemon --transpile-only index.ts"
+        "dev": "nodemon --transpile-only index.ts",
+        "tsnode": "ts-node output-zod.ts"
     },
     "author": "",
     "license": "ISC",

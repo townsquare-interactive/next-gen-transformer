@@ -1,5 +1,5 @@
 import z from 'zod'
-import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, Page, ThemeStyles } from '../types'
+import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles } from '../types'
 
 export function socialConvert(str: string) {
     let icon = iconConvert(str)
@@ -379,8 +379,6 @@ export const createBtnStyles = (
     let btnStyles
 
     btnStyles = ` #id_${key} .item_${itemCount} .btn2_override {color:${themeStyles['textColorAccent']}; background-color:transparent;} `
-
-    console.log('btn stuff', modType)
 
     if (currentItem.promoColor) {
         btnStyles =
@@ -776,8 +774,6 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
         --promocomp:#{$promocomp};
         $promoinv1:invert(${themeStyles['promoColor']});
         --promoinv1:#{$promoinv1};
-        $promoinv2:invert(${themeStyles['promoColor']},20);
-        --promoinv2:#{$promoinv2};
         $promolighten:lighten(${themeStyles['promoColor']},30);
         --promolighten:#{$promolighten};
         --promoHSL: ${colorToHSL(themeStyles['promoColor'])};
@@ -884,7 +880,7 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
     } else if ([oldKey]) {
         console.log('key is not in obj')
     }
-    console.log('how is value')
+
     return { ...value }
 }
 
@@ -941,12 +937,10 @@ export function wrapTextWithPTags(text: string) {
             //tags.includes(`</${lowerCasePart}>`)
         ) {
             insideList = false
-            console.log('cp:', lowerCasePart)
             return lowerCasePart
         } else if (part === undefined || part === '' || part === ' ' || tags.includes(lowerCasePart)) {
             return ''
         } else if (!insideList && part != ' ' && part?.trim() !== '') {
-            console.log('part:', part)
             return `<p>${part}</p>`
         }
         return part

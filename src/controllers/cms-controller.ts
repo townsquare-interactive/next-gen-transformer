@@ -32,6 +32,8 @@ import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '.
 
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule } from '../../types.js'
 
+const toStringSchema = z.coerce.string()
+
 export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string) => {
     console.log('page transformer started')
     console.log(pageData)
@@ -59,6 +61,7 @@ export const transformPagesData = async (pageData: CMSPage, sitePageData: any, t
                 slug: newSlug,
                 title: newTitle,
                 url: newUrl,
+                id: toStringSchema.parse(value.id),
             }
             newData.push(oldPageFile)
 
@@ -192,7 +195,7 @@ const addPagesToList = async (pageListFile: { pages: [{ slug: string }] }, page:
             name: pageData.title,
             slug: pageData.slug,
             url: pageData.url || pageData.slug,
-            id: Number(pageData.id),
+            id: pageData.id,
             page_type: pageData.page_type || '',
         }
         //check if page doesn't exist (need a version if it does)
