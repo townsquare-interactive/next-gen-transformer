@@ -262,7 +262,7 @@ interface Composite {
         type: string
         items: Item[]
     }
-    sections: null | any
+    sections: any
 }
 
 interface Item {
@@ -487,6 +487,13 @@ export interface CMSNavItem {
     }[]
 }
 
+export interface PageSeo {
+    title?: string
+    descr?: string
+    selectedImages?: string
+    imageOverride?: string
+}
+
 export interface CMSPage {
     data: {
         id: string
@@ -506,12 +513,7 @@ export interface CMSPage {
         page_type: string
     }
     attrs: {}
-    seo: {
-        title?: string
-        descr?: string
-        selectedImages?: string
-        imageOverride?: string
-    }
+    seo: PageSeo
     head_script?: string
     JS?: string
     title: string

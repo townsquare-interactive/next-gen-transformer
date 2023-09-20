@@ -1,11 +1,9 @@
 import { z } from 'zod'
 
-const Slot = z.object({
-    // Define the properties for Slot here.
-})
+const Slot = z.object({})
 
 const Logo = z.object({
-    fonts: z.array(z.unknown()), // Adjust the type accordingly.
+    fonts: z.array(z.unknown()),
     footer: z.object({
         pct: z.nullable(z.number()),
         slots: z.array(Slot),
@@ -21,11 +19,30 @@ const Logo = z.object({
         slots: z.array(Slot),
         activeSlots: z.array(z.number()),
     }),
-    list: z.record(z.string()), // Define the type for the list property.
+    list: z.record(z.string()),
+})
+
+//pieces
+const SeoSchema = z.object({
+    title: z.optional(z.string()),
+    descr: z.optional(z.string()),
+    selectedImages: z.optional(z.string()),
+    imageOverride: z.optional(z.string()),
+})
+
+const Address = z.object({
+    zip: z.string(),
+    city: z.string(),
+    name: z.optional(z.string()),
+    state: z.string(),
+    street: z.string(),
+    street2: z.optional(z.string()),
+    coordinates: z.optional(z.array(z.string())),
+    url: z.optional(z.string()),
 })
 
 const Contact = z.object({
-    email: z.unknown(), // Adjust the type accordingly.
+    email: z.unknown(),
     hours: z.object({
         friday: z.string(),
         monday: z.string(),
@@ -39,47 +56,38 @@ const Contact = z.object({
         z.object({
             name: z.string(),
             number: z.string(),
-            disabled: z.string(), // Adjust the type accordingly.
+            disabled: z.string(),
             isPrimaryPhone: z.boolean(),
         })
     ),
-    address: z.object({
-        zip: z.string(),
-        city: z.string(),
-        name: z.optional(z.string()), // Adjust the type accordingly.
-        state: z.string(),
-        street: z.string(),
-        street2: z.optional(z.string()), // Adjust the type accordingly.
-        coordinates: z.optional(z.array(z.string())), // Adjust the type accordingly.
-        url: z.optional(z.string()), // Adjust the type accordingly.
-    }),
-    hideZip: z.optional(z.boolean()), // Adjust the type accordingly.
+    address: Address,
+    hideZip: z.optional(z.boolean()),
     advanced: z.optional(
         z.object({
             lat: z.string(),
             long: z.string(),
         })
     ),
-    disabled: z.optional(z.union([z.boolean(), z.string()])), // Adjust the type accordingly.
-    hideCity: z.optional(z.boolean()), // Adjust the type accordingly.
-    hideState: z.optional(z.boolean()), // Adjust the type accordingly.
-    isPrimary: z.optional(z.boolean()), // Adjust the type accordingly.
-    hideAddress: z.optional(z.boolean()), // Adjust the type accordingly.
-    displayInMap: z.optional(z.boolean()), // Adjust the type accordingly.
-    hideAddress2: z.optional(z.boolean()), // Adjust the type accordingly.
-    displayInFooter: z.optional(z.boolean()), // Adjust the type accordingly.
+    disabled: z.optional(z.union([z.boolean(), z.string()])),
+    hideCity: z.optional(z.boolean()),
+    hideState: z.optional(z.boolean()),
+    isPrimary: z.optional(z.boolean()),
+    hideAddress: z.optional(z.boolean()),
+    displayInMap: z.optional(z.boolean()),
+    hideAddress2: z.optional(z.boolean()),
+    displayInFooter: z.optional(z.boolean()),
     contactLinks: z.optional(
         z.array(
             z.object({
                 cName: z.string(),
                 link: z.string(),
-                icon: z.array(z.string()), // Adjust the type accordingly.
+                icon: z.array(z.string()),
                 content: z.string(),
                 active: z.boolean(),
             })
         )
     ),
-    showContactBox: z.optional(z.boolean()), // Adjust the type accordingly.
+    showContactBox: z.optional(z.boolean()),
 })
 
 const Config = z.object({
@@ -97,7 +105,7 @@ const ThemeStyles = z.object({
 
 export const SiteDataSchema = z.object({
     logos: Logo,
-    social: z.array(z.unknown()), // Adjust the type accordingly.
+    social: z.array(z.unknown()),
     contact: Contact,
     siteName: z.string(),
     url: z.string(),
@@ -116,6 +124,20 @@ export const SiteDataSchema = z.object({
     config: Config,
     error: z.unknown(),
 })
+
+const ButtonList = z.array(
+    z.object({
+        name: z.optional(z.string()),
+        link: z.optional(z.string()),
+        window: z.optional(z.string()),
+        label: z.optional(z.string()),
+        active: z.boolean(),
+        btnType: z.string(),
+        btnSize: z.optional(z.string()),
+        linkType: z.string(),
+        blockBtn: z.optional(z.boolean()),
+    })
+)
 
 const ModuleItemSchema = z.object({
     id: z.string(),
@@ -143,7 +165,7 @@ const ModuleItemSchema = z.object({
         z.object({
             width: z.number(),
             height: z.number(),
-            size: z.string(),
+            size: z.string().or(z.number()),
         })
     ),
     modColor1: z.optional(z.string()),
@@ -155,7 +177,7 @@ const ModuleItemSchema = z.object({
     modOpacity: z.optional(z.number()),
     modSwitch1: z.optional(z.number()),
     newwindow2: z.optional(z.string()),
-    pagelinkId: z.optional(z.number()),
+    pagelinkId: z.optional(z.number().or(z.string())),
     bkgrd_color: z.optional(z.string()),
     pagelink2Id: z.optional(z.string()),
     editingIcon1: z.optional(z.boolean()),
@@ -164,26 +186,18 @@ const ModuleItemSchema = z.object({
     iconSelected: z.optional(z.string()),
     promoColor: z.optional(z.string()),
     itemStyle: z.optional(
-        z.object({
-            background: z.optional(z.string()),
-        })
+        z.union([
+            z.object({
+                background: z.string(),
+            }),
+            z.object({
+                backgroundImage: z.string(),
+            }),
+            z.object({}),
+        ])
     ),
     captionStyle: z.optional(z.string()),
-    buttonList: z.optional(
-        z.array(
-            z.object({
-                name: z.string(),
-                link: z.string(),
-                window: z.optional(z.string()),
-                label: z.string(),
-                active: z.boolean(),
-                btnType: z.string(),
-                btnSize: z.optional(z.string()),
-                linkType: z.string(),
-                blockBtn: z.optional(z.boolean()),
-            })
-        )
-    ),
+    buttonList: z.optional(ButtonList),
     linkNoBtn: z.boolean(),
     twoButtons: z.boolean(),
     isWrapLink: z.boolean(),
@@ -198,24 +212,6 @@ const ModuleItemSchema = z.object({
 
 const EmptyArray = z.array(z.string()).refine((arr) => arr.length === 0)
 
-/* z.array(z.string()).refine((arr) => arr.length === 0, {
-    message: "Expected an empty array []",
-  }), */
-
-//const ModuleSchema = z.array(z.optional(z.array(z.optional(ModuleItemSchema))))
-/* const ModuleSchema = z.union([
-    z.optional(z.array(z.optional(ModuleItemSchema))),
-    z.array(z.string()).refine((arr) => arr.length === 0, {
-        message: 'Expected an empty array []',
-    }),
-]) */
-
-/* const ModuleSchema = z.union([
-    z.array(z.union([ModuleItemSchema, z.object({}).strict()])), // Optional array of ModuleItemSchema
-    z.array(z.string()).refine((arr) => arr.length === 0, {
-        message: 'Expected an empty array []',
-    }),
-]) */
 const AttributesSchema = z.object({
     id: z.string(),
     uid: z.string(),
@@ -223,9 +219,7 @@ const AttributesSchema = z.object({
     type: z.string(),
     well: z.string().optional(),
     align: z.string().optional(),
-    //items: z.array(z.optional(ModuleItemSchema)),
-    //items: z.union([ModuleItemSchema.passthrough(), z.object({}).strict()]),
-    items: z.unknown(), //getting errors when this is not unknown
+    items: z.array(ModuleItemSchema),
     title: z.string().optional(),
     export: z.number(),
     columns: z.number(),
@@ -247,10 +241,19 @@ const InnerModuleSchema = z.object({
     componentType: z.string(),
 })
 
-const ModuleSchema = z.array(
+/* const ModuleSchema = z.array(
     z.array(
         z.union([
             z.union([InnerModuleSchema, z.object({}).strict()]),
+            EmptyArray, //Empty array allowed
+        ])
+    )
+) */
+const ModuleSchema = z.array(
+    z.array(
+        z.union([
+            InnerModuleSchema,
+            //z.object({}),
             EmptyArray, //Empty array allowed
         ])
     )
@@ -278,13 +281,9 @@ export const CMSPagesSchema = z.array(
             page_type: z.optional(z.string()),
         }),
         attrs: z.record(z.unknown()), // An empty record (you can adjust the type)
-        /*         seo: z.object({
-            title: z.optional(z.string()),
-            descr: z.optional(z.string()),
-            selectedImages: z.optional(z.string()),
-            imageOverride: z.optional(z.string()),
-        }), */
-        seo: z.unknown(),
+        //z.union([InnerModuleSchema, z.object({}).strict()])
+        seo: SeoSchema,
+        //seo: z.unknown(),
         head_script: z.optional(z.string()), // Optional head_script
         JS: z.optional(z.string()), // Optional JS
     })

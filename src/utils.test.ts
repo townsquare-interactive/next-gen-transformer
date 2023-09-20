@@ -1,4 +1,4 @@
-import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey } from './utils'
+import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey, createItemStyles } from './utils'
 import { it, describe, expect } from 'vitest'
 
 describe('Wrap with P Tags', () => {
@@ -83,5 +83,33 @@ describe('Replace Key', () => {
 
     it('should remain unchanged when key is not present', () => {
         expect(replaceKey({ name: 'josh' }, 'job', 'ocupation')).toStrictEqual({ name: 'josh' })
+    })
+})
+
+//itemStyles createItemStyles
+describe('Create Item Styles', () => {
+    const items: any = [
+        {
+            id: '33',
+            modColor1: 'red',
+            image: '/yes.jpg',
+            textureImage: {
+                gradientColors: ['red', 'blue'],
+            },
+            promoColor: 'green',
+            //modOpacity: 0,
+            itemStyle: '',
+        },
+    ]
+
+    //items: LunaModuleItem[], well: string, modType: string, type: string
+    it('should result in the same items', () => {
+        expect(createItemStyles(items, '1', 'Parallax', '')).toStrictEqual(items)
+    })
+    it('should result in an accent background', () => {
+        let newItems = [...items]
+        newItems[0].itemStyle = { background: `var(--accent-background)` }
+        items[0].image = ''
+        expect(createItemStyles(items, '1', 'Parallax', '')).toStrictEqual(newItems)
     })
 })

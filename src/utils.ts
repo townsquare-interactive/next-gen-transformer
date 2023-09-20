@@ -1,5 +1,5 @@
 import z from 'zod'
-import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles } from '../types'
+import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo } from '../types'
 
 export function socialConvert(str: string) {
     let icon = iconConvert(str)
@@ -480,6 +480,24 @@ export function isGridCaption(item: LunaModuleItem) {
     } else {
         return false
     }
+}
+
+export const transformPageSeo = (pageSeo: PageSeo) => {
+    return {
+        title: pageSeo.title || '',
+        descr: pageSeo.descr || '',
+        selectedImages: pageSeo.selectedImages || '',
+        imageOverride: pageSeo.imageOverride || '',
+    }
+}
+
+//fields to possibly remove
+export const removeItemFields = () => {
+    //items
+    const fields = ['editingicon1', 'editingicon2', 'editingicon3', 'iconSelected']
+
+    //module
+    const fields2 = ['editingicon1', 'editingicon2', 'editingicon3', 'scale_to_fit']
 }
 
 export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: string | number, type: string) => {

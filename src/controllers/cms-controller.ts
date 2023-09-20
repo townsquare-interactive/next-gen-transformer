@@ -26,11 +26,12 @@ import {
     createItemStyles,
     createContactForm,
     convertDescText,
+    transformPageSeo,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
-import { CMSPage, ThemeStyles, Layout, Page, LunaModule } from '../../types.js'
+import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo } from '../../types.js'
 
 const toStringSchema = z.coerce.string()
 
@@ -123,7 +124,7 @@ const getPageData = (sitePageData: CMSPage[], key: string) => {
     const pageSlug = sitePageData[pageId].slug
     const pageType = sitePageData[pageId].page_type
     const url = sitePageData[pageId].url
-    const seo = sitePageData[pageId].seo
+    const seo = transformPageSeo(sitePageData[pageId].seo)
 
     return { pageId, pageTitle, pageSlug, pageType, url, seo }
 }
@@ -333,6 +334,9 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                 if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
                     value.items = createItemStyles(value.items, value.well, modRenderType, value.type)
                 }
+
+                //remove empty items
+                value.items = value.items.filter((modItem: {}) => Object.keys(modItem).length !== 0)
 
                 let itemCount = 0
                 //loop for each item
