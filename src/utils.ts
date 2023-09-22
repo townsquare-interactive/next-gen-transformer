@@ -309,19 +309,16 @@ export const determineNavParent = (menu: CMSNavItem[]) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number) => {
+export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number | string) => {
     const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
 
     const singleButton = isOneButton(currentItem)
-
     const twoButtons = isTwoButtons(currentItem)
-
     const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
-    // && !currentItem.desc.includes('<a')
 
     const visibleButton = linkAndBtn(currentItem)
 
-    const determineBtnSize = (btnSize: string, modType: string, columns: number) => {
+    const determineBtnSize = (btnSize: string, modType: string, columns: number | string) => {
         if (btnSize?.includes('lg') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
             return 'btn_lg'
         } else if (btnSize?.includes('xl') && (columns == 1 || modType === 'photo_grid' || modType === 'cta_banner')) {
@@ -410,7 +407,7 @@ export const createBtnStyles = (
     return btnStyles
 }
 
-export const createImageSizes = (modType: string, columns: number) => {
+export const createImageSizes = (modType: string, columns: number | string) => {
     if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
         return '100vw'
         //return 'large'
@@ -492,12 +489,14 @@ export const transformPageSeo = (pageSeo: PageSeo) => {
 }
 
 //fields to possibly remove
-export const removeItemFields = () => {
-    //items
-    const fields = ['editingicon1', 'editingicon2', 'editingicon3', 'iconSelected']
-
-    //module
-    const fields2 = ['editingicon1', 'editingicon2', 'editingicon3', 'scale_to_fit']
+export const removeFieldsFromObj = (obj: any, fields: any[]) => {
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i]
+        if (obj.hasOwnProperty(field)) {
+            delete obj[field]
+        }
+    }
+    return obj
 }
 
 export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: string | number, type: string) => {
@@ -518,6 +517,22 @@ export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: 
     }
 
     return newSettings
+}
+
+export const transformLinksInItem = (item: LunaModuleItem) => {
+    item = { ...item, links: transformItemLinks(item) }
+    item = removeFieldsFromObj(item, ['pagelink', 'weblink', 'weblink2', 'pagelink2'])
+
+    return item
+}
+
+const transformItemLinks = (item: LunaModuleItem) => {
+    return {
+        pagelink: item.pagelink || '',
+        pagelink2: item.pagelink2 || '',
+        weblink: item.weblink || '',
+        weblink2: item.weblink2 || '',
+    }
 }
 
 export const alternatePromoColors = (items: LunaModuleItem[], themeStyles: ThemeStyles, well: string) => {

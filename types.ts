@@ -96,9 +96,9 @@ interface Item {
 
 interface Button {
     name: string
-    link: string
-    window: string
-    label: string
+    link?: string
+    window?: string | number
+    label?: string
     active: boolean
     btnType: string
     btnSize: string
@@ -256,7 +256,7 @@ interface ContactLink {
 
 interface Composite {
     type: string
-    layout: null | any
+    layout: any
     columns: number
     modules: {
         type: string
@@ -536,7 +536,7 @@ export interface LunaModuleItem {
     headline?: string
     isPlugin?: boolean
     pagelink?: string
-    actionlbl?: string | number
+    actionlbl?: string
     actionlbl2?: string
     headerTag?: string
     imageSize?: any
@@ -549,6 +549,7 @@ export interface LunaModuleItem {
     pagelink2Id?: string
     icon?: string
     icon2?: string
+    icon3?: string
     btnType?: string
     btnSize?: string
     btnType2?: string
@@ -561,6 +562,16 @@ export interface LunaModuleItem {
     captionStyle?: any
     extraItemSettings?: extraItemSettings
     useAnchor?: boolean
+    links?: {
+        pagelink: string
+        weblink: string
+        pagelink2?: string
+        weblink2?: string
+    }
+    buttonList?: Button[]
+    imageType?: string
+    imageIcon?: any
+    linkNoBtn?: boolean
 }
 
 export interface LunaModuleSettings {
@@ -582,7 +593,7 @@ export interface LunaModule {
     items: ModuleItem[] | LunaModuleItem[]
     title: string
     export: number
-    columns: string
+    columns: string | number
     imgsize: string
     lightbox: string
     settings: CarouselSettings
@@ -649,13 +660,17 @@ export interface ModuleItem extends LunaModuleItem {
     caption_tag?: string
     img_alt_tag?: string
     stars?: string
-    actionlbl?: string | number
+    actionlbl?: string
     modColor1?: string
     modOpacity?: number
     headerTag?: string
     itemCount?: number
     modSwitch1?: number
     imagePriority?: boolean
+    isBeaconHero?: boolean
+    isFeatureButton?: boolean
+    btnStyles?: string
+    nextImageSizes?: string
 }
 
 /*   interface Button {

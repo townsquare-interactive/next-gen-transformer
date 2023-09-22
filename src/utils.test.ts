@@ -1,4 +1,4 @@
-import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey, createItemStyles } from './utils'
+import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey, createItemStyles, removeFieldsFromObj } from './utils'
 import { it, describe, expect } from 'vitest'
 
 describe('Wrap with P Tags', () => {
@@ -111,5 +111,24 @@ describe('Create Item Styles', () => {
         newItems[0].itemStyle = { background: `var(--accent-background)` }
         items[0].image = ''
         expect(createItemStyles(items, '1', 'Parallax', '')).toStrictEqual(newItems)
+    })
+})
+
+describe('Remove Fields From Object', () => {
+    const fields = ['editingicon1', 'editingicon2', 'editingicon3', 'iconSelected']
+
+    const obj = {
+        editingicon1: 'yes',
+        other: 'no',
+        editingicon3: 'yes',
+    }
+
+    let newObj = {
+        other: 'no',
+    }
+
+    //items: LunaModuleItem[], well: string, modType: string, type: string
+    it('should result in the obj without the fields passed in the array', () => {
+        expect(removeFieldsFromObj(obj, fields)).toStrictEqual(newObj)
     })
 })

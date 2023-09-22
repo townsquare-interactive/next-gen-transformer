@@ -9,7 +9,6 @@ import {
     getColumnsCssClass,
     transformcontact,
     transformNav,
-    //isGridCaption,
     alternatePromoColors,
     stripImageFolders,
     createColorClasses,
@@ -27,11 +26,14 @@ import {
     createContactForm,
     convertDescText,
     transformPageSeo,
+    removeFieldsFromObj,
+    transformLinksInItem,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
-import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo } from '../../types.js'
+import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
+import Module from 'module'
 
 const toStringSchema = z.coerce.string()
 
@@ -44,6 +46,8 @@ export const transformPagesData = async (pageData: CMSPage, sitePageData: any, t
     //for each page
     for (const [key, value] of Object.entries(pageData)) {
         const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
+
+        //let page = key
 
         //covering page name change
         if (Object.keys(value.data).length === 0 && value.attrs) {
@@ -273,8 +277,10 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         contactInfo = currentLayout.contact || ''
     }
 
+    const transformedLogos = removeFieldsFromObj(file.logos, ['list', 'fonts'])
+
     const globalFile = {
-        logos: file.logos,
+        logos: transformedLogos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: contactInfo,
         siteName: file.config.website.site_title || '',
@@ -319,52 +325,71 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
             for (const [key, value] of Object.entries(moduleList[i])) {
                 modCount += 1
 
-                const modRenderType = determineModRenderType(value.type)
-                value.type = modVariationType(value.type)
+                let currentModule = value
+
+                //remove unneeeded fields
+                currentModule = removeFieldsFromObj(currentModule, ['export'])
+
+                const modRenderType = determineModRenderType(currentModule.type)
+                currentModule.type = modVariationType(currentModule.type)
 
                 //transform Photo Gallery Settings
-                if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && value.settings) {
-                    value.settings = createGallerySettings(value.settings, value.blockSwitch1, value.type)
+                if ((modRenderType === 'PhotoGallery' || modRenderType === 'Testimonials') && currentModule.settings) {
+                    currentModule.settings = createGallerySettings(currentModule.settings, currentModule.blockSwitch1, currentModule.type)
                 }
 
                 if (modRenderType === 'PhotoGrid' || modRenderType === 'Banner' || modRenderType === 'Parallax' || modRenderType === 'PhotoGallery') {
-                    value.items = alternatePromoColors(value.items, themeStyles, value.well)
+                    currentModule.items = alternatePromoColors(currentModule.items, themeStyles, currentModule.well)
                 }
 
                 if (modRenderType === 'Parallax' || modRenderType === 'Banner' || modRenderType === 'PhotoGallery') {
-                    value.items = createItemStyles(value.items, value.well, modRenderType, value.type)
+                    currentModule.items = createItemStyles(currentModule.items, currentModule.well, modRenderType, currentModule.type)
+                }
+
+                //imagesize transforms
+                if (currentModule.imgsize === 'widescreen_2-4_1') {
+                    console.log('imagesize change')
+                    currentModule.imgsize = 'widescreen_2_4_1'
+                    //maybe change to imageratio
                 }
 
                 //remove empty items
-                value.items = value.items.filter((modItem: {}) => Object.keys(modItem).length !== 0)
+                currentModule.items = currentModule.items.filter((modItem: {}) => Object.keys(modItem).length !== 0)
+                console.log('here is a columns', currentModule.columns)
+                const schemaNum = z.coerce.number()
+
+                if (currentModule.columns) {
+                    currentModule.columns = schemaNum.parse(currentModule.columns)
+                }
 
                 let itemCount = 0
                 //loop for each item
-                for (let i = 0; i < value.items.length; i++) {
-                    const currentItem = value.items[i]
+                for (let i = 0; i < currentModule.items.length; i++) {
+                    let currentItem = currentModule.items[i]
+                    /*                     let currentItem = currentModule.items[i]
                     itemCount += 1
 
                     //zod type coercian
                     const schemaNum = z.coerce.number()
                     if (currentItem.columns) {
-                        value.items[i].columns = schemaNum.parse(value.items[i].columns)
+                        currentModule.items[i].columns = schemaNum.parse(currentModule.items[i].columns)
                     }
 
                     //Change lazy loading to off for first module in photogallery
-                    value.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : value.lazy
+                    currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
 
                     let imagePriority = false
-                    if (value.lazy === 'off') {
+                    if (currentModule.lazy === 'off') {
                         imagePriority = true
                     }
                     //replace line breaks from cms
-                    if (value.items[i].desc) {
-                        value.items[i].desc = convertDescText(currentItem.desc)
+                    if (currentModule.items[i].desc) {
+                        currentModule.items[i].desc = convertDescText(currentItem.desc)
                     }
 
                     let isFeatureButton
                     if (
-                        value.well &&
+                        currentModule.well &&
                         modRenderType != 'PhotoGrid' &&
                         modRenderType != 'Parallax' &&
                         modRenderType != 'PhotoGallery' &&
@@ -376,24 +401,27 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                     }
 
                     //create button styles
-                    const btnStyles = createBtnStyles(value, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
+                    const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
 
-                    const nextImageSizes = createImageSizes(modRenderType, value.columns)
+                    const nextImageSizes = createImageSizes(modRenderType, currentModule.columns)
 
                     const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
                         currentItem,
                         modRenderType,
-                        value.columns
+                        currentModule.columns
                     )
+
+                    //create links array and remove single link fields
+                    currentItem = transformLinksInItem(currentItem)
 
                     //check if article is beach and hero
                     const isBeaconHero = modRenderType === 'article' && currentItem.isFeatured === 'active' ? true : false
 
-                    const imageIcon = btnIconConvert(value.items[i].icon3 || '')
+                    const imageIcon = btnIconConvert(currentModule.items[i].icon3 || '')
 
                     //update each item's data
-                    value.items[i] = {
-                        ...value.items[i],
+                    currentModule.items[i] = {
+                        ...currentModule.items[i],
                         buttonList: buttonList,
                         imageIcon: imageIcon,
                         linkNoBtn: linkNoBtn,
@@ -407,11 +435,15 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                         btnStyles: btnStyles,
                         nextImageSizes: nextImageSizes,
                         isFeatureButton: isFeatureButton,
+                        //links: transformItemLinks(currentModule.items[i]),
                     }
+                    currentModule.items[i] = removeFieldsFromObj(currentModule.items[i], ['editingIcon1', 'editingIcon2', 'editingIcon3', 'iconSelected']) */
+
+                    currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles)
 
                     //decide if image is to be cropped to a certain dimension
-                    if (currentItem.image) {
-                        const imageType = !['no_sizing', 'no_set_height'].includes(value.imgsize)
+                    /* if (currentItem.image) {
+                        const imageType = !['no_sizing', 'no_set_height'].includes(currentModule.imgsize)
                             ? 'crop'
                             : modRenderType === 'Banner'
                             ? 'crop'
@@ -419,19 +451,19 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                             ? 'crop'
                             : 'nocrop'
 
-                        value.items[i] = {
-                            ...value.items[i],
+                        currentModule.items[i] = {
+                            ...currentModule.items[i],
                             imageType: imageType,
                         }
-                    }
+                    } */
                 }
 
                 //replace class with customClassName
                 let newModule
-                if (value.class) {
-                    newModule = replaceKey(value, 'class', 'customClassName')
+                if (currentModule.class) {
+                    newModule = replaceKey(currentModule, 'class', 'customClassName')
                 } else {
-                    newModule = { ...value }
+                    newModule = { ...currentModule }
                 }
 
                 //add contactFormData in form object
@@ -452,6 +484,97 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
         }
     }
     return columnsData
+}
+
+const transformModuleItem = (
+    currentModule: LunaModule,
+    currentItem: ModuleItem,
+    itemCount: number,
+    modCount: number,
+    modRenderType: string,
+    key: string,
+    themeStyles: ThemeStyles
+) => {
+    //let currentItem = currentModule.items[i]
+    itemCount += 1
+
+    //Change lazy loading to off for first module in photogallery
+    currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
+
+    let imagePriority = false
+    if (currentModule.lazy === 'off') {
+        imagePriority = true
+    }
+    //replace line breaks from cms
+    if (currentItem.desc) {
+        currentItem.desc = convertDescText(currentItem.desc)
+    }
+
+    let isFeatureButton
+    if (
+        currentModule.well &&
+        modRenderType != 'PhotoGrid' &&
+        modRenderType != 'Parallax' &&
+        modRenderType != 'PhotoGallery' &&
+        currentItem.isFeatured === 'active' &&
+        isOneButton(currentItem) &&
+        modRenderType != 'PhotoGallery'
+    ) {
+        isFeatureButton = true
+    }
+
+    //create button styles
+    const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
+
+    const nextImageSizes = createImageSizes(modRenderType, currentModule.columns)
+
+    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
+
+    //create links array and remove single link fields
+    currentItem = transformLinksInItem(currentItem)
+
+    //check if article is beach and hero
+    const isBeaconHero = modRenderType === 'article' && currentItem.isFeatured === 'active' ? true : false
+
+    const imageIcon = btnIconConvert(currentItem.icon3 || '')
+
+    //decide if image is to be cropped to a certain dimension
+    if (currentItem.image) {
+        const imageType = !['no_sizing', 'no_set_height'].includes(currentModule.imgsize)
+            ? 'crop'
+            : modRenderType === 'Banner'
+            ? 'crop'
+            : modRenderType === 'Parallax'
+            ? 'crop'
+            : 'nocrop'
+
+        currentItem = {
+            ...currentItem,
+            imageType: imageType,
+        }
+    }
+
+    //update each item's data
+    currentItem = {
+        ...currentItem,
+        buttonList: buttonList,
+        imageIcon: imageIcon,
+        linkNoBtn: linkNoBtn,
+        twoButtons: twoButtons,
+        isWrapLink: isWrapLink,
+        visibleButton: visibleButton,
+        isBeaconHero: isBeaconHero,
+        imagePriority: imagePriority,
+        //hasGridCaption: hasGridCaption,
+        itemCount: itemCount,
+        btnStyles: btnStyles,
+        nextImageSizes: nextImageSizes,
+        isFeatureButton: isFeatureButton,
+        //links: transformItemLinks(currentItem),
+    }
+    currentItem = removeFieldsFromObj(currentItem, ['editingIcon1', 'editingIcon2', 'editingIcon3', 'iconSelected'])
+
+    return currentItem
 }
 
 export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: any, code: { CSS: string }, currentPageList: any, basePath: string) => {
@@ -529,12 +652,12 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return { data: data, pageList: pageList }
 } */
 
-export const createPageList = (value: { title: string; slug: string; id: String; page_type: string }) => {
+export const createPageList = (page: { title: string; slug: string; id: String; page_type: string }) => {
     const pageData = {
-        name: value.title,
-        slug: value.slug,
-        id: value.id,
-        page_type: value.page_type,
+        name: page.title,
+        slug: page.slug,
+        id: page.id,
+        page_type: page.page_type,
     }
 
     return pageData
