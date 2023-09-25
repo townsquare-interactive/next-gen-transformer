@@ -68,7 +68,7 @@ interface Item {
     desc?: string
     pagelink?: string
     weblink?: string
-    actionlbl?: string
+    actionlbl?: string | number
     newwindow?: string | number
     pagelink2?: string
     weblink2?: string
@@ -536,7 +536,7 @@ export interface LunaModuleItem {
     headline?: string
     isPlugin?: boolean
     pagelink?: string
-    actionlbl?: string
+    actionlbl?: string | number
     actionlbl2?: string
     headerTag?: string
     imageSize?: any
@@ -644,7 +644,7 @@ export interface ModuleItem extends LunaModuleItem {
         weblink?: string
         pagelink2?: string
         weblink2?: string
-        actionlbl?: string
+        actionlbl?: string | number
         actionlbl2?: string
         btnSize?: string
         btnSize2?: string
@@ -661,7 +661,7 @@ export interface ModuleItem extends LunaModuleItem {
     caption_tag?: string
     img_alt_tag?: string
     stars?: string
-    actionlbl?: string
+    actionlbl?: string | number
     modColor1?: string
     modOpacity?: number
     headerTag?: string

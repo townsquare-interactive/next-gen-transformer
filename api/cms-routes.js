@@ -12,7 +12,6 @@ router.post('/save', async (req, res) => {
     try {
         const url = req.body.siteData.config.website.url
         const basePath = stripUrl(url)
-
         const data = await transformLuna(req)
         await publish({ ...data })
 

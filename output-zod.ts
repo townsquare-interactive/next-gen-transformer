@@ -52,30 +52,35 @@ const Address = z.object({
     url: z.optional(z.string()),
 })
 
+const hours = z.object({
+    friday: z.string().nullish(),
+    monday: z.string().nullish(),
+    sunday: z.string().nullish(),
+    tuesday: z.string().nullish(),
+    saturday: z.string().nullish(),
+    thursday: z.string().nullish(),
+    wednesday: z.string().nullish(),
+})
+
+//const onlyNumbers = new RegExp(/^\d+$/)
+
+//regext example .regex(/^[2-9]/, 'Area code cannot start with a 1')
 const Contact = z.object({
     email: z
         .array(
             z.object({
                 name: z.string().optional(),
-                email: z.string().optional(),
+                email: z.string().nullish(),
                 disabled: z.string().optional(),
                 isPrimaryEmail: z.boolean().optional(),
             })
         )
         .optional(),
-    hours: z.object({
-        friday: z.string().nullish(),
-        monday: z.string().nullish(),
-        sunday: z.string().nullish(),
-        tuesday: z.string().nullish(),
-        saturday: z.string().nullish(),
-        thursday: z.string().nullish(),
-        wednesday: z.string().nullish(),
-    }),
+    hours: z.optional(hours),
     phone: z.array(
         z.object({
             name: z.string(),
-            number: z.string(),
+            number: z.string().optional(),
             disabled: z.string(),
             isPrimaryPhone: z.boolean(),
         })
@@ -93,7 +98,7 @@ const Contact = z.object({
     hideState: z.optional(z.boolean()),
     isPrimary: z.optional(z.boolean()),
     hideAddress: z.optional(z.boolean()),
-    displayInMap: z.optional(z.boolean()), //remove
+    displayInMap: z.optional(z.boolean()),
     hideAddress2: z.optional(z.boolean()),
     displayInFooter: z.optional(z.boolean()),
     contactLinks: z.optional(
@@ -266,10 +271,6 @@ const ModuleItemSchema = z.object({
     pagelinkId: z.optional(z.number().or(z.string())),
     bkgrd_color: z.optional(z.string()),
     pagelink2Id: z.optional(z.string()),
-    /*  editingIcon1: z.optional(z.boolean()), //remove
-    editingIcon2: z.optional(z.string()), //remove
-    editingIcon3: z.optional(z.string()), //remove
-    iconSelected: z.optional(z.string()), //remove */
     promoColor: z.optional(z.string()),
     itemStyle: z.optional(
         z.union([

@@ -51,8 +51,7 @@ export const transformLuna = async (req: LunaRequest) => {
             siteIdentifier: basePath,
             usingPreviewMode: false,
             siteLayout: globalFile,
-            pages: newPageData.pages,
-
+            pages: newPageData.pages || [],
             assets: [],
             globalStyles: globalStyles,
         }
