@@ -782,12 +782,12 @@ export const createStrapiButtonVars = (currentItem: ModuleItem, modRenderType: s
 
         currentItem = { ...currentItem, ...btnData }
 
-        const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, columns)
+        const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, columns)
 
         currentItem = {
             ...currentItem,
             linkNoBtn: linkNoBtn,
-            twoButtons: twoButtons,
+            btnCount: btnCount,
             isWrapLink: isWrapLink,
             visibleButton: visibleButton,
             buttonList: buttonList,

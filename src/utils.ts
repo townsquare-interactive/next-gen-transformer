@@ -310,12 +310,11 @@ export const determineNavParent = (menu: CMSNavItem[]) => {
 }
 
 export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number | string) => {
-    const linkNoBtn = isButton(currentItem) === false && isLink(currentItem) === true
-
-    const singleButton = isOneButton(currentItem)
-    const twoButtons = isTwoButtons(currentItem)
-    const isWrapLink = (singleButton || linkNoBtn) && modType != 'article'
-
+    // const singleButton = isOneButton(currentItem)
+    const btnCount = decideBtnCount(currentItem)
+    //const twoButtons = isTwoButtons(currentItem)
+    const linkNoBtn = btnCount === 0 && isLink(currentItem) === true
+    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article'
     const visibleButton = linkAndBtn(currentItem)
 
     const determineBtnSize = (btnSize: string, modType: string, columns: number | string) => {
@@ -361,7 +360,7 @@ export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modTyp
         },
     ]
 
-    return { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList }
+    return { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList }
 }
 
 export const createBtnStyles = (
@@ -447,6 +446,24 @@ export function isOneButton(currentItem: LunaModuleItem) {
         return true
     } else {
         return false
+    }
+}
+
+export function decideBtnCount(currentItem: LunaModuleItem) {
+    if (
+        (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
+        (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
+    ) {
+        return 1
+    } else if (
+        currentItem.actionlbl &&
+        currentItem.actionlbl2 &&
+        (currentItem.pagelink || currentItem.weblink) &&
+        (currentItem.pagelink2 || currentItem.weblink2)
+    ) {
+        return 2
+    } else if (!currentItem.actionlbl && !currentItem.actionlbl2) {
+        return 0
     }
 }
 

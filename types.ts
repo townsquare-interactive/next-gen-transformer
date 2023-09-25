@@ -84,7 +84,7 @@ interface Item {
     pagelink2Id?: string
     buttonList: Button[]
     linkNoBtn: boolean
-    twoButtons: boolean
+    btnCount?: number
     isWrapLink: boolean
     visibleButton: boolean
     isBeaconHero: boolean
@@ -653,7 +653,8 @@ export interface ModuleItem extends LunaModuleItem {
     }[]
     plugin?: string
     linkNoBtn?: boolean
-    twoButtons?: boolean
+    //twoButtons?: boolean
+    btnCount?: number
     isWrapLink?: boolean
     visibleButton?: boolean
     buttonList?: any[]

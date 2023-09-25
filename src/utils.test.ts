@@ -1,4 +1,15 @@
-import { wrapTextWithPTags, isPromoButton, removeDuplicatesArray, convertSpecialTokens, replaceKey, createItemStyles, removeFieldsFromObj } from './utils'
+import {
+    wrapTextWithPTags,
+    isPromoButton,
+    removeDuplicatesArray,
+    convertSpecialTokens,
+    replaceKey,
+    createItemStyles,
+    removeFieldsFromObj,
+    isLink,
+    isButton,
+    decideBtnCount,
+} from './utils'
 import { it, describe, expect } from 'vitest'
 
 describe('Wrap with P Tags', () => {
@@ -130,5 +141,46 @@ describe('Remove Fields From Object', () => {
     //items: LunaModuleItem[], well: string, modType: string, type: string
     it('should result in the obj without the fields passed in the array', () => {
         expect(removeFieldsFromObj(obj, fields)).toStrictEqual(newObj)
+    })
+})
+
+describe('isLink: Check if item has any link value', () => {
+    let item = { image: '', modColor1: '', id: '1' }
+
+    it('should decide the item does not have a link because of empty link values ', () => {
+        expect(isLink(item)).toStrictEqual(false)
+    })
+    it('should decide the item has a link because of the pagelink value', () => {
+        expect(isLink({ ...item, pagelink: '/home' })).toStrictEqual(true)
+    })
+})
+
+describe('isButton: Check if item has label values for a button', () => {
+    let item = { image: '', modColor1: '', id: '1' }
+
+    it('should decide the item does not have a button because of empty label values ', () => {
+        expect(isButton(item)).toStrictEqual(false)
+    })
+    it('should decide the item has a button because of the actionlbl value', () => {
+        expect(isButton({ ...item, actionlbl: 'click here' })).toStrictEqual(true)
+    })
+
+    it('should decide the item has a link because of the actionlbl2 value', () => {
+        expect(isButton({ ...item, actionlbl2: 'click here' })).toStrictEqual(true)
+    })
+})
+
+describe('btnCount: Decide how many buttons are in an item', () => {
+    let item = { image: '', modColor1: '', id: '1' }
+
+    it('should decide 0 btns in an item without the correct fields', () => {
+        expect(decideBtnCount(item)).toStrictEqual(0)
+    })
+    it('should decide the item has 1 button because of the actionlbl value and pagelink', () => {
+        expect(decideBtnCount({ ...item, actionlbl: 'click here', pagelink: '/home' })).toStrictEqual(1)
+    })
+
+    it('should decide the item has 2 buttons because of the multiple label values and links', () => {
+        expect(decideBtnCount({ ...item, actionlbl: 'btn1', actionlbl2: 'btn2', pagelink: '/home', weblink2: '/home' })).toStrictEqual(2)
     })
 })

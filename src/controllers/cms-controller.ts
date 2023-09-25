@@ -366,79 +366,6 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                 //loop for each item
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
-                    /*                     let currentItem = currentModule.items[i]
-                    itemCount += 1
-
-                    //zod type coercian
-                    const schemaNum = z.coerce.number()
-                    if (currentItem.columns) {
-                        currentModule.items[i].columns = schemaNum.parse(currentModule.items[i].columns)
-                    }
-
-                    //Change lazy loading to off for first module in photogallery
-                    currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
-
-                    let imagePriority = false
-                    if (currentModule.lazy === 'off') {
-                        imagePriority = true
-                    }
-                    //replace line breaks from cms
-                    if (currentModule.items[i].desc) {
-                        currentModule.items[i].desc = convertDescText(currentItem.desc)
-                    }
-
-                    let isFeatureButton
-                    if (
-                        currentModule.well &&
-                        modRenderType != 'PhotoGrid' &&
-                        modRenderType != 'Parallax' &&
-                        modRenderType != 'PhotoGallery' &&
-                        currentItem.isFeatured === 'active' &&
-                        isOneButton(currentItem) &&
-                        modRenderType != 'PhotoGallery'
-                    ) {
-                        isFeatureButton = true
-                    }
-
-                    //create button styles
-                    const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
-
-                    const nextImageSizes = createImageSizes(modRenderType, currentModule.columns)
-
-                    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
-                        currentItem,
-                        modRenderType,
-                        currentModule.columns
-                    )
-
-                    //create links array and remove single link fields
-                    currentItem = transformLinksInItem(currentItem)
-
-                    //check if article is beach and hero
-                    const isBeaconHero = modRenderType === 'article' && currentItem.isFeatured === 'active' ? true : false
-
-                    const imageIcon = btnIconConvert(currentModule.items[i].icon3 || '')
-
-                    //update each item's data
-                    currentModule.items[i] = {
-                        ...currentModule.items[i],
-                        buttonList: buttonList,
-                        imageIcon: imageIcon,
-                        linkNoBtn: linkNoBtn,
-                        twoButtons: twoButtons,
-                        isWrapLink: isWrapLink,
-                        visibleButton: visibleButton,
-                        isBeaconHero: isBeaconHero,
-                        imagePriority: imagePriority,
-                        //hasGridCaption: hasGridCaption,
-                        itemCount: itemCount,
-                        btnStyles: btnStyles,
-                        nextImageSizes: nextImageSizes,
-                        isFeatureButton: isFeatureButton,
-                        //links: transformItemLinks(currentModule.items[i]),
-                    }
-                    currentModule.items[i] = removeFieldsFromObj(currentModule.items[i], ['editingIcon1', 'editingIcon2', 'editingIcon3', 'iconSelected']) */
-
                     currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles)
 
                     //decide if image is to be cropped to a certain dimension
@@ -528,7 +455,7 @@ const transformModuleItem = (
 
     const nextImageSizes = createImageSizes(modRenderType, currentModule.columns)
 
-    const { linkNoBtn, twoButtons, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
+    const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
 
     //create links array and remove single link fields
     currentItem = transformLinksInItem(currentItem)
@@ -560,7 +487,7 @@ const transformModuleItem = (
         buttonList: buttonList,
         imageIcon: imageIcon,
         linkNoBtn: linkNoBtn,
-        twoButtons: twoButtons,
+        btnCount: btnCount,
         isWrapLink: isWrapLink,
         visibleButton: visibleButton,
         isBeaconHero: isBeaconHero,

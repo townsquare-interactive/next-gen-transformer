@@ -285,7 +285,7 @@ const ModuleItemSchema = z.object({
     captionStyle: z.optional(z.string()),
     buttonList: z.optional(ButtonList),
     linkNoBtn: z.boolean(),
-    twoButtons: z.boolean(),
+    btnCount: z.number(),
     isWrapLink: z.boolean(),
     visibleButton: z.boolean(),
     isBeaconHero: z.optional(z.boolean()),
