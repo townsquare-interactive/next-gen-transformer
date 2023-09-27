@@ -1,5 +1,4 @@
 import { z } from 'zod'
-
 const Slot = z.object({})
 
 const CompositeItemSchema = z.object({
@@ -175,6 +174,15 @@ const ThemeStyles = z.object({
     promoColor4: z.string(),
     promoColor5: z.string(),
     promoColor6: z.string(),
+})
+
+const navStuff = z.object({
+    ID: z.number(),
+    menu_list_id: z.number(),
+    title: z.string(),
+    post_type: z.string(),
+    type: z.string().nullish(),
+    menu_item_parent: z.union([z.number(), z.string()]),
 })
 
 const CMSNavItem = z.object({

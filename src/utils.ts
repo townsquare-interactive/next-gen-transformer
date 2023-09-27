@@ -1,4 +1,4 @@
-import z from 'zod'
+import { z } from 'zod'
 import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo } from '../types'
 
 export function socialConvert(str: string) {
@@ -206,13 +206,9 @@ export function transformcontact(contactInfo: Contact) {
     }
 
     const newAdd = contactInfo.address.street?.replaceAll(' ', '+')
-
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
-
     const contactLinks = []
-
     const multiPhones = contactInfo.phone.length > 1 ? true : false
-
     const hideEmail = !multiPhones && contactInfo.email.length > 1
 
     for (const x in contactInfo.phone) {
@@ -268,8 +264,8 @@ export const transformNav = (menu: CMSNavItem[], siteUrl: string) => {
             if (menu[i].title) {
                 const subSlug = subMenu1.title.replace(/\s+/g, '-')
                 menu[i].submenu[x] = { ...subMenu1, slug: subSlug.toLowerCase(), url: subMenu1.url ? stripSiteAndUrl(subMenu1.url, siteUrl) : '' }
-                //loop through second submenu
 
+                //loop through second submenu
                 if (menu[i].submenu[x]) {
                     for (let k = 0; k < menu[i].submenu[x].submenu.length; k++) {
                         const subMenu2 = menu[i].submenu[x].submenu[k]

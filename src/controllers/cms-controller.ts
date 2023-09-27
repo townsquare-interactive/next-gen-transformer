@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
 config()
 import sass from 'sass'
-import z from 'zod'
+import { z } from 'zod'
 
 import {
     socialConvert,
