@@ -279,6 +279,19 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
     const transformedLogos = removeFieldsFromObj(file.logos, ['list', 'fonts'])
 
+    //Using footer composite, create modal field for global file
+    let modalData
+    if (file.composites?.footer?.modules?.items) {
+        const componentItems = file.composites?.footer.modules.items
+        const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+
+        if (modalItem.length > 0) {
+            modalData = replaceKey(modalItem[0], 'title', 'headline')
+            modalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
+            console.log('pop up modal', modalData)
+        }
+    }
+
     const globalFile = {
         logos: transformedLogos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
@@ -288,6 +301,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
         url: file.config.website.url,
         composites: file.composites,
+        modalData: modalData,
         cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList, url) : currentLayout.cmsNav,
         navAlign: file.navigation ? file.navigation.menu_alignment : 'left',
         seo: file.seo.global_seo_options ? { global: file.seo.global_seo_options } : currentLayout.seo || {},

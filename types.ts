@@ -1,3 +1,5 @@
+import { CompositeData } from './output-zod'
+
 export interface Page {
     data: {
         id: string
@@ -325,9 +327,7 @@ export interface SiteData {
     contact: Contact
     siteName: string
     url: string
-    composites: {
-        footer: Composite
-    }
+    composites: CompositeData
     cmsColors: ThemeStyles
     theme: string
     cmsUrl: string
@@ -408,7 +408,7 @@ export interface Layout {
     phoneNumber: string
     email: string
     url: string
-    composites: {
+    /*     composites: {
         footer: {
             type: string
             layout: null
@@ -425,7 +425,8 @@ export interface Layout {
             }
             sections: null
         }
-    }
+    } */
+    composites: CompositeData
     cmsNav: CMSNavItem[]
     seo: {
         global: {

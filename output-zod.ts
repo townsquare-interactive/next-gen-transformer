@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const Slot = z.object({})
 
-const Composite = z.object({
+/* const Composite = z.object({
     type: z.string(),
     layout: z.unknown(),
     columns: z.number(),
@@ -11,7 +11,33 @@ const Composite = z.object({
         items: z.object({}),
     }),
     sections: z.unknown(),
+}) */
+const CompositeItemSchema = z.object({
+    title: z.string().optional(),
+    component: z.string(),
+    nav_menu: z.nullable(z.any()),
+    name: z.string(),
+    subtitle: z.string().optional(),
+    text: z.string().optional(),
+    autoopen: z.boolean().optional(),
 })
+
+const CompositeSchema = z.object({
+    footer: z
+        .object({
+            type: z.string(),
+            layout: z.nullable(z.any()),
+            columns: z.number(),
+            modules: z.object({
+                items: z.array(CompositeItemSchema),
+                type: z.string(),
+            }),
+            sections: z.nullable(z.any()),
+        })
+        .optional(),
+})
+
+export type CompositeData = z.infer<typeof CompositeSchema>
 
 const Logo = z.object({
     // fonts: z.array(z.unknown()),
@@ -33,7 +59,6 @@ const Logo = z.object({
     //list: z.record(z.string()), //remove
 })
 
-//pieces
 const SeoSchema = z.object({
     title: z.optional(z.string()),
     descr: z.optional(z.string()),
@@ -63,7 +88,6 @@ const hours = z.object({
 })
 
 //const onlyNumbers = new RegExp(/^\d+$/)
-
 //regext example .regex(/^[2-9]/, 'Area code cannot start with a 1')
 const Contact = z.object({
     email: z
@@ -168,7 +192,7 @@ const CMSNavItem = z.object({
     menu_list_id: z.number(),
     title: z.string(),
     post_type: z.string(),
-    type: z.union([z.string(), z.null()]),
+    type: z.string().nullish(),
     menu_item_parent: z.union([z.number(), z.string()]),
     object_id: z.number(),
     object: z.string(),
@@ -199,12 +223,8 @@ export const SiteDataSchema = z.object({
     contact: Contact,
     siteName: z.string(),
     url: z.string(),
-    /*     composites: z.optional(
-        z.object({
-            footer: z.optional(Composite),
-        })
-    ), */
-    composites: z.unknown(),
+    composites: CompositeSchema.nullish(),
+    modalData: CompositeItemSchema.optional(),
     cmsNav: z.array(CMSNavItemSchema).optional(),
     cmsColors: ThemeStyles,
     theme: z.string(),
@@ -213,7 +233,6 @@ export const SiteDataSchema = z.object({
     favicon: z.string(),
     fontImport: z.string(),
     config: Config,
-    //error: z.unknown(), //remove
 })
 
 const ButtonList = z.array(
@@ -270,7 +289,7 @@ const ModuleItemSchema = z.object({
     newwindow2: z.optional(z.string()),
     pagelinkId: z.optional(z.number().or(z.string())),
     bkgrd_color: z.optional(z.string()),
-    pagelink2Id: z.optional(z.string()),
+    pagelink2Id: z.optional(z.number().or(z.string())),
     promoColor: z.optional(z.string()),
     itemStyle: z.optional(
         z.union([
@@ -305,6 +324,19 @@ const ModuleItemSchema = z.object({
 
 const EmptyArray = z.array(z.string()).refine((arr) => arr.length === 0)
 
+const imageRatioList = [
+    'square_1_1',
+    'round_1_1',
+    'landscape_4_3',
+    'landscape_3_2',
+    'portrait_2_3',
+    'portrait_3_4',
+    'widescreen_16_9',
+    'widescreen_3_1',
+    'widescreen_2_4_1',
+    'no_sizing',
+]
+
 const AttributesSchema = z.object({
     id: z.string(),
     uid: z.string(),
@@ -316,18 +348,9 @@ const AttributesSchema = z.object({
     title: z.string().optional(),
     //export: z.number(),
     columns: z.number().min(1),
-    imgsize: z.union([
-        z.literal('square_1_1'),
-        z.literal('round_1_1'),
-        z.literal('landscape_4_3'),
-        z.literal('landscape_3_2'),
-        z.literal('portrait_2_3'),
-        z.literal('portrait_3_4'),
-        z.literal('widescreen_16_9'),
-        z.literal('widescreen_3_1'),
-        z.literal('widescreen_2_4_1'),
-        z.literal('no_sizing'),
-    ]),
+    imgsize: z.string().refine((value) => imageRatioList.includes(value), {
+        message: 'Invalid image ratio',
+    }),
     lightbox: z.string().optional(),
     blockField1: z.string().optional(),
     blockField2: z.string().optional(),
