@@ -1,4 +1,4 @@
-import { z } from 'zod'
+//import { z } from 'zod'
 import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo } from '../types'
 
 export function socialConvert(str: string) {
@@ -514,9 +514,10 @@ export const removeFieldsFromObj = (obj: any, fields: any[]) => {
 
 export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: string | number, type: string) => {
     //convert to numbers
-    const schemaNum = z.coerce.number()
-    const interval = schemaNum.parse(settings.interval) * 1000
-    const restartDelay = schemaNum.parse(settings.restartdelay)
+    //const schemaNum = z.coerce.number()
+    const interval = Number(settings.interval) * 1000
+    const restartDelay = Number(settings.restartdelay)
+    //const restartDelay = schemaNum.parse(settings.restartdelay)
 
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,

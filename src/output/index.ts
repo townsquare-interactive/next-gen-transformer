@@ -2,18 +2,18 @@ import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import { PublishData } from '../../types.js'
 import { SiteDataSchema, zodDataParse, CMSPagesSchema } from '../../output-zod.js'
-import { z } from 'zod'
+//import { z } from 'zod'
 
-const stringSchema = z.string()
+//const stringSchema = z.string()
 
 export const publish = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
 
     //Use zod to check data for types
-    stringSchema.parse(siteIdentifier)
+    //stringSchema.parse(siteIdentifier)
     //stringSchema.parse(globalStyles)
-    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
-    zodDataParse(pages, CMSPagesSchema, 'Pages')
+    //zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
+    //zodDataParse(pages, CMSPagesSchema, 'Pages')
 
     const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
 
