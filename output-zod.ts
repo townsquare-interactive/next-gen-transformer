@@ -2,16 +2,6 @@ import { z } from 'zod'
 
 const Slot = z.object({})
 
-/* const Composite = z.object({
-    type: z.string(),
-    layout: z.unknown(),
-    columns: z.number(),
-    modules: z.object({
-        type: z.string(),
-        items: z.object({}),
-    }),
-    sections: z.unknown(),
-}) */
 const CompositeItemSchema = z.object({
     title: z.string().optional(),
     component: z.string(),
