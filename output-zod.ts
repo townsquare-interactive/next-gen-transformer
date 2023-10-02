@@ -28,22 +28,23 @@ const CompositeSchema = z.object({
 
 export type CompositeData = z.infer<typeof CompositeSchema>
 
+const LogoItem = z
+    .object({
+        slots: z.array(Slot),
+        activeSlots: z.array(z.number()),
+    })
+    .nullish()
+
 const Logo = z.object({
     // fonts: z.array(z.unknown()),
     footer: z.object({
-        pct: z.nullable(z.number()),
-        slots: z.array(Slot),
-        activeSlots: z.array(z.number()),
+        LogoItem,
     }),
     header: z.object({
-        pct: z.nullable(z.number()),
-        slots: z.array(Slot),
-        activeSlots: z.array(z.number()),
+        LogoItem,
     }),
     mobile: z.object({
-        pct: z.nullable(z.number()),
-        slots: z.array(Slot),
-        activeSlots: z.array(z.number()),
+        LogoItem,
     }),
     //list: z.record(z.string()), //remove
 })
@@ -129,10 +130,12 @@ const Contact = z.object({
 })
 
 const Config = z.object({
-    mailChimp: z.object({
-        audId: z.string(),
-        datacenter: z.string(),
-    }),
+    mailChimp: z
+        .object({
+            audId: z.string(),
+            datacenter: z.string(),
+        })
+        .optional(),
     zapierUrl: z.string(),
     makeUrl: z.string(),
 })
@@ -229,7 +232,7 @@ export const SiteDataSchema = z.object({
     cmsUrl: z.string(),
     s3Folder: z.string(),
     favicon: z.string(),
-    fontImport: z.string(),
+    fontImport: z.string().describe('Font import css'),
     config: Config,
 })
 

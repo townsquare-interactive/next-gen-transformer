@@ -33,10 +33,11 @@ app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000
 
 app.use('/api/cms-routes', routes)
 
-const PORT = process.env.PORT || 8080
+//const PORT = process.env.PORT || 8080
+const PORT = 8080
 
 app.get('/', (req, res) => {
-    res.send(`API Running ${process.env.PORT}`)
+    res.send(`API Running ${PORT}`)
 })
 
 app.listen(PORT, () => console.log(`Server running in port ${PORT}`))

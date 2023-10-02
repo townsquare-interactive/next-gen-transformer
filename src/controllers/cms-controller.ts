@@ -3,6 +3,8 @@ config()
 import sass from 'sass'
 import { z } from 'zod'
 
+//const z = require()
+
 import {
     socialConvert,
     btnIconConvert,
@@ -33,7 +35,7 @@ import {
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
-import Module from 'module'
+//import Module from 'module'
 
 const toStringSchema = z.coerce.string()
 
@@ -312,11 +314,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
         fontImport: fontImportGroup,
         config: {
-            mailChimp: {
+            /* mailChimp: {
                 audId: 'd0b2dd1631',
                 datacenter: 'us21',
                 auth: process.env.MAILCHIMP_API_KEY,
-            },
+            }, */
             zapierUrl: process.env.ZAPIER_URL,
             makeUrl: process.env.MAKE_URL,
         },

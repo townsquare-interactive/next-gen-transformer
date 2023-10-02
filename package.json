@@ -13,7 +13,7 @@
     "license": "ISC",
     "dependencies": {
         "@aws-sdk/client-s3": "^3.160.0",
-        "@babel/node": "^7.22.6",
+        "@babel/node": "^7.22.19",
         "aws-sdk": "^2.1189.0",
         "axios": "^0.27.2",
         "body-parser": "^1.20.0",
@@ -23,14 +23,16 @@
         "json-to-css": "^0.1.0",
         "mongodb": "^4.8.1",
         "mongoose": "^6.5.2",
+        "node-sass": "^9.0.0",
         "request-promise": "^4.2.6",
         "uuid": "^9.0.0",
-        "zod": "^3.22.2"
+        "zod": "^3.22.2",
+        "zod-to-json-schema": "^3.21.4"
     },
     "devDependencies": {
-        "@babel/cli": "^7.22.9",
-        "@babel/core": "^7.22.9",
-        "@babel/preset-env": "^7.22.9",
+        "@babel/cli": "^7.23.0",
+        "@babel/core": "^7.23.0",
+        "@babel/preset-env": "^7.22.20",
         "@types/express": "^4.17.17",
         "@types/jsdom": "^21.1.2",
         "@types/node": "^20.4.2",

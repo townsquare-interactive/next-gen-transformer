@@ -2,18 +2,23 @@ import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import { PublishData } from '../../types.js'
 import { SiteDataSchema, zodDataParse, CMSPagesSchema } from '../../output-zod.js'
-//import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
+import { z } from 'zod'
 
-//const stringSchema = z.string()
+const stringSchema = z.string()
 
 export const publish = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
 
+    //create layout json schema
+    //const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
+    //console.log('json schema', JSON.stringify(layoutJsonSchema))
+
     //Use zod to check data for types
-    //stringSchema.parse(siteIdentifier)
-    //stringSchema.parse(globalStyles)
-    //zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
-    //zodDataParse(pages, CMSPagesSchema, 'Pages')
+    stringSchema.parse(siteIdentifier)
+    stringSchema.parse(globalStyles)
+    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
+    zodDataParse(pages, CMSPagesSchema, 'Pages')
 
     const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
 
