@@ -198,6 +198,21 @@ export const createContactForm = (formTitle: string, email: string) => {
     return contactFormData
 }
 
+export const transformModalData = (compositeItems: any) => {
+    let modalData
+    if (compositeItems) {
+        const componentItems = compositeItems
+        const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+
+        if (modalItem.length > 0) {
+            modalData = replaceKey(modalItem[0], 'title', 'headline')
+            modalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
+            console.log('pop up modal', modalData)
+        }
+    }
+    return modalData
+}
+
 export function transformcontact(contactInfo: Contact) {
     const icons = {
         phone: ['fas', 'phone'],

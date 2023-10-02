@@ -1,13 +1,15 @@
 import { z } from 'zod'
 const Slot = z.object({})
 
+const OptionalString = z.string().optional()
+
 const CompositeItemSchema = z.object({
-    title: z.string().optional(),
+    title: OptionalString,
     component: z.string(),
     nav_menu: z.nullable(z.any()),
     name: z.string(),
-    subtitle: z.string().optional(),
-    text: z.string().optional(),
+    subtitle: OptionalString,
+    text: OptionalString,
     autoopen: z.boolean().optional(),
 })
 
@@ -50,21 +52,21 @@ const Logo = z.object({
 })
 
 const SeoSchema = z.object({
-    title: z.optional(z.string()),
-    descr: z.optional(z.string()),
-    selectedImages: z.optional(z.string()),
-    imageOverride: z.optional(z.string()),
+    title: OptionalString,
+    descr: OptionalString,
+    selectedImages: OptionalString,
+    imageOverride: OptionalString,
 })
 
 const Address = z.object({
     zip: z.string(),
     city: z.string(),
-    name: z.optional(z.string()),
+    name: OptionalString,
     state: z.string(),
     street: z.string(),
-    street2: z.optional(z.string()),
+    street2: OptionalString,
     coordinates: z.optional(z.array(z.string())),
-    url: z.optional(z.string()),
+    url: OptionalString,
 })
 
 const hours = z.object({
@@ -83,9 +85,9 @@ const Contact = z.object({
     email: z
         .array(
             z.object({
-                name: z.string().optional(),
+                name: OptionalString,
                 email: z.string().nullish(),
-                disabled: z.string().optional(),
+                disabled: OptionalString,
                 isPrimaryEmail: z.boolean().optional(),
             })
         )
@@ -94,7 +96,7 @@ const Contact = z.object({
     phone: z.array(
         z.object({
             name: z.string(),
-            number: z.string().optional(),
+            number: OptionalString,
             disabled: z.string(),
             isPrimaryPhone: z.boolean(),
         })
@@ -179,15 +181,6 @@ const ThemeStyles = z.object({
     promoColor6: z.string(),
 })
 
-const navStuff = z.object({
-    ID: z.number(),
-    menu_list_id: z.number(),
-    title: z.string(),
-    post_type: z.string(),
-    type: z.string().nullish(),
-    menu_item_parent: z.union([z.number(), z.string()]),
-})
-
 const CMSNavItem = z.object({
     ID: z.number(),
     menu_list_id: z.number(),
@@ -232,19 +225,19 @@ export const SiteDataSchema = z.object({
     cmsUrl: z.string(),
     s3Folder: z.string(),
     favicon: z.string(),
-    fontImport: z.string().describe('Font import css'),
+    fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,
 })
 
 const ButtonList = z.array(
     z.object({
-        name: z.optional(z.string()),
-        link: z.optional(z.string()),
-        window: z.optional(z.string()),
-        label: z.optional(z.string()),
+        name: OptionalString,
+        link: OptionalString,
+        window: OptionalString,
+        label: OptionalString,
         active: z.boolean(),
         btnType: z.string(),
-        btnSize: z.optional(z.string()),
+        btnSize: OptionalString,
         linkType: z.string(),
         blockBtn: z.optional(z.boolean()),
     })
@@ -252,26 +245,26 @@ const ButtonList = z.array(
 
 const ModuleItemSchema = z.object({
     id: z.string(),
-    desc: z.optional(z.string()),
-    icon: z.optional(z.string()),
-    align: z.optional(z.string()),
-    icon2: z.optional(z.string()),
-    icon3: z.optional(z.string()),
-    image: z.optional(z.string()),
-    plugin: z.optional(z.string()),
-    btnSize: z.optional(z.string()),
-    btnType: z.optional(z.string()),
-    weblink: z.optional(z.string()),
-    btnSize2: z.optional(z.string()),
-    btnType2: z.optional(z.string()),
-    disabled: z.optional(z.string()),
-    headline: z.optional(z.string()),
-    isPlugin: z.optional(z.string()),
-    pagelink: z.optional(z.string()),
-    weblink2: z.optional(z.string()),
-    actionlbl: z.optional(z.string()),
-    captionOn: z.optional(z.string()),
-    headerTag: z.optional(z.string()),
+    desc: OptionalString,
+    icon: OptionalString,
+    align: OptionalString,
+    icon2: OptionalString,
+    icon3: OptionalString,
+    image: OptionalString,
+    plugin: OptionalString,
+    btnSize: OptionalString,
+    btnType: OptionalString,
+    weblink: OptionalString,
+    btnSize2: OptionalString,
+    btnType2: OptionalString,
+    disabled: OptionalString,
+    headline: OptionalString,
+    isPlugin: OptionalString,
+    pagelink: OptionalString,
+    weblink2: OptionalString,
+    actionlbl: OptionalString,
+    captionOn: OptionalString,
+    headerTag: OptionalString,
     imageSize: z.optional(
         z.object({
             width: z.number(),
@@ -279,19 +272,19 @@ const ModuleItemSchema = z.object({
             size: z.string().or(z.number()),
         })
     ),
-    modColor1: z.optional(z.string()),
-    newwindow: z.optional(z.string()),
-    pagelink2: z.optional(z.string()),
-    subheader: z.optional(z.string()),
-    actionlbl2: z.optional(z.string()),
-    isFeatured: z.optional(z.string()),
+    modColor1: OptionalString,
+    newwindow: OptionalString,
+    pagelink2: OptionalString,
+    subheader: OptionalString,
+    actionlbl2: OptionalString,
+    isFeatured: OptionalString,
     modOpacity: z.optional(z.number()),
     modSwitch1: z.optional(z.number()),
-    newwindow2: z.optional(z.string()),
+    newwindow2: OptionalString,
     pagelinkId: z.optional(z.number().or(z.string())),
-    bkgrd_color: z.optional(z.string()),
+    bkgrd_color: OptionalString,
     pagelink2Id: z.optional(z.number().or(z.string())),
-    promoColor: z.optional(z.string()),
+    promoColor: OptionalString,
     itemStyle: z.optional(
         z.union([
             z.object({
@@ -303,7 +296,7 @@ const ModuleItemSchema = z.object({
             z.object({}),
         ])
     ),
-    captionStyle: z.optional(z.string()),
+    captionStyle: OptionalString,
     buttonList: z.optional(ButtonList),
     linkNoBtn: z.boolean(),
     btnCount: z.number(),
@@ -312,14 +305,14 @@ const ModuleItemSchema = z.object({
     isBeaconHero: z.optional(z.boolean()),
     imagePriority: z.boolean(),
     itemCount: z.number().min(1),
-    btnStyles: z.optional(z.string()),
-    nextImageSizes: z.optional(z.string()),
+    btnStyles: OptionalString,
+    nextImageSizes: OptionalString,
     imageType: z.optional(z.union([z.literal('crop'), z.literal('nocrop')])),
     links: z.object({
-        weblink: z.optional(z.string()),
-        pagelink: z.optional(z.string()),
-        weblink2: z.optional(z.string()),
-        pagelink2: z.optional(z.string()),
+        weblink: OptionalString,
+        pagelink: OptionalString,
+        weblink2: OptionalString,
+        pagelink2: OptionalString,
     }),
 })
 
@@ -344,21 +337,21 @@ const AttributesSchema = z.object({
     lazy: z.string(),
     type: z.string(),
     well: z.string(),
-    align: z.string().optional(),
+    align: OptionalString,
     items: z.array(ModuleItemSchema),
-    title: z.string().optional(),
+    title: OptionalString,
     //export: z.number(),
     columns: z.number().min(1),
     imgsize: z.string().refine((value) => imageRatioList.includes(value), {
         message: 'Invalid image ratio',
     }),
-    lightbox: z.string().optional(),
-    blockField1: z.string().optional(),
-    blockField2: z.string().optional(),
+    lightbox: OptionalString,
+    blockField1: OptionalString,
+    blockField2: OptionalString,
     blockSwitch1: z.number(),
-    scale_to_fit: z.string().optional(),
-    customClassName: z.string().optional(),
-    modId: z.string().optional(),
+    scale_to_fit: OptionalString,
+    customClassName: OptionalString,
+    modId: OptionalString,
     modCount: z.number().min(1),
     columnLocation: z.number(),
     isSingleColumn: z.optional(z.boolean()),
@@ -395,12 +388,12 @@ export const CMSPagesSchema = z.array(
             hideTitle: z.number(),
             head_script: z.string(),
             columnStyles: z.string(),
-            page_type: z.optional(z.string()),
+            page_type: OptionalString,
         }),
         attrs: z.record(z.unknown()), //for page name changes
         seo: SeoSchema,
-        head_script: z.optional(z.string()),
-        JS: z.optional(z.string()),
+        head_script: OptionalString,
+        JS: OptionalString,
     })
 )
 
