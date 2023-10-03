@@ -217,7 +217,6 @@ const CMSNavItemSchema = z.object({
         .array(
             z
                 .object({
-                    //CMSNavItem: CMSNavItem.nullish(),
                     submenu: z.array(z.object({ CMSNavItem: CMSNavItem.nullish() })).nullish(),
                 })
                 .merge(CMSNavItem)
