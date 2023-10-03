@@ -51,6 +51,18 @@ const Logo = z.object({
     //list: z.record(z.string()), //remove
 })
 
+const socialItem = z.object({
+    id: z.number(),
+    name: z.string(),
+    format: z.string(),
+    label: z.string(),
+    value: z.string(),
+    enabled: z.number(),
+    input: z.array(z.string()),
+    url: z.string(),
+    icon: z.array(z.string()).optional(),
+})
+
 const SeoSchema = z.object({
     title: OptionalString,
     descr: OptionalString,
@@ -203,27 +215,29 @@ const CMSNavItemSchema = z.object({
     ...CMSNavItem.shape,
     submenu: z
         .array(
-            z.object({
-                CMSNavItem: CMSNavItem,
-                submenu: z.array(z.object({ CMSNavItem: CMSNavItem })),
-            })
+            z
+                .object({
+                    //CMSNavItem: CMSNavItem.nullish(),
+                    submenu: z.array(z.object({ CMSNavItem: CMSNavItem.nullish() })).nullish(),
+                })
+                .merge(CMSNavItem)
         )
         .optional(),
 })
 
 export const SiteDataSchema = z.object({
-    logos: Logo,
-    social: z.array(z.unknown()),
+    logos: Logo.describe('Data for all logo slots'),
+    social: z.array(socialItem),
     contact: Contact,
     siteName: z.string(),
     url: z.string(),
-    composites: CompositeSchema.nullish(),
-    modalData: CompositeItemSchema.optional(),
-    cmsNav: z.array(CMSNavItemSchema).optional(),
-    cmsColors: ThemeStyles,
-    theme: z.string(),
-    cmsUrl: z.string(),
-    s3Folder: z.string(),
+    composites: CompositeSchema.nullish().describe('modules in footer'),
+    modalData: CompositeItemSchema.optional().describe('regular pop up modal'),
+    cmsNav: z.array(CMSNavItemSchema.nullish()).nullish(),
+    cmsColors: ThemeStyles.describe('website theme colors'),
+    theme: z.string().describe('cms website theme'),
+    cmsUrl: z.string().describe('current luna url'),
+    s3Folder: z.string().describe('siteID where data is stored in s3'),
     favicon: z.string(),
     fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,

@@ -198,19 +198,21 @@ export const createContactForm = (formTitle: string, email: string) => {
     return contactFormData
 }
 
-export const transformModalData = (compositeItems: any) => {
-    let modalData
-    if (compositeItems) {
-        const componentItems = compositeItems
-        const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+export const transformCompositeItems = (compositeItems: any) => {
+    let newModalData
+    const componentItems = compositeItems
+    //seperate modal item
+    const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+    //all non modal items
+    const newCompositeItems = componentItems.filter((e: any) => e.component != 'popup_modal')
 
-        if (modalItem.length > 0) {
-            modalData = replaceKey(modalItem[0], 'title', 'headline')
-            modalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
-            console.log('pop up modal', modalData)
-        }
+    if (modalItem.length > 0) {
+        newModalData = replaceKey(modalItem[0], 'title', 'headline')
+        newModalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
+        console.log('pop up modal', newModalData)
     }
-    return modalData
+
+    return { newModalData, newCompositeItems }
 }
 
 export function transformcontact(contactInfo: Contact) {
@@ -474,6 +476,8 @@ export function decideBtnCount(currentItem: LunaModuleItem) {
     ) {
         return 2
     } else if (!currentItem.actionlbl && !currentItem.actionlbl2) {
+        return 0
+    } else {
         return 0
     }
 }

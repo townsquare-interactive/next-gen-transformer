@@ -3,8 +3,6 @@ config()
 import sass from 'sass'
 import { z } from 'zod'
 
-//const z = require()
-
 import {
     socialConvert,
     btnIconConvert,
@@ -30,6 +28,7 @@ import {
     transformPageSeo,
     removeFieldsFromObj,
     transformLinksInItem,
+    transformCompositeItems,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -41,15 +40,11 @@ const toStringSchema = z.coerce.string()
 
 export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string) => {
     console.log('page transformer started')
-    console.log(pageData)
-    //let newPages = []
     let newData = []
 
     //for each page
     for (const [key, value] of Object.entries(pageData)) {
         const { pageId, pageTitle, pageSlug, pageType, url, seo } = getPageData(sitePageData, key)
-
-        //let page = key
 
         //covering page name change
         if (Object.keys(value.data).length === 0 && value.attrs) {
@@ -281,17 +276,16 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
     const transformedLogos = removeFieldsFromObj(file.logos, ['list', 'fonts'])
 
-    //Using footer composite, create modal field for global file
+    //Transform composite data/modal
     let modalData
+    let composites = file.composites
     if (file.composites?.footer?.modules?.items) {
-        const componentItems = file.composites?.footer.modules.items
-        const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+        const { newModalData, newCompositeItems } = transformCompositeItems(file.composites?.footer?.modules?.items)
 
-        if (modalItem.length > 0) {
-            modalData = replaceKey(modalItem[0], 'title', 'headline')
-            modalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
-            console.log('pop up modal', modalData)
-        }
+        file.composites.footer.modules.items = newCompositeItems
+
+        modalData = newModalData
+        composites = file.composites
     }
 
     const globalFile = {
@@ -302,7 +296,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
         email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
         url: file.config.website.url,
-        composites: file.composites,
+        composites: composites,
         modalData: modalData,
         cmsNav: file.vars.navigation ? transformNav(file.vars.navigation.menuList, url) : currentLayout.cmsNav,
         navAlign: file.navigation ? file.navigation.menu_alignment : 'left',
@@ -371,7 +365,6 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
 
                 //remove empty items
                 currentModule.items = currentModule.items.filter((modItem: {}) => Object.keys(modItem).length !== 0)
-                console.log('here is a columns', currentModule.columns)
                 const schemaNum = z.coerce.number()
 
                 if (currentModule.columns) {
@@ -383,22 +376,6 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
                     currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles)
-
-                    //decide if image is to be cropped to a certain dimension
-                    /* if (currentItem.image) {
-                        const imageType = !['no_sizing', 'no_set_height'].includes(currentModule.imgsize)
-                            ? 'crop'
-                            : modRenderType === 'Banner'
-                            ? 'crop'
-                            : modRenderType === 'Parallax'
-                            ? 'crop'
-                            : 'nocrop'
-
-                        currentModule.items[i] = {
-                            ...currentModule.items[i],
-                            imageType: imageType,
-                        }
-                    } */
                 }
 
                 //replace class with customClassName

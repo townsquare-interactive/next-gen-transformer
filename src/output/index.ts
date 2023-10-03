@@ -16,7 +16,7 @@ export const publish = async (data: PublishData) => {
 
     //Use zod to check data for types
     stringSchema.parse(siteIdentifier)
-    stringSchema.parse(globalStyles)
+    //stringSchema.parse(globalStyles)
     zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
     zodDataParse(pages, CMSPagesSchema, 'Pages')
 
