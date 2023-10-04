@@ -345,8 +345,8 @@ const imageRatioList = [
 ]
 
 const AttributesSchema = z.object({
-    id: z.string(),
-    uid: z.string(),
+    //id: z.string(),
+    //uid: z.string(),
     lazy: z.string(),
     type: z.string(),
     well: z.string(),
@@ -364,7 +364,7 @@ const AttributesSchema = z.object({
     blockSwitch1: z.number(),
     scale_to_fit: OptionalString,
     customClassName: OptionalString,
-    modId: OptionalString,
+    modId: z.string(),
     modCount: z.number().min(1),
     columnLocation: z.number(),
     isSingleColumn: z.optional(z.boolean()),

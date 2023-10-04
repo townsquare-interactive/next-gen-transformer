@@ -19,7 +19,6 @@ import {
     determineModRenderType,
     createBtnStyles,
     createImageSizes,
-    isOneButton,
     createGallerySettings,
     modVariationType,
     createItemStyles,
@@ -29,6 +28,7 @@ import {
     removeFieldsFromObj,
     transformLinksInItem,
     transformCompositeItems,
+    isFeatureBtn,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -418,6 +418,10 @@ const transformModuleItem = (
     //let currentItem = currentModule.items[i]
     itemCount += 1
 
+    //currentModule.id = currentModule.uid || currentModule.id
+
+    currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
+
     //Change lazy loading to off for first module in photogallery
     currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
 
@@ -430,25 +434,27 @@ const transformModuleItem = (
         currentItem.desc = convertDescText(currentItem.desc)
     }
 
-    let isFeatureButton
+    //Create button and link vars
+    const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
+
+    let isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
+    /*     let isFeatureButton
     if (
         currentModule.well &&
         modRenderType != 'PhotoGrid' &&
         modRenderType != 'Parallax' &&
         modRenderType != 'PhotoGallery' &&
         currentItem.isFeatured === 'active' &&
-        isOneButton(currentItem) &&
+        btnCount === 1 &&
         modRenderType != 'PhotoGallery'
     ) {
         isFeatureButton = true
-    }
+    } */
 
     //create button styles
     const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
 
     const nextImageSizes = createImageSizes(modRenderType, currentModule.columns)
-
-    const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
 
     //create links array and remove single link fields
     currentItem = transformLinksInItem(currentItem)

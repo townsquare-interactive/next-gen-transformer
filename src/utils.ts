@@ -451,10 +451,16 @@ export function isLink(item: LunaModuleItem) {
     }
 }
 
-export function isOneButton(currentItem: LunaModuleItem) {
+export const isFeatureBtn = (modRenderType: string, well: string | number, btnCount: number, isFeatured?: string | boolean) => {
+    console.log('bt count here', btnCount)
     if (
-        (currentItem.actionlbl && !currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink)) ||
-        (!currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink2 || currentItem.weblink2))
+        well &&
+        modRenderType != 'PhotoGrid' &&
+        modRenderType != 'Parallax' &&
+        modRenderType != 'PhotoGallery' &&
+        isFeatured === 'active' &&
+        btnCount === 1 &&
+        modRenderType != 'PhotoGallery'
     ) {
         return true
     } else {
@@ -479,14 +485,6 @@ export function decideBtnCount(currentItem: LunaModuleItem) {
         return 0
     } else {
         return 0
-    }
-}
-
-export function isTwoButtons(currentItem: LunaModuleItem) {
-    if (currentItem.actionlbl && currentItem.actionlbl2 && (currentItem.pagelink || currentItem.weblink) && (currentItem.pagelink2 || currentItem.weblink2)) {
-        return true
-    } else {
-        return false
     }
 }
 
