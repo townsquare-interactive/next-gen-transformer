@@ -257,7 +257,7 @@ const ButtonList = z.array(
 )
 
 const ModuleItemSchema = z.object({
-    id: z.string(),
+    id: z.string().nullish(),
     desc: OptionalString,
     icon: OptionalString,
     align: OptionalString,

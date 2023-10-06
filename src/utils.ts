@@ -1,5 +1,5 @@
 //import { z } from 'zod'
-import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo } from '../types'
+import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot } from '../types'
 
 export function socialConvert(str: string) {
     let icon = iconConvert(str)
@@ -452,7 +452,6 @@ export function isLink(item: LunaModuleItem) {
 }
 
 export const isFeatureBtn = (modRenderType: string, well: string | number, btnCount: number, isFeatured?: string | boolean) => {
-    console.log('bt count here', btnCount)
     if (
         well &&
         modRenderType != 'PhotoGrid' &&
@@ -462,10 +461,26 @@ export const isFeatureBtn = (modRenderType: string, well: string | number, btnCo
         btnCount === 1 &&
         modRenderType != 'PhotoGallery'
     ) {
+        console.log
         return true
     } else {
         return false
     }
+}
+
+//may need a versoin for strapi that doesnt add cmsUrl??
+export const createTsiImageLink = (cmsUrl: string, imgUrl: string) => {
+    //let lunaProdLink = '.production.townsquareinteractive.com'
+    //let imageUrl = 'http://' + (cmsUrl + lunaProdLink) + imgUrl
+    let imageUrl = 'http://' + cmsUrl + imgUrl
+    return encodeURI(imageUrl)
+}
+
+export const createFavLink = (cmsUrl: string, fav: string) => {
+    let stripPath = stripImageFolders(fav)
+    let fullUrl = cmsUrl + stripPath
+    console.log('fav url--------------------------', fullUrl)
+    return fullUrl
 }
 
 export function decideBtnCount(currentItem: LunaModuleItem) {
@@ -507,6 +522,26 @@ export function isGridCaption(item: LunaModuleItem) {
     } else {
         return false
     }
+}
+
+export const transformLogos = (logos: Logo, cmsUrl: string) => {
+    //change logo sources
+    function transformLogoSlots(slots: Slot[]) {
+        for (const x in slots) {
+            if (slots[x].image_src) {
+                slots[x].image_src = createTsiImageLink(cmsUrl, slots[x].image_src)
+            }
+        }
+        return slots
+    }
+
+    logos.header.slots = transformLogoSlots(logos.header.slots)
+    logos.footer.slots = transformLogoSlots(logos.footer.slots)
+    logos.mobile.slots = transformLogoSlots(logos.mobile.slots)
+
+    const transformedLogos = removeFieldsFromObj(logos, ['list', 'fonts'])
+
+    return transformedLogos
 }
 
 export const transformPageSeo = (pageSeo: PageSeo) => {

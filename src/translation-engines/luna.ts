@@ -6,12 +6,12 @@ import { LunaRequest } from '../../types.js'
 export const transformLuna = async (req: LunaRequest) => {
     try {
         //grab url to make S3 folder name
-        const url = req.body.siteData.config.website.url
-        const basePath = stripUrl(url)
+        const cmsUrl = req.body.siteData.config.website.url
+        const basePath = stripUrl(cmsUrl)
         const themeStyles: any = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
 
         let globalFile
-        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, url)
+        globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, cmsUrl)
         /*    await addFileS3(globalFile, `${basePath}/layout`) */
 
         let newPageList
@@ -20,7 +20,7 @@ export const transformLuna = async (req: LunaRequest) => {
         let globalStyles
 
         if (req.body.savedData.pages) {
-            newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath)
+            newPageData = await transformPagesData(req.body.savedData.pages, req.body.siteData.pages, themeStyles, basePath, cmsUrl)
 
             // update/create pagelist (uses new page )
             newPageList = await updatePageList(newPageData.pages, basePath)

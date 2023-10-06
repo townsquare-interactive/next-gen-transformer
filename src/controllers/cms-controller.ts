@@ -10,7 +10,6 @@ import {
     transformcontact,
     transformNav,
     alternatePromoColors,
-    stripImageFolders,
     createColorClasses,
     convertSpecialTokens,
     replaceKey,
@@ -28,7 +27,10 @@ import {
     removeFieldsFromObj,
     transformLinksInItem,
     transformCompositeItems,
+    createTsiImageLink,
     isFeatureBtn,
+    createFavLink,
+    transformLogos,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -38,7 +40,7 @@ import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem
 
 const toStringSchema = z.coerce.string()
 
-export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string) => {
+export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string, cmsUrl: string) => {
     console.log('page transformer started')
     let newData = []
 
@@ -102,7 +104,7 @@ export const transformPagesData = async (pageData: CMSPage, sitePageData: any, t
 
                 //transforming page data
 
-                value.data.modules = transformPageModules(value.data.modules, themeStyles)
+                value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl)
 
                 // newData = newPages
             }
@@ -274,7 +276,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         contactInfo = currentLayout.contact || ''
     }
 
-    const transformedLogos = removeFieldsFromObj(file.logos, ['list', 'fonts'])
+    const transformedLogos = transformLogos(file.logos, file.config.website.url)
 
     //Transform composite data/modal
     let modalData
@@ -305,7 +307,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         theme: file.design.themes.selected || '',
         cmsUrl: file.config.website.url || '',
         s3Folder: basePath,
-        favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? stripImageFolders(file.config.website.favicon.src) : '',
+        favicon:
+            file.config.website.favicon.src && file.config.website.favicon.src != null
+                ? createFavLink('https://townsquareinteractive.s3.amazonaws.com/' + basePath + '/assets/', file.config.website.favicon.src)
+                : '',
+        //favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? file.config.website.favicon.src : '',
         fontImport: fontImportGroup,
         config: {
             /* mailChimp: {
@@ -321,7 +327,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     return globalFile
 }
 
-const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles) => {
+const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string) => {
     let columnsData = []
     for (let i = 0; i <= moduleList.length; ++i) {
         if (moduleList[i]) {
@@ -375,7 +381,7 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                 //loop for each item
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
-                    currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles)
+                    currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles, cmsUrl)
                 }
 
                 //replace class with customClassName
@@ -413,7 +419,8 @@ const transformModuleItem = (
     modCount: number,
     modRenderType: string,
     key: string,
-    themeStyles: ThemeStyles
+    themeStyles: ThemeStyles,
+    cmsUrl: string
 ) => {
     //let currentItem = currentModule.items[i]
     itemCount += 1
@@ -466,6 +473,7 @@ const transformModuleItem = (
 
     //decide if image is to be cropped to a certain dimension
     if (currentItem.image) {
+        currentItem.image = createTsiImageLink(cmsUrl, currentItem.image)
         const imageType = !['no_sizing', 'no_set_height'].includes(currentModule.imgsize)
             ? 'crop'
             : modRenderType === 'Banner'

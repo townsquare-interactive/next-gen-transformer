@@ -151,7 +151,7 @@ interface Section {
     wide: string
 }
 
-interface Logo {
+export interface Logo {
     fonts: any[]
     footer: {
         pct: null | number
@@ -173,7 +173,7 @@ interface Logo {
     }
 }
 
-interface Slot {
+export interface Slot {
     show?: number
     type: string
     markup?: string
