@@ -104,7 +104,7 @@ export const stripImageFolders = (file: string) => {
     const result = file.substring(file.lastIndexOf('/') + 1)
     return result
 }
-
+//
 export const createContactForm = (formTitle: string, email: string) => {
     const contactFormData = {
         formTitle: formTitle || 'Contact Us Today',
