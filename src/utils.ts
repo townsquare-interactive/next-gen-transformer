@@ -134,7 +134,6 @@ export const createContactForm = (formTitle: string, email: string) => {
 
             {
                 name: 'email',
-                // placeholder:'Enter Name',
                 type: 'email',
                 label: 'Email',
                 isReq: true,
@@ -144,7 +143,6 @@ export const createContactForm = (formTitle: string, email: string) => {
             },
             {
                 name: 'phone',
-                // placeholder:'Enter Name',
                 type: 'phone',
                 label: 'Phone',
                 isReq: false,
