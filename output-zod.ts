@@ -292,7 +292,7 @@ const ModuleItemSchema = z.object({
     actionlbl2: OptionalString,
     isFeatured: OptionalString,
     modOpacity: z.optional(z.number()),
-    modSwitch1: z.optional(z.number()),
+    modSwitch1: z.optional(z.number().or(z.string())),
     newwindow2: OptionalString,
     pagelinkId: z.optional(z.number().or(z.string())),
     bkgrd_color: OptionalString,

@@ -1,6 +1,9 @@
 //import { z } from 'zod'
 import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot } from '../types'
 
+export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
+const globalAssets = bucketUrl + '/global-assets'
+
 export function socialConvert(str: string) {
     let icon = iconConvert(str)
     if (icon === 'google') {
@@ -390,8 +393,12 @@ export const createBtnStyles = (
     if (currentItem.promoColor) {
         btnStyles =
             btnStyles +
-            `  #id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
+            `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
             #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`
+
+        //console.log(btnStyles)
+    } else {
+        console.log('not promo btn', currentItem.id)
     }
 
     if (currentItem.modColor1) {
@@ -600,38 +607,36 @@ const transformItemLinks = (item: LunaModuleItem) => {
 }
 
 export const alternatePromoColors = (items: LunaModuleItem[], themeStyles: ThemeStyles, well: string) => {
-    const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--prom5)']).flat()
+    const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--promo5)']).flat()
 
     const textureImageList = Array(items.length)
         .fill([
             {
-                image: `/subtle-white-feathers.png`,
+                image: `${globalAssets}/subtle-white-feathers.png`,
                 gradientColors: ['var(--promo)', 'var(--promo2)'],
             },
             {
-                image: '/shattered-dark.png',
+                image: `${globalAssets}/shattered-dark.png`,
                 gradientColors: ['var(--promo2)', 'var(--promo3)'],
             },
             {
-                image: '/fabric-of-squares.png',
+                image: `${globalAssets}/fabric-of-squares.png`,
                 gradientColors: ['var(--promo3)', 'var(--promo4)'],
             },
             {
-                image: '/cartographer.png',
-                gradientColors: ['var(--promo4)', 'var(--prom5)'],
+                image: `${globalAssets}/cartographer.png`,
+                gradientColors: ['var(--promo4)', 'var(--promo5)'],
             },
             {
-                image: `/bright-squares.png`,
+                image: `${globalAssets}/bright-squares.png`,
                 gradientColors: ['var(--promo)', 'var(--promo3)'],
             },
         ])
         .flat()
 
-    //let noImgCount = 0
     for (let i = 0; i < items.length; i++) {
         if (!items[i].image) {
             items[i] = { ...items[i], promoColor: colorList[i], textureImage: well == '1' ? textureImageList[i] : '' }
-            //noImgCount += 1
         } else {
             items[i] = { ...items[i], promoColor: colorList[i] }
         }
@@ -702,7 +707,6 @@ export const createItemStyles = (items: LunaModuleItem[], well: string, modType:
                 itemStyle = {}
             }
         }
-        console.log('item style', itemStyle)
 
         items[i] = { ...items[i], itemStyle: itemStyle, captionStyle: captionStyle || '' }
 

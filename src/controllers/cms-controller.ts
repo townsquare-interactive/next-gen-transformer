@@ -377,11 +377,12 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                     currentModule.columns = schemaNum.parse(currentModule.columns)
                 }
 
-                let itemCount = 0
+                let itemCount = 1
                 //loop for each item
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
                     currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles, cmsUrl)
+                    itemCount += 1
                 }
 
                 //replace class with customClassName
@@ -422,9 +423,6 @@ const transformModuleItem = (
     themeStyles: ThemeStyles,
     cmsUrl: string
 ) => {
-    //let currentItem = currentModule.items[i]
-    itemCount += 1
-
     //currentModule.id = currentModule.uid || currentModule.id
 
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
