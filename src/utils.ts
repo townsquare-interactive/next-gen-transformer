@@ -50,6 +50,8 @@ export const determineModRenderType = (type: string) => {
         return 'PhotoGallery'
     } else if (type === 'plugin') {
         return 'ContactFormRoutes'
+    } else if (type === 'modal_1') {
+        return 'Modal'
     } else {
         return type
     }
@@ -210,6 +212,7 @@ export const transformCompositeItems = (compositeItems: any) => {
     if (modalItem.length > 0) {
         newModalData = replaceKey(modalItem[0], 'title', 'headline')
         newModalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
+        newModalData = { items: [newModalData] }
         console.log('pop up modal', newModalData)
     }
 

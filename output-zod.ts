@@ -4,13 +4,15 @@ const Slot = z.object({})
 const OptionalString = z.string().optional()
 
 const CompositeItemSchema = z.object({
-    title: OptionalString,
-    component: z.string(),
-    nav_menu: z.nullable(z.any()),
-    name: z.string(),
-    subtitle: OptionalString,
-    text: OptionalString,
-    autoopen: z.boolean().optional(),
+    items: z.object({
+        title: OptionalString,
+        component: z.string(),
+        nav_menu: z.nullable(z.any()),
+        name: z.string(),
+        subtitle: OptionalString,
+        text: OptionalString,
+        autoopen: z.boolean().optional(),
+    }),
 })
 
 const CompositeSchema = z.object({

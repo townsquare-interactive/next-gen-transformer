@@ -11,7 +11,7 @@ export const publish = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
 
     //create layout json schema
-    //const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
+    const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
     //console.log('json schema', JSON.stringify(layoutJsonSchema))
 
     //Use zod to check data for types
