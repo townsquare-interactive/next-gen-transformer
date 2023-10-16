@@ -281,6 +281,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     //Transform composite data/modal
     let modalData
     let composites = file.composites
+
     if (file.composites?.footer?.modules?.items) {
         const { newModalData, newCompositeItems } = transformCompositeItems(file.composites?.footer?.modules?.items)
 

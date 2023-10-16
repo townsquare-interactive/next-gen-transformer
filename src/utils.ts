@@ -201,20 +201,38 @@ export const createContactForm = (formTitle: string, email: string) => {
     return contactFormData
 }
 
-export const transformCompositeItems = (compositeItems: any) => {
+export const transformCompositeItems = (compositeItems: any[]) => {
     let newModalData
     const componentItems = compositeItems
     //seperate modal item
-    const modalItem = componentItems.filter((e: any) => e.component === 'popup_modal')
+    const modalItems = componentItems.filter((e: any) => e.component === 'popup_modal')
     //all non modal items
-    const newCompositeItems = componentItems.filter((e: any) => e.component != 'popup_modal')
+    let newCompositeItems = componentItems.filter((e: any) => e.component != 'popup_modal')
 
-    if (modalItem.length > 0) {
-        newModalData = replaceKey(modalItem[0], 'title', 'headline')
-        newModalData = replaceKey(modalItem[0], 'subtitle', 'subheader')
-        newModalData = { items: [newModalData] }
-        console.log('pop up modal', newModalData)
+    //add plugin for each item
+    for (const i in modalItems) {
+        if (modalItems[i].form_id) {
+            modalItems[i].plugin = '[gravity]'
+        }
     }
+
+    if (modalItems.length > 0) {
+        newModalData = replaceKey(modalItems[0], 'title', 'headline')
+        newModalData = replaceKey(modalItems[0], 'subtitle', 'subheader')
+        newModalData = replaceKey(modalItems[0], 'text', 'desc')
+        newModalData = { items: [newModalData] }
+    }
+
+    //add contact form capability
+    if (compositeItems.filter((item) => item.form_id).length > 0) {
+        const contactFormData = createContactForm('', '')
+        newModalData = {
+            ...newModalData,
+            contactFormData: contactFormData,
+        }
+    }
+
+    console.log('new md data', newModalData)
 
     return { newModalData, newCompositeItems }
 }
