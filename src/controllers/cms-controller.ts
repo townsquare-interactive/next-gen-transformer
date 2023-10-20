@@ -36,11 +36,12 @@ import {
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
+import Module from 'module'
 //import Module from 'module'
 
 const toStringSchema = z.coerce.string()
 
-export const transformPagesData = async (pageData: CMSPage, sitePageData: any, themeStyles: ThemeStyles, basePath: string, cmsUrl: string) => {
+export const transformPagesData = async (pageData: Page, sitePageData: any, themeStyles: ThemeStyles, basePath: string, cmsUrl: string) => {
     console.log('page transformer started')
     let newData = []
 
@@ -94,7 +95,7 @@ export const transformPagesData = async (pageData: CMSPage, sitePageData: any, t
 
             value.seo = seo
 
-            if (value.data.modules) {
+            if (value.data.modules && value.data.modules.length != 0) {
                 const columnStyles = getColumnsCssClass(value.data)
 
                 //adding site data to pages
@@ -102,9 +103,33 @@ export const transformPagesData = async (pageData: CMSPage, sitePageData: any, t
 
                 createPageScss(value.data, pageSlug, basePath)
 
-                //transforming page data
+                //add all page modal titles into array field
+                let pageModalTitles = []
+                for (let i in value.data.modules) {
+                    //console.log(value.data.modules[i])
 
-                value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl)
+                    if (Object.keys(value.data.modules[i]).length != 0) {
+                        let modalNum = 0
+                        for (const [key, potentialModule] of Object.entries<Record<string, any>>(value.data.modules[i])) {
+                            //for (const potentialModule in value.data.modules[i]) {
+                            if (potentialModule && Object.entries(potentialModule).length != 0) {
+                                console.log('type of check', typeof potentialModule)
+                                if (potentialModule.type === 'modal_1') {
+                                    pageModalTitles.push(potentialModule.title || '')
+                                    potentialModule.modalNum = modalNum
+                                    modalNum += 1
+                                }
+
+                                value.data.pageModalTitles = pageModalTitles
+
+                                console.log('page mod titles', pageModalTitles)
+                            }
+                        }
+                    }
+                    //}
+                }
+                //transforming page data
+                value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl, pageModalTitles)
 
                 // newData = newPages
             }
@@ -284,9 +309,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
     if (file.composites?.footer?.modules?.items) {
         const { newModalData, newCompositeItems } = transformCompositeItems(file.composites?.footer?.modules?.items)
-
         file.composites.footer.modules.items = newCompositeItems
-
         modalData = newModalData
         composites = file.composites
     }
@@ -297,7 +320,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         contact: contactInfo,
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
-        email: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryEmailAddress : currentLayout.email || '',
+        email: file.settings ? file.settings.contact.contact_list.wide.items[0].email[0].name : currentLayout.email || '',
         url: file.config.website.url,
         composites: composites,
         modalData: modalData,
@@ -328,8 +351,9 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     return globalFile
 }
 
-const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string) => {
+const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string, pageModalTitles: string[]) => {
     let columnsData = []
+
     for (let i = 0; i <= moduleList.length; ++i) {
         if (moduleList[i]) {
             let newData = []
@@ -382,7 +406,17 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                 //loop for each item
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
-                    currentModule.items[i] = transformModuleItem(currentModule, currentItem, itemCount, modCount, modRenderType, key, themeStyles, cmsUrl)
+                    currentModule.items[i] = transformModuleItem(
+                        currentModule,
+                        currentItem,
+                        itemCount,
+                        modCount,
+                        modRenderType,
+                        key,
+                        themeStyles,
+                        cmsUrl,
+                        pageModalTitles
+                    )
                     itemCount += 1
                 }
 
@@ -422,7 +456,8 @@ const transformModuleItem = (
     modRenderType: string,
     key: string,
     themeStyles: ThemeStyles,
-    cmsUrl: string
+    cmsUrl: string,
+    pageModalTitles: string[]
 ) => {
     //currentModule.id = currentModule.uid || currentModule.id
 
@@ -441,7 +476,12 @@ const transformModuleItem = (
     }
 
     //Create button and link vars
-    const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, currentModule.columns)
+    const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
+        currentItem,
+        modRenderType,
+        currentModule.columns,
+        pageModalTitles
+    )
 
     let isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
     /*     let isFeatureButton

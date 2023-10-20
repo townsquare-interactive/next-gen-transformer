@@ -216,6 +216,7 @@ export const transformCompositeItems = (compositeItems: any[]) => {
         }
     }
 
+    //uses first modal item right now, not sure if we will need to account for multiple
     if (modalItems.length > 0) {
         newModalData = replaceKey(modalItems[0], 'title', 'headline')
         newModalData = replaceKey(modalItems[0], 'subtitle', 'subheader')
@@ -232,9 +233,35 @@ export const transformCompositeItems = (compositeItems: any[]) => {
         }
     }
 
-    console.log('new md data', newModalData)
+    /* console.log('new md data', newModalData) */
 
     return { newModalData, newCompositeItems }
+}
+
+//take modal form page mods, give page a modalTitle field, check btns to see if they have modalTitle href
+/* export function seperatePageModal(modalMod) {
+    let pageModalTitles = []
+    if (modalMod.title) {
+        pageModalTitles.push(modalMod.title)
+    }
+}
+
+export function checkButton(btnLink, pageModalTitles) {
+    for (let x in pageModalTitles) {
+        if (btnLink === pageModalTitles[x]) {
+            let opensModal = x
+        }
+    }
+} */
+export function checkButton(btnLink: string, pageModalTitles: string[]) {
+    for (let x in pageModalTitles) {
+        if (btnLink === '#modal_' + pageModalTitles[x].replace(' ', '-')) {
+            console.log('btn matches modtitle----------------------')
+            return Number(x)
+        } else {
+            return -1
+        }
+    }
 }
 
 export function transformcontact(contactInfo: Contact) {
@@ -344,12 +371,12 @@ export const determineNavParent = (menu: CMSNavItem[]) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number | string) => {
+export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number | string, pageModalTitles: string[]) => {
     // const singleButton = isOneButton(currentItem)
     const btnCount = decideBtnCount(currentItem)
     //const twoButtons = isTwoButtons(currentItem)
     const linkNoBtn = btnCount === 0 && isLink(currentItem) === true
-    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article'
+    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkButton(currentItem.weblink || '', pageModalTitles) === -1
     const visibleButton = linkAndBtn(currentItem)
 
     const determineBtnSize = (btnSize: string, modType: string, columns: number | string) => {
@@ -380,6 +407,7 @@ export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modTyp
             btnSize: determineBtnSize(currentItem.btnSize || '', modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
             blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
+            opensModal: checkButton(currentItem.weblink || '', pageModalTitles),
         },
         {
             name: 'btn2',
@@ -392,6 +420,7 @@ export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modTyp
             btnSize: determineBtnSize(currentItem.btnSize2 || '', modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
             blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
+            opensModal: checkButton(currentItem.weblink2 || '', pageModalTitles),
         },
     ]
 
@@ -418,8 +447,6 @@ export const createBtnStyles = (
             #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`
 
         //console.log(btnStyles)
-    } else {
-        console.log('not promo btn', currentItem.id)
     }
 
     if (currentItem.modColor1) {
@@ -995,7 +1022,6 @@ export const convertSpecialTokens = (str: string) => {
 
 export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: string) => {
     if (oldKey !== newKey && value[oldKey]) {
-        console.log(oldKey, 'exits?')
         value[newKey] = value[oldKey]
         //Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
         delete value[oldKey]

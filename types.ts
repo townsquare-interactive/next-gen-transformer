@@ -51,6 +51,7 @@ interface Module {
         isSingleColumn: boolean
     }
     componentType: string
+    title?: string
 }
 
 interface Item {
