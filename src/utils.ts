@@ -240,22 +240,22 @@ export const transformCompositeItems = (compositeItems: any[]) => {
 
 //take modal form page mods, give page a modalTitle field, check btns to see if they have modalTitle href
 /* export function seperatePageModal(modalMod) {
-    let pageModalTitles = []
+    let pageModals = []
     if (modalMod.title) {
-        pageModalTitles.push(modalMod.title)
+        pageModals.push(modalMod.title)
     }
 }
 
-export function checkButton(btnLink, pageModalTitles) {
-    for (let x in pageModalTitles) {
-        if (btnLink === pageModalTitles[x]) {
+export function checkButton(btnLink, pageModals) {
+    for (let x in pageModals) {
+        if (btnLink === pageModals[x]) {
             let opensModal = x
         }
     }
 } */
-export function checkButton(btnLink: string, pageModalTitles: string[]) {
-    for (let x in pageModalTitles) {
-        if (btnLink === '#modal_' + pageModalTitles[x].replace(' ', '-')) {
+export function checkButton(btnLink: string, pageModals: { modalNum: number; modalTitle: any }[]) {
+    for (let x in pageModals) {
+        if (btnLink === '#modal_' + pageModals[x].modalTitle.replace(' ', '-')) {
             console.log('btn matches modtitle----------------------')
             return Number(x)
         } else {
@@ -371,12 +371,17 @@ export const determineNavParent = (menu: CMSNavItem[]) => {
     return editTable.length != 0 ? editTable : menu
 }
 
-export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modType: string, columns: number | string, pageModalTitles: string[]) => {
+export const createLinkAndButtonVariables = (
+    currentItem: LunaModuleItem,
+    modType: string,
+    columns: number | string,
+    pageModals: { modalNum: number; modalTitle: any }[]
+) => {
     // const singleButton = isOneButton(currentItem)
     const btnCount = decideBtnCount(currentItem)
     //const twoButtons = isTwoButtons(currentItem)
     const linkNoBtn = btnCount === 0 && isLink(currentItem) === true
-    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkButton(currentItem.weblink || '', pageModalTitles) === -1
+    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkButton(currentItem.weblink || '', pageModals) === -1
     const visibleButton = linkAndBtn(currentItem)
 
     const determineBtnSize = (btnSize: string, modType: string, columns: number | string) => {
@@ -407,7 +412,7 @@ export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modTyp
             btnSize: determineBtnSize(currentItem.btnSize || '', modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
             blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
-            opensModal: checkButton(currentItem.weblink || '', pageModalTitles),
+            opensModal: checkButton(currentItem.weblink || '', pageModals),
         },
         {
             name: 'btn2',
@@ -420,7 +425,7 @@ export const createLinkAndButtonVariables = (currentItem: LunaModuleItem, modTyp
             btnSize: determineBtnSize(currentItem.btnSize2 || '', modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
             blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
-            opensModal: checkButton(currentItem.weblink2 || '', pageModalTitles),
+            opensModal: checkButton(currentItem.weblink2 || '', pageModals),
         },
     ]
 

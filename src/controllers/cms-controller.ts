@@ -36,7 +36,7 @@ import {
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
-import Module from 'module'
+//import Module from 'module'
 //import Module from 'module'
 
 const toStringSchema = z.coerce.string()
@@ -104,7 +104,7 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                 createPageScss(value.data, pageSlug, basePath)
 
                 //add all page modal titles into array field
-                let pageModalTitles = []
+                let pageModals = []
                 for (let i in value.data.modules) {
                     //console.log(value.data.modules[i])
 
@@ -115,21 +115,21 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                             if (potentialModule && Object.entries(potentialModule).length != 0) {
                                 console.log('type of check', typeof potentialModule)
                                 if (potentialModule.type === 'modal_1') {
-                                    pageModalTitles.push(potentialModule.title || '')
+                                    pageModals.push({ modalNum: modalNum, modalTitle: potentialModule.title || '' })
                                     potentialModule.modalNum = modalNum
                                     modalNum += 1
                                 }
 
-                                value.data.pageModalTitles = pageModalTitles
+                                value.data.pageModals = pageModals
 
-                                console.log('page mod titles', pageModalTitles)
+                                console.log('page mod titles', pageModals)
                             }
                         }
                     }
                     //}
                 }
                 //transforming page data
-                value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl, pageModalTitles)
+                value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl, pageModals)
 
                 // newData = newPages
             }
@@ -351,7 +351,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     return globalFile
 }
 
-const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string, pageModalTitles: string[]) => {
+const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string, pageModals: { modalNum: number; modalTitle: any }[]) => {
     let columnsData = []
 
     for (let i = 0; i <= moduleList.length; ++i) {
@@ -415,7 +415,7 @@ const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles
                         key,
                         themeStyles,
                         cmsUrl,
-                        pageModalTitles
+                        pageModals
                     )
                     itemCount += 1
                 }
@@ -457,7 +457,7 @@ const transformModuleItem = (
     key: string,
     themeStyles: ThemeStyles,
     cmsUrl: string,
-    pageModalTitles: string[]
+    pageModals: { modalNum: number; modalTitle: any }[]
 ) => {
     //currentModule.id = currentModule.uid || currentModule.id
 
@@ -480,7 +480,7 @@ const transformModuleItem = (
         currentItem,
         modRenderType,
         currentModule.columns,
-        pageModalTitles
+        pageModals
     )
 
     let isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
