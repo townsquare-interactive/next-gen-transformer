@@ -4,15 +4,34 @@ const Slot = z.object({})
 const OptionalString = z.string().optional()
 
 const CompositeItemSchema = z.object({
-    items: z.object({
-        title: OptionalString,
-        component: z.string(),
-        nav_menu: z.nullable(z.any()),
-        name: z.string(),
-        subtitle: OptionalString,
-        text: OptionalString,
-        autoopen: z.boolean().optional(),
-    }),
+    items: z.array(
+        z.object({
+            title: OptionalString,
+            component: z.string(),
+            nav_menu: z.nullable(z.any()),
+            name: z.string(),
+            subtitle: OptionalString,
+            text: OptionalString,
+            autoopen: z.boolean().optional(),
+        })
+    ),
+})
+const ContactFormData = z.object({
+    formTitle: z.string().optional(),
+    formService: z.string(),
+    email: z.string().optional(),
+    formFields: z.array(
+        z.object({
+            name: z.string(),
+            placeholder: z.string(),
+            type: z.string(),
+            label: z.string(),
+            isReq: z.boolean(),
+            fieldType: z.string(),
+            isVisible: z.boolean(),
+            size: z.string(),
+        })
+    ),
 })
 
 const CompositeSchema = z.object({
@@ -24,8 +43,10 @@ const CompositeSchema = z.object({
             modules: z.object({
                 items: z.array(CompositeItemSchema),
                 type: z.string(),
+                modalNum: z.number().optional(),
             }),
             sections: z.nullable(z.any()),
+            contactFormData: ContactFormData.optional(),
         })
         .optional(),
 })
@@ -79,7 +100,7 @@ const Address = z.object({
     state: z.string(),
     street: z.string(),
     street2: OptionalString,
-    coordinates: z.optional(z.array(z.string())),
+    coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
     url: OptionalString,
 })
 
@@ -242,6 +263,7 @@ export const SiteDataSchema = z.object({
     favicon: z.string(),
     fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,
+    contactFormData: ContactFormData.optional(),
 })
 
 const ButtonList = z.array(
@@ -370,6 +392,8 @@ const AttributesSchema = z.object({
     modCount: z.number().min(1),
     columnLocation: z.number(),
     isSingleColumn: z.optional(z.boolean()),
+    modalNum: z.number().optional(),
+    contactFormData: ContactFormData.optional(),
 })
 
 const InnerModuleSchema = z.object({
@@ -404,6 +428,7 @@ export const CMSPagesSchema = z.array(
             head_script: z.string(),
             columnStyles: z.string(),
             page_type: OptionalString,
+            pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
         }),
         attrs: z.record(z.unknown()), //for page name changes
         seo: SeoSchema,

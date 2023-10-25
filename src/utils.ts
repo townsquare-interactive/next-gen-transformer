@@ -211,6 +211,7 @@ export const transformCompositeItems = (compositeItems: any[]) => {
 
     //add plugin for each item
     for (const i in modalItems) {
+        modalItems[i].modalType = 'site'
         if (modalItems[i].form_id) {
             modalItems[i].plugin = '[gravity]'
         }
@@ -221,7 +222,7 @@ export const transformCompositeItems = (compositeItems: any[]) => {
         newModalData = replaceKey(modalItems[0], 'title', 'headline')
         newModalData = replaceKey(modalItems[0], 'subtitle', 'subheader')
         newModalData = replaceKey(modalItems[0], 'text', 'desc')
-        newModalData = { items: [newModalData] }
+        newModalData = { items: [newModalData], autoOpen: modalItems[0].autoOpen || false }
     }
 
     //add contact form capability
@@ -246,25 +247,23 @@ export const transformCompositeItems = (compositeItems: any[]) => {
     }
 }
 
-export function checkButton(btnLink, pageModals) {
+export function checkModalBtn(btnLink, pageModals) {
     for (let x in pageModals) {
         if (btnLink === pageModals[x]) {
             let opensModal = x
         }
     }
 } */
-export function checkButton(btnLink: string, pageModals: { modalNum: number; modalTitle: any }[]) {
+export function checkModalBtn(btnLink: string, pageModals: { modalNum: number; modalTitle: any }[]) {
     for (let x in pageModals) {
         if (btnLink === '#modal_' + pageModals[x].modalTitle.replace(' ', '-')) {
-            console.log('btn matches modtitle----------------------')
             return Number(x)
-        } else {
-            return -1
         }
     }
+    return -1
 }
 
-export function transformcontact(contactInfo: Contact) {
+export async function transformcontact(contactInfo: Contact) {
     const icons = {
         phone: ['fas', 'phone'],
         email: ['fas', 'envelope'],
@@ -276,6 +275,14 @@ export function transformcontact(contactInfo: Contact) {
     const contactLinks = []
     const multiPhones = contactInfo.phone.length > 1 ? true : false
     const hideEmail = !multiPhones && contactInfo.email.length > 1
+
+    //for (const x in contactInfo.address) {
+    if (contactInfo.address) {
+        let coords = await newAddyCoords(contactInfo.address)
+        console.log('cords after---------------', coords)
+        contactInfo.address = { ...contactInfo.address, coordinates: coords }
+    }
+    //}
 
     for (const x in contactInfo.phone) {
         if (contactInfo.phone[x]) {
@@ -381,7 +388,7 @@ export const createLinkAndButtonVariables = (
     const btnCount = decideBtnCount(currentItem)
     //const twoButtons = isTwoButtons(currentItem)
     const linkNoBtn = btnCount === 0 && isLink(currentItem) === true
-    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkButton(currentItem.weblink || '', pageModals) === -1
+    const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkModalBtn(currentItem.weblink || '', pageModals) === -1
     const visibleButton = linkAndBtn(currentItem)
 
     const determineBtnSize = (btnSize: string, modType: string, columns: number | string) => {
@@ -400,10 +407,13 @@ export const createLinkAndButtonVariables = (
         }
     }
 
+    const btn1isModal = checkModalBtn(currentItem.weblink || '', pageModals) > -1 ? true : false
+    const btn2isModal = checkModalBtn(currentItem.weblink2 || '', pageModals) > -1 ? true : false
+
     const buttonList = [
         {
             name: 'btn1',
-            link: currentItem.pagelink || currentItem.weblink,
+            link: btn1isModal ? '#' : currentItem.pagelink || currentItem.weblink,
             window: currentItem.newwindow,
             icon: btnIconConvert(currentItem.icon || ''),
             label: currentItem.actionlbl,
@@ -412,11 +422,11 @@ export const createLinkAndButtonVariables = (
             btnSize: determineBtnSize(currentItem.btnSize || '', modType, columns),
             linkType: currentItem.pagelink ? 'local' : 'ext',
             blockBtn: currentItem.btnSize?.includes('btn_block') ? true : currentItem.btnSize?.includes('btn_blk') ? true : false,
-            opensModal: checkButton(currentItem.weblink || '', pageModals),
+            opensModal: checkModalBtn(currentItem.weblink || '', pageModals),
         },
         {
             name: 'btn2',
-            link: currentItem.pagelink2 || currentItem.weblink2,
+            link: btn2isModal ? '#' : currentItem.pagelink2 || currentItem.weblink2,
             window: currentItem.newwindow2,
             icon: btnIconConvert(currentItem.icon2 || ''),
             label: currentItem.actionlbl2,
@@ -425,7 +435,7 @@ export const createLinkAndButtonVariables = (
             btnSize: determineBtnSize(currentItem.btnSize2 || '', modType, columns),
             linkType: currentItem.pagelink2 ? 'local' : 'ext',
             blockBtn: currentItem.btnSize2?.includes('btn_block') ? true : currentItem.btnSize2?.includes('btn_blk') ? true : false,
-            opensModal: checkButton(currentItem.weblink2 || '', pageModals),
+            opensModal: checkModalBtn(currentItem.weblink2 || '', pageModals),
         },
     ]
 
@@ -995,7 +1005,7 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
     return colorStyles
 }
 
-export async function getAddressCoords(address: any) {
+export async function fetchCoordinates(address: any) {
     const url = `https://nominatim.openstreetmap.org/search?street=${address.street}&city=${address.city}&state=${address.state}&postalcode${address.zip}&format=json`
     try {
         const resCoords = await fetch(encodeURI(url))
@@ -1006,6 +1016,17 @@ export async function getAddressCoords(address: any) {
         console.log(err)
         return { lat: 0, long: 0 }
     }
+}
+
+export const newAddyCoords = async (addy: any) => {
+    let mapCoords
+    if (addy.zip && addy.state && addy.city) {
+        mapCoords = await fetchCoordinates(addy)
+        console.log(mapCoords)
+    } else {
+        mapCoords = { lat: '', long: '' }
+    }
+    return mapCoords
 }
 
 //reuseables

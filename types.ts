@@ -19,12 +19,7 @@ export interface Page {
         page_type?: string
     }
     attrs: {}
-    seo: {
-        title: string
-        descr: string
-        selectedImages: string
-        imageOverride: string
-    }
+    seo: PageSeo
 }
 
 interface Module {
@@ -191,7 +186,7 @@ export interface Address {
     state: string
     street: string
     street2?: string
-    coordinates?: string[]
+    coordinates?: { lat: string | number; long: string | number }
     url?: string
 }
 
@@ -501,7 +496,7 @@ export interface CMSPage {
         id: string
         title: string
         slug: string
-        pageType?: string
+        pageType: string
         url: string
         JS: string
         type: string
@@ -674,6 +669,7 @@ export interface ModuleItem extends LunaModuleItem {
     isFeatureButton?: boolean
     btnStyles?: string
     nextImageSizes?: string
+    contactFormData?: any
 }
 
 /*   interface Button {

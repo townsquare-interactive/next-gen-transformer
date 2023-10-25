@@ -1,4 +1,4 @@
-import { socialConvert, createContactForm, createLinkAndButtonVariables, getAddressCoords } from './utils.js'
+import { socialConvert, createContactForm, createLinkAndButtonVariables, fetchCoordinates } from './utils.js'
 import { CurrentModule, Email, ModuleItem, Page, Phone, StrapiPageData, anchorTags } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
@@ -782,7 +782,7 @@ export const createStrapiButtonVars = (currentItem: ModuleItem, modRenderType: s
 
         currentItem = { ...currentItem, ...btnData }
 
-        const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, columns)
+        const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(currentItem, modRenderType, columns, [])
 
         currentItem = {
             ...currentItem,
@@ -846,10 +846,9 @@ const createAddress = async (attributes: { city: string; zip: string; state: str
         state: attributes.state || '',
         city: attributes.city || '',
     }
-    console.log('addy', addy)
     let mapCoords
     if (addy.zip && addy.state && addy.city) {
-        mapCoords = await getAddressCoords(addy)
+        mapCoords = await fetchCoordinates(addy)
         console.log(mapCoords)
     } else {
         mapCoords = { lat: '', long: '' }
@@ -862,7 +861,7 @@ const createAddress = async (attributes: { city: string; zip: string; state: str
 }
 
 export const createContactInfo = async (
-    attributes: { city: string; zip: string; state: string; streetAddress: string; phone: Phone[]; email: Email[] },
+    attributes: { city: string; zip: string; state: string; streetAddress: string; phone: Phone[]; email: Email[]; coordinates: any },
     siteIdentifier: string
 ) => {
     //create address with coordnates

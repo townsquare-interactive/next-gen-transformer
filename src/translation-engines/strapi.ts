@@ -57,7 +57,7 @@ export const transformStrapi = async (req: Request) => {
         const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
         const pageSeo = req.entry.seo || ''
         let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
-        contactInfo = transformcontact(contactInfo)
+        contactInfo = await transformcontact(contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
 
         const usingPreviewMode = layout.data.attributes.usePreviewMode === true ? true : false

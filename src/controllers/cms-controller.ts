@@ -31,6 +31,7 @@ import {
     isFeatureBtn,
     createFavLink,
     transformLogos,
+    newAddyCoords,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -110,19 +111,25 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
 
                     if (Object.keys(value.data.modules[i]).length != 0) {
                         let modalNum = 0
-                        for (const [key, potentialModule] of Object.entries<Record<string, any>>(value.data.modules[i])) {
-                            //for (const potentialModule in value.data.modules[i]) {
-                            if (potentialModule && Object.entries(potentialModule).length != 0) {
-                                console.log('type of check', typeof potentialModule)
-                                if (potentialModule.type === 'modal_1') {
-                                    pageModals.push({ modalNum: modalNum, modalTitle: potentialModule.title || '' })
-                                    potentialModule.modalNum = modalNum
+                        for (const [key, pageModule] of Object.entries<Record<string, any>>(value.data.modules[i])) {
+                            //for (const pageModule in value.data.modules[i]) {
+                            if (pageModule && Object.entries(pageModule).length != 0) {
+                                //console.log('type of check', typeof pageModule)
+                                if (pageModule.type === 'modal_1') {
+                                    let autoOpen = false
+                                    for (let m in pageModule.items) {
+                                        if (pageModule.items[m].autoOpen === true) {
+                                            autoOpen = true
+                                        }
+                                    }
+                                    pageModals.push({ modalNum: modalNum, modalTitle: pageModule.title || '', autoOpen: autoOpen })
+                                    pageModule.modalNum = modalNum
                                     modalNum += 1
                                 }
 
                                 value.data.pageModals = pageModals
 
-                                console.log('page mod titles', pageModals)
+                                //console.log('page mod titles', pageModals)
                             }
                         }
                     }
@@ -296,7 +303,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     // transform contact link/data
     let contactInfo
     if (file.settings && file.settings.contact.contact_list.wide.items[0]) {
-        contactInfo = transformcontact(file.settings.contact.contact_list.wide.items[0])
+        contactInfo = await transformcontact(file.settings.contact.contact_list.wide.items[0])
     } else {
         contactInfo = currentLayout.contact || ''
     }
@@ -524,6 +531,15 @@ const transformModuleItem = (
         currentItem = {
             ...currentItem,
             imageType: imageType,
+        }
+    }
+
+    //If modal has form plugin
+    if (modRenderType === 'Modal' && currentItem.plugin === '[gravity]') {
+        const contactFormData = createContactForm('', '')
+        currentItem = {
+            ...currentItem,
+            contactFormData: contactFormData,
         }
     }
 
