@@ -684,12 +684,20 @@ export const createModalPageList = (modules: any[]) => {
                     //console.log('type of check', typeof pageModule)
                     if (pageModule.type === 'modal_1') {
                         let autoOpen = false
+                        if (pageModule.well == '1') {
+                            autoOpen = true
+                        }
                         for (let m in pageModule.items) {
                             if (pageModule.items[m].autoOpen === true) {
                                 autoOpen = true
                             }
                         }
-                        pageModals.push({ modalNum: modalNum, modalTitle: pageModule.title || '', autoOpen: autoOpen, openEveryTime: true })
+                        pageModals.push({
+                            modalNum: modalNum,
+                            modalTitle: pageModule.title || '',
+                            autoOpen: autoOpen,
+                            openEveryTime: false,
+                        })
                         pageModule.modalNum = modalNum
                         modalNum += 1
                     }
