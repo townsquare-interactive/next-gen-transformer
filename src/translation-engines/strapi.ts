@@ -56,7 +56,7 @@ export const transformStrapi = async (req: Request) => {
         const logo = layout.data?.attributes?.logo?.data?.attributes?.url || ''
         const favicon = layout.data?.attributes?.favicon?.data?.attributes?.url || ''
         const pageSeo = req.entry.seo || ''
-        let contactInfo: Contact = await createContactInfo(layout.data.attributes, siteIdentifier)
+        let contactInfo: any = await createContactInfo(layout.data.attributes, siteIdentifier)
         contactInfo = await transformcontact(contactInfo)
         const socialMediaItems = createSocials(layout.data?.attributes.socialMedia)
 

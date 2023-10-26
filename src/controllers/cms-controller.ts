@@ -31,6 +31,7 @@ import {
     isFeatureBtn,
     createFavLink,
     transformLogos,
+    createModalPageList,
     newAddyCoords,
 } from '../utils.js'
 
@@ -104,37 +105,10 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
 
                 createPageScss(value.data, pageSlug, basePath)
 
-                //add all page modal titles into array field
-                let pageModals = []
-                for (let i in value.data.modules) {
-                    //console.log(value.data.modules[i])
+                //create list of page modals
+                let pageModals: { modalNum: number; modalTitle: string; openEveryTime: boolean; autoOpen: boolean }[] = createModalPageList(value.data.modules)
+                value.data.pageModals = pageModals
 
-                    if (Object.keys(value.data.modules[i]).length != 0) {
-                        let modalNum = 0
-                        for (const [key, pageModule] of Object.entries<Record<string, any>>(value.data.modules[i])) {
-                            //for (const pageModule in value.data.modules[i]) {
-                            if (pageModule && Object.entries(pageModule).length != 0) {
-                                //console.log('type of check', typeof pageModule)
-                                if (pageModule.type === 'modal_1') {
-                                    let autoOpen = false
-                                    for (let m in pageModule.items) {
-                                        if (pageModule.items[m].autoOpen === true) {
-                                            autoOpen = true
-                                        }
-                                    }
-                                    pageModals.push({ modalNum: modalNum, modalTitle: pageModule.title || '', autoOpen: autoOpen })
-                                    pageModule.modalNum = modalNum
-                                    modalNum += 1
-                                }
-
-                                value.data.pageModals = pageModals
-
-                                //console.log('page mod titles', pageModals)
-                            }
-                        }
-                    }
-                    //}
-                }
                 //transforming page data
                 value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl, pageModals)
 
@@ -358,7 +332,12 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     return globalFile
 }
 
-const transformPageModules = (moduleList: LunaModule[], themeStyles: ThemeStyles, cmsUrl: string, pageModals: { modalNum: number; modalTitle: any }[]) => {
+const transformPageModules = (
+    moduleList: LunaModule[],
+    themeStyles: ThemeStyles,
+    cmsUrl: string,
+    pageModals: { modalNum: number; modalTitle: any; openEveryTime: boolean; autoOpen: boolean }[]
+) => {
     let columnsData = []
 
     for (let i = 0; i <= moduleList.length; ++i) {

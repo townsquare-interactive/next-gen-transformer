@@ -669,6 +669,41 @@ const transformItemLinks = (item: LunaModuleItem) => {
     }
 }
 
+//createModalPagesList(value.data.modules[i])
+
+export const createModalPageList = (modules: any[]) => {
+    let pageModals = []
+    let modalNum = 0
+    for (let i in modules) {
+        //console.log(modules[i])
+
+        if (Object.keys(modules[i]).length != 0) {
+            for (const [key, pageModule] of Object.entries<Record<string, any>>(modules[i])) {
+                //for (const pageModule in value.data.modules[i]) {
+                if (pageModule && Object.entries(pageModule).length != 0) {
+                    //console.log('type of check', typeof pageModule)
+                    if (pageModule.type === 'modal_1') {
+                        let autoOpen = false
+                        for (let m in pageModule.items) {
+                            if (pageModule.items[m].autoOpen === true) {
+                                autoOpen = true
+                            }
+                        }
+                        pageModals.push({ modalNum: modalNum, modalTitle: pageModule.title || '', autoOpen: autoOpen, openEveryTime: true })
+                        pageModule.modalNum = modalNum
+                        modalNum += 1
+                    }
+
+                    //console.log('page mod titles', pageModals)
+                }
+            }
+        }
+
+        //}
+    }
+    return pageModals
+}
+
 export const alternatePromoColors = (items: LunaModuleItem[], themeStyles: ThemeStyles, well: string) => {
     const colorList = Array(items.length).fill(['var(--promo)', 'var(--promo2)', 'var(--promo3)', 'var(--promo4)', 'var(--promo5)']).flat()
 
