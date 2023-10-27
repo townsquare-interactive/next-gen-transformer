@@ -357,7 +357,14 @@ const transformPageModules = (
                 //remove unneeeded fields
                 currentModule = removeFieldsFromObj(currentModule, ['export'])
 
-                const modRenderType = determineModRenderType(currentModule.type)
+                let modRenderType = ''
+                if (currentModule.type === 'plugin' && currentModule.items[0]?.plugin === '[map]') {
+                    console.log('map time')
+                    modRenderType = 'Map'
+                } else {
+                    modRenderType = determineModRenderType(currentModule.type)
+                }
+
                 currentModule.type = modVariationType(currentModule.type)
 
                 //transform Photo Gallery Settings
