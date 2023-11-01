@@ -276,10 +276,9 @@ export async function transformcontact(contactInfo: Contact) {
     const multiPhones = contactInfo.phone.length > 1 ? true : false
     const hideEmail = !multiPhones && contactInfo.email.length > 1
 
-    //for (const x in contactInfo.address) {
+    //create coordinates for map
     if (contactInfo.address) {
         let coords = await newAddyCoords(contactInfo.address)
-        console.log('cords after---------------', coords)
         contactInfo.address = { ...contactInfo.address, coordinates: coords }
     }
     //}
@@ -547,7 +546,6 @@ export const createTsiImageLink = (cmsUrl: string, imgUrl: string) => {
 export const createFavLink = (cmsUrl: string, fav: string) => {
     let stripPath = stripImageFolders(fav)
     let fullUrl = cmsUrl + stripPath
-    console.log('fav url--------------------------', fullUrl)
     return fullUrl
 }
 
@@ -675,8 +673,6 @@ export const createModalPageList = (modules: any[]) => {
     let pageModals = []
     let modalNum = 0
     for (let i in modules) {
-        //console.log(modules[i])
-
         if (Object.keys(modules[i]).length != 0) {
             for (const [key, pageModule] of Object.entries<Record<string, any>>(modules[i])) {
                 //for (const pageModule in value.data.modules[i]) {
@@ -684,6 +680,7 @@ export const createModalPageList = (modules: any[]) => {
                     //console.log('type of check', typeof pageModule)
                     if (pageModule.type === 'modal_1') {
                         let autoOpen = false
+
                         if (pageModule.well == '1') {
                             autoOpen = true
                         }

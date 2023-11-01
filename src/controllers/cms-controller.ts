@@ -1,6 +1,6 @@
 import { config } from 'dotenv'
 config()
-import sass from 'sass'
+import * as sass from 'sass'
 import { z } from 'zod'
 
 import {

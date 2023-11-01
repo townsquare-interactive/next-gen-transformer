@@ -230,7 +230,7 @@ const CMSNavItem = z.object({
     menu_order: z.number(),
     mi_url: z.string().nullish(),
     url: z.string(),
-    disabled: z.union([z.boolean(), z.string()]),
+    disabled: z.union([z.boolean(), z.string()]).optional(),
     slug: z.string(),
 })
 
