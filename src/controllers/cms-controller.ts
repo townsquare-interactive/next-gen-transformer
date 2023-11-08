@@ -32,14 +32,11 @@ import {
     createFavLink,
     transformLogos,
     createModalPageList,
-    newAddyCoords,
 } from '../utils.js'
 
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
-//import Module from 'module'
-//import Module from 'module'
 
 const toStringSchema = z.coerce.string()
 
@@ -71,8 +68,6 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                 id: toStringSchema.parse(value.id),
             }
             newData.push(oldPageFile)
-
-            //change nav to change new page
 
             //filter array to update nav spot with changed page name
             if (oldNav.findIndex((x) => x.slug === oldPageSlug) != -1) {
@@ -111,8 +106,6 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
 
                 //transforming page data
                 value.data.modules = transformPageModules(value.data.modules, themeStyles, cmsUrl, pageModals)
-
-                // newData = newPages
             }
             newData.push(value)
 
@@ -166,6 +159,7 @@ const createPageScss = async (pageData: CMSPage, pageSlug: string, basePath: str
     await addFileS3(pageCss, `${basePath}/styles/${pageSlug}`, 'scss')
 }
 
+//delete pages from s3
 export const deletePages = async (pages: CMSPage[], basePath: string) => {
     console.log('deleter started')
     const oldPageList = await getFileS3(`${basePath}/pages/page-list.json`)
@@ -197,7 +191,6 @@ export const updatePageList = async (page: CMSPage[] | Page[], basePath: string)
 
 //add page object to pagelist
 const addPagesToList = async (pageListFile: { pages: [{ slug: string }] }, page: CMSPage[] | Page[], basePath: string) => {
-    //console.log('old pagelist', pageListFile)
     for (let i = 0; i < page.length; i++) {
         let pageData = page[i].data
 
@@ -212,15 +205,12 @@ const addPagesToList = async (pageListFile: { pages: [{ slug: string }] }, page:
         if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length === 0) {
             pageListFile.pages.push(newPageItem)
 
-            //await addNewPageToNav(pageData, basePath:string)
-
             //updating existing page data in pagelist
         } else if (pageListFile.pages.filter((e) => e.slug === pageData.slug).length >= 0) {
             const pageIdx = pageListFile.pages.findIndex((e) => e.slug === pageData.slug)
             pageListFile.pages[pageIdx] = newPageItem
         }
     }
-    //return pageListFile
 }
 
 //Adding a new page does not automatically add it to nav unless we do this
@@ -316,7 +306,6 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             file.config.website.favicon.src && file.config.website.favicon.src != null
                 ? createFavLink('https://townsquareinteractive.s3.amazonaws.com/' + basePath + '/assets/', file.config.website.favicon.src)
                 : '',
-        //favicon: file.config.website.favicon.src && file.config.website.favicon.src != null ? file.config.website.favicon.src : '',
         fontImport: fontImportGroup,
         config: {
             /* mailChimp: {
@@ -345,7 +334,6 @@ const transformPageModules = (
             let newData = []
             let modCount = 0
 
-            //let imageCount = 0
             const isSingleColumn = moduleList.filter((e: any) => Object.keys(e).length != 0).length === 2
 
             //each actual page module
@@ -394,7 +382,7 @@ const transformPageModules = (
                 }
 
                 let itemCount = 1
-                //loop for each item
+                //loop for each item inside of module
                 for (let i = 0; i < currentModule.items.length; i++) {
                     let currentItem = currentModule.items[i]
                     currentModule.items[i] = transformModuleItem(
@@ -559,7 +547,6 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         allPageStyles = ''
     }
 
-    //let allStyles = fontImportGroup + fontClasses + colorClasses + customCss + allPageStyles
     let allStyles = fontClasses + colorClasses + customCss + allPageStyles
     const allStylesConverted = convertSpecialTokens(allStyles)
 
@@ -568,7 +555,6 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         return convertedCss.css
     } catch (e) {
         //error catch if code passed is not correct scss/css
-
         return `/* ${e.message.toString()} */` + allStyles
     }
 }
@@ -584,7 +570,7 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return allPageCss.join(' ')
 }
 
-//used for migrate, probably delete later
+//used for migrating whole site
 /* export const transformCMSData = function (data:any) {
     let newData:any = []
     const pageListData:any = []

@@ -2,10 +2,10 @@ import { config } from 'dotenv'
 config()
 import express from 'express'
 import router from './api/cms-routes.js'
-import router2 from './api/trivia-routes.js'
+//import triviarouter from './api/trivia-routes.js'
 const app = express()
 
-let routes = router2
+let routes = router
 /* if (process.env.DB == 'dynamo') {
     routes = require('./api/dynamo-routes')
 } else if (process.env.DB == 'mongo') {
@@ -33,7 +33,7 @@ app.use(express.json({ limit: '80mb' }))
 app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000000 }))
 
 //app.use('/api/cms-routes', routes)
-app.use('/api/trivia-routes', routes)
+app.use('/api/cms-routes', routes)
 
 //const PORT = process.env.PORT || 8080
 const PORT = 8080

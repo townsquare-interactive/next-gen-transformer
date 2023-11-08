@@ -9,6 +9,7 @@ const router = express.Router()
 
 //save from luna cms
 router.post('/save', async (req, res) => {
+    console.log('save req')
     try {
         const url = req.body.siteData.config.website.url
         const basePath = stripUrl(url)
@@ -73,18 +74,6 @@ router.post('/site-data/strapi', async (req, res) => {
         res.status(500).json({ err: 'Something went wrong' })
     }
 })
-
-/* router.post('/site-data/basic', async (req, res) => {
-    try {
-        const data = engines.basic.translate()
-
-        await publish({ ...data })
-        res.json('posting to s3 folder: ' + 'basic')
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({ err: 'Something went wrong' })
-    }
-}) */
 
 //save all of site data in one file to s3
 router.post('/cms', async (req, res) => {

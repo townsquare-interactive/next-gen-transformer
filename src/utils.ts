@@ -234,26 +234,9 @@ export const transformCompositeItems = (compositeItems: any[]) => {
         }
     }
 
-    /* console.log('new md data', newModalData) */
-
     return { newModalData, newCompositeItems }
 }
 
-//take modal form page mods, give page a modalTitle field, check btns to see if they have modalTitle href
-/* export function seperatePageModal(modalMod) {
-    let pageModals = []
-    if (modalMod.title) {
-        pageModals.push(modalMod.title)
-    }
-}
-
-export function checkModalBtn(btnLink, pageModals) {
-    for (let x in pageModals) {
-        if (btnLink === pageModals[x]) {
-            let opensModal = x
-        }
-    }
-} */
 export function checkModalBtn(btnLink: string, pageModals: { modalNum: number; modalTitle: any }[]) {
     for (let x in pageModals) {
         if (btnLink === '#modal_' + pageModals[x].modalTitle.replace(' ', '-')) {
@@ -281,7 +264,6 @@ export async function transformcontact(contactInfo: Contact) {
         let coords = await newAddyCoords(contactInfo.address)
         contactInfo.address = { ...contactInfo.address, coordinates: coords }
     }
-    //}
 
     for (const x in contactInfo.phone) {
         if (contactInfo.phone[x]) {
@@ -329,8 +311,8 @@ export async function transformcontact(contactInfo: Contact) {
 export const transformNav = (menu: CMSNavItem[], siteUrl: string) => {
     for (let i = 0; i < menu.length; i++) {
         const slug = menu[i].title ? menu[i].title.replace(/\s+/g, '-') : ''
-        //loop through first submenu
 
+        //loop through first submenu
         for (let x = 0; x < menu[i].submenu.length; x++) {
             const subMenu1 = menu[i].submenu[x]
             if (menu[i].title) {
@@ -383,9 +365,7 @@ export const createLinkAndButtonVariables = (
     columns: number | string,
     pageModals: { modalNum: number; modalTitle: any }[]
 ) => {
-    // const singleButton = isOneButton(currentItem)
     const btnCount = decideBtnCount(currentItem)
-    //const twoButtons = isTwoButtons(currentItem)
     const linkNoBtn = btnCount === 0 && isLink(currentItem) === true
     const isWrapLink = (btnCount === 1 || linkNoBtn) && modType != 'article' && checkModalBtn(currentItem.weblink || '', pageModals) === -1
     const visibleButton = linkAndBtn(currentItem)
@@ -459,8 +439,6 @@ export const createBtnStyles = (
             btnStyles +
             `#id_${key} .item_${itemCount} .btn_promo {color: ${currentItem.promoColor}; background-color: ${themeStyles['textColorAccent']};}
             #id_${key} .item_${itemCount} .btn_promo:hover{color: ${themeStyles['textColorAccent']}; background-color: ${currentItem.promoColor};}`
-
-        //console.log(btnStyles)
     }
 
     if (currentItem.modColor1) {
@@ -475,9 +453,6 @@ export const createBtnStyles = (
         btnStyles = btnStyles + `#id_${key} .is-wrap-link:hover .btn_1{color: var(--hero-btn-background); background-color:var(--txt-accent) ;}`
     } else if ((value.well || modType === 'Card') && modType != 'PhotoGrid' && modType != 'Parallax' && modType != 'PhotoGallery' && !isFeatureButton) {
         btnStyles =
-            /* btnStyles +
-            `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['promoColor']}; background-color: ${themeStyles['textColorAccent']}}; 
-            ` */
             btnStyles +
             `#id_${key} .is-wrap-link:hover .btn_1{color: ${themeStyles['btnBackground']}; background-color: ${themeStyles['btnText']}}; 
             `
@@ -486,6 +461,7 @@ export const createBtnStyles = (
     return btnStyles
 }
 
+//trying to adjust next.js image sizes depending on modules/columns
 export const createImageSizes = (modType: string, columns: number | string) => {
     if (modType === 'Parallax' || modType === 'Banner' || modType === 'PhotoGallery') {
         return '100vw'
@@ -535,10 +511,7 @@ export const isFeatureBtn = (modRenderType: string, well: string | number, btnCo
     }
 }
 
-//may need a versoin for strapi that doesnt add cmsUrl??
 export const createTsiImageLink = (cmsUrl: string, imgUrl: string) => {
-    //let lunaProdLink = '.production.townsquareinteractive.com'
-    //let imageUrl = 'http://' + (cmsUrl + lunaProdLink) + imgUrl
     let imageUrl = 'http://' + cmsUrl + imgUrl
     return encodeURI(imageUrl)
 }
@@ -632,10 +605,8 @@ export const removeFieldsFromObj = (obj: any, fields: any[]) => {
 
 export const createGallerySettings = (settings: CarouselSettings, blockSwitch1: string | number, type: string) => {
     //convert to numbers
-    //const schemaNum = z.coerce.number()
     const interval = Number(settings.interval) * 1000
     const restartDelay = Number(settings.restartdelay)
-    //const restartDelay = schemaNum.parse(settings.restartdelay)
 
     const newSettings = {
         autoplay: settings.autoplay == 0 ? false : true,
@@ -667,8 +638,6 @@ const transformItemLinks = (item: LunaModuleItem) => {
     }
 }
 
-//createModalPagesList(value.data.modules[i])
-
 export const createModalPageList = (modules: any[]) => {
     let pageModals = []
     let modalNum = 0
@@ -698,13 +667,9 @@ export const createModalPageList = (modules: any[]) => {
                         pageModule.modalNum = modalNum
                         modalNum += 1
                     }
-
-                    //console.log('page mod titles', pageModals)
                 }
             }
         }
-
-        //}
     }
     return pageModals
 }
@@ -759,9 +724,6 @@ export const isPromoButton = (item: LunaModuleItem, modType: string, btnNum: num
     ) {
         return 'btn_promo'
     } else if (btnNum === 1 && modType === 'Banner' && !item.image) {
-        /*  else if (btnNum === 1 && ((modType === 'Banner' && items.modColor1) || (modType === 'Parallax' && items.modColor1))) {
-        return 'btn_override'
-    } */
         return 'btn_promo'
     } else if (btnNum === 1) {
         return 'btn_1'
@@ -812,8 +774,6 @@ export const createItemStyles = (items: LunaModuleItem[], well: string, modType:
         }
 
         items[i] = { ...items[i], itemStyle: itemStyle, captionStyle: captionStyle || '' }
-
-        //banner
     }
     return items
 }

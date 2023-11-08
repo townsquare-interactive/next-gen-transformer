@@ -2,7 +2,7 @@ import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import { PublishData } from '../../types.js'
 import { SiteDataSchema, zodDataParse, CMSPagesSchema } from '../../output-zod.js'
-import { zodToJsonSchema } from 'zod-to-json-schema'
+//import { zodToJsonSchema } from 'zod-to-json-schema'
 import { z } from 'zod'
 
 const stringSchema = z.string()
@@ -11,15 +11,14 @@ export const publish = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
 
     //create layout json schema
-    const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
-    console.log('json schema', JSON.stringify(layoutJsonSchema))
+    //const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
+    //console.log('json schema', JSON.stringify(layoutJsonSchema))
 
-    const pagesJsonSchema = zodToJsonSchema(CMSPagesSchema, 'layout schema')
-    console.log('json schema for pages', JSON.stringify(pagesJsonSchema))
+    //const pagesJsonSchema = zodToJsonSchema(CMSPagesSchema, 'layout schema')
+    //console.log('json schema for pages', JSON.stringify(pagesJsonSchema))
 
     //Use zod to check data for types
     stringSchema.parse(siteIdentifier)
-    //stringSchema.parse(globalStyles)
     zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
     zodDataParse(pages, CMSPagesSchema, 'Pages')
 
