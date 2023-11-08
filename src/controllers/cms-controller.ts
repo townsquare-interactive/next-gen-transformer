@@ -382,15 +382,13 @@ const transformPageModules = (
 
                 //imagesize transforms
                 if (currentModule.imgsize === 'widescreen_2-4_1') {
-                    console.log('imagesize change')
                     currentModule.imgsize = 'widescreen_2_4_1'
-                    //maybe change to imageratio
                 }
 
                 //remove empty items
                 currentModule.items = currentModule.items.filter((modItem: {}) => Object.keys(modItem).length !== 0)
-                const schemaNum = z.coerce.number()
 
+                const schemaNum = z.coerce.number()
                 if (currentModule.columns) {
                     currentModule.columns = schemaNum.parse(currentModule.columns)
                 }
@@ -452,11 +450,9 @@ const transformModuleItem = (
     cmsUrl: string,
     pageModals: { modalNum: number; modalTitle: any }[]
 ) => {
-    //currentModule.id = currentModule.uid || currentModule.id
-
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
 
-    //Change lazy loading to off for first module in photogallery
+    //Change lazy loading to off for first module that is a photogallery
     currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
 
     let imagePriority = false
@@ -477,18 +473,6 @@ const transformModuleItem = (
     )
 
     let isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
-    /*     let isFeatureButton
-    if (
-        currentModule.well &&
-        modRenderType != 'PhotoGrid' &&
-        modRenderType != 'Parallax' &&
-        modRenderType != 'PhotoGallery' &&
-        currentItem.isFeatured === 'active' &&
-        btnCount === 1 &&
-        modRenderType != 'PhotoGallery'
-    ) {
-        isFeatureButton = true
-    } */
 
     //create button styles
     const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
@@ -547,6 +531,7 @@ const transformModuleItem = (
         isFeatureButton: isFeatureButton,
         //links: transformItemLinks(currentItem),
     }
+    //fields not being used currently
     currentItem = removeFieldsFromObj(currentItem, ['editingIcon1', 'editingIcon2', 'editingIcon3', 'iconSelected'])
 
     return currentItem
@@ -637,12 +622,3 @@ export const createPageList = (page: { title: string; slug: string; id: String; 
 
     return pageData
 }
-
-/* export default {
-    transformCMSData,
-    updatePageList,
-    transformPagesData,
-    createOrEditLayout,
-    deletePages,
-    createGlobalStylesheet,
-} */

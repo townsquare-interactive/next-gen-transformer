@@ -12,8 +12,10 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.160.0",
+        "@aws-sdk/client-s3": "^3.440.0",
         "@babel/node": "^7.22.19",
+        "@vercel/node": "^3.0.7",
+        "@vercel/postgres": "^0.5.1",
         "aws-sdk": "^2.1189.0",
         "axios": "^0.27.2",
         "body-parser": "^1.20.0",

@@ -3,24 +3,34 @@ config()
 import request from 'request-promise'
 const tsiBucket = 'townsquareinteractive'
 const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
-
 import AWS from 'aws-sdk'
+import { S3 } from '@aws-sdk/client-s3'
 
+// JS SDK v3 does not support global configuration.
+// Codemod has attempted to pass values to each service client in this file.
+// You may need to update clients outside of this file, if they use global config.
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
     accessKeyId: process.env.CMS_ACCESS_KEY_ID,
     secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID,
     //logger: console,
 })
-const s3 = new AWS.S3()
+const s3 = new S3({
+    credentials: {
+        accessKeyId: process.env.CMS_ACCESS_KEY_ID || '',
+        //logger: console,
+        secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID || '',
+    },
+    region: process.env.CMS_DEFAULT_REGION,
+})
 
 //Get S3 object and return, if not found return passed object
 export const getFileS3 = async (key: string, rtnObj = { pages: [] }, type = 'json') => {
     //if (type === 'json') {
     try {
-        const data = await s3.getObject({ Bucket: tsiBucket, Key: key }).promise()
+        const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
         if (data.Body) {
-            return JSON.parse(data.Body.toString('utf-8'))
+            return JSON.parse(data.Body.toString())
         }
     } catch (err) {
         console.log('file  not found in S3, creating new file')
@@ -52,7 +62,6 @@ export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
             Key: key + `.${fileType}`,
             ContentType: s3ContentType,
         })
-        .promise()
         .catch((error) => {
             console.error(error)
         })
@@ -76,7 +85,7 @@ export const addAssetFromSiteToS3 = async (file: any, key: string) => {
                     Key: key,
                     Bucket: tsiBucket,
                 },
-                function (error, data) {
+                function (error: any, data: any) {
                     if (error) {
                         console.log('error downloading image to s3')
                     } else {
@@ -161,13 +170,11 @@ export const moveAllS3Objs = async () => {
 export const addFileS3List = async (file: any, key: string) => {
     //console.log('File to be added', file)
 
-    await s3
-        .putObject({
-            Body: JSON.stringify(file),
-            Bucket: tsiBucket,
-            Key: key,
-        })
-        .promise()
+    await s3.putObject({
+        Body: JSON.stringify(file),
+        Bucket: tsiBucket,
+        Key: key,
+    })
 
     console.log('S3 File Added')
 }
@@ -175,12 +182,10 @@ export const addFileS3List = async (file: any, key: string) => {
 export const deleteFileS3 = async (key: string) => {
     console.log('File to be deleted', key)
 
-    await s3
-        .deleteObject({
-            Bucket: tsiBucket,
-            Key: key,
-        })
-        .promise()
+    await s3.deleteObject({
+        Bucket: tsiBucket,
+        Key: key,
+    })
 
     console.log('S3 File Deleted')
 }

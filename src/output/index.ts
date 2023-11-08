@@ -12,7 +12,10 @@ export const publish = async (data: PublishData) => {
 
     //create layout json schema
     const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
-    //console.log('json schema', JSON.stringify(layoutJsonSchema))
+    console.log('json schema', JSON.stringify(layoutJsonSchema))
+
+    const pagesJsonSchema = zodToJsonSchema(CMSPagesSchema, 'layout schema')
+    console.log('json schema for pages', JSON.stringify(pagesJsonSchema))
 
     //Use zod to check data for types
     stringSchema.parse(siteIdentifier)
