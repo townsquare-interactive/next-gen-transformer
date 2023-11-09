@@ -23,6 +23,19 @@ router.post('/save', async (req, res) => {
     }
 })
 
+//website data sent for site creation
+router.post('/create-site', async (req, res) => {
+    console.log('create site route')
+    try {
+        console.log(req)
+
+        res.json('Website data: ' + req)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
 //save from strapi webhook
 router.post('/site-data/strapi', async (req, res) => {
     /*  //DEPLOYS NEW PROJECT TO VERCEL

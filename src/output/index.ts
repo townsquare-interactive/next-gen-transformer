@@ -2,8 +2,8 @@ import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import { PublishData } from '../../types.js'
 import { SiteDataSchema, zodDataParse, CMSPagesSchema } from '../../output-zod.js'
-//import { zodToJsonSchema } from 'zod-to-json-schema'
 import { z } from 'zod'
+//import { zodToJsonSchema } from 'zod-to-json-schema'
 
 const stringSchema = z.string()
 
