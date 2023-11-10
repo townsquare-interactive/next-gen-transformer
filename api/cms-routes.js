@@ -2,6 +2,7 @@ import { addFileS3 } from '../src/s3Functions.js'
 import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
+import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
 
 import express from 'express'
@@ -26,10 +27,26 @@ router.post('/save', async (req, res) => {
 //website data sent for site creation
 router.post('/create-site', async (req, res) => {
     console.log('create site route')
-    try {
-        console.log(req)
 
-        res.json('Website data: ' + req)
+    /*     const body = {
+        clientId: 22,
+        type: 'nextgen',
+        subdomain: 'bobconstruction',
+        templateIdentifier: 'hvac2',
+    } */
+    //siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false
+
+    const basePath = req.body.subdomain
+    console.log('bpath', basePath)
+    //const data = await transformLuna(req)
+
+    try {
+        console.log(req.body)
+
+        const data = await transformCreateSite(req.body)
+        await publish({ ...data })
+
+        res.json('Website data: ' + req.body)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })

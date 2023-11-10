@@ -1,0 +1,196 @@
+{
+    "logos": {
+        "footer": {
+            "pct": 100,
+            "slots": [
+                {
+                    "show": 1,
+                    "type": "image",
+                    "markup": "",
+                    "hasLinks": false,
+                    "alignment": "left",
+                    "image_src": "",
+                    "image_link": "/"
+                },
+                {
+                    "markup": ""
+                },
+                {
+                    "markup": ""
+                }
+            ],
+            "activeSlots": [0]
+        },
+        "header": {
+            "pct": 100,
+            "slots": [
+                {
+                    "show": 1,
+                    "type": "image",
+                    "markup": "",
+                    "hasLinks": false,
+                    "alignment": "center",
+                    "image_src": "",
+                    "image_link": "/"
+                },
+                {
+                    "show": 0,
+                    "type": "image",
+                    "markup": "",
+                    "hasLinks": false,
+                    "alignment": "left",
+                    "image_src": "",
+                    "image_link": "/"
+                },
+                {
+                    "show": 0,
+                    "type": "image",
+                    "markup": "",
+                    "hasLinks": false,
+                    "alignment": "left",
+                    "image_src": "",
+                    "image_link": "/"
+                }
+            ],
+            "activeSlots": [0]
+        },
+        "mobile": {
+            "pct": 100,
+            "slots": [
+                {
+                    "show": 1,
+                    "type": "image",
+                    "markup": "",
+                    "hasLinks": false,
+                    "alignment": "left",
+                    "image_src": "",
+                    "image_link": "/"
+                },
+                {
+                    "markup": ""
+                },
+                {
+                    "markup": ""
+                }
+            ],
+            "activeSlots": [0]
+        }
+    },
+    "social": [],
+    "contact": {
+        "email": [],
+        "phone": [],
+        "address": {
+            "zip": "",
+            "city": "",
+            "name": "",
+            "state": "",
+            "street": "",
+            "street2": "",
+            "coordinates": {
+                "lat": "",
+                "long": ""
+            },
+            "url": ""
+        },
+        "hideZip": false,
+        "advanced": {
+            "lat": "",
+            "long": ""
+        },
+        "disabled": "",
+        "hideCity": false,
+        "hideState": false,
+        "isPrimary": true,
+        "hideAddress": false,
+        "displayInMap": true,
+        "hideAddress2": false,
+        "displayInFooter": true,
+        "selectedPrimaryEmailLabel": "",
+        "selectedPrimaryPhoneLabel": "",
+        "selectedPrimaryPhoneNumber": "",
+        "contactLinks": [],
+        "showContactBox": false
+    },
+    "siteName": "Emerald Renovations",
+    "phoneNumber": "",
+    "email": "",
+    "url": "nextgenprototype.production.townsquareinteractive.com",
+    "composites": {},
+    "cmsNav": [
+        {
+            "ID": 862283,
+            "menu_list_id": 77555,
+            "title": "Home",
+            "post_type": "nav_menu_item",
+            "type": "post_type",
+            "menu_item_parent": 0,
+            "object_id": 774341,
+            "object": "page",
+            "target": "",
+            "classes": null,
+            "menu_order": 1,
+            "mi_url": null,
+            "url": "/",
+            "submenu": [],
+            "slug": "home"
+        }
+    ],
+    "navAlign": "right",
+    "seo": {
+        "global": {
+            "aiosp_home_title": "",
+            "aiosp_home_description": "",
+            "aiosp_page_title_format": "",
+            "aiosp_description_format": "",
+            "aiosp_404_title_format": ""
+        }
+    },
+    "cmsColors": {
+        "logoColor": "#c15656",
+        "headingColor": "#13141a",
+        "subHeadingColor": "#13141a",
+        "textColor": "#13141a",
+        "linkColor": "#ffffff",
+        "linkHover": "#000000",
+        "btnText": "#13141a",
+        "btnBackground": "#ffffff",
+        "textColorAccent": "#ffffff",
+        "heroSubheadline": "#ffffff",
+        "heroText": "#ffffff",
+        "heroBtnText": "#3d5627",
+        "heroBtnBackground": "#ffffff",
+        "heroLink": "#DDDDDD",
+        "heroLinkHover": "transparent",
+        "captionText": "#ffffff",
+        "captionBackground": "rgba(121,142,103,0.5)",
+        "NavText": "#3d5627",
+        "navHover": "#3d5627",
+        "navCurrent": "#13141a",
+        "backgroundMain": "#ffffff",
+        "bckdContent": "rgba(255,255,255,1)",
+        "headerBackground": "rgba(255,255,255,1)",
+        "BckdHeaderSocial": "#719056",
+        "accentBackgroundColor": "rgba(121,142,103,1)",
+        "backgroundHero": "rgba(121,142,103,1)",
+        "footerBackground": "#3d5627",
+        "footerText": "#ffffff",
+        "footerLink": "#ffffff",
+        "promoText": "#000000",
+        "promoColor": "#719056",
+        "promoColor2": "#4e6738",
+        "promoColor3": "#000000",
+        "promoColor4": "#95b479",
+        "promoColor5": "#b64848",
+        "promoColor6": "#ffffff"
+    },
+    "theme": "beacon-theme_charlotte",
+    "cmsUrl": "nextgenprototype.production.townsquareinteractive.com",
+    "s3Folder": "nextgenprototype",
+    "favicon": "",
+    "fontImport": "@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic,700italic&display=swap);",
+    "config": {
+        "zapierUrl": "https://hooks.zapier.com/hooks/catch/15652200/3hr112q/",
+        "makeUrl": "https://hook.us1.make.com/5ag2mwfm3rynjgumcjgu76wseppexe3s"
+    }
+}

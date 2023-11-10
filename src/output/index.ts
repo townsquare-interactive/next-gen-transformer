@@ -18,6 +18,7 @@ export const publish = async (data: PublishData) => {
     //console.log('json schema for pages', JSON.stringify(pagesJsonSchema))
 
     //Use zod to check data for types
+    console.log('here is siteid', siteIdentifier)
     stringSchema.parse(siteIdentifier)
     zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
     zodDataParse(pages, CMSPagesSchema, 'Pages')
