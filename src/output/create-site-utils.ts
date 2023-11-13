@@ -62,7 +62,7 @@ export const publishSite = async (subdomain: string) => {
                         }),
                     }
                 )
-                console.log('Domain addition success')
+                console.log('Domain addition success', rawResponse)
             } catch (err) {
                 console.log('Domain addition error: ', err)
             }
