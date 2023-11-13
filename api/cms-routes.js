@@ -43,10 +43,10 @@ router.post('/create-site', async (req, res) => {
 
 //publish site domain to vercel
 router.post('/vercel-publish', async (req, res) => {
-    console.log('publish site route')
+    console.log('publish site route', req.body)
 
     try {
-        const response = await publishSite(req.body.clientId)
+        const response = await publishSite(req.body.subdomain)
         console.log(response)
 
         res.json(response)

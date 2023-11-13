@@ -17,11 +17,11 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
 }
 
 //modify site array to add published domains
-const modifySitesArr = async (clientId: string, currentSiteList: CreateSiteParams[], currentSiteItemData: CreateSiteParams, domainName: string) => {
+const modifySitesArr = async (subdomain: string, currentSiteList: CreateSiteParams[], currentSiteItemData: CreateSiteParams, domainName: string) => {
     currentSiteItemData.domains?.push(domainName)
 
     //create array with all but current site working on
-    const newSitesArr = currentSiteList.filter((site) => site.clientId != clientId)
+    const newSitesArr = currentSiteList.filter((site) => site.subdomain != subdomain)
     //push updated site with the others
     newSitesArr.push(currentSiteItemData)
     console.log('new list', newSitesArr)
@@ -30,19 +30,20 @@ const modifySitesArr = async (clientId: string, currentSiteList: CreateSiteParam
 }
 
 //publish site domain
-export const publishSite = async (clientId: string) => {
+export const publishSite = async (subdomain: string) => {
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList)
+    console.log('subdom', subdomain)
 
     //check site-list for client ID and update published field
-    const arrWithClientId = currentSiteList.filter((site) => site.clientId === clientId)
+    const arrWithClientId = currentSiteList.filter((site) => site.subdomain === subdomain)
 
     //check if client ID exists already in create-site, then check if site has been published
     if (arrWithClientId.length > 0) {
         const currentSiteItemData = arrWithClientId[0]
         const domainName = currentSiteItemData.subdomain + '.vercel.app'
         if (currentSiteItemData.domains && currentSiteItemData.domains.filter((domain) => domain === domainName).length <= 0) {
-            await modifySitesArr(clientId, currentSiteList, currentSiteItemData, domainName)
+            await modifySitesArr(subdomain, currentSiteList, currentSiteItemData, domainName)
             console.log('here is the domain: ', domainName)
 
             //Add domain to vercel via vercel api

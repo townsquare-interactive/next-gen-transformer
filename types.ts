@@ -907,7 +907,7 @@ interface Font {
 }
 
 export interface CreateSiteParams {
-    clientId: string
+    clientId: number
     type: string
     subdomain: string
     templateIdentifier: string
