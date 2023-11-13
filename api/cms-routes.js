@@ -4,7 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { addToSiteList } from '../src/output/site-list.js'
+import { addToSiteList, publishSite } from '../src/output/create-site-utils.js'
 
 import express from 'express'
 const router = express.Router()
@@ -45,13 +45,11 @@ router.post('/create-site', async (req, res) => {
 router.post('/vercel-publish', async (req, res) => {
     console.log('publish site route')
 
-    const basePath = req.body.subdomain
-
     try {
-        const data = await transformCreateSite(req.body)
-        await publish({ ...data })
+        const response = await publishSite(req.body.clientId)
+        console.log(response)
 
-        res.json('Website data: ' + req.body)
+        res.json(response)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
@@ -60,40 +58,6 @@ router.post('/vercel-publish', async (req, res) => {
 
 //save from strapi webhook
 router.post('/site-data/strapi', async (req, res) => {
-    /*  //DEPLOYS NEW PROJECT TO VERCEL
-    try {
-        const rawResponse = await fetch(`https://api.vercel.com/v9/projects?teamId=${teamId}`, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${tokey}`,
-            },
-            body: JSON.stringify(requeststuff.body),
-        })
-        console.log(rawResponse)
-    } catch (err) {
-        console.log('EERRRRROR', err)
-    } */
-
-    /*  const newDeploy = await fetch(`https://api.vercel.com/v1/projects/{projectID}/deployments`, {
-        body: {
-            name: 'My Deployment',
-            files: [
-                {
-                    file: '/path/to/file',
-                    data: 'BASE64_ENCODED_CONTENT',
-                },
-            ],
-        },
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${tokey}`,
-        },
-        method: 'post',
-    }) */
-
     try {
         const data = await transformStrapi(req.body)
 
