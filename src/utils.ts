@@ -1010,10 +1010,9 @@ export async function fetchCoordinates(address: any) {
     try {
         const resCoords = await fetch(encodeURI(url))
         const coords = await resCoords.json()
-
         return { lat: coords[0].lat, long: coords[0].lon }
     } catch (err) {
-        console.log(err)
+        console.log('map coordinates error')
         return { lat: 0, long: 0 }
     }
 }

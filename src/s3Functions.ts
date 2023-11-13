@@ -5,6 +5,7 @@ const tsiBucket = 'townsquareinteractive'
 const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 import AWS from 'aws-sdk'
 import { S3 } from '@aws-sdk/client-s3'
+import { Readable } from 'stream'
 
 // JS SDK v3 does not support global configuration.
 // Codemod has attempted to pass values to each service client in this file.
@@ -27,18 +28,38 @@ const s3 = new S3({
     region: process.env.CMS_DEFAULT_REGION,
 })
 
+// Utility function to convert a Readable Stream to a string (needed for sdk v3)
+const streamToString = (stream: Readable): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const chunks: any[] = []
+        stream.on('data', (chunk) => chunks.push(chunk))
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
+        stream.on('error', (error) => reject(error))
+    })
+}
+
 //Get S3 object and return, if not found return passed object
 export const getFileS3 = async (key: string, rtnObj: any = { pages: [] }, type = 'json') => {
     try {
         const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
 
         if (data.Body) {
-            console.log('body has been found')
-            console.log('here body', data.Body)
-            return JSON.parse(data.Body.toString())
+            // Convert the Readable Stream to a string
+            const rawBody = await streamToString(data.Body as Readable)
+
+            // If the content is JSON, return it directly
+            try {
+                const jsonData = JSON.parse(rawBody)
+                return jsonData
+            } catch (jsonError) {
+                // If parsing as JSON fails, return the raw string
+                console.log('Failed to parse as JSON. Returning raw string.')
+                return rawBody
+            }
         }
     } catch (err) {
-        console.log(`file ${key} not found in S3, creating new file`, err)
+        console.error(`Error fetching file ${key} from S3:`)
+        console.log(`File ${key} not found in S3, creating a new file`)
         return rtnObj
     }
 }
