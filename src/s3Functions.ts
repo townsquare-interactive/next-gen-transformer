@@ -3,22 +3,9 @@ config()
 import request from 'request-promise'
 const tsiBucket = 'townsquareinteractive'
 const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
-import AWS from 'aws-sdk'
 import { S3 } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
 
-// JS SDK v3 does not support global configuration.
-// Codemod has attempted to pass values to each service client in this file.
-// You may need to update clients outside of this file, if they use global config.
-// JS SDK v3 does not support global configuration.
-// Codemod has attempted to pass values to each service client in this file.
-// You may need to update clients outside of this file, if they use global config.
-AWS.config.update({
-    region: process.env.CMS_DEFAULT_REGION,
-    accessKeyId: process.env.CMS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID,
-    //logger: console,
-})
 const s3 = new S3({
     credentials: {
         accessKeyId: process.env.CMS_ACCESS_KEY_ID || '',
