@@ -4,6 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
+import { addToSiteList } from '../src/output/site-list.js'
 
 import express from 'express'
 const router = express.Router()
@@ -28,21 +29,25 @@ router.post('/save', async (req, res) => {
 router.post('/create-site', async (req, res) => {
     console.log('create site route')
 
-    /*     const body = {
-        clientId: 22,
-        type: 'nextgen',
-        subdomain: 'bobconstruction',
-        templateIdentifier: 'hvac2',
-    } */
-    //siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false
+    try {
+        await addToSiteList(req.body)
+        const data = await transformCreateSite(req.body)
+        await publish({ ...data })
+
+        res.json('Website data: ' + req.body)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
+//publish site domain to vercel
+router.post('/vercel-publish', async (req, res) => {
+    console.log('publish site route')
 
     const basePath = req.body.subdomain
-    console.log('bpath', basePath)
-    //const data = await transformLuna(req)
 
     try {
-        console.log(req.body)
-
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
 

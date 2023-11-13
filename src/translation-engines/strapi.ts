@@ -62,7 +62,7 @@ export const transformStrapi = async (req: Request) => {
 
         const usingPreviewMode = layout.data.attributes.usePreviewMode === true ? true : false
 
-        //get nav object
+        //get layout object
         const currentLayoutS3 = await getFileS3(`${siteIdentifier}/layout.json`)
 
         if (!currentLayoutS3.cmsNav) {

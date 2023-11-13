@@ -905,3 +905,10 @@ interface Font {
     value: string
     family: string
 }
+
+export interface CreateSiteParams {
+    clientId: string
+    type: string
+    subdomain: string
+    templateIdentifier: string
+}

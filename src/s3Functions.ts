@@ -9,6 +9,9 @@ import { S3 } from '@aws-sdk/client-s3'
 // JS SDK v3 does not support global configuration.
 // Codemod has attempted to pass values to each service client in this file.
 // You may need to update clients outside of this file, if they use global config.
+// JS SDK v3 does not support global configuration.
+// Codemod has attempted to pass values to each service client in this file.
+// You may need to update clients outside of this file, if they use global config.
 AWS.config.update({
     region: process.env.CMS_DEFAULT_REGION,
     accessKeyId: process.env.CMS_ACCESS_KEY_ID,
@@ -25,29 +28,19 @@ const s3 = new S3({
 })
 
 //Get S3 object and return, if not found return passed object
-export const getFileS3 = async (key: string, rtnObj = { pages: [] }, type = 'json') => {
-    //if (type === 'json') {
+export const getFileS3 = async (key: string, rtnObj: any = { pages: [] }, type = 'json') => {
     try {
         const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
+
         if (data.Body) {
+            console.log('body has been found')
+            console.log('here body', data.Body)
             return JSON.parse(data.Body.toString())
         }
     } catch (err) {
-        console.log('file  not found in S3, creating new file')
+        console.log(`file ${key} not found in S3, creating new file`, err)
         return rtnObj
     }
-    /*}else {
-         try {
-            const data = await s3.getObject({ Bucket: tsiBucket, Key: key })
-            if (data?.Body) {
-            return data.Body.toString('utf-8')
-            }
-        } catch (err) {
-            console.log('css file not in s3')
-            return rtnObj
-        } 
-        return
-    }*/
 }
 
 //add file to s3 bucket
