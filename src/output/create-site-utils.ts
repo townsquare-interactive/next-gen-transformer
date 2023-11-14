@@ -4,7 +4,7 @@ import { addFileS3, getFileS3 } from '../s3Functions.js'
 //add created site params to list in s3
 export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
-    websiteData.domains = []
+    websiteData.publishedDomains = []
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList)
 
@@ -16,9 +16,9 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     await addFileS3(currentSiteList, `sites/site-list`)
 }
 
-//modify site array to add published domains
+//modify site array to add published publishedDomains
 const modifySitesArr = async (subdomain: string, currentSiteList: CreateSiteParams[], currentSiteItemData: CreateSiteParams, domainName: string) => {
-    currentSiteItemData.domains?.push(domainName)
+    currentSiteItemData.publishedDomains?.push(domainName)
 
     //create array with all but current site working on
     const newSitesArr = currentSiteList.filter((site) => site.subdomain != subdomain)
@@ -42,7 +42,7 @@ export const publishSite = async (subdomain: string) => {
     if (arrWithClientId.length > 0) {
         const currentSiteItemData = arrWithClientId[0]
         const domainName = currentSiteItemData.subdomain + '.vercel.app'
-        if (currentSiteItemData.domains && currentSiteItemData.domains.filter((domain) => domain === domainName).length <= 0) {
+        if (currentSiteItemData.publishedDomains && currentSiteItemData.publishedDomains.filter((domain) => domain === domainName).length <= 0) {
             await modifySitesArr(subdomain, currentSiteList, currentSiteItemData, domainName)
             console.log('here is the domain: ', domainName)
 
