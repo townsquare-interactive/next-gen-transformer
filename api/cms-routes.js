@@ -30,11 +30,11 @@ router.post('/create-site', async (req, res) => {
     console.log('create site route')
 
     try {
-        await addToSiteList(req.body)
+        const siteListStatus = await addToSiteList(req.body)
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
 
-        res.json(`Website data added to site-list and s3 template created for clientID: ${req.body.clientId}`)
+        res.json(siteListStatus)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong in the transformer' })

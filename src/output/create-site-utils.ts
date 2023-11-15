@@ -8,12 +8,15 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList)
 
+    //Add site to s3 site-list if it is not already there
     if (currentSiteList.filter((site) => site.subdomain === basePath).length <= 0) {
         currentSiteList.push(websiteData)
         console.log('new site list', currentSiteList)
+        await addFileS3(currentSiteList, `sites/site-list`)
+        return `Site added to list, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}`
+    } else {
+        return `Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}`
     }
-
-    await addFileS3(currentSiteList, `sites/site-list`)
 }
 
 //modify site array to add published publishedDomains or remove unpublished domains
