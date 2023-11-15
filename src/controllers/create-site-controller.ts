@@ -20,7 +20,7 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
 }
 
 //modify site array to add published publishedDomains or remove unpublished domains
-const modifySiteDomainList = async (
+const modifySitePublishedDomainsList = async (
     subdomain: string,
     currentSiteList: CreateSiteParams[],
     currentSiteData: CreateSiteParams,
@@ -68,7 +68,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         const isDomainPublishedAlready = currentSiteData.publishedDomains.filter((domain) => domain === domainName).length > 0
 
         if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
-            await modifySiteDomainList(subdomain, currentSiteList, currentSiteData, domainName, method)
+            await modifySitePublishedDomainsList(subdomain, currentSiteList, currentSiteData, domainName, method)
             console.log('here is the domain: ', domainName)
 
             //vercep api url changes between post vs delete
@@ -84,8 +84,6 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                 const response = await fetch(vercelApiUrl, {
                     method: method,
                     headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
                         Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
                     },
                     body: JSON.stringify({

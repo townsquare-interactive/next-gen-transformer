@@ -4,7 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { addToSiteList, modifyVercelDomainPublishStatus } from '../src/output/create-site-utils.js'
+import { addToSiteList, modifyVercelDomainPublishStatus } from '../src/controllers/create-site-controller.js'
 
 import express from 'express'
 const router = express.Router()
