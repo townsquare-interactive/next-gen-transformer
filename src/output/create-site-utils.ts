@@ -16,61 +16,87 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     await addFileS3(currentSiteList, `sites/site-list`)
 }
 
-//modify site array to add published publishedDomains
-const modifySitesArr = async (subdomain: string, currentSiteList: CreateSiteParams[], currentSiteItemData: CreateSiteParams, domainName: string) => {
-    currentSiteItemData.publishedDomains?.push(domainName)
+//modify site array to add published publishedDomains or remove unpublished domains
+const modifySiteDomainList = async (
+    subdomain: string,
+    currentSiteList: CreateSiteParams[],
+    currentSiteData: CreateSiteParams,
+    domainName: string,
+    method: 'POST' | 'DELETE'
+) => {
+    let newSiteData = currentSiteData
+    if (method === 'POST') {
+        newSiteData.publishedDomains?.push(domainName)
+    } else if (method === 'DELETE') {
+        newSiteData.publishedDomains = currentSiteData.publishedDomains.filter((domain) => domain != domainName)
+    }
 
     //create array with all but current site working on
     const newSitesArr = currentSiteList.filter((site) => site.subdomain != subdomain)
     //push updated site with the others
-    newSitesArr.push(currentSiteItemData)
+    newSitesArr.push(newSiteData)
     console.log('new list', newSitesArr)
 
     await addFileS3(newSitesArr, `sites/site-list`)
 }
 
-//publish site domain
-export const publishSite = async (subdomain: string) => {
+//select current site data from site-list
+const getSiteObjectFromSubdomain = async (subdomain: string, currentSiteList: CreateSiteParams[]) => {
+    const arrWithSiteObject = currentSiteList.filter((site) => site.subdomain === subdomain)
+
+    if (arrWithSiteObject.length > 0) {
+        const currentSiteData = arrWithSiteObject[0]
+        return currentSiteData
+    } else {
+        return 'subdomain does not match any created sites'
+    }
+}
+
+//takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
+export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList)
-    console.log('subdom', subdomain)
 
-    //check site-list for client ID and update published field
-    const arrWithClientId = currentSiteList.filter((site) => site.subdomain === subdomain)
+    const currentSiteData = await getSiteObjectFromSubdomain(subdomain, currentSiteList)
+    if (typeof currentSiteData != 'string') {
+        const domainName = currentSiteData.subdomain + '.vercel.app'
 
-    //check if client ID exists already in create-site, then check if site has been published
-    if (arrWithClientId.length > 0) {
-        const currentSiteItemData = arrWithClientId[0]
-        const domainName = currentSiteItemData.subdomain + '.vercel.app'
-        if (currentSiteItemData.publishedDomains && currentSiteItemData.publishedDomains.filter((domain) => domain === domainName).length <= 0) {
-            await modifySitesArr(subdomain, currentSiteList, currentSiteItemData, domainName)
+        //need to check if domain is published already for POST and DELETE methods
+        const isDomainPublishedAlready = currentSiteData.publishedDomains.filter((domain) => domain === domainName).length > 0
+
+        if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
+            await modifySiteDomainList(subdomain, currentSiteList, currentSiteData, domainName, method)
             console.log('here is the domain: ', domainName)
 
-            //Add domain to vercel via vercel api
+            //vercep api url changes between post vs delete
+            const vercelApiUrl =
+                method === 'POST'
+                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+                    : method === 'DELETE'
+                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+                    : ''
+
+            //Add or remove domain to vercel via vercel api
             try {
-                const rawResponse = await fetch(
-                    `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
-                        },
-                        body: JSON.stringify({
-                            name: domainName,
-                        }),
-                    }
-                )
-                console.log('Domain addition success', rawResponse)
+                const response = await fetch(vercelApiUrl, {
+                    method: method,
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        name: domainName,
+                    }),
+                })
             } catch (err) {
-                console.log('Domain addition error: ', err)
+                console.log('Domain task error: ', err)
             }
         } else {
-            return 'Domain has already been published'
+            return `Domain is not ready for ${method} in site-list`
         }
     } else {
-        return 'Client id not found in list of created sites'
+        return 'Subdomain not found in list of created sites'
     }
-    return 'site published'
+    return `site domain${method === 'POST' ? 'published' : 'unpublished'}`
 }

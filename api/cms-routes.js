@@ -4,7 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { addToSiteList, publishSite } from '../src/output/create-site-utils.js'
+import { addToSiteList, modifyVercelDomainPublishStatus } from '../src/output/create-site-utils.js'
 
 import express from 'express'
 const router = express.Router()
@@ -34,10 +34,10 @@ router.post('/create-site', async (req, res) => {
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
 
-        res.json('Website data: ' + req.body)
+        res.json(`Website data added to site-list and s3 template created for clientID: ${req.body.clientId}`)
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
     }
 })
 
@@ -46,13 +46,26 @@ router.post('/vercel-publish', async (req, res) => {
     console.log('publish site route', req.body)
 
     try {
-        const response = await publishSite(req.body.subdomain)
+        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
         console.log(response)
-
         res.json(response)
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+//publish site domain to vercel
+router.post('/vercel-unpublish', async (req, res) => {
+    console.log('unpublish site route', req.body)
+
+    try {
+        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
     }
 })
 
@@ -60,14 +73,10 @@ router.post('/vercel-publish', async (req, res) => {
 router.post('/site-data/strapi', async (req, res) => {
     try {
         const data = await transformStrapi(req.body)
-
         console.log(data.pages)
 
         await publish({ ...data })
         res.json('posting to s3 folder: ' + 'strapi')
-
-        // await publish({ ...data })
-        //res.json('posting to s3 folder: ' + 'basic')
     } catch (err) {
         console.log(err)
         res.status(500).json({ err: 'Something went wrong' })
