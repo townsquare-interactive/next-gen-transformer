@@ -13,9 +13,9 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
         currentSiteList.push(websiteData)
         console.log('new site list', currentSiteList)
         await addFileS3(currentSiteList, `sites/site-list`)
-        return `Site added to list, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}`
+        return `Site added, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `
     } else {
-        return `Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}`
+        return `Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `
     }
 }
 
@@ -99,5 +99,5 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
     } else {
         return 'Subdomain not found in list of created sites'
     }
-    return `site domain${method === 'POST' ? 'published' : 'unpublished'}`
+    return `site domain ${method === 'POST' ? 'published' : 'unpublished'}`
 }

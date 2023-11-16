@@ -33,8 +33,9 @@ router.post('/create-site', async (req, res) => {
         const siteListStatus = await addToSiteList(req.body)
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
-
-        res.json(siteListStatus)
+        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
+        console.log('domain status: ', response)
+        res.json('site status: ' + siteListStatus + ' Domain status: ' + response)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong in the transformer' })
