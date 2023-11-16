@@ -4,7 +4,8 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { addToSiteList, modifyVercelDomainPublishStatus } from '../src/controllers/create-site-controller.js'
+import { addToSiteList, modifyVercelDomainPublishStatus, getSiteObjectFromS3 } from '../src/controllers/create-site-controller.js'
+import { getFileS3 } from '../src/s3Functions.js'
 
 import express from 'express'
 const router = express.Router()
@@ -64,6 +65,20 @@ router.post('/vercel-unpublish', async (req, res) => {
         const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
         console.log(response)
         res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+//publish site domain to vercel
+router.post('/get-site', async (req, res) => {
+    console.log('get site route', req.body)
+
+    try {
+        const currentSiteList = await getFileS3(`sites/site-list.json`, [])
+        const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', req.body.id)
+        res.json(currentSiteData)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong in the transformer' })

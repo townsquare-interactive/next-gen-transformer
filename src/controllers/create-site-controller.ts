@@ -6,6 +6,7 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
+    websiteData.id = (currentSiteList.length + 1).toString()
     console.log('current site list', currentSiteList)
 
     //Add site to s3 site-list if it is not already there
@@ -13,7 +14,7 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
         currentSiteList.push(websiteData)
         console.log('new site list', currentSiteList)
         await addFileS3(currentSiteList, `sites/site-list`)
-        return `Site added, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `
+        return `Site added, ClientId: ${websiteData.id}, Subdomain: ${websiteData.subdomain}  `
     } else {
         return `Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `
     }
@@ -43,15 +44,16 @@ const modifySitePublishedDomainsList = async (
     await addFileS3(newSitesArr, `sites/site-list`)
 }
 
-//select current site data from site-list
-const getSiteObjectFromSubdomain = async (subdomain: string, currentSiteList: CreateSiteParams[]) => {
-    const arrWithSiteObject = currentSiteList.filter((site) => site.subdomain === subdomain)
+//select current site data from site-list using subdomain or id
+export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: CreateSiteParams[], searchBy = 'subdomain', id = '') => {
+    const arrWithSiteObject =
+        searchBy === 'subdomain' ? currentSiteList.filter((site) => site.subdomain === subdomain) : currentSiteList.filter((site) => site.id === id)
 
     if (arrWithSiteObject.length > 0) {
         const currentSiteData = arrWithSiteObject[0]
         return currentSiteData
     } else {
-        return 'subdomain does not match any created sites'
+        return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
     }
 }
 
@@ -60,7 +62,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList)
 
-    const currentSiteData = await getSiteObjectFromSubdomain(subdomain, currentSiteList)
+    const currentSiteData = await getSiteObjectFromS3(subdomain, currentSiteList)
     if (typeof currentSiteData != 'string') {
         const domainName = currentSiteData.subdomain + '.vercel.app'
 
