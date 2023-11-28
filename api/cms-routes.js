@@ -72,12 +72,12 @@ router.post('/vercel-unpublish', async (req, res) => {
 })
 
 //publish site domain to vercel
-router.post('/get-site', async (req, res) => {
-    console.log('get site route', req.body)
+router.get('/get-site', async (req, res) => {
+    console.log('get site route', req.query)
 
     try {
         const currentSiteList = await getFileS3(`sites/site-list.json`, [])
-        const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', req.body.id)
+        const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', req.query.id)
         const transformedWebsite = transformToWebsiteObj(currentSiteData)
         res.json(transformedWebsite)
     } catch (err) {

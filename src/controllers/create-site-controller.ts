@@ -104,7 +104,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
     return `site domain ${method === 'POST' ? 'published' : 'unpublished'}`
 }
 
-export const transformToWebsiteObj = (site: any) => {
+export const transformToWebsiteObj = (site: CreateSiteParams) => {
     return {
         clientId: site.clientId,
         type: site.type,
