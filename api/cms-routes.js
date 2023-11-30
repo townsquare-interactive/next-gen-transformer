@@ -109,7 +109,7 @@ router.post('/remove-domain', async (req, res) => {
     }
 })
 
-router.put('/unpublish', async (req, res) => {
+router.patch('/unpublish', async (req, res) => {
     console.log('unpublish site route', req.body)
 
     try {
@@ -121,7 +121,7 @@ router.put('/unpublish', async (req, res) => {
         res.status(500).json({ err: 'Something went wrong in the transformer' })
     }
 })
-router.put('/publish', async (req, res) => {
+router.patch('/publish', async (req, res) => {
     console.log('publish site route', req.body)
 
     try {
