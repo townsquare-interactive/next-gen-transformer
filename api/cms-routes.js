@@ -4,7 +4,13 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { addToSiteList, modifyVercelDomainPublishStatus, getSiteObjectFromS3, transformToWebsiteObj } from '../src/controllers/create-site-controller.js'
+import {
+    addToSiteList,
+    modifyVercelDomainPublishStatus,
+    getSiteObjectFromS3,
+    transformToWebsiteObj,
+    changePublishStatusInSiteData,
+} from '../src/controllers/create-site-controller.js'
 import { getFileS3 } from '../src/s3Functions.js'
 
 import express from 'express'
@@ -44,7 +50,7 @@ router.post('/create-site', async (req, res) => {
 })
 
 //publish site domain to vercel
-router.post('/vercel-publish', async (req, res) => {
+router.post('/domain-publish', async (req, res) => {
     console.log('publish site route', req.body)
 
     try {
@@ -58,11 +64,68 @@ router.post('/vercel-publish', async (req, res) => {
 })
 
 //publish site domain to vercel
-router.post('/vercel-unpublish', async (req, res) => {
-    console.log('unpublish site route', req.body)
+router.patch('/update-domain', async (req, res) => {
+    console.log('redirect', req.body)
+    const domainName = req.body.subdomain + '.vercel.app'
+
+    try {
+        console.log('starting fetch', domainName)
+        const response = await fetch(
+            `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    redirect: 'joesburgers.vercel.app', //currently only works with domains on same project
+                    //redirect: 'google.com',
+                    redirectStatusCode: 301,
+                }),
+            }
+        )
+
+        console.log('did fetch work?', response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        //res.status(500).json({ error: 'Something went wrong in the transformer' })
+        res.json({ error: 'error time' })
+    }
+})
+
+//publish site domain to vercel
+router.post('/remove-domain', async (req, res) => {
+    console.log('removing domain site route', req.body)
 
     try {
         const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+router.put('/unpublish', async (req, res) => {
+    console.log('unpublish site route', req.body)
+
+    try {
+        const response = await changePublishStatusInSiteData(req.body.id, false)
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+router.put('/publish', async (req, res) => {
+    console.log('publish site route', req.body)
+
+    try {
+        const response = await changePublishStatusInSiteData(req.body.id, true)
         console.log(response)
         res.json(response)
     } catch (err) {

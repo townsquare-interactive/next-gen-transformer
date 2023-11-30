@@ -112,3 +112,18 @@ export const transformToWebsiteObj = (site: CreateSiteParams) => {
         identifier: site.id,
     }
 }
+
+export const changePublishStatusInSiteData = async (id: string, status: boolean) => {
+    const currentSiteList = await getFileS3(`sites/site-list.json`, [])
+    const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', id)
+
+    if (typeof currentSiteData != 'string') {
+        const basePath = currentSiteData.subdomain
+        let siteLayoutFile = await getFileS3(`${basePath}/layout.json`)
+        siteLayoutFile.published = status
+        await addFileS3(siteLayoutFile, `${basePath}/layout`)
+        return `ID: ${id}  Domain: ${currentSiteData.subdomain} publish status changed`
+    } else {
+        return `ID: ${id} not found`
+    }
+}
