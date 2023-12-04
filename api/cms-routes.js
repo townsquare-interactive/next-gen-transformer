@@ -4,14 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import {
-    addToSiteList,
-    modifyVercelDomainPublishStatus,
-    getSiteObjectFromS3,
-    transformToWebsiteObj,
-    changePublishStatusInSiteData,
-} from '../src/controllers/create-site-controller.js'
-import { getFileS3 } from '../src/s3Functions.js'
+import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData } from '../src/controllers/create-site-controller.js'
 
 import express from 'express'
 const router = express.Router()
@@ -37,12 +30,11 @@ router.post('/create-site', async (req, res) => {
     console.log('create site route')
 
     try {
-        const siteListStatus = await addToSiteList(req.body)
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
         const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
         console.log('domain status: ', response)
-        res.json('site status: ' + siteListStatus + ' Domain status: ' + response)
+        res.json('site status: created' + ' Domain status: ' + response)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong in the transformer' })
@@ -50,7 +42,7 @@ router.post('/create-site', async (req, res) => {
 })
 
 //publish site domain to vercel
-router.post('/domain-publish', async (req, res) => {
+router.patch('/domain-publish', async (req, res) => {
     console.log('publish site route', req.body)
 
     try {
@@ -63,7 +55,48 @@ router.post('/domain-publish', async (req, res) => {
     }
 })
 
-//publish site domain to vercel
+//remove site domain to vercel
+router.patch('/remove-domain', async (req, res) => {
+    console.log('removing domain site route', req.body)
+
+    try {
+        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+//update publish status for site
+router.patch('/publish', async (req, res) => {
+    console.log('publish site route', req.body)
+
+    try {
+        const response = await changePublishStatusInSiteData(req.body.subdomain, true)
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+router.patch('/unpublish', async (req, res) => {
+    console.log('unpublish site route', req.body)
+
+    try {
+        const response = await changePublishStatusInSiteData(req.body.subdomain, false)
+        console.log(response)
+        res.json(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+//update vercel domain
 router.patch('/update-domain', async (req, res) => {
     console.log('redirect', req.body)
     const domainName = req.body.subdomain + '.vercel.app'
@@ -86,66 +119,11 @@ router.patch('/update-domain', async (req, res) => {
             }
         )
 
-        console.log('did fetch work?', response)
-        res.json(response)
-    } catch (err) {
-        console.error(err)
-        //res.status(500).json({ error: 'Something went wrong in the transformer' })
-        res.json({ error: 'error time' })
-    }
-})
-
-//publish site domain to vercel
-router.post('/remove-domain', async (req, res) => {
-    console.log('removing domain site route', req.body)
-
-    try {
-        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
         console.log(response)
         res.json(response)
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
-    }
-})
-
-router.patch('/unpublish', async (req, res) => {
-    console.log('unpublish site route', req.body)
-
-    try {
-        const response = await changePublishStatusInSiteData(req.body.id, false)
-        console.log(response)
-        res.json(response)
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
-    }
-})
-router.patch('/publish', async (req, res) => {
-    console.log('publish site route', req.body)
-
-    try {
-        const response = await changePublishStatusInSiteData(req.body.id, true)
-        console.log(response)
-        res.json(response)
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
-    }
-})
-
-//publish site domain to vercel
-router.get('/get-site', async (req, res) => {
-    console.log('get site route', req.query)
-
-    try {
-        const currentSiteList = await getFileS3(`sites/site-list.json`, [])
-        const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', req.query.id)
-        const transformedWebsite = transformToWebsiteObj(currentSiteData)
-        res.json(transformedWebsite)
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
+        res.status(500).json({ error: 'Something went wrong in the transformer' })
     }
 })
 

@@ -307,6 +307,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
                 ? createFavLink('https://townsquareinteractive.s3.amazonaws.com/' + basePath + '/assets/', file.config.website.favicon.src)
                 : '',
         fontImport: fontImportGroup,
+        publishedDomains: currentLayout.publishedDomains || [],
         config: {
             /* mailChimp: {
                 audId: 'd0b2dd1631',

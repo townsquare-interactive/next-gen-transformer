@@ -1,8 +1,77 @@
-import { CreateSiteParams } from '../../types.js'
+import { CreateSiteParams, Layout } from '../../types.js'
 import { addFileS3, getFileS3 } from '../s3Functions.js'
 
+//takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
+export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
+    const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
+    console.log('current site list', currentSiteList)
+
+    let siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+
+    if (typeof siteLayout != 'string') {
+        const domainName = subdomain + '.vercel.app'
+
+        //new check with layout file
+        const filteredDomainList = siteLayout.publishedDomains?.filter((domain) => domain === domainName)
+        const isDomainPublishedAlready = filteredDomainList.length > 0
+
+        if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
+            console.log('here is the domain: ', domainName)
+
+            //add domains to layout file or removes if deleting
+            if (method === 'POST') {
+                siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
+            } else if (method === 'DELETE') {
+                //remove site from list if deleting
+                siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain) => domain != domainName)
+            }
+            await addFileS3(siteLayout, `${subdomain}/layout`)
+
+            //vercep api url changes between post vs delete
+            const vercelApiUrl =
+                method === 'POST'
+                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+                    : method === 'DELETE'
+                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+                    : ''
+
+            //Add or remove domain to vercel via vercel api
+            try {
+                const response = await fetch(vercelApiUrl, {
+                    method: method,
+                    headers: {
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        name: domainName,
+                    }),
+                })
+            } catch (err) {
+                console.log('Domain task error: ', err)
+            }
+        } else {
+            return `Domain is not ready for ${method} in layout file`
+        }
+    } else {
+        return 'Subdomain not found in list of created sites'
+    }
+    return `site domain ${method === 'POST' ? 'published' : 'unpublished'}`
+}
+
+export const changePublishStatusInSiteData = async (subdomain: string, status: boolean) => {
+    let siteLayoutFile = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    if (typeof siteLayoutFile != 'string') {
+        siteLayoutFile.published = status
+        await addFileS3(siteLayoutFile, `${subdomain}/layout`)
+        return `Domain: ${subdomain} publish status changed`
+    } else {
+        return `Error: ${subdomain} not found in s3`
+    }
+}
+
 //add created site params to list in s3
-export const addToSiteList = async (websiteData: CreateSiteParams) => {
+//may not be needed later if we are checking DB before and have publishedDomains in Layout file
+/*export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
@@ -21,7 +90,7 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
 }
 
 //modify site array to add published publishedDomains or remove unpublished domains
-const modifySitePublishedDomainsList = async (
+ const modifySitePublishedDomainsList = async (
     subdomain: string,
     currentSiteList: CreateSiteParams[],
     currentSiteData: CreateSiteParams,
@@ -56,74 +125,4 @@ export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: Cr
         return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
     }
 }
-
-//takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
-    const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
-    console.log('current site list', currentSiteList)
-
-    const currentSiteData = await getSiteObjectFromS3(subdomain, currentSiteList)
-    if (typeof currentSiteData != 'string') {
-        const domainName = currentSiteData.subdomain + '.vercel.app'
-
-        //need to check if domain is published already for POST and DELETE methods
-        const isDomainPublishedAlready = currentSiteData.publishedDomains.filter((domain) => domain === domainName).length > 0
-
-        if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
-            await modifySitePublishedDomainsList(subdomain, currentSiteList, currentSiteData, domainName, method)
-            console.log('here is the domain: ', domainName)
-
-            //vercep api url changes between post vs delete
-            const vercelApiUrl =
-                method === 'POST'
-                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
-                    : method === 'DELETE'
-                    ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
-                    : ''
-
-            //Add or remove domain to vercel via vercel api
-            try {
-                const response = await fetch(vercelApiUrl, {
-                    method: method,
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
-                    },
-                    body: JSON.stringify({
-                        name: domainName,
-                    }),
-                })
-            } catch (err) {
-                console.log('Domain task error: ', err)
-            }
-        } else {
-            return `Domain is not ready for ${method} in site-list`
-        }
-    } else {
-        return 'Subdomain not found in list of created sites'
-    }
-    return `site domain ${method === 'POST' ? 'published' : 'unpublished'}`
-}
-
-export const transformToWebsiteObj = (site: CreateSiteParams) => {
-    return {
-        clientId: site.clientId,
-        type: site.type,
-        subdomain: site.subdomain,
-        identifier: site.id,
-    }
-}
-
-export const changePublishStatusInSiteData = async (id: string, status: boolean) => {
-    const currentSiteList = await getFileS3(`sites/site-list.json`, [])
-    const currentSiteData = await getSiteObjectFromS3('', currentSiteList, 'id', id)
-
-    if (typeof currentSiteData != 'string') {
-        const basePath = currentSiteData.subdomain
-        let siteLayoutFile = await getFileS3(`${basePath}/layout.json`)
-        siteLayoutFile.published = status
-        await addFileS3(siteLayoutFile, `${basePath}/layout`)
-        return `ID: ${id}  Domain: ${currentSiteData.subdomain} publish status changed`
-    } else {
-        return `ID: ${id} not found`
-    }
-}
+ */

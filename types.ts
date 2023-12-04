@@ -446,6 +446,8 @@ export interface Layout {
         zapierUrl: string
         makeUrl: string
     }
+    publishedDomains: string[]
+    published?: boolean
 }
 
 export interface CMSNavItem {

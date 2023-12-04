@@ -1154,6 +1154,7 @@ export const layout1 = {
     pageList: {
         pages: [{ name: 'Home', slug: 'home', url: '/', id: '774341', page_type: '' }],
     },
+    publishedDomains: [],
     globalCSS: `body {
         font-family: Open Sans;
     }

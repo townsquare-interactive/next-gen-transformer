@@ -264,6 +264,8 @@ export const SiteDataSchema = z.object({
     fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,
     contactFormData: ContactFormData.optional(),
+    published: z.boolean().nullable(),
+    publishedDomains: z.array(z.string().optional()),
 })
 
 const ButtonList = z.array(
