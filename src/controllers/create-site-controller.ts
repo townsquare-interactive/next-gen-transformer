@@ -12,8 +12,8 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         const domainName = subdomain + '.vercel.app'
 
         //new check with layout file
-        const filteredDomainList = siteLayout.publishedDomains?.filter((domain) => domain === domainName)
-        const isDomainPublishedAlready = filteredDomainList.length > 0
+        let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
+        const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
 
         if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
             console.log('here is the domain: ', domainName)
@@ -21,6 +21,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
             //add domains to layout file or removes if deleting
             if (method === 'POST') {
                 siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
+                console.log('published domains', siteLayout.publishedDomains)
             } else if (method === 'DELETE') {
                 //remove site from list if deleting
                 siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain) => domain != domainName)
@@ -71,7 +72,7 @@ export const changePublishStatusInSiteData = async (subdomain: string, status: b
 
 //add created site params to list in s3
 //may not be needed later if we are checking DB before and have publishedDomains in Layout file
-/*export const addToSiteList = async (websiteData: CreateSiteParams) => {
+export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
@@ -85,12 +86,12 @@ export const changePublishStatusInSiteData = async (subdomain: string, status: b
         await addFileS3(currentSiteList, `sites/site-list`)
         return `Site added, ClientId: ${websiteData.id}, Subdomain: ${websiteData.subdomain}  `
     } else {
-        return `Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `
+        throw new Error(`Site has already been created, ClientId: ${websiteData.clientId}, Subdomain: ${websiteData.subdomain}  `)
     }
 }
 
 //modify site array to add published publishedDomains or remove unpublished domains
- const modifySitePublishedDomainsList = async (
+/* const modifySitePublishedDomainsList = async (
     subdomain: string,
     currentSiteList: CreateSiteParams[],
     currentSiteData: CreateSiteParams,
@@ -111,7 +112,7 @@ export const changePublishStatusInSiteData = async (subdomain: string, status: b
     console.log('new list', newSitesArr)
 
     await addFileS3(newSitesArr, `sites/site-list`)
-}
+} */
 
 //select current site data from site-list using subdomain or id
 export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: CreateSiteParams[], searchBy = 'subdomain', id = '') => {
@@ -125,4 +126,3 @@ export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: Cr
         return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
     }
 }
- */
