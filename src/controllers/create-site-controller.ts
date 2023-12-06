@@ -126,3 +126,9 @@ export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: Cr
         return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
     }
 }
+
+export const getDomainList = async () => {
+    const domainList = await getFileS3(`sites/domains.json`, [])
+
+    return domainList
+}

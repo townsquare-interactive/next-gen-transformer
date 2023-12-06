@@ -4,7 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
-import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData, addToSiteList } from '../src/controllers/create-site-controller.js'
+import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData, addToSiteList, getDomainList } from '../src/controllers/create-site-controller.js'
 
 import express from 'express'
 const router = express.Router()
@@ -31,7 +31,6 @@ router.post('/create-site', async (req, res) => {
 
     try {
         const siteListStatus = await addToSiteList(req.body)
-        console.log('type of er', typeof siteListStatus)
         const data = await transformCreateSite(req.body)
         await publish({ ...data })
         const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
@@ -39,7 +38,7 @@ router.post('/create-site', async (req, res) => {
         res.json(' Domain status: ' + response)
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: ` ${siteListStatus} : Something went wrong in the transformer` })
+        res.status(500).json({ err: `Something went wrong in the transformer` })
     }
 })
 
@@ -150,6 +149,16 @@ router.post('/cms', async (req, res) => {
     try {
         await addFileS3(req.body, `${basePath}/siteData`)
         res.json('cms data added')
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
+    }
+})
+
+router.get('/domain-list', async (req, res) => {
+    try {
+        const domainList = await getDomainList()
+        res.json(domainList)
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong' })
