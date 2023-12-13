@@ -1,4 +1,4 @@
-import { addFileS3 } from '../src/s3Functions.js'
+import { addFileS3, addFolderS3, folderExistsInS3 } from '../src/s3Functions.js'
 import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
@@ -30,15 +30,22 @@ router.post('/create-site', async (req, res) => {
     console.log('create site route')
 
     try {
-        const siteListStatus = await addToSiteList(req.body)
-        const data = await transformCreateSite(req.body)
-        await publish({ ...data })
-        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
-        console.log('domain status: ', response)
-        res.json(' Domain status: ' + response)
+        //check if site is already created in s3
+        const siteExistsInS3 = await folderExistsInS3(req.body.subdomain)
+
+        if (siteExistsInS3) {
+            res.status(500).json(`Site already in s3`)
+        } else {
+            const siteListStatus = await addToSiteList(req.body)
+            const data = await transformCreateSite(req.body)
+            await publish({ ...data })
+            const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
+            console.log('domain status: ', response)
+            res.json(' Domain status: ' + response)
+        }
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: `Something went wrong in the transformer` })
+        res.status(500).json(`Site not able to be created. (Already created or error)`)
     }
 })
 

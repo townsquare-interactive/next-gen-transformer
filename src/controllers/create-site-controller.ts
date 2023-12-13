@@ -71,7 +71,7 @@ export const changePublishStatusInSiteData = async (subdomain: string, status: b
 }
 
 //add created site params to list in s3
-//may not be needed later if we are checking DB before and have publishedDomains in Layout file
+//may not be needed later if we can check s3 for folder
 export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []

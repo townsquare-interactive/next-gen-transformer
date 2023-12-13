@@ -51,6 +51,35 @@ export const getFileS3 = async (key: string, rtnObj: any = { pages: [] }, type =
     }
 }
 
+/* export const fileExistsInS3 = async (key: string): Promise<boolean> => {
+    try {
+        await s3.headObject({ Bucket: tsiBucket, Key: key })
+        return true // Object exists
+    } catch (err) {
+        if (err.code === 'NotFound') {
+            console.log(`File ${key} not found in S3`)
+            return false // Object does not exist
+        }
+        console.error(`Error checking if file ${key} exists in S3:`, err)
+        throw err // Handle other errors
+    }
+} */
+
+export const folderExistsInS3 = async (folderKey: string): Promise<boolean> => {
+    try {
+        const listObjectsResponse = await s3.listObjectsV2({
+            Bucket: tsiBucket,
+            Prefix: folderKey.endsWith('/') ? folderKey : folderKey + '/',
+            MaxKeys: 1, // Only need to check if there is at least one object
+        })
+
+        return listObjectsResponse.Contents ? listObjectsResponse.Contents.length > 0 : false
+    } catch (error) {
+        console.error(`Error checking if folder ${folderKey} exists in S3:`, error)
+        throw error // Handle other errors
+    }
+}
+
 //add file to s3 bucket
 export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
     const s3ContentType = fileType.includes('css') ? 'text/css' : 'application/json'
@@ -68,6 +97,20 @@ export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
         })
 
     console.log('File Placed')
+}
+
+//add file to s3 bucket
+export const addFolderS3 = async (file: any, key: string) => {
+    await s3
+        .putObject({
+            Bucket: tsiBucket,
+            Key: file + '/',
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+
+    console.log('S3 folder created')
 }
 
 export const addAssetFromSiteToS3 = async (file: any, key: string) => {

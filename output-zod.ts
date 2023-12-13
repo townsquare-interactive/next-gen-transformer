@@ -264,7 +264,8 @@ export const SiteDataSchema = z.object({
     fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,
     contactFormData: ContactFormData.optional(),
-    published: z.boolean().nullable(),
+    published: z.boolean().optional(),
+    redirectUrl: z.string().optional(),
     publishedDomains: z.array(z.string().optional()),
 })
 
