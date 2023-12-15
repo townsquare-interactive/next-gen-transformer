@@ -112,7 +112,7 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     console.log('new list', newSitesArr)
 
     await addFileS3(newSitesArr, `sites/site-list`)
-} */
+} 
 
 //select current site data from site-list using subdomain or id
 export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: CreateSiteParams[], searchBy = 'subdomain', id = '') => {
@@ -126,7 +126,7 @@ export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: Cr
         return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
     }
 }
-
+*/
 export const getDomainList = async () => {
     const domainList = await getFileS3(`sites/domains.json`, [])
 

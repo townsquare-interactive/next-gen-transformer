@@ -5,6 +5,8 @@ import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
 import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData, addToSiteList, getDomainList } from '../src/controllers/create-site-controller.js'
+import { zodDataParse } from '../output-zod.js'
+import { saveInputSchema } from '../input-zod.js'
 
 import express from 'express'
 const router = express.Router()
@@ -12,16 +14,25 @@ const router = express.Router()
 //save from luna cms
 router.post('/save', async (req, res) => {
     console.log('save req')
-    try {
-        const url = req.body.siteData.config.website.url
-        const basePath = stripUrl(url)
-        const data = await transformLuna(req)
-        await publish({ ...data })
 
-        res.json('posting to s3 folder: ' + basePath)
+    try {
+        //check input data for correct structure
+        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+
+        try {
+            const url = req.body.siteData.config.website.url
+            const basePath = stripUrl(url)
+            const data = await transformLuna(req)
+            await publish({ ...data })
+
+            res.json('posting to s3 folder: ' + basePath)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
+        console.log(err)
+        res.status(500).json({ err: 'incorrect data structure received' })
     }
 })
 

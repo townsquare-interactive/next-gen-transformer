@@ -914,5 +914,5 @@ export interface CreateSiteParams {
     type: string
     subdomain: string
     templateIdentifier: string
-    publishedDomains: string[]
+    publishedDomains?: string[]
 }

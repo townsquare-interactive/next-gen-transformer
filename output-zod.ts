@@ -23,8 +23,8 @@ const ContactFormData = z.object({
     formFields: z.array(
         z.object({
             name: z.string(),
-            placeholder: z.string(),
-            type: z.string(),
+            placeholder: z.string().optional(),
+            type: z.string().optional(),
             label: z.string(),
             isReq: z.boolean(),
             fieldType: z.string(),
@@ -441,8 +441,14 @@ export const CMSPagesSchema = z.array(
 )
 
 //check data based off Zod schema
-export const zodDataParse = (data: any, schema: any, type: string) => {
-    const validatedPageData = schema.safeParse(data)
+export const zodDataParse = (data: any, schema: any, type: string, parseLevel = 'safe') => {
+    let validatedPageData
+
+    if (parseLevel === 'safe') {
+        validatedPageData = schema.safeParse(data)
+    } else {
+        validatedPageData = schema.parse(data)
+    }
 
     if (validatedPageData.success === false) {
         return console.log(`${type} zod error:`, JSON.stringify(validatedPageData))
