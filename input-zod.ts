@@ -209,3 +209,10 @@ export const saveInputSchema = z.object({
     savedData: savedData,
     siteData: siteData,
 })
+
+export const createSiteInputSchema = z.object({
+    subdomain: z.string(),
+    clientId: z.number(),
+    templateIdentifier: z.string(),
+    type: z.literal('apex'),
+})

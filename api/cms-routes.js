@@ -6,7 +6,7 @@ import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
 import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData, addToSiteList, getDomainList } from '../src/controllers/create-site-controller.js'
 import { zodDataParse } from '../output-zod.js'
-import { saveInputSchema } from '../input-zod.js'
+import { saveInputSchema, createSiteInputSchema } from '../input-zod.js'
 
 import express from 'express'
 const router = express.Router()
@@ -41,22 +41,30 @@ router.post('/create-site', async (req, res) => {
     console.log('create site route')
 
     try {
-        //check if site is already created in s3
-        const siteExistsInS3 = await folderExistsInS3(req.body.subdomain)
+        //check input data for correct structure
+        zodDataParse(req.body, createSiteInputSchema, 'savedInput', 'parse')
 
-        if (siteExistsInS3) {
-            res.status(500).json(`Site already in s3`)
-        } else {
-            const siteListStatus = await addToSiteList(req.body)
-            const data = await transformCreateSite(req.body)
-            await publish({ ...data })
-            const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
-            console.log('domain status: ', response)
-            res.json(' Domain status: ' + response)
+        try {
+            //check if site is already created in s3
+            const siteExistsInS3 = await folderExistsInS3(req.body.subdomain)
+
+            if (siteExistsInS3) {
+                res.status(500).json(`Site already in s3`)
+            } else {
+                const siteListStatus = await addToSiteList(req.body)
+                const data = await transformCreateSite(req.body)
+                await publish({ ...data })
+                const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
+                console.log('domain status: ', response)
+                res.json(' Domain status: ' + response)
+            }
+        } catch (err) {
+            console.error(err)
+            res.status(500).json(`Site not able to be created. (Already created or error)`)
         }
     } catch (err) {
-        console.error(err)
-        res.status(500).json(`Site not able to be created. (Already created or error)`)
+        console.log(err)
+        res.status(500).json({ err: 'incorrect data structure received' })
     }
 })
 
