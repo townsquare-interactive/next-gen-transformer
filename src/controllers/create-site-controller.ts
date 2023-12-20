@@ -76,7 +76,6 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []
     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
-    websiteData.id = (currentSiteList.length + 1).toString()
     console.log('current site list', currentSiteList)
 
     //Add site to s3 site-list if it is not already there
