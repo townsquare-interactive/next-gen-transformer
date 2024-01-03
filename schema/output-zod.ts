@@ -1,6 +1,5 @@
 import { z } from 'zod'
 const Slot = z.object({})
-
 const OptionalString = z.string().optional()
 
 const CompositeItemSchema = z.object({
@@ -13,6 +12,7 @@ const CompositeItemSchema = z.object({
             subtitle: OptionalString,
             text: OptionalString,
             autoopen: z.boolean().optional(),
+            
         })
     ),
 })
@@ -52,6 +52,7 @@ const CompositeSchema = z.object({
 })
 
 export type CompositeData = z.infer<typeof CompositeSchema>
+export type CMSPagesSchemaType = z.infer<typeof CMSPagesSchema>
 
 const LogoItem = z
     .object({
@@ -283,7 +284,7 @@ const ButtonList = z.array(
     })
 )
 
-const ModuleItemSchema = z.object({
+export const ModuleItemSchema = z.object({
     id: z.string().nullish(),
     desc: OptionalString,
     icon: OptionalString,
@@ -372,15 +373,12 @@ const imageRatioList = [
 ]
 
 const AttributesSchema = z.object({
-    //id: z.string(),
-    //uid: z.string(),
     lazy: z.string(),
     type: z.string(),
     well: z.string(),
     align: OptionalString,
     items: z.array(ModuleItemSchema),
     title: OptionalString,
-    //export: z.number(),
     columns: z.number().min(1),
     imgsize: z.string().refine((value) => imageRatioList.includes(value), {
         message: 'Invalid image ratio',
@@ -397,6 +395,7 @@ const AttributesSchema = z.object({
     isSingleColumn: z.optional(z.boolean()),
     modalNum: z.number().optional(),
     contactFormData: ContactFormData.optional(),
+    export:z.number().optional()
 })
 
 const InnerModuleSchema = z.object({
@@ -427,7 +426,7 @@ export const CMSPagesSchema = z.array(
             columns: z.number(),
             modules: ModuleSchema,
             sections: z.array(z.object({ wide: z.string() })),
-            hideTitle: z.number(),
+            hideTitle: z.number().or(z.boolean()),
             head_script: z.string(),
             columnStyles: z.string(),
             page_type: OptionalString,
@@ -440,11 +439,23 @@ export const CMSPagesSchema = z.array(
     })
 )
 
+export const PageListSchema = z.object({
+    pages: z.array(
+        z.object({
+            name: z.string(),
+            slug: z.string(),
+            url: z.string(),
+            id: z.string(),
+            page_type: z.string().optional(),
+        })
+    ),
+})
+
 //check data based off Zod schema
-export const zodDataParse = (data: any, schema: any, type: string, parseLevel = 'safe') => {
+export const zodDataParse = (data: any, schema: any, type = '', parseLevel: 'safeParse' | 'parse' = 'safeParse') => {
     let validatedPageData
 
-    if (parseLevel === 'safe') {
+    if (parseLevel === 'safeParse') {
         validatedPageData = schema.safeParse(data)
     } else {
         validatedPageData = schema.parse(data)

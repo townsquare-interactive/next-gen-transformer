@@ -227,7 +227,7 @@ export const transformStrapi = async (req: Request) => {
 
             const newPage = {
                 data: {
-                    id: req.entry.id,
+                    id: String(req.entry.id),
                     title: req.entry.name,
                     slug: req.entry.slug,
                     page_type: req.entry.homePage === true ? 'homepage' : '',
@@ -258,6 +258,7 @@ export const transformStrapi = async (req: Request) => {
                     head_script: '',
                     columnStyles: 'full-column',
                     anchorTags: anchorTags,
+                    pageType:''
                 },
                 attrs: {},
                 seo: {
@@ -406,6 +407,6 @@ export const transformStrapi = async (req: Request) => {
         return strapi
     } catch (error) {
         console.log(error)
-        return { error: 'Strapi fetch error' }
+        throw error
     }
 }

@@ -1,4 +1,6 @@
-import { CompositeData } from './output-zod'
+import { CompositeData } from './schema/output-zod'
+
+
 
 export interface Page {
     data: {
@@ -13,7 +15,7 @@ export interface Page {
         columns: number
         modules: Module[][]
         sections: Section[]
-        hideTitle: boolean
+        hideTitle: number | boolean
         head_script: string
         columnStyles: string
         page_type?: string
@@ -24,37 +26,37 @@ export interface Page {
 
 interface Module {
     attributes: {
-        title: string
-        class: string
-        align: string
+        title?: string
+        class?: string
+        align?: string
         imgsize: string
-        columns: string
+        columns: number
         type: string
         well: string
-        lightbox: string
-        lazy: string
+        lightbox?: string
+        lazy?: string
         blockSwitch1?: number
         blockField1?: string
-        blockField2: string
-        scale_to_fit: string
-        export: number
+        blockField2?: string
+        scale_to_fit?: string
+        export?: number
         items: Item[]
         id: string
         modId: string
         modCount: number
-        columnLocation: number
-        isSingleColumn: boolean
+        columnLocation?: number
+        isSingleColumn?: boolean
     }
     componentType: string
     title?: string
 }
 
 interface Item {
-    id: string
+    id?: string
     headline: string
     subheader: string
     image: string
-    captionOn: string
+    captionOn?: string
     icon?: string
     icon2?: string
     icon3?: string
@@ -78,8 +80,8 @@ interface Item {
     headerTag: string
     plugin?: string
     disabled: boolean | string
-    pagelinkId?: string
-    pagelink2Id?: string
+    pagelinkId?: string | number
+    pagelink2Id?: string | number
     buttonList: Button[]
     linkNoBtn: boolean
     btnCount?: number
@@ -148,35 +150,23 @@ interface Section {
 }
 
 export interface Logo {
-    fonts: any[]
-    footer: {
-        pct: null | number
-        slots: Slot[]
-        activeSlots: number[]
-    }
-    header: {
-        pct: number | null
-        slots: Slot[]
-        activeSlots: number[]
-    }
-    mobile: {
-        pct: null | number
-        slots: Slot[]
-        activeSlots: number[]
-    }
-    list: {
+    fonts?: any[]
+    footer: LogoBlock
+    header: LogoBlock
+    mobile: LogoBlock
+    list?: {
         [key: number]: string
     }
 }
 
 export interface Slot {
     show?: number
-    type: string
+    type?: string
     markup?: string
     hasLinks?: boolean
-    alignment: string
-    image_src: string
-    image_link: string
+    alignment?: string
+    image_src?: string
+    image_link?: string
 }
 
 export interface Address {
@@ -258,14 +248,14 @@ interface Composite {
     columns: number
     modules: {
         type: string
-        items: Item[]
+        items: CompositeItem[]
     }
     sections: any
 }
 
-interface Item {
+interface CompositeItem {
     title: string
-    nav_menu: number
+    nav_menu: any
     component: string
 }
 
@@ -309,12 +299,12 @@ interface CmsColors {
 }
 
 interface Config {
-    mailChimp: {
+    mailChimp?: {
         audId: string
         datacenter: string
     }
-    zapierUrl: string
-    makeUrl: string
+    zapierUrl?: string
+    makeUrl?: string
 }
 
 export interface SiteData {
@@ -342,50 +332,18 @@ export interface PublishData {
     globalStyles: string
 }
 
+interface LogoBlock {
+    pct?: number
+            slots: Slot[]
+            activeSlots?: number[]
+}
+
 export interface Layout {
     logos: {
         fonts: any[]
-        footer: {
-            pct: number
-            slots: {
-                show: number
-                type: string
-                markup: string
-                hasLinks: boolean
-                alignment: string
-                image_src: string
-                image_link: string
-                image_link_ext?: string
-            }[]
-            activeSlots: number[]
-        }
-        header: {
-            pct: number
-            slots: {
-                show: number
-                type: string
-                markup: string
-                hasLinks: boolean
-                alignment: string
-                image_src: string
-                image_link: string
-            }[]
-            activeSlots: number[]
-        }
-        mobile: {
-            pct: number
-            slots: {
-                show: number
-                type: string
-                markup: string
-                hasLinks: boolean
-                alignment: string
-                image_src: string
-                image_link: string
-                image_link_ext?: string
-            }[]
-            activeSlots: number[]
-        }
+        footer: LogoBlock
+        header: LogoBlock
+        mobile: LogoBlock
         list: { [key: string]: string }
     }
     social: {
@@ -437,15 +395,7 @@ export interface Layout {
     s3Folder: string
     favicon: string
     fontImport: string
-    config: {
-        mailChimp: {
-            audId: string
-            datacenter: string
-            auth: string
-        }
-        zapierUrl: string
-        makeUrl: string
-    }
+    config: Config
     publishedDomains: string[]
     published?: boolean
 }
@@ -506,10 +456,10 @@ export interface CMSPage {
         columns: number
         modules: Module[][]
         sections: Section[]
-        hideTitle: boolean
+        hideTitle: number | boolean
         head_script: string
         columnStyles: string
-        page_type: string
+        page_type?: string
     }
     attrs: {}
     seo: PageSeo
@@ -517,7 +467,7 @@ export interface CMSPage {
     JS?: string
     title: string
     slug: string
-    page_type: string
+    page_type?: string
     url: string
     id: string
     sections: Section[]
@@ -544,8 +494,8 @@ export interface LunaModuleItem {
     pagelink2?: string
     subheader?: string
     isFeatured?: string | boolean
-    pagelinkId?: string
-    pagelink2Id?: string
+    pagelinkId?: string | number
+    pagelink2Id?: string | number
     icon?: string
     icon2?: string
     icon3?: string
@@ -568,7 +518,7 @@ export interface LunaModuleItem {
         weblink2?: string
     }
     buttonList?: Button[]
-    imageType?: string
+    imageType?: 'crop' | 'nocrop'
     imageIcon?: any
     linkNoBtn?: boolean
 }
@@ -695,7 +645,7 @@ export interface CurrentModule {
     contactFormData?: any
     useCarousel?: boolean
     settings?: CarouselSettings
-    blockSwitch1?: string
+    blockSwitch1?: number
     type?: string
     imageOverlay?: boolean
     modId?: string | number

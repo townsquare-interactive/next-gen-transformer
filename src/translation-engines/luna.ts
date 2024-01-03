@@ -12,7 +12,6 @@ export const transformLuna = async (req: LunaRequest) => {
 
         let globalFile
         globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, cmsUrl)
-        /*    await addFileS3(globalFile, `${basePath}/layout`) */
 
         let newPageList
         //Transforming and posting saved page data
@@ -53,12 +52,12 @@ export const transformLuna = async (req: LunaRequest) => {
             siteLayout: globalFile,
             pages: newPageData.pages || [],
             assets: [],
-            globalStyles: globalStyles,
+            globalStyles: globalStyles || '',
         }
 
         return luna
     } catch (error) {
         console.log(error)
-        return { error: 'Luna transformer error' }
+        throw error
     }
 }

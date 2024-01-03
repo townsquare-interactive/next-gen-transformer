@@ -33,10 +33,9 @@ import {
     transformLogos,
     createModalPageList,
 } from '../utils.js'
-
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
-
-import { CMSPage, ThemeStyles, Layout, Page, LunaModule, PageSeo, LunaModuleItem, ModuleItem } from '../../types.js'
+import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem } from '../../types.js'
+import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
 
 const toStringSchema = z.coerce.string()
 
@@ -120,7 +119,7 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
     return { pages: newData }
 }
 
-const getPageData = (sitePageData: CMSPage[], key: string) => {
+export const getPageData = (sitePageData: any, key: any) => {
     const pageId: any = key
     const pageTitle = sitePageData[pageId].title
     const pageSlug = sitePageData[pageId].slug
@@ -185,6 +184,7 @@ export const updatePageList = async (page: CMSPage[] | Page[], basePath: string)
     //Can use add file when ready, instead of addpagelist logging
     console.log('new page list', pageListFile)
 
+    zodDataParse(pageListFile, PageListSchema, 'Pages', 'parse')
     await addFileS3List(pageListFile, pageListUrl)
     return pageListFile
 }

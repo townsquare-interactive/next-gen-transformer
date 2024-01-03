@@ -568,7 +568,7 @@ export const transformLogos = (logos: Logo, cmsUrl: string) => {
     function transformLogoSlots(slots: Slot[]) {
         for (const x in slots) {
             if (slots[x].image_src) {
-                slots[x].image_src = createTsiImageLink(cmsUrl, slots[x].image_src)
+                slots[x].image_src = createTsiImageLink(cmsUrl, slots[x].image_src || '')
             }
         }
         return slots

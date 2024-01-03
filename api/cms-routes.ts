@@ -1,20 +1,18 @@
-import { addFileS3, addFolderS3, folderExistsInS3 } from '../src/s3Functions.js'
+import { addFileS3, folderExistsInS3 } from '../src/s3Functions.js'
 import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { publish } from '../src/output/index.js'
 import { modifyVercelDomainPublishStatus, changePublishStatusInSiteData, addToSiteList, getDomainList } from '../src/controllers/create-site-controller.js'
-import { zodDataParse } from '../output-zod.js'
-import { saveInputSchema, createSiteInputSchema } from '../input-zod.js'
+import { zodDataParse } from '../schema/output-zod.js'
+import { saveInputSchema, createSiteInputSchema } from '../schema/input-zod.js'
 
 import express from 'express'
 const router = express.Router()
 
 //save from luna cms
 router.post('/save', async (req, res) => {
-    console.log('save req')
-
     try {
         //check input data for correct structure
         zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
@@ -42,7 +40,7 @@ router.post('/create-site', async (req, res) => {
 
     try {
         //check input data for correct structure
-        zodDataParse(req.body, createSiteInputSchema, 'savedInput', 'parse')
+        zodDataParse(req.body, createSiteInputSchema, 'createSite', 'parse')
 
         try {
             //check if site is already created in s3
@@ -53,7 +51,9 @@ router.post('/create-site', async (req, res) => {
             } else {
                 const siteListStatus = await addToSiteList(req.body)
                 const data = await transformCreateSite(req.body)
-                await publish({ ...data })
+                if (!(data instanceof Error)){
+                    await publish({ ...data })
+                }
                 const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
                 console.log('domain status: ', response)
                 res.json(' Domain status: ' + response)
@@ -160,7 +160,8 @@ router.post('/site-data/strapi', async (req, res) => {
         const data = await transformStrapi(req.body)
         console.log(data.pages)
 
-        await publish({ ...data })
+        //hidden for TS reasons
+        //await publish({ ...data })
         res.json('posting to s3 folder: ' + 'strapi')
     } catch (err) {
         console.log(err)

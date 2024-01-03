@@ -1,4 +1,4 @@
-import { layout1 } from '../../template1.js'
+import { layout1 } from '../../templates/template1.js'
 
 interface body {
     clientId: string
@@ -34,6 +34,6 @@ export const transformCreateSite = async (req: body) => {
         return siteData
     } catch (error) {
         console.log(error)
-        return { error: 'Create site transformer error' }
+        throw{ error: 'Create site transformer error' }
     }
 }
