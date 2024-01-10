@@ -58,7 +58,7 @@ router.post('/create-site', async (req, res) => {
 
             //if (siteStatusPostgres === 'site exists' || siteExistsInS3) {
             if (siteExistsInS3) {
-                return res.status(500).json({ 'error adding site data': 'site already exists' })
+                return res.status(500).json('site already exists')
             } else {
                 //const siteListStatus = await addToSiteList(req.body)
                 const data = await transformCreateSite(req.body)
@@ -73,7 +73,7 @@ router.post('/create-site', async (req, res) => {
         }
     } catch (err) {
         console.log(err)
-        res.status(500).json({ err: 'incorrect data structure received' })
+        res.status(500).json('incorrect data structure received')
     }
 })
 
