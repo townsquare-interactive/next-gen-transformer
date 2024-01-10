@@ -12,7 +12,6 @@ const CompositeItemSchema = z.object({
             subtitle: OptionalString,
             text: OptionalString,
             autoopen: z.boolean().optional(),
-            
         })
     ),
 })
@@ -395,7 +394,7 @@ const AttributesSchema = z.object({
     isSingleColumn: z.optional(z.boolean()),
     modalNum: z.number().optional(),
     contactFormData: ContactFormData.optional(),
-    export:z.number().optional()
+    export: z.number().optional(),
 })
 
 const InnerModuleSchema = z.object({
@@ -415,7 +414,7 @@ const ModuleSchema = z.array(
 export const CMSPagesSchema = z.array(
     z.object({
         data: z.object({
-            id: z.string(),
+            id: z.string().or(z.number()),
             title: z.string(),
             slug: z.string(),
             pageType: z.string(),
@@ -445,7 +444,7 @@ export const PageListSchema = z.object({
             name: z.string(),
             slug: z.string(),
             url: z.string(),
-            id: z.string(),
+            id: z.string().or(z.number()),
             page_type: z.string().optional(),
         })
     ),
