@@ -1,6 +1,6 @@
 import { layout1 } from '../../templates/template1.js'
 
-interface body {
+interface reqBody {
     clientId: string
     type: string
     subdomain: string
@@ -17,7 +17,7 @@ function transformLayoutTemplate(layoutTemplate: any, basePath: string) {
     return siteLayout
 }
 
-export const transformCreateSite = async (req: body) => {
+export const transformCreateSite = async (req: reqBody) => {
     const basePath = req.subdomain
 
     let siteLayout = transformLayoutTemplate(layout1.layout, basePath)

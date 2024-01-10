@@ -1,5 +1,6 @@
 import { CreateSiteParams, Layout } from '../../types.js'
 import { addFileS3, getFileS3 } from '../s3Functions.js'
+import { sql } from '@vercel/postgres'
 
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
@@ -130,4 +131,18 @@ export const getDomainList = async () => {
     const domainList = await getFileS3(`sites/domains.json`, [])
 
     return domainList
+}
+
+export async function checkIfSiteExistsPostgres(domain: string) {
+    try {
+        const domainCheck = await sql`SELECT * FROM Domains WHERE domain = ${domain};`
+        const domainExists = domainCheck.rowCount > 0 ? true : false
+        const foundStatus = domainExists === true ? 'site exists' : 'not found'
+        console.log(foundStatus)
+
+        return foundStatus
+    } catch (error) {
+        console.log(error)
+        throw { 'this is error': { error } }
+    }
 }
