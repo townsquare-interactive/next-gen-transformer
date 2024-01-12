@@ -42,7 +42,7 @@ export const publish = async (data: PublishData) => {
 
     if (assets && assets?.length != 0) {
         assets.forEach(async (asset) => {
-            await addAssetFromSiteToS3(asset.content, s3SitePath + '/assets/' + asset.name)
+            await addAssetFromSiteToS3(asset.fileName, s3SitePath + '/assets/' + asset.name)
         })
     }
 

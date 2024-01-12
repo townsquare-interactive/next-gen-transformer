@@ -9,6 +9,7 @@ export const transformLuna = async (req: LunaRequest) => {
         const cmsUrl = req.body.siteData.config.website.url
         const basePath = stripUrl(cmsUrl)
         const themeStyles: any = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
+        const assets = []
 
         let globalFile
         globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, cmsUrl)
@@ -27,12 +28,8 @@ export const transformLuna = async (req: LunaRequest) => {
 
         if (req.body.savedData.favicon) {
             const faviconName = stripImageFolders(req.body.savedData.favicon)
-            console.log(
-                'favicon time',
-                req.body.savedData.favicon,
-                req.body.siteData.config.website.url + req.body.savedData.favicon,
-                basePath + '/assets/' + faviconName
-            )
+            console.log('favicon time', req.body.siteData.config.website.url + req.body.savedData.favicon, basePath + '/assets/' + faviconName)
+            assets.push({ fileName: req.body.siteData.config.website.url + req.body.savedData.favicon, name: faviconName })
         }
 
         if (req.body.savedData.deletePages) {
@@ -51,7 +48,7 @@ export const transformLuna = async (req: LunaRequest) => {
             usingPreviewMode: false,
             siteLayout: globalFile,
             pages: newPageData.pages || [],
-            assets: [],
+            assets: assets,
             globalStyles: globalStyles || '',
         }
 

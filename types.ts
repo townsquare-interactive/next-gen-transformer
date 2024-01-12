@@ -1,7 +1,5 @@
 import { CompositeData } from './schema/output-zod'
 
-
-
 export interface Page {
     data: {
         id: string
@@ -328,14 +326,14 @@ export interface PublishData {
     usingPreviewMode?: boolean
     siteLayout: SiteData
     pages: Page[]
-    assets: { url: string; fileName: string; name: string; content: string }[]
+    assets: { url?: string; fileName: string; name?: string; content?: string }[]
     globalStyles: string
 }
 
 interface LogoBlock {
     pct?: number
-            slots: Slot[]
-            activeSlots?: number[]
+    slots: Slot[]
+    activeSlots?: number[]
 }
 
 export interface Layout {

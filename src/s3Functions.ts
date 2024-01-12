@@ -113,6 +113,7 @@ export const addFolderS3 = async (file: any, key: string) => {
     console.log('S3 folder created')
 }
 
+//adds file from luna site to s3 folder (used for favicons)
 export const addAssetFromSiteToS3 = async (file: any, key: string) => {
     var options = {
         uri: 'http://' + file,
