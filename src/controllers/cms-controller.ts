@@ -442,7 +442,7 @@ const transformModuleItem = (
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
 
     //Change lazy loading to off for first module that is a photogallery
-    currentModule.lazy = modCount === 1 && itemCount === 1 && modRenderType === 'PhotoGallery' ? 'off' : currentModule.lazy
+    currentModule.lazy = modCount === 1 && itemCount === 1 && (modRenderType === 'PhotoGallery' || modRenderType === 'Parallax') ? 'off' : currentModule.lazy
 
     let imagePriority = false
     if (currentModule.lazy === 'off') {
@@ -450,7 +450,7 @@ const transformModuleItem = (
     }
     //replace line breaks from cms
     if (currentItem.desc) {
-        currentItem.desc = convertDescText(currentItem.desc)
+        currentItem.desc = convertDescText(currentItem.desc, cmsUrl)
     }
 
     //Create button and link vars

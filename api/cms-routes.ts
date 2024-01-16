@@ -7,14 +7,12 @@ import { publish } from '../src/output/index.js'
 import {
     modifyVercelDomainPublishStatus,
     changePublishStatusInSiteData,
-    addToSiteList,
     getDomainList,
     checkIfSiteExistsPostgres,
 } from '../src/controllers/create-site-controller.js'
 import { zodDataParse } from '../schema/output-zod.js'
 import { saveInputSchema, createSiteInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
-
 import express from 'express'
 const router = express.Router()
 
@@ -23,6 +21,50 @@ router.post('/save', async (req, res) => {
     try {
         //check input data for correct structure
         zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+
+        try {
+            const url = req.body.siteData.config.website.url
+            const basePath = stripUrl(url)
+            const data = await transformLuna(req)
+            await publish({ ...data })
+
+            res.json('posting to s3 folder: ' + basePath)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ err: 'incorrect data structure received' })
+    }
+})
+
+//currently all pages are not passed in save from cms
+router.post('/migrate', async (req, res) => {
+    try {
+        //check input data for correct structure
+        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+
+        //transform to migrate form
+        //loop this
+        //move data into pages
+        let newPages = {}
+        for (let [key, value] of Object.entries(req.body.siteData.pages)) {
+            console.log(value)
+            let newPage: any = value
+            if (newPage.publisher) {
+                value = { ...newPage, data: newPage.publisher.data }
+                newPages = { ...newPages, [key]: value } // Fix is here, use [key]: value
+            }
+            //console.log(value);
+        }
+
+        if (req.body.siteData.config.website.favicon.src) {
+            req.body.savedData.favicon = req.body.siteData.config.website.favicon.src
+        }
+
+        //change savedData to have all pages
+        req.body.savedData = { ...req.body.savedData, pages: newPages }
 
         try {
             const url = req.body.siteData.config.website.url

@@ -15,7 +15,7 @@ const NavMenuItemSchema = z.object({
     menu_list_id: z.number(),
     title: z.string(),
     post_type: z.string(),
-    type: z.string(),
+    type: z.string().nullish(),
     menu_item_parent: z.union([z.string(), z.number()]).nullable(),
     object_id: z.number(),
     object: z.string(),
@@ -120,7 +120,7 @@ const SavedPagesSchema = z.object({
         columns: z.number(),
         modules: z.array(z.record(z.object({}))),
         sections: z.array(z.object({})), // Define the schema for Section here if needed
-        hideTitle: z.number().optional(),
+        hideTitle: z.number().or(z.boolean()).optional(),
         head_script: z.string().optional(),
         page_type: z.string().optional(),
     }),

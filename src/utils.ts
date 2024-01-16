@@ -1120,9 +1120,29 @@ export function wrapTextWithPTags(text: string) {
     return removedUnwrapped
 }
 
-export const convertDescText = (desc: string) => {
+function processImageTag(desc: string, cmsUrl: string) {
+    // Regular expression to match <img> tag
+    var imgRegex = /<img([^>]*)src\s*=\s*["']([^"']*)["']([^>]*)>/g
+
+    // Function to replace the src attribute
+    function replaceSrc(match: any, p1: string, p2: string, p3: string) {
+        // Add the string variable to the beginning of the src value
+        var newSrc = cmsUrl + p2
+        return '<img' + p1 + 'src="' + 'http://' + newSrc + '"' + p3 + '>'
+    }
+
+    // Use replace function with the defined callback
+    var processedDesc = desc.replace(imgRegex, replaceSrc)
+
+    console.log('lets see how it works', desc, processedDesc)
+
+    return processedDesc
+}
+
+export const convertDescText = (desc: string, cmsUrl: string) => {
     const wrappedText = wrapTextWithPTags(desc)
     const convertedDesc = convertSpecialTokens(wrappedText)
+    //const convertedImages = processImageTag(convertedDesc, cmsUrl)
     return convertedDesc
 }
 
