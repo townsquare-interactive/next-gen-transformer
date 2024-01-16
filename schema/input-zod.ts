@@ -17,10 +17,10 @@ const NavMenuItemSchema = z.object({
     post_type: z.string(),
     type: z.string().nullish(),
     menu_item_parent: z.union([z.string(), z.number()]).nullable(),
-    object_id: z.number(),
+    object_id: z.number().nullish(),
     object: z.string(),
     target: z.string().nullable(),
-    classes: z.string().nullable(),
+    classes: z.string().or(z.array(z.unknown())).nullable(),
     menu_order: z.number(),
     mi_url: z.string().nullable(),
     url: z.string(),
@@ -132,7 +132,7 @@ const SavedPagesSchema = z.object({
 
 const colorSchema = z.object({
     key: z.string(),
-    type: z.string(),
+    type: z.string().nullish(),
     label: z.string(),
     value: z.string(),
 })
