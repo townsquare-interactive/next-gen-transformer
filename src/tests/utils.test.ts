@@ -45,6 +45,18 @@ describe('Wrap with P Tags', () => {
     it('should handle uppercase <B> tag', () => {
         expect(wrapTextWithPTags('Hello There <B>yes</B>helob')).toBe('<p>Hello There </p><b>yes</b><p>helob</p>')
     })
+
+    const pText =
+        '<p>Swamp Rabbit Home Repairs has years of experience providing <a href="/deck-repairs/">home repair</a> and improvement services to residents of Greenville, SC and surrounding areas.</p>'
+    it('should ignore text that starts with </p>', () => {
+        expect(wrapTextWithPTags(pText)).toBe(pText)
+    })
+
+    const divText =
+        '<div>Swamp Rabbit Home Repairs has years of experience providing <a href="/deck-repairs/">home repair</a> and improvement services to residents of Greenville, SC and surrounding areas.</div>'
+    it('should ignore text that starts with </div>', () => {
+        expect(wrapTextWithPTags(divText)).toBe(divText)
+    })
 })
 
 describe('Is Promo button', () => {

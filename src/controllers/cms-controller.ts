@@ -291,7 +291,9 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         contact: contactInfo,
         siteName: file.config.website.site_title || '',
         phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
-        email: file.settings ? file.settings.contact.contact_list.wide.items[0].email[0].name : currentLayout.email || '',
+        email: file.settings?.contact?.contact_list?.wide.items[0]?.email[0]?.name
+            ? file.settings.contact.contact_list.wide.items[0].email[0].name
+            : currentLayout.email || '',
         url: file.config.website.url,
         composites: composites,
         modalData: modalData,

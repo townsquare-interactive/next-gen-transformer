@@ -1053,23 +1053,12 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
     return { ...value }
 }
 
-/* function removeUndefinedTags(inputText: string) {
-    const regex = /<p>undefined<\/p>/g
-    const cleanedText = inputText.replace(regex, '')
-    return cleanedText
-} */
-/* function removeUnwrappedLists(text: string) {
-    // Define a regular expression to match 'ul' or 'ol' not enclosed in '<' symbols
-    const regex = /(?<!<)(ul|ol|div|span)(?![>/])/g
-
-    // Remove 'ul' or 'ol' not enclosed in '<' symbols
-    const cleanedText = text.replace(regex, '')
-
-    return cleanedText
-}
- */
 //Need to wrap <p> tags around text that does not contain list tags
 export function wrapTextWithPTags(text: string) {
+    //dont edit text that starts with a html tag
+    if (text.startsWith('<')) {
+        return text
+    }
     // Match text outside of html tags
     const regex = /(<\/?(ul|ol|b|div|span|i)[^>]*>)|([^<]+)/gi
 
