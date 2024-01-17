@@ -430,6 +430,21 @@ const transformPageModules = (
     return columnsData
 }
 
+const determineLazyLoad = (modLazy: string, modCount: number, itemCount: number) => {
+    //initiate lazy load off for top module items
+    if (modCount === 1 && itemCount <= 2) {
+        modLazy = 'off'
+    } else {
+        modLazy = modLazy
+    }
+
+    if (modLazy === 'off') {
+        return true
+    } else {
+        return false
+    }
+}
+
 const transformModuleItem = (
     currentModule: LunaModule,
     currentItem: ModuleItem,
@@ -443,13 +458,8 @@ const transformModuleItem = (
 ) => {
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
 
-    //Change lazy loading to off for first module that is a photogallery
-    currentModule.lazy = modCount === 1 && itemCount === 1 && (modRenderType === 'PhotoGallery' || modRenderType === 'Parallax') ? 'off' : currentModule.lazy
+    const imagePriority = determineLazyLoad(currentModule.lazy, modCount, itemCount)
 
-    let imagePriority = false
-    if (currentModule.lazy === 'off') {
-        imagePriority = true
-    }
     //replace line breaks from cms
     if (currentItem.desc) {
         currentItem.desc = convertDescText(currentItem.desc, cmsUrl)
@@ -463,7 +473,7 @@ const transformModuleItem = (
         pageModals
     )
 
-    let isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
+    const isFeatureButton = isFeatureBtn(modRenderType, currentModule.well, btnCount, currentItem.isFeatured)
 
     //create button styles
     const btnStyles = createBtnStyles(currentModule, modRenderType, key, themeStyles, currentItem, itemCount, isFeatureButton)
