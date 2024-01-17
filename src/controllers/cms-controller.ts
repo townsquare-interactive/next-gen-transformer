@@ -32,6 +32,7 @@ import {
     createFavLink,
     transformLogos,
     createModalPageList,
+    moduleRenderTypes,
 } from '../utils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem } from '../../types.js'
@@ -341,8 +342,6 @@ const transformPageModules = (
 
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
-                modCount += 1
-
                 let currentModule = value
 
                 //remove unneeeded fields
@@ -354,6 +353,11 @@ const transformPageModules = (
                     modRenderType = 'Map'
                 } else {
                     modRenderType = determineModRenderType(currentModule.type)
+                }
+
+                //Dont count modules that are not being rendered
+                if (moduleRenderTypes.includes(modRenderType)) {
+                    modCount += 1
                 }
 
                 currentModule.type = modVariationType(currentModule.type)

@@ -33,6 +33,8 @@ export function iconConvert(str: string) {
     }
 }
 
+export const moduleRenderTypes = ['Article', 'PhotoGrid', 'Banner', 'Parallax', 'Testimonials', 'Card', 'PhotoGallery', 'ContactFormRoutes', 'Modal']
+
 export const determineModRenderType = (type: string) => {
     if (type.includes('article')) {
         return 'Article'
