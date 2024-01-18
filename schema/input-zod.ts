@@ -10,7 +10,7 @@ const CodeSchema = z.object({
     visible: z.number(),
 })
 
-const NavMenuItemSchema = z.object({
+export const NavMenuItemSchema = z.object({
     ID: z.number(),
     menu_list_id: z.number(),
     title: z.string(),

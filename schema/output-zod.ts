@@ -1,19 +1,22 @@
 import { z } from 'zod'
+import { NavMenuItemSchema } from './input-zod.js'
 const Slot = z.object({})
 const OptionalString = z.string().optional()
 
 const CompositeItemSchema = z.object({
-    items: z.array(
-        z.object({
-            title: OptionalString,
-            component: z.string(),
-            nav_menu: z.nullable(z.any()),
-            name: z.string(),
-            subtitle: OptionalString,
-            text: OptionalString,
-            autoopen: z.boolean().optional(),
-        })
-    ),
+    items: z
+        .array(
+            z.object({
+                title: OptionalString,
+                component: z.string(),
+                nav_menu: z.nullable(z.any()),
+                name: z.string(),
+                subtitle: OptionalString,
+                text: OptionalString,
+                autoopen: z.boolean().optional(),
+            })
+        )
+        .optional(),
 })
 const ContactFormData = z.object({
     formTitle: z.string().optional(),
@@ -216,7 +219,7 @@ const ThemeStyles = z.object({
     promoColor6: z.string(),
 })
 
-const CMSNavItem = z.object({
+/* const CMSNavItem = z.object({
     ID: z.number(),
     menu_list_id: z.number(),
     title: z.string(),
@@ -232,17 +235,17 @@ const CMSNavItem = z.object({
     url: z.string(),
     disabled: z.union([z.boolean(), z.string()]).optional(),
     slug: z.string(),
-})
+}) */
 
 const CMSNavItemSchema = z.object({
-    ...CMSNavItem.shape,
+    ...NavMenuItemSchema.shape,
     submenu: z
         .array(
             z
                 .object({
-                    submenu: z.array(z.object({ CMSNavItem: CMSNavItem.nullish() })).nullish(),
+                    submenu: z.array(z.object({ CMSNavItem: NavMenuItemSchema.nullish() })).nullish(),
                 })
-                .merge(CMSNavItem)
+                .merge(NavMenuItemSchema)
         )
         .optional(),
 })
@@ -267,6 +270,7 @@ export const SiteDataSchema = z.object({
     published: z.boolean().optional(),
     redirectUrl: z.string().optional(),
     publishedDomains: z.array(z.string().optional()),
+    allStyles: z.string(),
 })
 
 const ButtonList = z.array(
@@ -389,7 +393,7 @@ const AttributesSchema = z.object({
     scale_to_fit: OptionalString,
     customClassName: OptionalString,
     modId: z.string(),
-    modCount: z.number().min(1),
+    modCount: z.number().min(0),
     columnLocation: z.number(),
     isSingleColumn: z.optional(z.boolean()),
     modalNum: z.number().optional(),
@@ -431,7 +435,7 @@ export const CMSPagesSchema = z.array(
             page_type: OptionalString,
             pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
         }),
-        attrs: z.record(z.unknown()), //for page name changes
+        attrs: z.record(z.unknown()).optional(), //for page name changes
         seo: SeoSchema,
         head_script: OptionalString,
         JS: OptionalString,

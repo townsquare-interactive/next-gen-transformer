@@ -319,6 +319,7 @@ export interface SiteData {
     favicon: string
     fontImport: string
     config: Config
+    allStyles?: string
 }
 
 export interface PublishData {
@@ -396,6 +397,7 @@ export interface Layout {
     config: Config
     publishedDomains: string[]
     published?: boolean
+    allStyles: string
 }
 
 export interface CMSNavItem {

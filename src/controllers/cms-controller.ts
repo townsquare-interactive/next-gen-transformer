@@ -242,7 +242,7 @@ export const addNewPageToNav = async (pageData: CMSPage, basePath: string) => {
 }
 
 //Create or edit layout file
-export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string) => {
+export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles: string) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -320,6 +320,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             zapierUrl: process.env.ZAPIER_URL,
             makeUrl: process.env.MAKE_URL,
         },
+        allStyles: globalStyles,
     }
 
     return globalFile
@@ -542,6 +543,16 @@ const transformModuleItem = (
     return currentItem
 }
 
+/* function removeLunaCss(inputString: string) {
+    // Use a regular expression to match the patterns ".tsH", ".tsD", or ".tsI" followed by anything until the next "}" or the end of the string
+    const regex = /\.ts[HDI][^}]*?(}|$)/g
+
+    // Replace the matched patterns with an empty string
+    const result = inputString.replace(regex, '').replace(/\n\s*\n/g, '\n')
+
+    return result
+} */
+
 export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: any, code: { CSS: string }, currentPageList: any, basePath: string) => {
     console.log('global css changed --------')
 
@@ -615,7 +626,7 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return { data: data, pageList: pageList }
 } */
 
-export const createPageList = (page: { title: string; slug: string; id: String; page_type: string }) => {
+export const createPageList = (page: { title: string; slug: string; id: string; page_type: string }) => {
     const pageData = {
         name: page.title,
         slug: page.slug,
