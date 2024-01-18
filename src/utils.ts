@@ -1058,11 +1058,19 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
 //Need to wrap <p> tags around text that does not contain list tags
 export function wrapTextWithPTags(text: string) {
     //dont edit text that starts with a html tag
-    if (text.startsWith('<')) {
+
+    text = text.replace(/\n/g, '[rn]')
+
+    if (text.startsWith('<') || text.includes('<a')) {
+        console.log('skipping <p> tag insertion')
+        if (text.includes('One of the best ways')) {
+            console.log('incoming text', text)
+        }
         return text
     }
+
     // Match text outside of html tags
-    const regex = /(<\/?(ul|ol|b|div|span|i)[^>]*>)|([^<]+)/gi
+    const regex = /(<\/?(ul|ol|b|div|span|i|a)[^>]*>)|([^<]+)/gi
 
     // Split the text based on the regex and process each part
     const parts = text.split(regex)
@@ -1071,18 +1079,20 @@ export function wrapTextWithPTags(text: string) {
     let insideList = false
 
     //tags we want to include
-    const tags = ['ul', 'ol', 'b', 'div', 'span', 'i']
+    const tags = ['ul', 'ol', 'b', 'div', 'span', 'i', 'a']
 
     // Process each part and wrap text in <p> tags if not inside a list
     const result = parts.map((part) => {
         const lowerCasePart = part?.toLowerCase()
+        //console.log(part)
         if (
             lowerCasePart === '<ul>' ||
             lowerCasePart === '<ol>' ||
             lowerCasePart === '<b>' ||
             lowerCasePart === '<i>' ||
             lowerCasePart === '<div>' ||
-            lowerCasePart === '<span>'
+            lowerCasePart === '<span>' ||
+            lowerCasePart?.includes('<a')
             //tags.includes(`<${lowerCasePart}>`)
         ) {
             insideList = true
@@ -1093,7 +1103,8 @@ export function wrapTextWithPTags(text: string) {
             lowerCasePart === '</b>' ||
             lowerCasePart === '</div>' ||
             lowerCasePart === '</span>' ||
-            lowerCasePart === '</i>'
+            lowerCasePart === '</i>' ||
+            lowerCasePart === '</a>'
             //tags.includes(`</${lowerCasePart}>`)
         ) {
             insideList = false
