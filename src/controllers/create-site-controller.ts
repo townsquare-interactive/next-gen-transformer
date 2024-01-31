@@ -15,6 +15,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         //new check with layout file
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+        console.log('is pub already', isDomainPublishedAlready)
 
         if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
             console.log('here is the domain: ', domainName)
@@ -48,8 +49,27 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                         name: domainName,
                     }),
                 })
+
+                console.log('vercel domain response', response)
+                //if domain name already exists try adding again with postfix
+                if (response.status === 409) {
+                    console.log('domain already exists, adding -preview')
+                    const secondDomain = await fetch(vercelApiUrl, {
+                        method: method,
+                        headers: {
+                            Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                        },
+                        body: JSON.stringify({
+                            name: subdomain + '-preview' + '.vercel.app',
+                        }),
+                    })
+                    if (secondDomain.status === 409) {
+                        throw new Error('Unable to create domain, both versions taken')
+                    }
+                }
             } catch (err) {
                 console.log('Domain task error: ', err)
+                throw new Error('Domain task error: ')
             }
         } else {
             return `Domain is not ready for ${method} in layout file`

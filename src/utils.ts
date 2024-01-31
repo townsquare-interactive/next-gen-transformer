@@ -1070,7 +1070,7 @@ export function wrapTextWithPTags(text: string) {
     }
 
     // Match text outside of html tags
-    const regex = /(<\/?(ul|ol|b|div|span|i|a)[^>]*>)|([^<]+)/gi
+    const regex = /(<\/?(ul|ol|b|div|span|i|a|li)[^>]*>)|([^<]+)/gi
 
     // Split the text based on the regex and process each part
     const parts = text.split(regex)
@@ -1079,7 +1079,7 @@ export function wrapTextWithPTags(text: string) {
     let insideList = false
 
     //tags we want to include
-    const tags = ['ul', 'ol', 'b', 'div', 'span', 'i', 'a']
+    const tags = ['ul', 'ol', 'b', 'div', 'span', 'i', 'a', 'li']
 
     // Process each part and wrap text in <p> tags if not inside a list
     const result = parts.map((part) => {
@@ -1092,7 +1092,8 @@ export function wrapTextWithPTags(text: string) {
             lowerCasePart === '<i>' ||
             lowerCasePart === '<div>' ||
             lowerCasePart === '<span>' ||
-            lowerCasePart?.includes('<a')
+            lowerCasePart?.includes('<a') ||
+            lowerCasePart === '<li>'
             //tags.includes(`<${lowerCasePart}>`)
         ) {
             insideList = true
@@ -1104,7 +1105,8 @@ export function wrapTextWithPTags(text: string) {
             lowerCasePart === '</div>' ||
             lowerCasePart === '</span>' ||
             lowerCasePart === '</i>' ||
-            lowerCasePart === '</a>'
+            lowerCasePart === '</a>' ||
+            lowerCasePart === '</li>'
             //tags.includes(`</${lowerCasePart}>`)
         ) {
             insideList = false

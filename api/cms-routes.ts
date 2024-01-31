@@ -46,7 +46,6 @@ router.post('/migrate', async (req, res) => {
         zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
 
         //transform to migrate form
-        //loop this
         //move data into pages
         let newPages = {}
         for (let [key, value] of Object.entries(req.body.siteData.pages)) {
@@ -54,9 +53,8 @@ router.post('/migrate', async (req, res) => {
             let newPage: any = value
             if (newPage.publisher) {
                 value = { ...newPage, data: newPage.publisher.data }
-                newPages = { ...newPages, [key]: value } // Fix is here, use [key]: value
+                newPages = { ...newPages, [key]: value }
             }
-            //console.log(value);
         }
 
         if (req.body.siteData.config.website.favicon.src) {
@@ -241,20 +239,6 @@ router.get('/domain-list', async (req, res) => {
         res.status(500).json({ err: 'Something went wrong' })
     }
 })
-
-//takes all site data and adds pages using backup data
-/* router.post('/migrate', async (req, res) => {
-    const newData = transformCMSData(req.body)
-    const basePath = stripUrl(req.body.config.website.url)
-
-    try {
-        await addMultipleS3(newData.data, newData.pageList, basePath)
-        res.json('All Files added')
-    } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong' })
-    }
-}) */
 
 /*-------- Domains ---------------*/
 //save from luna cms

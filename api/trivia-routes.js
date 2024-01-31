@@ -28,7 +28,9 @@ router.post('/trivia', async (req, res) => {
 
         //const result = await sql`CREATE TABLE Questions ( Name varchar(255), QuestionList varchar(255) );`
         //const result = await sql`CREATE TABLE Questions ( Name varchar(255), QuestionList varchar(255) );`
-        await sql`INSERT INTO Questions (Name, QuestionList) VALUES (${values.id}, ${jsonb_build_object(values.questions)});`
+        //await sql`INSERT INTO Questions (Name, QuestionList) VALUES (${values.id}, ${jsonb_build_object(values.questions)});`
+        await sql`INSERT INTO Questions (Name, QuestionList) VALUES (${values.id}, ${JSON.stringify(values.questions)});`
+
         //return res.status(500).json({ none: 'no error yet' })
 
         //await client.sql`INSERT INTO Pets (Name, Owner) VALUES (${names[0]}, ${names[1]});`
@@ -36,6 +38,25 @@ router.post('/trivia', async (req, res) => {
         //await sql`INSERT INTO Questions (Name, QuestionList) VALUES (445, firstQ);`;
 
         //return res.status(200).json({ result })
+        const questions = await sql`SELECT * FROM Questions;`
+        console.log(questions.rows[questions.rows.length - 1])
+        return res.status(200).json({ questions })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ 'this is error': { error } })
+    }
+})
+
+router.post('/column', async (req, res) => {
+    // let values = ['445', { question: 'here is our question', answers: ['A', 'B', 'C'], correctAnswer: 'B' }]
+
+    try {
+        console.log('there is a req for trivia')
+
+        //await sql`ALTER TABLE Questions ALTER COLUMN QuestionList TYPE json;`
+        await sql`ALTER TABLE Questions ALTER COLUMN QuestionList TYPE json USING QuestionList::json;`
+        //await sql`DELETE FROM Questions;`
+
         const questions = await sql`SELECT * FROM Questions;`
         console.log(questions.rows[questions.rows.length - 1])
         return res.status(200).json({ questions })

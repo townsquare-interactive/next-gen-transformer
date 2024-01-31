@@ -598,34 +598,6 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return allPageCss.join(' ')
 }
 
-//used for migrating whole site
-/* export const transformCMSData = function (data:any) {
-    let newData:any = []
-    const pageListData:any = []
-
-    for (const [key, value] of Object.entries(data.pages)) {
-        //creating file for pagelist
-        pageListData.push(createPageList(value))
-
-        //transforming page data
-        if (value.publisher.data.modules) {
-            value.publisher.data.modules = transformPageModules(value.publisher.data.modules)
-            newData.push(value)
-        } else if (value.backup.data) {
-            value.backup.data.modules = transformPageModules(value.backup.data.modules)
-            newData.push(value)
-        } else {
-            newData.push(value)
-        }
-    }
-
-    const pageList = { pages: pageListData }
-    data.pages = newData
-
-    //returned transformed whole page json and pagelist
-    return { data: data, pageList: pageList }
-} */
-
 export const createPageList = (page: { title: string; slug: string; id: string; page_type: string }) => {
     const pageData = {
         name: page.title,
