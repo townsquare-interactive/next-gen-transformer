@@ -951,8 +951,7 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
     .navLink:hover{color: var(--nav-hover);} 
     .navLink{color:var(--nav-txt);} 
     .social-icon{color:var(--nav-txt);} 
-    .social-icon:hover {background-color:var(--btn-background); color:var(--btn-txt);}
-    .footer-icon:hover{background-color: var(--nav-hover);}
+    .social-icon:hover, .footer-icon:hover {background-color:var(--btn-background); color:var(--btn-txt);}
     .current-page{color:var(--nav-current);} 
     .caption-txt{color:var(--caption-txt);}
     .box-links{color:var(--link);}
