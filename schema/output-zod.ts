@@ -271,7 +271,11 @@ export const SiteDataSchema = z.object({
     redirectUrl: z.string().optional(),
     publishedDomains: z.array(z.string().optional()),
     allStyles: z.string(),
+    phoneNumber: z.string().optional(),
+    email: z.string().optional(),
 })
+
+export type SiteDataType = z.infer<typeof SiteDataSchema>
 
 const ButtonList = z.array(
     z.object({

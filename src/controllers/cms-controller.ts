@@ -33,6 +33,8 @@ import {
     transformLogos,
     createModalPageList,
     moduleRenderTypes,
+    decidePrimaryPhoneOrEmail,
+    filterPrimaryContact,
 } from '../utils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem } from '../../types.js'
@@ -267,10 +269,17 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
     // transform contact link/data
     let contactInfo
-    if (file.settings && file.settings.contact.contact_list.wide.items[0]) {
-        contactInfo = await transformcontact(file.settings.contact.contact_list.wide.items[0])
+    let phoneNumber
+    let email
+    if (file.settings && file.settings.contact.contact_list.wide.items.length > 0) {
+        const primaryContact = filterPrimaryContact(file.settings)
+        contactInfo = await transformcontact(primaryContact)
+        phoneNumber = decidePrimaryPhoneOrEmail(primaryContact, currentLayout, 'phone')
+        email = decidePrimaryPhoneOrEmail(primaryContact, currentLayout, 'email')
     } else {
         contactInfo = currentLayout.contact || ''
+        phoneNumber = currentLayout.phoneNumber || ''
+        email = currentLayout.email || ''
     }
 
     const transformedLogos = transformLogos(file.logos, file.config.website.url)
@@ -291,10 +300,8 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         social: file.settings ? transformSocial(file) : currentLayout.social,
         contact: contactInfo,
         siteName: file.config.website.site_title || '',
-        phoneNumber: file.settings ? file.settings.contact.contact_list.wide.items[0].selectedPrimaryPhoneNumber : currentLayout.phoneNumber || '',
-        email: file.settings?.contact?.contact_list?.wide.items[0]?.email[0]?.name
-            ? file.settings.contact.contact_list.wide.items[0].email[0].name
-            : currentLayout.email || '',
+        phoneNumber: phoneNumber,
+        email: email,
         url: file.config.website.url,
         composites: composites,
         modalData: modalData,

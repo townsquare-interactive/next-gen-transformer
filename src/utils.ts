@@ -1,4 +1,5 @@
 //import { z } from 'zod'
+import { SiteDataType } from '../schema/output-zod'
 import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot } from '../types'
 
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
@@ -246,6 +247,34 @@ export function checkModalBtn(btnLink: string, pageModals: { modalNum: number; m
         }
     }
     return -1
+}
+
+export const filterPrimaryContact = (settings: any) => {
+    const primaryContact = (settings?.contact?.contact_list?.wide?.items.filter((site: any) => site.isPrimary))[0]
+
+    console.log(primaryContact)
+    return primaryContact
+}
+
+//decide primary phone/email
+export const decidePrimaryPhoneOrEmail = (primaryContact: any, currentLayout: SiteDataType, type = 'phone') => {
+    if (primaryContact) {
+        const contacts = primaryContact[type]
+        if (contacts) {
+            const primaryContact = contacts.filter((contact: any) => contact[`isPrimary${capitalize(type)}`])
+            if (primaryContact.length > 0) {
+                console.log('using primary contact', primaryContact[0])
+                if (type === 'phone') {
+                    return primaryContact[0].number || ''
+                } else if (type === 'email') {
+                    return primaryContact[0].email || ''
+                }
+            }
+        }
+    }
+
+    // If no primary contact found, return the fallback contact from currentLayout
+    return type === 'phone' ? currentLayout.phoneNumber || '' : type === 'email' ? currentLayout.email || '' : ''
 }
 
 export async function transformcontact(contactInfo: Contact) {
@@ -559,6 +588,14 @@ export function isGridCaption(item: LunaModuleItem) {
     } else {
         return false
     }
+}
+
+export function capitalize(str: string) {
+    if (!str) {
+        return ''
+    }
+
+    return str[0].toUpperCase() + str.slice(1)
 }
 
 export const transformLogos = (logos: Logo, cmsUrl: string) => {
