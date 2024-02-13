@@ -270,7 +270,11 @@ export const SiteDataSchema = z.object({
     published: z.boolean().optional(),
     redirectUrl: z.string().optional(),
     publishedDomains: z.array(z.string().optional()),
-    allStyles: z.string(),
+    allStyles: z.string().optional(),
+    styles:z.object({
+        global:z.string().optional(),
+        custom:z.string().optional()
+    }).optional(),
     phoneNumber: z.string().optional(),
     email: z.string().optional(),
 })

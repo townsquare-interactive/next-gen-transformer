@@ -28,7 +28,7 @@ export const transformCreateSite = async (req: reqBody) => {
             siteLayout: siteLayout,
             pages: layout1.pages,
             assets: [],
-            globalStyles: layout1.globalCSS,
+            globalStyles: layout1.layout.styles,
         }
 
         return siteData

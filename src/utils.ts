@@ -252,7 +252,6 @@ export function checkModalBtn(btnLink: string, pageModals: { modalNum: number; m
 export const filterPrimaryContact = (settings: any) => {
     const primaryContact = (settings?.contact?.contact_list?.wide?.items.filter((site: any) => site.isPrimary))[0]
 
-    console.log(primaryContact)
     return primaryContact
 }
 
@@ -968,15 +967,6 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
         --promo4: ${themeStyles['promoColor4']};
         --promo5: ${themeStyles['promoColor5']};
         --promo6: ${themeStyles['promoColor6']};
-
-        $promocomp:complement(${themeStyles['promoColor']});
-        --promocomp:#{$promocomp};
-        $promoinv1:invert(${themeStyles['promoColor']});
-        --promoinv1:#{$promoinv1};
-        $promolighten:lighten(${themeStyles['promoColor']},30);
-        --promolighten:#{$promolighten};
-        --promoHSL: ${colorToHSL(themeStyles['promoColor'])};
-
        }
        `
 

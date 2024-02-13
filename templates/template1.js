@@ -2545,7 +2545,313 @@ export const layout1 = {
         s3Folder: 'nextgenprototype',
         favicon: '',
         fontImport: '@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic,700italic&display=swap);',
-        allStyles: `body {\n  font-family: Open Sans;\n}\n\n.hd-font {\n  font-family: Open Sans;\n}\n\n.txt-font {\n  font-family: Open Sans;\n}\n\n.feat-font {\n  font-family: Open Sans;\n}\n\n:root {\n  --logo: #c15656;\n  --hd: #13141a;\n  --sh: #13141a;\n  --txt: #13141a;\n  --link: #ffffff;\n  --link-hover: #000000;\n  --btn-txt: #13141a;\n  --btn-background: #ffffff;\n  --txt-accent: #ffffff;\n  --hero-sh: #ffffff;\n  --hero-txt: #ffffff;\n  --hero-btn-txt: #3d5627;\n  --hero-btn-background: #ffffff;\n  --hero-link: #DDDDDD;\n  --hero-link-hover: transparent;\n  --caption-txt: #ffffff;\n  --caption-background: rgba(121,142,103,0.5);\n  --nav-txt: #3d5627;\n  --nav-hover: #3d5627;\n  --nav-current: #13141a;\n  --main-background: #ffffff;\n  --content-background: rgba(255,255,255,1);\n  --header-background: rgba(255,255,255,1);\n  --social-background: #719056;\n  --accent-background: rgba(121,142,103,1);\n  --hero-background: rgba(121,142,103,1);\n  --footer-background: #3d5627;\n  --footer-txt: #ffffff;\n  --footer-link: #ffffff;\n  --promo-txt: #000000;\n  --promo: #719056;\n  --promo2: #4e6738;\n  --promo3: #000000;\n  --promo4: #95b479;\n  --promo5: #b64848;\n  --promo6: #ffffff;\n  --promocomp:#755690;\n  --promoinv1:#8e6fa9;\n  --promolighten:#bed0af;\n  --promoHSL: hsl(92, 25%, 45%);\n}\n\nbody .txt-font .dsc a {\n  color: var(--link);\n}\n\n.accent-txt {\n  color: var(--txt-accent);\n}\n\n.txt-color {\n  color: var(--txt);\n}\n\n.txt-color-hd {\n  color: var(--hd);\n}\n\n.txt-color-sh {\n  color: var(--sh);\n}\n\n.navLink:hover {\n  color: var(--nav-hover);\n}\n\n.navLink {\n  color: var(--nav-txt);\n}\n\n.social-icon {\n  color: var(--nav-txt);\n}\n\n.social-icon:hover {\n  background-color: var(--btn-background);\n  color: var(--btn-txt);\n}\n\n.footer-icon:hover {\n  background-color: var(--nav-hover);\n}\n\n.current-page {\n  color: var(--nav-current);\n}\n\n.caption-txt {\n  color: var(--caption-txt);\n}\n\n.box-links {\n  color: var(--link);\n}\n\n.box-links:hover {\n  color: var(--nav-hover);\n}\n\n.testimonial-txt-color {\n  color: var(--btn-background);\n}\n\n.testimonials-mod.well .hero.item, .testimonials-mod.well .hero .desc, .card-mod .hero.item, .card-mod .hero .desc, .photogallery-mod.well .hero.item, .photogallery-mod.well .hero .desc {\n  color: var(--hero-txt);\n}\n.testimonials-mod.well .hero .stars, .testimonials-mod.well .hero .quotes, .testimonials-mod.well .hero .hd, .testimonials-mod.well .hero .sh, .card-mod .hero .stars, .card-mod .hero .quotes, .card-mod .hero .hd, .card-mod .hero .sh, .photogallery-mod.well .hero .stars, .photogallery-mod.well .hero .quotes, .photogallery-mod.well .hero .hd, .photogallery-mod.well .hero .sh {\n  color: var(--txt-accent);\n}\n\n.btn_1 {\n  color: var(--btn-txt);\n  background-color: var(--btn-background);\n}\n\n.btn_1:hover {\n  color: var(--btn-background);\n  background-color: var(--btn-txt);\n}\n\n.btn_2 {\n  color: var(--link);\n  border-color: var(--link);\n}\n\n.btn_2:hover {\n  color: var(--link-hover);\n  border-color: var(--link-hover);\n}\n\n.btn_alt {\n  color: var(--promo);\n  background-color: var(--btn-txt);\n}\n\n.btn_alt:hover {\n  color: var(--btn-txt);\n  background-color: var(--promo);\n}\n\n.close-toggle {\n  color: var(--btn-txt);\n  background-color: var(--btn-background);\n}\n\n.close-toggle:hover {\n  color: var(--btn-background);\n  background-color: var(--btn-txt);\n}\n\n.btn_p4.btn_1 {\n  background-color: var(--promo4);\n  color: var(--btn-txt);\n}\n\n.btn_p4.btn_1:hover {\n  color: var(--promo4);\n  background-color: var(--btn-txt);\n}\n\n.btn_p3.btn_1 {\n  background-color: var(--promo3);\n  color: var(--btn-txt);\n}\n\n.btn_p3.btn_1:hover {\n  color: var(--promo3);\n  background-color: var(--btn-txt);\n}\n\n.btn_p2.btn_1 {\n  background-color: var(--promo2);\n  color: var(--btn-txt);\n}\n\n.btn_p2.btn_1:hover {\n  color: var(--promo2);\n  background-color: var(--btn-txt);\n}\n\n.btn_p4.btn_2 {\n  border-color: var(--promo4);\n  color: var(--promo4);\n}\n\n.btn_p3.btn_2 {\n  border-color: var(--promo3);\n  color: var(--promo3);\n}\n\n.btn_p2.btn_2 {\n  border-color: var(--promo2);\n  color: var(--promo2);\n}\n\n.btn_p4.btn_2:hover, .btn_p3.btn_2:hover, .btn_p2.btn_2:hover {\n  border-color: var(--link-hover);\n  color: var(--link-hover);\n}\n\n.hero .one-btn-w .btn_1.btn_w {\n  color: var(--btn-txt);\n  background-color: var(--hero-btn-background);\n}\n\n.border-background {\n  background-color: var(--accent-background);\n}\n\n.hero-background {\n  background-color: var(--promo);\n}\n\n.content-background {\n  background-color: var(--content-background);\n}\n\n.footer {\n  background-color: var(--footer-background);\n  color: var(--footer-txt);\n}\n\n.header-background {\n  background-color: var(--header-background);\n}\n\n.social-bar-background {\n  background-color: var(--social-background);\n}\n\n.promo-background {\n  background-color: var(--promo);\n}\n\n.cta {\n  background-color: var(--promo);\n}\n\n.cta:hover {\n  background-color: var(--promo2);\n}\n\n.testimonials-mod .hero-background, .card-mod .hero-background {\n  background-color: var(--hero-background);\n}\n\n.caption-background {\n  background-color: var(--caption-background);\n}\n\n/*---------------------Custom Code--------------------*/\n/*--------------------------------------------------- FEATURES ----------------------------------------------------*/\n/*---\n.tsD_feature .tsI_img{    \n  max-width: 7.6rem !important;\n  margin: auto !important;\n  border-radius: 50% !important;\n  border: 5px solid #3d5627 !important;\n  -webkit-transition: all 0.4s ease-in-out !important;\n  -moz-transition: all 0.4s ease-in-out !important;\n  -o-transition: all 0.4s ease-in-out !important;\n  transition: all 0.4s ease-in-out !important;\n}\n.tsD_feature .tsI_img img{\n  padding: .3rem !important;\n}\n.tsD_feature .tsI:hover .tsI_img{\n  background: #fff !important;\n  box-shadow: 0px 2px 8px 1px rgb(0 0 0 / 40%) !important;\n}\n.tsD_feature .tsI_hd span{\n  font-weight:700 !important;\n}\n.tsD_feature .tsI_hd{\n  font-size: 1.24em !important;\n  text-transform:unset !important; \n  letter-spacing:0 !important;\n}\n\n}\n\n\n.tsT_article.tsD_split2{\n  background: #7c1012 !important;\n  padding: 0 !important;\n}\n.tsD_split2 * {\n  color: #fff !important;\n}\n.tsD_split2 .tsR{\n  max-width: 100% !important;\n  padding: 0 !important;\n}\n.tsD_split2 .tsI:nth-child(1) .tsI_txt_wrp {\n  background: linear-gradient(to bottom right, #719056, #3d5627) !important;\n  padding: 5rem 5rem !important;\n}\n.tsD_split2 .tsI {\n  margin: 0 !important;\n  width: 50% !important;\n}\n.isTablet .tsD_split2 .tsI {\n  background-repeat: no-repeat !important;\n  background-size: cover !important;\n} \n.mediaqueries .tsD_split2 .item_2 {\n  background-repeat: no-repeat !important;\n  background-size: cover !important;\n  background-position: top center !important;\n}\n.tsD_split2 .item_2 {\n  background: url(/files/2023/08/iStock-1400564019.jpg) !important;\n}\n.tsD_split2 .tsI_hd{\n  font-size: 2.8rem !important;\n  letter-spacing: .2rem !important;\n}\n.tsD_split2 .tsI_sh{\n  font-weight: 600 !important;\n  letter-spacing: 0em !important;\n  font-size:2rem !important;\n  color: #fff !important;\n}\n\n@media (max-width:1025px){\n  .tsD_split2 .tsI:nth-child(1) .tsI_txt_wrp {\n\tpadding: 3rem 4rem !important;\n  }\n}\n\n@media (max-width:800px){\n  .tsD_split2 .tsI{\n\twidth: 100% !important;\n  }\n  .mediaqueries .tsD_split2 .item_2{\n\tmin-height: 25rem !important;\n  }\n}\n\n@media (max-width:569px){\n  .tsD_split2 .tsI:nth-child(1) .tsI_txt_wrp {\n\tpadding: 2rem 2.3rem !important;\n  }\n  .mediaqueries .tsD_split2 .item_2{\n\tmin-height: 18rem !important;\n  }\n  .tsD_split2 .tsI_sh{\n\tfont-size: 1.2rem !important;\n  }\n}\n/*---------------------------------------------------- FOOTER ----------------------------------\n.tsF{\n  border-top: 4px solid var(--promo1) !important;\n}\n.tsF .tsR{\n  max-width: 100% !important;\n  padding: 0 !important;\n}\n.tsF hr, \n.tsF_section.section_content.tsflex, \n.tsF_section.brand {\n  display: none !important;\n}\n.tsF_section.copyright{\n  padding-top:1.6rem !important;\n}\n.tsF_section.bottom.social{\n  padding-bottom: .9rem !important;\n  padding-top: 0rem !important;\n}\n\n.gform_wrapper li {\n  margin-bottom: 0.1rem;\n}\n.gform_wrapper .ginput_container input[type=\"text\"], \n.gform_wrapper .ginput_container select{\n  height: 2.2rem !important;\n}\n.gform_title{\n  margin-top: 0 !important;\n  padding-top: 0 !important;\n}\n.gform_button{\n  float: none !important;\n  margin: 1rem 0 0 !important;\n}\n.ginput_container input.medium{\n  width: 100% !important;\n}\nli.gfield{\n  padding: 0 1rem 0rem !important;\n}\n.gform_body{\n  padding-bottom: 0 !important;\n}\n\n\n.tsSC .social-media-links a, \n.tsSC .tsC_Btn{\n  color: #fff !important;\n}\n.tsSC {\n  box-shadow: none !important;\n}\n.tsSC .tsC_Btn {\n  font-weight: 500 !important;\n  letter-spacing:1px !important;\n  font-size:.72rem !important;\n}\n\n}\n\n\n.tsD_dl .tsI,\n.tsD_dl2 .tsI{ \n  height: 75vh !important;\n}\n.tsD_dl .tsI_txt{\n  padding: 0 0 3rem !important;\n}\n.tsD_dl .tsI_hd {\n  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.4) !important;\n}\n.tsD_dl .tsI_sh{\n  font-weight:400 !important;\n  margin: 0rem auto 1.5rem !important;\n}\n\n\n.tsD_dl2 {\n  margin: 0 !important;\n}\n.tsD_dl2 .tsI_txt{\n  max-width:40rem !important;\n  margin: 0 auto !important;\n  padding: 0 0 4rem !important;\n  float:right !important;\n}\n.tsD_dl2 .tsI_sh { \n  font-size: 1.38rem !important;\n}\n\n@media(max-width:1024px){\n  .tsD_dl .tsI_txt{\n\tmargin-top: 0 !important;\n\tpadding: 0 0 2rem !important;\n\tmax-width: 35rem !important;\n\tmargin: auto !important;\n  }\n  .tsD_dl .tsI_hd,\n  .tsD_dl2 .tsI_hd{\n\tfont-size: 2rem !important;\n  }\n  .tsD_dl .tsI_sh, \n  .tsD_dl2 .tsI_sh{\n\tfont-size: 1rem !important;\n  }\n}\n\n.tsT_parallax .tsI.yImg.yHero.yOvr .tsI_wrp, .tsT_parallax .tsI.yImg.yOvr .tsI_wrp {\n    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000, endColorstr=#4C000000);\n    background-color: #ffffff;\n}\n\n---*/\n.tsSC .social-media-links a {\n  color: #fff !important;\n}\n\n.tsSC .social-media-links a:hover {\n  color: #000 !important;\n}\n\n.social-bar .social-icon {\n  color: #fff;\n}\n\n/*--\n.hd, * {\n  font-family: 'Kenia', sans-serif !important;\n}\n---*/`,
+        styles: {
+            global:`body {
+                font-family: Open Sans;
+            }
+            
+            .hd-font {
+                font-family: Open Sans;
+            }
+            
+            .txt-font {
+                font-family: Open Sans;
+            }
+            
+            .feat-font {
+                font-family: Open Sans;
+            }
+            
+            :root {
+                --logo: #c15656;
+                --hd: #13141a;
+                --sh: #13141a;
+                --txt: #13141a;
+                --link: #ffffff;
+                --link-hover: #000000;
+                --btn-txt: #13141a;
+                --btn-background: #ffffff;
+                --txt-accent: #ffffff;
+                --hero-sh: #ffffff;
+                --hero-txt: #ffffff;
+                --hero-btn-txt: #3d5627;
+                --hero-btn-background: #ffffff;
+                --hero-link: #dddddd;
+                --hero-link-hover: transparent;
+                --caption-txt: #ffffff;
+                --caption-background: rgba(121, 142, 103, 0.5);
+                --nav-txt: #3d5627;
+                --nav-hover: #3d5627;
+                --nav-current: #13141a;
+                --main-background: #ffffff;
+                --content-background: rgba(255, 255, 255, 1);
+                --header-background: rgba(255, 255, 255, 1);
+                --social-background: #719056;
+                --accent-background: rgba(121, 142, 103, 1);
+                --hero-background: rgba(121, 142, 103, 1);
+                --footer-background: #3d5627;
+                --footer-txt: #ffffff;
+                --footer-link: #ffffff;
+                --promo-txt: #000000;
+                --promo: #719056;
+                --promo2: #4e6738;
+                --promo3: #000000;
+                --promo4: #95b479;
+                --promo5: #b64848;
+                --promo6: #ffffff;
+                --promocomp: #755690;
+                --promoinv1: #8e6fa9;
+                --promolighten: #bed0af;
+                --promoHSL: hsl(92, 25%, 45%);
+            }
+            
+            body .txt-font .dsc a {
+                color: var(--link);
+            }
+            
+            .accent-txt {
+                color: var(--txt-accent);
+            }
+            
+            .txt-color {
+                color: var(--txt);
+            }
+            
+            .txt-color-hd {
+                color: var(--hd);
+            }
+            
+            .txt-color-sh {
+                color: var(--sh);
+            }
+            
+            .navLink:hover {
+                color: var(--nav-hover);
+            }
+            
+            .navLink {
+                color: var(--nav-txt);
+            }
+            
+            .social-icon {
+                color: var(--nav-txt);
+            }
+            
+            .social-icon:hover {
+                background-color: var(--btn-background);
+                color: var(--btn-txt);
+            }
+            
+            .footer-icon:hover {
+                background-color: var(--nav-hover);
+            }
+            
+            .current-page {
+                color: var(--nav-current);
+            }
+            
+            .caption-txt {
+                color: var(--caption-txt);
+            }
+            
+            .box-links {
+                color: var(--link);
+            }
+            
+            .box-links:hover {
+                color: var(--nav-hover);
+            }
+            
+            .testimonial-txt-color {
+                color: var(--btn-background);
+            }
+            
+            .testimonials-mod.well .hero.item,
+            .testimonials-mod.well .hero .desc,
+            .card-mod .hero.item,
+            .card-mod .hero .desc,
+            .photogallery-mod.well .hero.item,
+            .photogallery-mod.well .hero .desc {
+                color: var(--hero-txt);
+            }
+            .testimonials-mod.well .hero .stars,
+            .testimonials-mod.well .hero .quotes,
+            .testimonials-mod.well .hero .hd,
+            .testimonials-mod.well .hero .sh,
+            .card-mod .hero .stars,
+            .card-mod .hero .quotes,
+            .card-mod .hero .hd,
+            .card-mod .hero .sh,
+            .photogallery-mod.well .hero .stars,
+            .photogallery-mod.well .hero .quotes,
+            .photogallery-mod.well .hero .hd,
+            .photogallery-mod.well .hero .sh {
+                color: var(--txt-accent);
+            }
+            
+            .btn_1 {
+                color: var(--btn-txt);
+                background-color: var(--btn-background);
+            }
+            
+            .btn_1:hover {
+                color: var(--btn-background);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_2 {
+                color: var(--link);
+                border-color: var(--link);
+            }
+            
+            .btn_2:hover {
+                color: var(--link-hover);
+                border-color: var(--link-hover);
+            }
+            
+            .btn_alt {
+                color: var(--promo);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_alt:hover {
+                color: var(--btn-txt);
+                background-color: var(--promo);
+            }
+            
+            .close-toggle {
+                color: var(--btn-txt);
+                background-color: var(--btn-background);
+            }
+            
+            .close-toggle:hover {
+                color: var(--btn-background);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_p4.btn_1 {
+                background-color: var(--promo4);
+                color: var(--btn-txt);
+            }
+            
+            .btn_p4.btn_1:hover {
+                color: var(--promo4);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_p3.btn_1 {
+                background-color: var(--promo3);
+                color: var(--btn-txt);
+            }
+            
+            .btn_p3.btn_1:hover {
+                color: var(--promo3);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_p2.btn_1 {
+                background-color: var(--promo2);
+                color: var(--btn-txt);
+            }
+            
+            .btn_p2.btn_1:hover {
+                color: var(--promo2);
+                background-color: var(--btn-txt);
+            }
+            
+            .btn_p4.btn_2 {
+                border-color: var(--promo4);
+                color: var(--promo4);
+            }
+            
+            .btn_p3.btn_2 {
+                border-color: var(--promo3);
+                color: var(--promo3);
+            }
+            
+            .btn_p2.btn_2 {
+                border-color: var(--promo2);
+                color: var(--promo2);
+            }
+            
+            .btn_p4.btn_2:hover,
+            .btn_p3.btn_2:hover,
+            .btn_p2.btn_2:hover {
+                border-color: var(--link-hover);
+                color: var(--link-hover);
+            }
+            
+            .hero .one-btn-w .btn_1.btn_w {
+                color: var(--btn-txt);
+                background-color: var(--hero-btn-background);
+            }
+            
+            .border-background {
+                background-color: var(--accent-background);
+            }
+            
+            .hero-background {
+                background-color: var(--promo);
+            }
+            
+            .content-background {
+                background-color: var(--content-background);
+            }
+            
+            .footer {
+                background-color: var(--footer-background);
+                color: var(--footer-txt);
+            }
+            
+            .header-background {
+                background-color: var(--header-background);
+            }
+            
+            .social-bar-background {
+                background-color: var(--social-background);
+            }
+            
+            .promo-background {
+                background-color: var(--promo);
+            }
+            
+            .cta {
+                background-color: var(--promo);
+            }
+            
+            .cta:hover {
+                background-color: var(--promo2);
+            }
+            
+            .testimonials-mod .hero-background,
+            .card-mod .hero-background {
+                background-color: var(--hero-background);
+            }
+            
+            .caption-background {
+                background-color: var(--caption-background);
+            }`
+        ,
+
+        custom: ` .tsSC .social-media-links a {
+            color: #fff !important;
+        }
+        
+        .tsSC .social-media-links a:hover {
+            color: #000 !important;
+        }
+        
+        .social-bar .social-icon {
+            color: #fff;
+        }
+        
+        /*--
+          .hd, * {
+            font-family: 'Kenia', sans-serif !important;
+          }
+          --*/
+        `,
+        },
         config: {
             zapierUrl: 'https://hooks.zapier.com/hooks/catch/15652200/3hr112q/',
             makeUrl: 'https://hook.us1.make.com/5ag2mwfm3rynjgumcjgu76wseppexe3s',
@@ -2840,26 +3146,10 @@ export const layout1 = {
     
     .caption-background {
         background-color: var(--caption-background);
-    }
+    }`
+    
     
     /*---------------------Custom Code--------------------*/
     
-    .tsSC .social-media-links a {
-        color: #fff !important;
-    }
-    
-    .tsSC .social-media-links a:hover {
-        color: #000 !important;
-    }
-    
-    .social-bar .social-icon {
-        color: #fff;
-    }
-    
-    /*--
-      .hd, * {
-        font-family: 'Kenia', sans-serif !important;
-      }
-      --*/
-    `,
+   
 }

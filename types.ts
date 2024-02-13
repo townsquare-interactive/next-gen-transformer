@@ -328,8 +328,14 @@ export interface PublishData {
     siteLayout: SiteData
     pages: Page[]
     assets: { url?: string; fileName: string; name?: string; content?: string }[]
-    globalStyles: string
+    globalStyles: GlobalStyles
 }
+
+export interface GlobalStyles {
+    custom:string, 
+    global:string
+}
+
 
 interface LogoBlock {
     pct?: number

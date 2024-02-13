@@ -37,7 +37,7 @@ import {
     filterPrimaryContact,
 } from '../utils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
-import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem } from '../../types.js'
+import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
 
 const toStringSchema = z.coerce.string()
@@ -244,7 +244,7 @@ export const addNewPageToNav = async (pageData: CMSPage, basePath: string) => {
 }
 
 //Create or edit layout file
-export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles: string) => {
+export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles:GlobalStyles) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -327,7 +327,9 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             zapierUrl: process.env.ZAPIER_URL,
             makeUrl: process.env.MAKE_URL,
         },
-        allStyles: globalStyles,
+        //allStyles: globalStyles,
+        styles:{global: globalStyles.global, custom: globalStyles.custom
+        }
     }
 
     return globalFile
@@ -582,15 +584,26 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         allPageStyles = ''
     }
 
-    let allStyles = fontClasses + colorClasses + customCss + allPageStyles
-    const allStylesConverted = convertSpecialTokens(allStyles)
+    //let allStyles = fontClasses + colorClasses + customCss + allPageStyles
+    let globalStyles = colorClasses
+   // const globalStylesConverted = fontClasses + colorClasses
+    //const allStylesConverted = convertSpecialTokens(allStyles)
+    const globalConverted=convertSpecialTokens(globalStyles)
+    const customConverted=convertSpecialTokens(fontClasses + customCss + allPageStyles)
 
     try {
-        const convertedCss = sass.compileString(allStylesConverted)
-        return convertedCss.css
+/*         const convertedCss = sass.compileString(allStylesConverted)
+        return convertedCss.css */
+        const convertedGlobal = sass.compileString(globalConverted)
+        const convertedCustom = sass.compileString(customConverted)
+        return {global:convertedGlobal.css, custom:convertedCustom.css}
     } catch (e) {
         //error catch if code passed is not correct scss/css
-        return `/* ${e.message.toString()} */` + allStyles
+        //return `/* ${e.message.toString()} */` + allStyles
+        console.log(`error in styling compression ${e.message.toString()}`)
+        //return `/* ${e.message.toString()} */`
+        return {global: globalConverted, custom:`/* ${e.message.toString()} */` + customConverted}
+
     }
 }
 
