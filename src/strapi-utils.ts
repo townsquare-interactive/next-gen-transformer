@@ -1,4 +1,4 @@
-import { socialConvert, createContactForm, createLinkAndButtonVariables, fetchCoordinates } from './utils.js'
+import { socialConvert, createContactForm, createLinkAndButtonVariables, fetchCoordinates, addProtocolToLink } from './utils.js'
 import { CurrentModule, Email, ModuleItem, Page, Phone, StrapiPageData, anchorTags } from '../types.js'
 
 export const transformStrapiNav = (nav: [{ title: string; related: { slug: string; homePage: boolean; id: string } }]) => {
@@ -88,6 +88,7 @@ export const convertColumns = (columns: string | number | undefined) => {
     }
 }
 
+
 export const createSocials = (socialMedia: { url: string }[]) => {
     let socialMediaItems = []
     if (socialMedia.length != 0) {
@@ -95,9 +96,7 @@ export const createSocials = (socialMedia: { url: string }[]) => {
 
         for (let m = 0; m < inputtedSocials.length; m++) {
             let url = inputtedSocials[m].url
-            if (!url.includes('http')) {
-                url = 'http://' + url
-            }
+            url=addProtocolToLink(url)
 
             socialMediaItems.push({ url: url, icon: socialConvert(inputtedSocials[m].url) })
         }

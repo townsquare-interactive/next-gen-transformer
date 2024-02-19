@@ -36,12 +36,6 @@ export const transformLuna = async (req: LunaRequest) => {
             await addFileS3(updatedPageList, pageListUrl)
         }
 
-        /*         if (req.body.savedData.colors || req.body.savedData.fonts || req.body.savedData.code || req.body.savedData.pages) {
-            //const currentPageList = await getFileS3(`${basePath}/pages/page-list.json`)
-            //globalStyles = await createGlobalStylesheet(themeStyles, req.body.siteData.design.fonts, req.body.siteData.design.code, currentPageList, basePath)
-            globalFile.allStyles = globalStyles
-        } */
-
         const luna = {
             siteIdentifier: basePath,
             usingPreviewMode: false,

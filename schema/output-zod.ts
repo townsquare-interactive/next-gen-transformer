@@ -84,7 +84,7 @@ const socialItem = z.object({
     label: z.string(),
     value: z.string(),
     enabled: z.number(),
-    input: z.array(z.string()),
+    input: z.array(z.string().nullable()),
     url: z.string(),
     icon: z.array(z.string()).optional(),
 })
@@ -99,10 +99,10 @@ const SeoSchema = z.object({
 const Address = z.object({
     zip: z.string(),
     city: z.string(),
-    name: OptionalString,
+    name: z.string().nullable(),
     state: z.string(),
     street: z.string(),
-    street2: OptionalString,
+    street2: z.string().nullable(),
     coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
     url: OptionalString,
 })
@@ -135,7 +135,7 @@ const Contact = z.object({
         z.object({
             name: z.string(),
             number: OptionalString,
-            disabled: z.string(),
+            disabled: z.string().nullable(),
             isPrimaryPhone: z.boolean(),
         })
     ),
@@ -252,7 +252,7 @@ const CMSNavItemSchema = z.object({
 
 export const SiteDataSchema = z.object({
     logos: Logo.describe('Data for all logo slots'),
-    social: z.array(socialItem),
+    social: z.array(socialItem.optional()),
     contact: Contact,
     siteName: z.string(),
     url: z.string(),
@@ -277,6 +277,7 @@ export const SiteDataSchema = z.object({
     }).optional(),
     phoneNumber: z.string().optional(),
     email: z.string().optional(),
+    customComponents:z.array(z.object({}))
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>

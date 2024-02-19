@@ -34,6 +34,15 @@ export function iconConvert(str: string) {
     }
 }
 
+export const addProtocolToLink = (url:string)=>{
+    if (!url.includes('http')) {
+        url = 'http://' + url
+    }
+    
+    return url
+}
+
+
 export const moduleRenderTypes = ['Article', 'PhotoGrid', 'Banner', 'Parallax', 'Testimonials', 'Card', 'PhotoGallery', 'ContactFormRoutes', 'Modal']
 
 export const determineModRenderType = (type: string) => {
@@ -43,7 +52,7 @@ export const determineModRenderType = (type: string) => {
         return 'PhotoGrid'
     } else if (type === 'banner_1') {
         return 'Banner'
-    } else if (type === 'parallax_1') {
+    } else if (type === 'parallax_1' || type === 'video_1b') {
         return 'Parallax'
     } else if (type === 'testimonials_1' || type === 'testimonials_2') {
         return 'Testimonials'
@@ -287,7 +296,7 @@ export async function transformcontact(contactInfo: Contact) {
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
     const contactLinks = []
     const multiPhones = contactInfo.phone.length > 1 ? true : false
-    const hideEmail = !multiPhones && contactInfo.email.length > 1
+    const hideEmail = !multiPhones && contactInfo.email?.length > 1
 
     //create coordinates for map
     if (contactInfo.address) {
@@ -295,33 +304,37 @@ export async function transformcontact(contactInfo: Contact) {
         contactInfo.address = { ...contactInfo.address, coordinates: coords }
     }
 
-    for (const x in contactInfo.phone) {
-        if (contactInfo.phone[x]) {
-            const phone = {
-                cName: 'phone',
-                link: 'tel:' + contactInfo.phone[x].number,
-                icon: icons.phone,
-                content: multiPhones ? contactInfo.phone[x].name + ': ' + contactInfo.phone[x].number : contactInfo.phone[x].number,
-                active: contactInfo.phone[x].number ? true : false,
-            }
+    if (contactInfo.phone){
+        for (const x in contactInfo.phone) {
+            if (contactInfo.phone[x]) {
+                const phone = {
+                    cName: 'phone',
+                    link: 'tel:' + contactInfo.phone[x].number,
+                    icon: icons.phone,
+                    content: multiPhones ? contactInfo.phone[x].name + ': ' + contactInfo.phone[x].number : contactInfo.phone[x].number,
+                    active: contactInfo.phone[x].number ? true : false,
+                }
 
-            contactLinks.push(phone)
+                contactLinks.push(phone)
+            }
         }
     }
 
-    for (const x in contactInfo.email) {
-        if (contactInfo.email[x]) {
-            const email = {
-                cName: 'email',
-                link: `mailto:${contactInfo.email[x].email}`,
-                icon: icons.email,
-                content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
-                active: hideEmail ? false : contactInfo.email[x].email ? true : false,
-            }
+    if (contactInfo.email){
+        for (const x in contactInfo.email) {
+            if (contactInfo.email[x]) {
+                const email = {
+                    cName: 'email',
+                    link: `mailto:${contactInfo.email[x].email}`,
+                    icon: icons.email,
+                    content: contactInfo.email[x].name + ': ' + contactInfo.email[x].email,
+                    active: hideEmail ? false : contactInfo.email[x].email ? true : false,
+                }
 
-            contactLinks.push(email)
+                contactLinks.push(email)
+            }
         }
-    }
+}
 
     const contactMap = {
         cName: 'map',
@@ -1245,3 +1258,8 @@ export function colorToHSL(color: string) {
         return color
     }
 }
+
+
+
+
+

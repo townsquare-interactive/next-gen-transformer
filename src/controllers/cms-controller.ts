@@ -36,6 +36,7 @@ import {
     decidePrimaryPhoneOrEmail,
     filterPrimaryContact,
 } from '../utils.js'
+import {createCustomComponents} from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
@@ -295,6 +296,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         composites = file.composites
     }
 
+    //custom code components
+    const customComponents=createCustomComponents(file.design.code || '')
+    console.log(customComponents)
+
+
     const globalFile = {
         logos: transformedLogos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
@@ -329,7 +335,8 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         },
         //allStyles: globalStyles,
         styles:{global: globalStyles.global, custom: globalStyles.custom
-        }
+        },
+        customComponents:customComponents
     }
 
     return globalFile
@@ -349,6 +356,8 @@ const transformPageModules = (
             let modCount = 0
 
             const isSingleColumn = moduleList.filter((e: any) => Object.keys(e).length != 0).length === 2
+
+            let imageCount = 0
 
             //each actual page module
             for (const [key, value] of Object.entries(moduleList[i])) {
@@ -411,9 +420,15 @@ const transformPageModules = (
                         key,
                         themeStyles,
                         cmsUrl,
-                        pageModals
+                        pageModals,
+                        imageCount
                     )
+
                     itemCount += 1
+
+                    if (currentModule.items[i].image){
+                        imageCount+=1
+                    }
                 }
 
                 //replace class with customClassName
@@ -444,9 +459,11 @@ const transformPageModules = (
     return columnsData
 }
 
-const determineLazyLoad = (modLazy: string, modCount: number, itemCount: number) => {
+const determineLazyLoad = (modLazy: string, modCount: number, itemCount: number, imageCount: number) => {
     //initiate lazy load off for top module items
     if (modCount === 1 && itemCount <= 2) {
+        modLazy = 'off'
+    } if (imageCount===0){
         modLazy = 'off'
     } else {
         modLazy = modLazy
@@ -468,11 +485,12 @@ const transformModuleItem = (
     key: string,
     themeStyles: ThemeStyles,
     cmsUrl: string,
-    pageModals: { modalNum: number; modalTitle: any }[]
+    pageModals: { modalNum: number; modalTitle: any }[],
+    imageCount:number,
 ) => {
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
 
-    const imagePriority = determineLazyLoad(currentModule.lazy, modCount, itemCount)
+    const imagePriority = determineLazyLoad(currentModule.lazy, modCount, itemCount, imageCount)
 
     //replace line breaks from cms
     if (currentItem.desc) {
@@ -618,6 +636,8 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return allPageCss.join(' ')
 }
 
+
+
 export const createPageList = (page: { title: string; slug: string; id: string; page_type: string }) => {
     const pageData = {
         name: page.title,
@@ -628,3 +648,4 @@ export const createPageList = (page: { title: string; slug: string; id: string; 
 
     return pageData
 }
+
