@@ -1184,9 +1184,42 @@ function processImageTag(desc: string, cmsUrl: string) {
 
 export const convertDescText = (desc: string, cmsUrl: string) => {
     const wrappedText = wrapTextWithPTags(desc)
-    const convertedDesc = convertSpecialTokens(wrappedText)
+    let convertedDesc = convertSpecialTokens(wrappedText)
+    convertedDesc
+    
     //const convertedImages = processImageTag(convertedDesc, cmsUrl)
     return convertedDesc
+}
+
+//decide if youtube iframe is in desc tag and extract src to use if so
+export function extractIframeSrc(input: string) {
+    // Regular expression to match iframe tags
+    const iframeRegex = /<iframe.*?<\/iframe>/gi;
+
+    const iframeMatches = input.match(iframeRegex);
+
+    if (iframeMatches && iframeMatches.length > 0) {
+        // Extract the first iframe tag found
+        const iframeTag = iframeMatches[0];
+
+        // Extract the src attribute value from the iframe tag
+        const srcRegex = /src=['"]([^'"]*?)['"]/i
+        const srcMatch = iframeTag.match(srcRegex);
+
+        if (srcMatch && srcMatch.length > 1) {
+            // Return the src attribute value
+            const srcValue = srcMatch[1];
+            if (srcValue.includes('youtube')) {
+
+                // Remove the iframe tag from the input string
+                const stringWithoutIframe = input.replace(iframeTag, '');
+                return {srcValue:srcValue, newDesc: stringWithoutIframe};
+            }
+            
+        }
+    }
+
+    return null;
 }
 
 //converts hex or rgb to HSL

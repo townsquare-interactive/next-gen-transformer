@@ -35,6 +35,7 @@ import {
     moduleRenderTypes,
     decidePrimaryPhoneOrEmail,
     filterPrimaryContact,
+    extractIframeSrc,
 } from '../utils.js'
 import {createCustomComponents} from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -494,7 +495,18 @@ const transformModuleItem = (
 
     //replace line breaks from cms
     if (currentItem.desc) {
-        currentItem.desc = convertDescText(currentItem.desc, cmsUrl)
+        let newDesc = convertDescText(currentItem.desc, cmsUrl)
+        const videoDesc = extractIframeSrc(newDesc)
+        newDesc = videoDesc ? videoDesc.newDesc : newDesc
+        currentItem.desc = newDesc
+
+        //add video object if exists in desc
+        if (videoDesc?.srcValue){
+            currentItem.video = {
+                src: videoDesc?.srcValue,
+                method:'ext'
+            }
+        } 
     }
 
     //Create button and link vars

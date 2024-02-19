@@ -628,6 +628,7 @@ export interface ModuleItem extends LunaModuleItem {
     btnStyles?: string
     nextImageSizes?: string
     contactFormData?: any
+    video?: { src: string; method: string }
 }
 
 /*   interface Button {
