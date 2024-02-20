@@ -320,9 +320,9 @@ export const ModuleItemSchema = z.object({
     headerTag: OptionalString,
     imageSize: z.optional(
         z.object({
-            width: z.number(),
-            height: z.number(),
-            size: z.string().or(z.number()),
+            width: z.number().nullable(),
+            height: z.number().nullable(),
+            size: z.string().or(z.number()).nullable(),
         })
     ),
     modColor1: OptionalString,
@@ -367,6 +367,11 @@ export const ModuleItemSchema = z.object({
         weblink2: OptionalString,
         pagelink2: OptionalString,
     }),
+    video: z.object({
+        src: z.string(),
+        method: z.string()
+
+    }).optional()
 })
 
 const EmptyArray = z.array(z.string()).refine((arr) => arr.length === 0)

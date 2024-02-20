@@ -35,9 +35,8 @@ import {
     moduleRenderTypes,
     decidePrimaryPhoneOrEmail,
     filterPrimaryContact,
-    extractIframeSrc,
 } from '../utils.js'
-import {createCustomComponents} from '../customComponentsUtils.js'
+import {createCustomComponents, extractIframeSrc,} from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
@@ -503,7 +502,7 @@ const transformModuleItem = (
         //add video object if exists in desc
         if (videoDesc?.srcValue){
             currentItem.video = {
-                src: videoDesc?.srcValue,
+                src: videoDesc.srcValue,
                 method:'ext'
             }
         } 
