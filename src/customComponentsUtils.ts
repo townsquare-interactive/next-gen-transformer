@@ -33,7 +33,6 @@ function parseSocialItemsFlex(inputString: string): { hrefs: string[] } | null {
 
     // Extract the code from the beginning div to the end of the code
     const substring = inputString.substring(startIndex, closingQuoteIndex);
-    console.log('sub', substring)
 
     // Count the number of <a> tags
     const tagInfo = getATags(substring)

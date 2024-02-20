@@ -277,7 +277,11 @@ export const SiteDataSchema = z.object({
     }).optional(),
     phoneNumber: z.string().optional(),
     email: z.string().optional(),
-    customComponents:z.array(z.object({}))
+    customComponents:z.array(z.object({})),
+    scripts:z.object({
+        header:z.string().optional(),
+        footer:z.string().optional(),
+    }).optional()
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>

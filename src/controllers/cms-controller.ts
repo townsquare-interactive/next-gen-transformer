@@ -336,7 +336,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         //allStyles: globalStyles,
         styles:{global: globalStyles.global, custom: globalStyles.custom
         },
-        customComponents:customComponents
+        customComponents:customComponents,
+        scripts: {
+            header:file.design.code.header || '',
+            footer: file.design.code.footer || ''
+        }
     }
 
     return globalFile
