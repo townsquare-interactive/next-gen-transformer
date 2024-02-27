@@ -35,6 +35,7 @@ import {
     moduleRenderTypes,
     decidePrimaryPhoneOrEmail,
     filterPrimaryContact,
+    seperateScriptCode,
 } from '../utils.js'
 import {createCustomComponents, extractIframeSrc,} from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
@@ -102,6 +103,14 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                 value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
 
                 createPageScss(value.data, pageSlug, basePath)
+                
+                //screate page scripts
+                const foot_script = value.data.JS || ''
+                const head_script = value.data.head_script || ''
+                const customPageCode = foot_script + head_script
+                const seperatedCode = seperateScriptCode(customPageCode)
+                value.data.scripts = seperatedCode.scripts
+                
 
                 //create list of page modals
                 let pageModals: { modalNum: number; modalTitle: string; openEveryTime: boolean; autoOpen: boolean }[] = createModalPageList(value.data.modules)
@@ -142,19 +151,8 @@ const createPageScss = async (pageData: CMSPage, pageSlug: string, basePath: str
         const foot_script = pageData.JS || ''
         const head_script = pageData.head_script || ''
         const customPageCode = foot_script + head_script
-
-        let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
-        let nextMatch = styleMatchReg.exec(customPageCode)
-        let cssStringArray = []
-        while (nextMatch != null) {
-            cssStringArray.push(nextMatch[1])
-            nextMatch = styleMatchReg.exec(customPageCode)
-        }
-
-        const cssString = convertSpecialTokens(cssStringArray.join(' '))
-        pageCss = `.page-${pageSlug} {
-        ${cssString}
-    }`
+        const allPageCode = seperateScriptCode(customPageCode, pageSlug)
+        pageCss = allPageCode.css
     } else {
         pageCss = ''
     }
@@ -301,6 +299,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     console.log(customComponents)
 
 
+    //global script evaluation
+    const globalHeaderCode = seperateScriptCode(file.design.code.header || '', '')
+    const globalFooterCode = seperateScriptCode(file.design.code.footer || '', '')
+
+
     const globalFile = {
         logos: transformedLogos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
@@ -333,13 +336,12 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             zapierUrl: process.env.ZAPIER_URL,
             makeUrl: process.env.MAKE_URL,
         },
-        //allStyles: globalStyles,
         styles:{global: globalStyles.global, custom: globalStyles.custom
         },
         customComponents:customComponents,
         scripts: {
-            header:file.design.code.header || '',
-            footer: file.design.code.footer || ''
+            header: globalHeaderCode.scripts,
+            footer: globalFooterCode.scripts
         }
     }
 
@@ -621,12 +623,10 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
     let globalStyles = colorClasses
    // const globalStylesConverted = fontClasses + colorClasses
     //const allStylesConverted = convertSpecialTokens(allStyles)
-    const globalConverted=convertSpecialTokens(globalStyles)
-    const customConverted=convertSpecialTokens(fontClasses + customCss + allPageStyles)
+    const globalConverted=convertSpecialTokens(globalStyles, 'code')
+    const customConverted=convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
 
     try {
-/*         const convertedCss = sass.compileString(allStylesConverted)
-        return convertedCss.css */
         const convertedGlobal = sass.compileString(globalConverted)
         const convertedCustom = sass.compileString(customConverted)
         return {global:convertedGlobal.css, custom:convertedCustom.css}

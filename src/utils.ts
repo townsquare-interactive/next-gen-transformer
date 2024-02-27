@@ -1073,9 +1073,10 @@ export const removeDuplicatesArray = (arr: any[]) => {
     return uniqueArr
 }
 
-export const convertSpecialTokens = (str: string) => {
+export const convertSpecialTokens = (str: string, type= 'desc') => {
+    
     //const removedBreak = str.replaceAll('[rn]', '\n')
-    const removedBreak = str.replaceAll('[rn]', '<br>')
+    const removedBreak = type === 'desc' ? str.replaceAll('[rn]', '<br>') : str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
     const removedParenthesis = removedBlank.replaceAll('&quot;', "'")
 
@@ -1256,6 +1257,32 @@ export function colorToHSL(color: string) {
         console.log('invalid color format')
         return color
     }
+}
+
+export const seperateScriptCode = (customPageCode: string, pageSlug?: string ) => {
+    let pageCss = ''
+    let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi;
+    let nextMatch = styleMatchReg.exec(customPageCode);
+    let cssStringArray = [];
+    while (nextMatch != null) {
+        cssStringArray.push(nextMatch[1]);
+        nextMatch = styleMatchReg.exec(customPageCode);
+    }
+
+    const codeWithoutStyles = customPageCode.replace(styleMatchReg, '');
+
+    //console.log('Original string', cleanCustomPageCode);
+
+    const cssString = convertSpecialTokens(cssStringArray.join(' '), 'code');
+
+    if (cssString){
+        pageCss = pageSlug ? `.page-${pageSlug} {
+            ${cssString} 
+        }` : cssString;
+    }   
+
+    return {css: pageCss || '', scripts: convertSpecialTokens(codeWithoutStyles, 'code') || ''}
+
 }
 
 

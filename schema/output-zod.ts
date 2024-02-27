@@ -452,6 +452,7 @@ export const CMSPagesSchema = z.array(
             columnStyles: z.string(),
             page_type: OptionalString,
             pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
+            scripts: z.string().optional()
         }),
         attrs: z.record(z.unknown()).optional(), //for page name changes
         seo: SeoSchema,
