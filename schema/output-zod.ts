@@ -84,7 +84,7 @@ const socialItem = z.object({
     label: z.string(),
     value: z.string(),
     enabled: z.number(),
-    input: z.array(z.string().nullable()),
+    input: z.array(z.string().nullable()).nullable(),
     url: z.string(),
     icon: z.array(z.string()).optional(),
 })

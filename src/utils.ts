@@ -5,30 +5,63 @@ import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSetti
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 const globalAssets = bucketUrl + '/global-assets'
 
+//contants
+export const socials = {
+    google: 'google',
+    facebook:'facebook',
+    instagram: 'instagram',
+}
+
 export function socialConvert(str: string) {
+    console.log('icon convert start', str)
     let icon = iconConvert(str)
-    if (icon === 'google') {
-        return ['fab', 'google']
-    } else if (icon === 'facebook') {
-        return ['fab', 'facebook']
-    } else if (icon === 'instagram') {
-        return ['fab', 'instagram']
+    console.log('after', icon)
+    if (icon === socials.google) {
+        return ['fab', socials.google]
+    } else if (icon === socials.facebook) {
+        return ['fab', socials.facebook]
+    } else if (icon === socials.instagram) {
+        return ['fab', socials.instagram]
     } else if (icon === 'twitter') {
         return ['fab', 'twitter']
+    } else if (icon === 'linkedin') {
+        return ['fab', 'linkedin']
+    } else if (icon === 'youtube') {
+        return ['fab', 'youtube']
+    } else if (icon === 'pinterest') {
+        return ['fab', 'pinterest']
+    } else if (icon === 'apple') {
+        return ['fab', 'apple']
+    } else if (icon === 'vimeo') {
+        return ['fab', 'vimeo']
+    } else if (icon === 'x-twitter') {
+        return ['fab', 'x-twitter']
     } else {
         return ['fas', 'rocket']
     }
 }
 
 export function iconConvert(str: string) {
-    if (str.indexOf('google') !== -1) {
-        return 'google'
-    } else if (str.indexOf('facebook') !== -1) {
-        return 'facebook'
-    } else if (str.indexOf('instagram') !== -1) {
-        return 'instagram'
+    if (str.indexOf(socials.google) !== -1) {
+        return socials.google
+    } else if (str.indexOf(socials.facebook) !== -1) {
+        return socials.facebook
+    } else if (str.indexOf(socials.instagram) !== -1) {
+        return socials.instagram
     } else if (str.indexOf('twitter') !== -1) {
         return 'twitter'
+    }else if (str.indexOf('linkedin') !== -1) {
+        return 'linkedin'
+    } else if (str.indexOf('youtube') !== -1) {
+        return 'youtube'
+    } else if (str.indexOf('pinterest') !== -1) {
+        return 'pinterest'
+    } else if (str.indexOf('apple') !== -1) {
+        return 'apple'
+    } else if (str.indexOf('vimeo') !== -1) {
+        return 'vimeo'
+    } else if (str.indexOf('/x.com') !== -1) {
+        return 'x-twitter'
     } else {
         return 'social'
     }

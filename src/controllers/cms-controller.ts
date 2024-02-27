@@ -254,11 +254,11 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
         for (let i = 0; i < file.settings.social.services.length; i++) {
             let item = file.settings.social.services[i]
-            const basePath = item.format.replace(/\%.*/, '') + item.value
+            const url = item.format.replace(/\%.*/, '') + item.value
 
             if (file.settings.social.services[i]) {
                 if (item.value && item.enabled == 1) {
-                    social.push({ ...item, url: basePath, icon: socialConvert(item.name) })
+                    social.push({ ...item, url: url, icon: socialConvert(url) })
                 }
             }
         }
