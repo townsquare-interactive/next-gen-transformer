@@ -37,7 +37,7 @@ import {
     filterPrimaryContact,
     seperateScriptCode,
 } from '../utils.js'
-import {createCustomComponents, extractIframeSrc,} from '../customComponentsUtils.js'
+import { createCustomComponents, extractIframeSrc } from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
@@ -103,14 +103,13 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                 value.data = { id: pageId, title: pageTitle, slug: pageSlug, pageType: pageType, url: url, ...value.data, columnStyles: columnStyles }
 
                 createPageScss(value.data, pageSlug, basePath)
-                
+
                 //screate page scripts
                 const foot_script = value.data.JS || ''
                 const head_script = value.data.head_script || ''
                 const customPageCode = foot_script + head_script
                 const seperatedCode = seperateScriptCode(customPageCode)
                 value.data.scripts = seperatedCode.scripts
-                
 
                 //create list of page modals
                 let pageModals: { modalNum: number; modalTitle: string; openEveryTime: boolean; autoOpen: boolean }[] = createModalPageList(value.data.modules)
@@ -243,7 +242,7 @@ export const addNewPageToNav = async (pageData: CMSPage, basePath: string) => {
 }
 
 //Create or edit layout file
-export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles:GlobalStyles) => {
+export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles: GlobalStyles) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
     const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
@@ -295,14 +294,12 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     }
 
     //custom code components
-    const customComponents=createCustomComponents(file.design.code || '')
+    const customComponents = createCustomComponents(file.design.code || '')
     console.log(customComponents)
-
 
     //global script evaluation
     const globalHeaderCode = seperateScriptCode(file.design.code.header || '', '')
     const globalFooterCode = seperateScriptCode(file.design.code.footer || '', '')
-
 
     const globalFile = {
         logos: transformedLogos,
@@ -336,13 +333,12 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             zapierUrl: process.env.ZAPIER_URL,
             makeUrl: process.env.MAKE_URL,
         },
-        styles:{global: globalStyles.global, custom: globalStyles.custom
-        },
-        customComponents:customComponents,
+        styles: { global: globalStyles.global, custom: globalStyles.custom },
+        customComponents: customComponents,
         scripts: {
             header: globalHeaderCode.scripts,
-            footer: globalFooterCode.scripts
-        }
+            footer: globalFooterCode.scripts,
+        },
     }
 
     return globalFile
@@ -432,8 +428,8 @@ const transformPageModules = (
 
                     itemCount += 1
 
-                    if (currentModule.items[i].image){
-                        imageCount+=1
+                    if (currentModule.items[i].image) {
+                        imageCount += 1
                     }
                 }
 
@@ -469,7 +465,8 @@ const determineLazyLoad = (modLazy: string, modCount: number, itemCount: number,
     //initiate lazy load off for top module items
     if (modCount === 1 && itemCount <= 2) {
         modLazy = 'off'
-    } if (imageCount===0){
+    }
+    if (imageCount === 0) {
         modLazy = 'off'
     } else {
         modLazy = modLazy
@@ -492,7 +489,7 @@ const transformModuleItem = (
     themeStyles: ThemeStyles,
     cmsUrl: string,
     pageModals: { modalNum: number; modalTitle: any }[],
-    imageCount:number,
+    imageCount: number
 ) => {
     currentItem = removeFieldsFromObj(currentItem, ['id', 'uid'])
 
@@ -506,12 +503,12 @@ const transformModuleItem = (
         currentItem.desc = newDesc
 
         //add video object if exists in desc
-        if (videoDesc?.srcValue){
+        if (videoDesc?.srcValue) {
             currentItem.video = {
                 src: videoDesc.srcValue,
-                method:'ext'
+                method: 'ext',
             }
-        } 
+        }
     }
 
     //Create button and link vars
@@ -621,22 +618,21 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
 
     //let allStyles = fontClasses + colorClasses + customCss + allPageStyles
     let globalStyles = colorClasses
-   // const globalStylesConverted = fontClasses + colorClasses
+    // const globalStylesConverted = fontClasses + colorClasses
     //const allStylesConverted = convertSpecialTokens(allStyles)
-    const globalConverted=convertSpecialTokens(globalStyles, 'code')
-    const customConverted=convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
+    const globalConverted = convertSpecialTokens(globalStyles, 'code')
+    const customConverted = convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
 
     try {
         const convertedGlobal = sass.compileString(globalConverted)
         const convertedCustom = sass.compileString(customConverted)
-        return {global:convertedGlobal.css, custom:convertedCustom.css}
+        return { global: convertedGlobal.css, custom: convertedCustom.css }
     } catch (e) {
         //error catch if code passed is not correct scss/css
         //return `/* ${e.message.toString()} */` + allStyles
         console.log(`error in styling compression ${e.message.toString()}`)
         //return `/* ${e.message.toString()} */`
-        return {global: globalConverted, custom:`/* ${e.message.toString()} */` + customConverted}
-
+        return { global: globalConverted, custom: `/* ${e.message.toString()} */` + customConverted }
     }
 }
 
@@ -651,8 +647,6 @@ const getAllCssPages = async (currentPageList: { pages: [{ slug: string }] }, ba
     return allPageCss.join(' ')
 }
 
-
-
 export const createPageList = (page: { title: string; slug: string; id: string; page_type: string }) => {
     const pageData = {
         name: page.title,
@@ -663,4 +657,3 @@ export const createPageList = (page: { title: string; slug: string; id: string; 
 
     return pageData
 }
-

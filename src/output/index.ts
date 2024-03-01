@@ -47,6 +47,6 @@ export const publish = async (data: PublishData) => {
     }
 
     if (globalStyles) {
-        await addFileS3(globalStyles, `${s3SitePath}/global`, 'css')
+        await addFileS3(globalStyles.global + globalStyles.custom, `${s3SitePath}/global`, 'css')
     }
 }
