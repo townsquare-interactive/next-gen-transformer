@@ -37,7 +37,7 @@ import {
     filterPrimaryContact,
     seperateScriptCode,
 } from '../utils.js'
-import { createCustomComponents, extractIframeSrc } from '../customComponentsUtils.js'
+import { createCustomComponents, extractIframeSrc, transformVcita } from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
@@ -301,6 +301,14 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
     const globalHeaderCode = seperateScriptCode(file.design.code.header || '', '')
     const globalFooterCode = seperateScriptCode(file.design.code.footer || '', '')
 
+    //engage
+    //if not in settings need to keep currentFile
+    let vcita = currentLayout.vcita ? currentLayout.vcita : null
+    if (file.engage?.hasEngage && file.settings.vcita) {
+        vcita = transformVcita(file.settings.vcita, file.engage, file.settings['vcita_business_info'] || null)
+        console.log('vcita test', vcita)
+    }
+
     const globalFile = {
         logos: transformedLogos,
         social: file.settings ? transformSocial(file) : currentLayout.social,
@@ -339,6 +347,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             header: globalHeaderCode.scripts,
             footer: globalFooterCode.scripts,
         },
+        vcita: vcita,
     }
 
     return globalFile
@@ -511,6 +520,13 @@ const transformModuleItem = (
         }
     }
 
+    if (currentItem.headline) {
+        currentItem.headline = convertSpecialTokens(currentItem.headline)
+    }
+    if (currentItem.subheader) {
+        currentItem.subheader = convertSpecialTokens(currentItem.subheader)
+    }
+
     //Create button and link vars
     const { linkNoBtn, btnCount, isWrapLink, visibleButton, buttonList } = createLinkAndButtonVariables(
         currentItem,
@@ -616,10 +632,7 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         allPageStyles = ''
     }
 
-    //let allStyles = fontClasses + colorClasses + customCss + allPageStyles
     let globalStyles = colorClasses
-    // const globalStylesConverted = fontClasses + colorClasses
-    //const allStylesConverted = convertSpecialTokens(allStyles)
     const globalConverted = convertSpecialTokens(globalStyles, 'code')
     const customConverted = convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
 
@@ -629,9 +642,7 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         return { global: convertedGlobal.css, custom: convertedCustom.css }
     } catch (e) {
         //error catch if code passed is not correct scss/css
-        //return `/* ${e.message.toString()} */` + allStyles
         console.log(`error in styling compression ${e.message.toString()}`)
-        //return `/* ${e.message.toString()} */`
         return { global: globalConverted, custom: `/* ${e.message.toString()} */` + customConverted }
     }
 }

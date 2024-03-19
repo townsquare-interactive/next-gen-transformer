@@ -82,6 +82,30 @@ export const getPageData = (sitePageData, key) => {
     const seo = transformPageSeo(sitePageData[pageId].seo);
     return { pageId, pageTitle, pageSlug, pageType, url, seo };
 };
+
+const seperatePageCode = (customPageCode) => {
+    let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi;
+    let nextMatch = styleMatchReg.exec(customPageCode);
+    let cssStringArray = [];
+    while (nextMatch != null) {
+        cssStringArray.push(nextMatch[1]);
+        nextMatch = styleMatchReg.exec(customPageCode);
+    }
+
+    let cleanCustomPageCode = customPageCode.replace(styleMatchReg, '');
+    //console.log('Original string', cleanCustomPageCode);
+
+    const cssString = convertSpecialTokens(cssStringArray.join(' '));
+    pageCss = `.page-${pageSlug} {
+        ${cssString}
+    }`;
+
+    
+
+    return {css: pageCss, scripts: cleanCustomPageCode}
+
+}
+
 //grab content between <style> tags and add scss page to s3
 const createPageScss = async (pageData, pageSlug, basePath) => {
     let pageCss;
@@ -89,6 +113,9 @@ const createPageScss = async (pageData, pageSlug, basePath) => {
         const foot_script = pageData.JS || '';
         const head_script = pageData.head_script || '';
         const customPageCode = foot_script + head_script;
+        //do function here
+        const allPageCode = seperatePageCode(customPageCode)
+        console.log('right here', allPageCode.css, allPageCode.scripts)
         let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi;
         let nextMatch = styleMatchReg.exec(customPageCode);
         let cssStringArray = [];

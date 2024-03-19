@@ -8,7 +8,7 @@ const globalAssets = bucketUrl + '/global-assets'
 //contants
 export const socials = {
     google: 'google',
-    facebook:'facebook',
+    facebook: 'facebook',
     instagram: 'instagram',
 }
 
@@ -50,7 +50,7 @@ export function iconConvert(str: string) {
         return socials.instagram
     } else if (str.indexOf('twitter') !== -1) {
         return 'twitter'
-    }else if (str.indexOf('linkedin') !== -1) {
+    } else if (str.indexOf('linkedin') !== -1) {
         return 'linkedin'
     } else if (str.indexOf('youtube') !== -1) {
         return 'youtube'
@@ -67,14 +67,13 @@ export function iconConvert(str: string) {
     }
 }
 
-export const addProtocolToLink = (url:string)=>{
+export const addProtocolToLink = (url: string) => {
     if (!url.includes('http')) {
         url = 'http://' + url
     }
-    
+
     return url
 }
-
 
 export const moduleRenderTypes = ['Article', 'PhotoGrid', 'Banner', 'Parallax', 'Testimonials', 'Card', 'PhotoGallery', 'ContactFormRoutes', 'Modal']
 
@@ -337,7 +336,7 @@ export async function transformcontact(contactInfo: Contact) {
         contactInfo.address = { ...contactInfo.address, coordinates: coords }
     }
 
-    if (contactInfo.phone){
+    if (contactInfo.phone) {
         for (const x in contactInfo.phone) {
             if (contactInfo.phone[x]) {
                 const phone = {
@@ -353,7 +352,7 @@ export async function transformcontact(contactInfo: Contact) {
         }
     }
 
-    if (contactInfo.email){
+    if (contactInfo.email) {
         for (const x in contactInfo.email) {
             if (contactInfo.email[x]) {
                 const email = {
@@ -367,7 +366,7 @@ export async function transformcontact(contactInfo: Contact) {
                 contactLinks.push(email)
             }
         }
-}
+    }
 
     const contactMap = {
         cName: 'map',
@@ -1106,8 +1105,7 @@ export const removeDuplicatesArray = (arr: any[]) => {
     return uniqueArr
 }
 
-export const convertSpecialTokens = (str: string, type= 'desc') => {
-    
+export const convertSpecialTokens = (str: string, type = 'desc') => {
     //const removedBreak = str.replaceAll('[rn]', '\n')
     const removedBreak = type === 'desc' ? str.replaceAll('[rn]', '<br>') : str.replaceAll('[rn]', '\n')
     const removedBlank = removedBreak.replaceAll('[t]', ' ')
@@ -1208,8 +1206,6 @@ function processImageTag(desc: string, cmsUrl: string) {
     // Use replace function with the defined callback
     var processedDesc = desc.replace(imgRegex, replaceSrc)
 
-    console.log('lets see how it works', desc, processedDesc)
-
     return processedDesc
 }
 
@@ -1217,7 +1213,7 @@ export const convertDescText = (desc: string, cmsUrl: string) => {
     const wrappedText = wrapTextWithPTags(desc)
     let convertedDesc = convertSpecialTokens(wrappedText)
     convertedDesc
-    
+
     //const convertedImages = processImageTag(convertedDesc, cmsUrl)
     return convertedDesc
 }
@@ -1292,33 +1288,29 @@ export function colorToHSL(color: string) {
     }
 }
 
-export const seperateScriptCode = (customPageCode: string, pageSlug?: string ) => {
+export const seperateScriptCode = (customPageCode: string, pageSlug?: string) => {
     let pageCss = ''
-    let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi;
-    let nextMatch = styleMatchReg.exec(customPageCode);
-    let cssStringArray = [];
+    let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
+    let nextMatch = styleMatchReg.exec(customPageCode)
+    let cssStringArray = []
     while (nextMatch != null) {
-        cssStringArray.push(nextMatch[1]);
-        nextMatch = styleMatchReg.exec(customPageCode);
+        cssStringArray.push(nextMatch[1])
+        nextMatch = styleMatchReg.exec(customPageCode)
     }
 
-    const codeWithoutStyles = customPageCode.replace(styleMatchReg, '');
+    const codeWithoutStyles = customPageCode.replace(styleMatchReg, '')
 
     //console.log('Original string', cleanCustomPageCode);
 
-    const cssString = convertSpecialTokens(cssStringArray.join(' '), 'code');
+    const cssString = convertSpecialTokens(cssStringArray.join(' '), 'code')
 
-    if (cssString){
-        pageCss = pageSlug ? `.page-${pageSlug} {
+    if (cssString) {
+        pageCss = pageSlug
+            ? `.page-${pageSlug} {
             ${cssString} 
-        }` : cssString;
-    }   
+        }`
+            : cssString
+    }
 
-    return {css: pageCss || '', scripts: convertSpecialTokens(codeWithoutStyles, 'code') || ''}
-
+    return { css: pageCss || '', scripts: convertSpecialTokens(codeWithoutStyles, 'code') || '' }
 }
-
-
-
-
-

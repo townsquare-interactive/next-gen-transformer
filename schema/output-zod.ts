@@ -249,6 +249,32 @@ const CMSNavItemSchema = z.object({
         )
         .optional(),
 })
+const ActionSchema = z.object({
+    name: z.string(),
+    text: z.string(),
+    icon: z.string().optional(),
+})
+
+const ThemeColorsSchema = z.object({
+    color: z.string(),
+    bgColor: z.string(),
+    buttonTextColor: z.string(),
+    buttonBgColor: z.string(),
+    labelTextColor: z.string(),
+    labelBgColor: z.string(),
+})
+
+const VcitaDataSchema = z.object({
+    actions: z.array(ActionSchema),
+    themeColors: ThemeColorsSchema,
+    businessId: z.string(),
+    titleText: z.string().optional(),
+    mainAction: z.string().optional(),
+    descText: z.string().optional(),
+    businessInfo: z.unknown().optional(),
+    showMyAccountBtn: z.boolean(),
+    widgetLabel: z.string().optional(),
+})
 
 export const SiteDataSchema = z.object({
     logos: Logo.describe('Data for all logo slots'),
@@ -271,17 +297,22 @@ export const SiteDataSchema = z.object({
     redirectUrl: z.string().optional(),
     publishedDomains: z.array(z.string().optional()),
     allStyles: z.string().optional(),
-    styles:z.object({
-        global:z.string().optional(),
-        custom:z.string().optional()
-    }).optional(),
+    styles: z
+        .object({
+            global: z.string().optional(),
+            custom: z.string().optional(),
+        })
+        .optional(),
     phoneNumber: z.string().optional(),
     email: z.string().optional(),
-    customComponents:z.array(z.object({})),
-    scripts:z.object({
-        header:z.string().optional(),
-        footer:z.string().optional(),
-    }).optional()
+    customComponents: z.array(z.object({})),
+    scripts: z
+        .object({
+            header: z.string().optional(),
+            footer: z.string().optional(),
+        })
+        .optional(),
+    vcita: VcitaDataSchema.optional(),
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>
@@ -371,11 +402,12 @@ export const ModuleItemSchema = z.object({
         weblink2: OptionalString,
         pagelink2: OptionalString,
     }),
-    video: z.object({
-        src: z.string(),
-        method: z.string()
-
-    }).optional()
+    video: z
+        .object({
+            src: z.string(),
+            method: z.string(),
+        })
+        .optional(),
 })
 
 const EmptyArray = z.array(z.string()).refine((arr) => arr.length === 0)
@@ -452,7 +484,7 @@ export const CMSPagesSchema = z.array(
             columnStyles: z.string(),
             page_type: OptionalString,
             pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
-            scripts: z.string().optional()
+            scripts: z.string().optional(),
         }),
         attrs: z.record(z.unknown()).optional(), //for page name changes
         seo: SeoSchema,
