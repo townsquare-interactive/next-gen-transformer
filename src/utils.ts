@@ -858,7 +858,7 @@ export const createItemStyles = (items: LunaModuleItem[], well: string, modType:
 }
 
 export const setColors = (cmsColors: any, cmsTheme: string) => {
-    if (cmsTheme === 'beacon-theme_charlotte') {
+    if (cmsTheme === 'beacon-theme_charlotte' || 'beacon-theme_apex') {
         return {
             logoColor: cmsColors.color_1.value,
             headingColor: cmsColors.color_2.value,
@@ -950,7 +950,7 @@ export const getColumnsCssClass = (page: CMSPage) => {
     }
 }
 
-export const createFontCss = (fonts: any) => {
+export const createFontCss = (fonts: any, siteType = 'website') => {
     let fontImportGroup
     let fontClasses
 
@@ -963,6 +963,9 @@ export const createFontCss = (fonts: any) => {
         const featuredFont = fonts.list[fonts.sections.feat.value]
         const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
         const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+        if (siteType === 'landing') {
+            uniqueFontGroup.push('Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0')
+        }
         fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
         fontClasses = ` body {font-family:${bodyFont.label}}
     .hd-font{font-family:${headlineFont.label}} 
@@ -1313,4 +1316,74 @@ export const seperateScriptCode = (customPageCode: string, pageSlug?: string) =>
     }
 
     return { css: pageCss || '', scripts: convertSpecialTokens(codeWithoutStyles, 'code') || '' }
+}
+
+const createHeaderCtaBtns = (btnList: any[]) => {
+    const headerBtns = []
+    for (let n = 0; n < btnList.length; n++) {
+        const currentBtn = btnList[n]
+
+        headerBtns.push({
+            label: currentBtn.label,
+            link: currentBtn.link,
+            active: true,
+            opensModal: -1,
+            window: 1,
+            btnType: 'btn_cta_landing',
+            btnSize: 'btn_md',
+            googleIcon: currentBtn.googleIcon,
+            icon: currentBtn.icon,
+        })
+    }
+    return headerBtns
+}
+
+export const getlandingPageOptions = () => {
+    const ctaBtns = [
+        {
+            label: 'GET 24/7 SERVICE CALL NOW',
+            link: 'tel:(732)%20351-2519',
+            googleIcon: `<span class="material-symbols-outlined call">phone_android</span>`,
+            faIcon: ['fas', 'mobile-notch'],
+            icon: {
+                iconPrefix: 'fas',
+                iconModel: 'mobile-notch',
+            },
+        },
+        {
+            label: 'Schedule NOW',
+            link: 'tel:(732)%20351-2519',
+            googleIcon: `<span class="material-symbols-outlined">calendar_clock</span>`,
+            icon: {
+                iconPrefix: 'far',
+                iconModel: 'calendar-clock',
+            },
+        },
+    ]
+
+    const mobileCtaBtns = [
+        {
+            label: 'CALL NOW',
+            link: 'tel:(732)%20351-2519',
+            googleIcon: `<span class="material-symbols-outlined call">phone_android</span>`,
+            icon: {
+                iconPrefix: 'fas',
+                iconModel: 'mobile-notch',
+            },
+        },
+        {
+            label: 'Schedule',
+            link: 'tel:(732)%20351-2519',
+            googleIcon: `<span class="material-symbols-outlined">calendar_clock</span>`,
+            icon: {
+                iconPrefix: 'far',
+                iconModel: 'calendar-clock',
+            },
+        },
+    ]
+
+    const headerBtns = createHeaderCtaBtns(ctaBtns)
+    const mobileHeaderBtns = createHeaderCtaBtns(mobileCtaBtns)
+
+    return { ctaBtns: headerBtns, hideNav: true, hideSocial: true, mobileHeaderBtns: mobileHeaderBtns }
 }

@@ -36,11 +36,13 @@ import {
     decidePrimaryPhoneOrEmail,
     filterPrimaryContact,
     seperateScriptCode,
+    getlandingPageOptions,
 } from '../utils.js'
 import { createCustomComponents, extractIframeSrc, transformVcita } from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
+import { dynamoClient } from './dynamo-controller.js'
 
 const toStringSchema = z.coerce.string()
 
@@ -245,17 +247,23 @@ export const addNewPageToNav = async (pageData: CMSPage, basePath: string) => {
 export const createOrEditLayout = async (file: any, basePath: string, themeStyles: ThemeStyles, url: string, globalStyles: GlobalStyles) => {
     const currentLayout = await getFileS3(`${basePath}/layout.json`)
 
-    const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts)
+    //setting siteType to landing
+    let siteType = file.config.website.siteType || 'website'
+    if (file.config.website.url.includes('nextgenprototype') || file.config.website.url.includes('guaranteedservice')) {
+        siteType = 'landing'
+    }
+
+    const { fontImportGroup, fontClasses } = createFontCss(file.design.fonts, siteType)
 
     //adding socials from sitedata
-    function transformSocial(file: any) {
+    function transformSocial(socials: any) {
         const social = []
 
-        for (let i = 0; i < file.settings.social.services.length; i++) {
-            let item = file.settings.social.services[i]
+        for (let i = 0; i < socials.length; i++) {
+            let item = socials[i]
             const url = item.format.replace(/\%.*/, '') + item.value
 
-            if (file.settings.social.services[i]) {
+            if (socials[i]) {
                 if (item.value && item.enabled == 1) {
                     social.push({ ...item, url: url, icon: socialConvert(url) })
                 }
@@ -311,7 +319,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
 
     const globalFile = {
         logos: transformedLogos,
-        social: file.settings ? transformSocial(file) : currentLayout.social,
+        social: file.settings ? transformSocial(file.settings.social.services) : currentLayout.social,
         contact: contactInfo,
         siteName: file.config.website.site_title || '',
         phoneNumber: phoneNumber,
@@ -348,6 +356,50 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
             footer: globalFooterCode.scripts,
         },
         vcita: vcita,
+        headerOptions: {},
+        siteType: siteType,
+    }
+
+    //not added to this in luna yet, adding manually "file.config.website.siteType"
+
+    if (siteType === 'landing') {
+        globalFile.headerOptions = getlandingPageOptions()
+        const socials = [
+            {
+                url: 'http://www.facebook.com/GuaranteedServiceNJ',
+                icon: socialConvert('facebook'),
+                name: 'facebook',
+            },
+            {
+                url: 'http://www.youtube.com/channel/UCTF0w4Gyxi34P3G3hRWguAA',
+                icon: socialConvert('youtube'),
+                name: 'youtube',
+            },
+            {
+                url: 'https://www.google.com/maps/place/Guaranteed+Service/@40.3801104,-74.571654,11z/data=!3m1!4b1!4m5!3m4!1s0x89c3c4c47750b5bb:0x1a7085e031fb3be7!8m2!3d40.3791538!4d-74.435907',
+                icon: socialConvert(
+                    'https://www.google.com/maps/place/Guaranteed+Service/@40.3801104,-74.571654,11z/data=!3m1!4b1!4m5!3m4!1s0x89c3c4c47750b5bb:0x1a7085e031fb3be7!8m2!3d40.3791538!4d-74.435907'
+                ),
+                name: 'directions',
+            },
+            {
+                url: 'http://www.twitter.com/GSNewJersey',
+                icon: socialConvert('http://www.twitter.com/GSNewJersey'),
+                name: 'twitter',
+            },
+            {
+                url: 'http://www.linkedin.com/guaranteed-service/',
+                icon: socialConvert('http://www.linkedin.com/guaranteed-service/'),
+                name: 'linkedin',
+            },
+            {
+                url: 'http://instagram.com/guaranteedservicenj',
+                icon: socialConvert('http://instagram.com/guaranteedservicenj'),
+                name: 'instagram',
+            },
+        ]
+
+        globalFile.social = socials
     }
 
     return globalFile
@@ -635,15 +687,15 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
     let globalStyles = colorClasses
     const globalConverted = convertSpecialTokens(globalStyles, 'code')
     const customConverted = convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
+    const convertedGlobal = sass.compileString(globalConverted)
 
     try {
-        const convertedGlobal = sass.compileString(globalConverted)
         const convertedCustom = sass.compileString(customConverted)
         return { global: convertedGlobal.css, custom: convertedCustom.css }
     } catch (e) {
         //error catch if code passed is not correct scss/css
         console.log(`error in styling compression ${e.message.toString()}`)
-        return { global: globalConverted, custom: `/* ${e.message.toString()} */` + customConverted }
+        return { global: convertedGlobal.css, custom: `/* ${e.message.toString()} */` + customConverted }
     }
 }
 
@@ -668,3 +720,6 @@ export const createPageList = (page: { title: string; slug: string; id: string; 
 
     return pageData
 }
+
+//b dynamoClient
+//throughout the evening prewritten toast or topic

@@ -78,13 +78,13 @@ const Logo = z.object({
 })
 
 const socialItem = z.object({
-    id: z.number(),
+    id: z.number().optional(),
     name: z.string(),
-    format: z.string(),
-    label: z.string(),
-    value: z.string(),
-    enabled: z.number(),
-    input: z.array(z.string().nullable()).nullable(),
+    format: z.string().optional(),
+    label: z.string().optional(),
+    value: z.string().optional(),
+    enabled: z.number().optional(),
+    input: z.array(z.string().nullable()).nullable().optional(),
     url: z.string(),
     icon: z.array(z.string()).optional(),
 })
@@ -312,7 +312,15 @@ export const SiteDataSchema = z.object({
             footer: z.string().optional(),
         })
         .optional(),
-    vcita: VcitaDataSchema.optional(),
+    vcita: VcitaDataSchema.optional().nullable(),
+    siteType: z.string(),
+    headerOptions: z
+        .object({
+            ctaBtns: z.array(z.object({})).optional(),
+            hideNav: z.boolean(),
+            hideSocial: z.boolean(),
+        })
+        .nullable(),
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>
@@ -366,7 +374,7 @@ export const ModuleItemSchema = z.object({
     subheader: OptionalString,
     actionlbl2: OptionalString,
     isFeatured: OptionalString,
-    modOpacity: z.optional(z.number()),
+    modOpacity: z.optional(z.number().or(z.string())),
     modSwitch1: z.optional(z.number().or(z.string())),
     newwindow2: OptionalString,
     pagelinkId: z.optional(z.number().or(z.string())),

@@ -185,7 +185,7 @@ const siteData = z.object({
     }),
     design: z.object({
         themes: z.object({
-            selected: z.literal('beacon-theme_charlotte'),
+            selected: z.union([z.literal('beacon-theme_charlotte'), z.literal('beacon-theme_apex')]),
         }),
         colors: colorsSchema,
         fonts: z.object({}),
