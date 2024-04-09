@@ -216,3 +216,104 @@ export const createSiteInputSchema = z.object({
     templateIdentifier: z.string(),
     type: z.literal('apex'),
 })
+
+//------------------------AI Schema-----------------------
+
+const coordinatesSchema = z.object({
+    lat: z.string().optional(),
+    long: z.string().optional(),
+})
+
+const addressSchema = z.object({
+    zip: z.string().optional(),
+    city: z.string().optional(),
+    name: z.string().optional(),
+    state: z.string().optional(),
+    street: z.string().optional(),
+    street2: z.string().optional(),
+    coordinates: coordinatesSchema.optional(),
+    url: z.string(),
+})
+
+const seoGlobalSchema = z.object({
+    aiosp_home_title: z.string().optional(),
+    aiosp_google_verify: z.string().optional(),
+    aiosp_home_description: z.string().optional(),
+    aiosp_page_title_format: z.string().optional(),
+    aiosp_description_format: z.string().optional(),
+    aiosp_404_title_format: z.string().optional(),
+})
+
+const zSections = z.array(
+    z.object({
+        headline: z.string().optional(),
+        reviewHeadline: z.string().optional(),
+        ctaText: z.string().optional(),
+        image: z.string().optional(),
+        subheader: z.string().optional(),
+        ctaLink: z.string().optional(),
+        desc: z.string().optional(),
+        desc2: z.string().optional(),
+        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+        components: z.array(
+            z.object({
+                type: z.string(),
+                image: z.string().optional(),
+                videoUrl: z.string().optional(),
+            })
+        ),
+    })
+)
+
+const pageModules = z.array(
+    z.object({
+        headline: z.string().optional(),
+        actionlbl: z.string().optional(),
+        image: z.string().optional(),
+        subheader: z.string().optional(),
+        type: z.string().optional(),
+        weblink: z.string().optional(),
+        videoUrl: z.string().optional(),
+        desc1: z.string().optional(),
+        desc2: z.string().optional(),
+        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+    })
+)
+
+const aiReqSchema = z.object({
+    logo: z.string(),
+    socials: z.array(z.string()),
+    address: addressSchema.optional(),
+    siteName: z.string(),
+    phoneNumber: z.string(),
+    email: z.string().email(),
+    url: z.string(),
+    seo: z.object({
+        global: seoGlobalSchema,
+    }),
+    colors: z.object({
+        primary: z.string(),
+        accent: z.string(),
+    }),
+    favicon: z.string(),
+    customComponents: z.array(
+        z.object({
+            type: z.string(),
+            apiKey: z.string(),
+        })
+    ),
+    page: z.object({
+        id: z.string(),
+        title: z.string(),
+        slug: z.string(),
+        pageType: z.string(),
+        url: z.string(),
+        modules: pageModules,
+        seo: seoGlobalSchema,
+        sections: zSections.optional(),
+    }),
+})
+
+export type AiReq = z.infer<typeof aiReqSchema>
+export type AiPageModules = z.infer<typeof pageModules>
+export type Sections = z.infer<typeof zSections>

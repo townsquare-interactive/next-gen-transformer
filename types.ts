@@ -27,10 +27,10 @@ interface Module {
         title?: string
         class?: string
         align?: string
-        imgsize: string
+        imgsize?: string
         columns: number
         type: string
-        well: string
+        well?: string
         lightbox?: string
         lazy?: string
         blockSwitch1?: number
@@ -51,18 +51,18 @@ interface Module {
 
 interface Item {
     id?: string
-    headline: string
-    subheader: string
-    image: string
+    headline?: string
+    subheader?: string
+    image?: string
     captionOn?: string
     icon?: string
     icon2?: string
     icon3?: string
     bkgrd_color?: string
-    btnType: string
-    btnType2: string
-    btnSize: string
-    btnSize2: string
+    btnType?: string
+    btnType2?: string
+    btnSize?: string
+    btnSize2?: string
     desc?: string
     pagelink?: string
     weblink?: string
@@ -73,22 +73,22 @@ interface Item {
     actionlbl2?: string
     newwindow2?: string | number
     align?: string
-    isFeatured: string
+    isFeatured?: string
     isPlugin?: string
-    headerTag: string
+    headerTag?: string
     plugin?: string
-    disabled: boolean | string
+    disabled?: boolean | string
     pagelinkId?: string | number
     pagelink2Id?: string | number
-    buttonList: Button[]
-    linkNoBtn: boolean
+    buttonList?: Button[]
+    linkNoBtn?: boolean
     btnCount?: number
-    isWrapLink: boolean
-    visibleButton: boolean
-    isBeaconHero: boolean
-    imagePriority: boolean
-    itemCount: number
-    btnStyles: string
+    isWrapLink?: boolean
+    visibleButton?: boolean
+    isBeaconHero?: boolean
+    imagePriority?: boolean
+    itemCount?: number
+    btnStyles?: string
     nextImageSizes?: string
 }
 
@@ -311,7 +311,7 @@ export interface SiteData {
     contact: Contact
     siteName: string
     url: string
-    composites: CompositeData
+    composites?: CompositeData
     cmsColors: ThemeStyles
     theme: string
     cmsUrl: string
@@ -326,16 +326,15 @@ export interface PublishData {
     siteIdentifier: string
     usingPreviewMode?: boolean
     siteLayout: SiteData
-    pages: Page[]
-    assets: { url?: string; fileName: string; name?: string; content?: string }[]
-    globalStyles: GlobalStyles
+    pages?: Page[]
+    assets?: { url?: string; fileName: string; name?: string; content?: string }[]
+    globalStyles?: GlobalStyles
 }
 
 export interface GlobalStyles {
-    custom:string, 
-    global:string
+    custom: string
+    global: string
 }
-
 
 interface LogoBlock {
     pct?: number

@@ -11,6 +11,7 @@ export const transformLuna = async (req: LunaRequest) => {
         const themeStyles: any = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
         const assets = []
         const currentPageList = await getFileS3(`${basePath}/pages/page-list.json`)
+        console.log(themeStyles)
         const globalStyles = await createGlobalStylesheet(themeStyles, req.body.siteData.design.fonts, req.body.siteData.design.code, currentPageList, basePath)
         const globalFile = await createOrEditLayout(req.body.siteData, basePath, themeStyles, cmsUrl, globalStyles)
         let newPageList

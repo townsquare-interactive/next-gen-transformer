@@ -13,7 +13,6 @@ export const socials = {
 }
 
 export function socialConvert(str: string) {
-    console.log('icon convert start', str)
     let icon = iconConvert(str)
     console.log('after', icon)
     if (icon === socials.google) {
@@ -1131,8 +1130,6 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
 
 //Need to wrap <p> tags around text that does not contain list tags
 export function wrapTextWithPTags(text: string) {
-    //dont edit text that starts with a html tag
-
     text = text.replace(/\n/g, '[rn]')
 
     //skip p tag insert here
@@ -1212,10 +1209,9 @@ function processImageTag(desc: string, cmsUrl: string) {
     return processedDesc
 }
 
-export const convertDescText = (desc: string, cmsUrl: string) => {
+export const convertDescText = (desc: string) => {
     const wrappedText = wrapTextWithPTags(desc)
     let convertedDesc = convertSpecialTokens(wrappedText)
-    convertedDesc
 
     //const convertedImages = processImageTag(convertedDesc, cmsUrl)
     return convertedDesc

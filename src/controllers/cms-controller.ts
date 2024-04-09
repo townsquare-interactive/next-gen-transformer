@@ -558,7 +558,7 @@ const transformModuleItem = (
 
     //replace line breaks from cms
     if (currentItem.desc) {
-        let newDesc = convertDescText(currentItem.desc, cmsUrl)
+        let newDesc = convertDescText(currentItem.desc)
         const videoDesc = extractIframeSrc(newDesc)
         newDesc = videoDesc ? videoDesc.newDesc : newDesc
         currentItem.desc = newDesc
@@ -688,7 +688,6 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
     const globalConverted = convertSpecialTokens(globalStyles, 'code')
     const customConverted = convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
     const convertedGlobal = sass.compileString(globalConverted)
-
     try {
         const convertedCustom = sass.compileString(customConverted)
         return { global: convertedGlobal.css, custom: convertedCustom.css }

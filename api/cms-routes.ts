@@ -14,6 +14,7 @@ import { zodDataParse } from '../schema/output-zod.js'
 import { saveInputSchema, createSiteInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
+import { createAiFiles, createLayoutFile } from '../src/controllers/ai-controller.js'
 const router = express.Router()
 
 //save from luna cms
@@ -29,6 +30,27 @@ router.post('/save', async (req, res) => {
             await publish({ ...data })
 
             res.json('posting to s3 folder: ' + basePath)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ err: 'incorrect data structure received' })
+    }
+})
+
+//save from luna cms
+router.post('/ai', async (req, res) => {
+    try {
+        //check input data for correct structure
+        //zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+
+        try {
+            const data = await createAiFiles(req.body)
+            await publish({ ...data })
+
+            res.json('posting to s3 folder: ' + data.siteIdentifier)
         } catch (err) {
             console.error(err)
             res.status(500).json({ err: 'Something went wrong' })

@@ -305,7 +305,7 @@ export const SiteDataSchema = z.object({
         .optional(),
     phoneNumber: z.string().optional(),
     email: z.string().optional(),
-    customComponents: z.array(z.object({})),
+    customComponents: z.array(z.object({})).optional(),
     scripts: z
         .object({
             header: z.string().optional(),
@@ -394,22 +394,24 @@ export const ModuleItemSchema = z.object({
     ),
     captionStyle: OptionalString,
     buttonList: z.optional(ButtonList),
-    linkNoBtn: z.boolean(),
-    btnCount: z.number(),
-    isWrapLink: z.boolean(),
-    visibleButton: z.boolean(),
+    linkNoBtn: z.boolean().optional(),
+    btnCount: z.number().optional(),
+    isWrapLink: z.boolean().optional(),
+    visibleButton: z.boolean().optional(),
     isBeaconHero: z.optional(z.boolean()),
-    imagePriority: z.boolean(),
-    itemCount: z.number().min(1),
+    imagePriority: z.boolean().optional(),
+    itemCount: z.number().min(1).optional(),
     btnStyles: OptionalString,
     nextImageSizes: OptionalString,
     imageType: z.optional(z.union([z.literal('crop'), z.literal('nocrop')])),
-    links: z.object({
-        weblink: OptionalString,
-        pagelink: OptionalString,
-        weblink2: OptionalString,
-        pagelink2: OptionalString,
-    }),
+    links: z
+        .object({
+            weblink: OptionalString,
+            pagelink: OptionalString,
+            weblink2: OptionalString,
+            pagelink2: OptionalString,
+        })
+        .optional(),
     video: z
         .object({
             src: z.string(),
@@ -434,20 +436,23 @@ const imageRatioList = [
 ]
 
 const AttributesSchema = z.object({
-    lazy: z.string(),
+    lazy: z.string().optional(),
     type: z.string(),
-    well: z.string(),
+    well: z.string().optional(),
     align: OptionalString,
     items: z.array(ModuleItemSchema),
     title: OptionalString,
     columns: z.number().min(1),
-    imgsize: z.string().refine((value) => imageRatioList.includes(value), {
-        message: 'Invalid image ratio',
-    }),
+    imgsize: z
+        .string()
+        .refine((value) => imageRatioList.includes(value), {
+            message: 'Invalid image ratio',
+        })
+        .optional(),
     lightbox: OptionalString,
     blockField1: OptionalString,
     blockField2: OptionalString,
-    blockSwitch1: z.number(),
+    blockSwitch1: z.number().optional(),
     scale_to_fit: OptionalString,
     customClassName: OptionalString,
     modId: z.string(),
