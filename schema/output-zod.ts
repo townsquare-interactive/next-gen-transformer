@@ -102,7 +102,7 @@ const Address = z.object({
     name: z.string().nullable(),
     state: z.string(),
     street: z.string(),
-    street2: z.string().nullable(),
+    street2: z.string().nullable().optional(),
     coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
     url: OptionalString,
 })

@@ -6,8 +6,8 @@
     "type": "module",
     "scripts": {
         "test": "vitest",
-        "start": "nodemon --transpile-only index.ts",
-        "dev": "nodemon --transpile-only index.ts"
+        "start": "npx tsx index.ts",
+        "dev": "npx tsx index.ts"
     },
     "author": "",
     "license": "ISC",
@@ -27,6 +27,7 @@
         "mongoose": "^6.5.2",
         "node-sass": "^9.0.0",
         "request-promise": "^4.2.6",
+        "tsx": "^4.7.2",
         "uuid": "^9.0.0",
         "zod": "^3.22.2",
         "zod-to-json-schema": "^3.21.4"

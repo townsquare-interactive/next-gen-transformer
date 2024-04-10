@@ -4,14 +4,13 @@ import { sql } from '@vercel/postgres'
 
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
-    const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
-    console.log('current site list', currentSiteList)
+    /*     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
+    console.log('current site list', currentSiteList) */
 
-    let siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    const domainName = subdomain + '.vercel.app'
 
     if (typeof siteLayout != 'string') {
-        const domainName = subdomain + '.vercel.app'
-
         //new check with layout file
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
@@ -53,7 +52,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                 console.log('vercel domain response', response)
                 //if domain name already exists try adding again with postfix
                 if (response.status === 409) {
-                    console.log('domain already exists, adding -preview')
+                    /*                     console.log('domain already exists, adding -preview')
                     const secondDomain = await fetch(vercelApiUrl, {
                         method: method,
                         headers: {
@@ -65,19 +64,23 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                     })
                     if (secondDomain.status === 409) {
                         throw new Error('Unable to create domain, both versions taken')
-                    }
+                    } */
+                    return 'domain already live in another project'
                 }
             } catch (err) {
                 console.log('Domain task error: ', err)
                 throw new Error('Domain task error: ')
             }
         } else {
-            return `Domain is not ready for ${method} in layout file`
+            //return `Domain is not ready for ${method} in layout file`
+            return method === 'POST'
+                ? `domain ${domainName} already published, updating site data`
+                : `domain ${domainName} cannot be removed as it is not connected to the apexID`
         }
     } else {
         return 'Subdomain not found in list of created sites'
     }
-    return `site domain ${method === 'POST' ? 'published' : 'unpublished'}`
+    return `site domain ${domainName} ${method === 'POST' ? 'published' : 'unpublished'}`
 }
 
 export const changePublishStatusInSiteData = async (subdomain: string, status: boolean) => {

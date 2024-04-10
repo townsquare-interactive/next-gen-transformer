@@ -14,7 +14,7 @@ import { zodDataParse } from '../schema/output-zod.js'
 import { saveInputSchema, createSiteInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
-import { createAiFiles, createLayoutFile } from '../src/controllers/ai-controller.js'
+import { createLandingPageFiles } from '../src/controllers/landing-controller.js'
 const router = express.Router()
 
 //save from luna cms
@@ -41,13 +41,13 @@ router.post('/save', async (req, res) => {
 })
 
 //save from luna cms
-router.post('/ai', async (req, res) => {
-    try {
+router.post('/landing', async (req, res) => {
+    /* try {
         //check input data for correct structure
         //zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
 
         try {
-            const data = await createAiFiles(req.body)
+            const data = await createLandingPageFiles(req.body)
             await publish({ ...data })
 
             res.json('posting to s3 folder: ' + data.siteIdentifier)
@@ -58,6 +58,30 @@ router.post('/ai', async (req, res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({ err: 'incorrect data structure received' })
+    } */
+
+    try {
+        //check if site is already created in s3
+        const apexID = stripUrl(req.body.url)
+        console.log('apexid check', apexID, req.body.url)
+
+        //check postgres for it
+        //const siteStatusPostgres = await checkIfSiteExistsPostgres(req.body.subdomain)
+
+        //if (siteStatusPostgres === 'site exists' || siteExistsInS3) {
+
+        //const siteListStatus = await addToSiteList(req.body)
+        const data = await createLandingPageFiles(req.body, apexID)
+        await publish({ ...data })
+        //const siteExistsInS3 = await folderExistsInS3(apexID)
+        /*         if (siteExistsInS3) {
+            res.json('existing site updating: ' + apexID) */
+        const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
+        console.log('domain status: ', response)
+        res.json(' Domain status: ' + response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json(`Site not able to be created. (Already created or error)`)
     }
 })
 
