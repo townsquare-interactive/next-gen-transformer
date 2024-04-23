@@ -216,7 +216,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
                 activeSlots: [0],
             },
         },
-        social: transformSocial(socials),
+        social: socials ? transformSocial(socials) : [],
         contact: {
             email: [
                 {
@@ -240,29 +240,6 @@ export const createLayoutFile = async (req: any, apexID: string) => {
             selectedPrimaryPhoneLabel: 'Phone',
             selectedPrimaryPhoneNumber: phoneNumber,
             selectedPrimaryEmailAddress: email,
-            /* contactLinks: [
-                {
-                    cName: 'phone',
-                    link: 'tel:(732) 351-2519',
-                    icon: ['fas', 'phone'],
-                    content: '(732) 351-2519',
-                    active: true,
-                },
-                {
-                    cName: 'email',
-                    link: 'mailto:',
-                    icon: ['fas', 'envelope'],
-                    content: ': ',
-                    active: false,
-                },
-                {
-                    cName: 'map',
-                    link: 'https://www.google.com/maps/place/+08736',
-                    icon: ['fas', 'location-pin'],
-                    content: 'Guaranteed Service',
-                    active: false,
-                },
-            ], */
             showContactBox: false,
         },
         siteName: siteName,
@@ -364,6 +341,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
                     btnType: 'btn_cta_landing',
                     btnSize: 'btn_md',
                     googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
+                    action: 'schedule',
                     icon: {
                         iconPrefix: 'far',
                         iconModel: 'calendar',
@@ -393,6 +371,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
                     btnType: 'btn_cta_landing',
                     btnSize: 'btn_md',
                     googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
+                    action: 'schedule',
                     icon: {
                         iconPrefix: 'far',
                         iconModel: 'calendar',
@@ -597,7 +576,7 @@ const createPageFile = (req: AiReq) => {
     return page
 }
 
-function transformString(inputText: string): string {
+function transformDLText(inputText: string): string {
     // Split the input text into words
     const words = inputText.split(' ')
 
@@ -624,6 +603,7 @@ const createModules = (modules: AiPageModules, colors: Colors) => {
         const currentMod = modules[i]
         let newMod
         if (currentMod.type === 'dl') {
+            console.log('headline test', currentMod.headline)
             newMod = {
                 attributes: {
                     id: '5cf59c97_e330_4565_97d0_9c166550903d',
@@ -636,7 +616,7 @@ const createModules = (modules: AiPageModules, colors: Colors) => {
                             image: currentMod.image,
                             modOne: '50vh',
                             btnType: 'btn_1 btn_p1',
-                            headline: transformString(currentMod.headline || ''),
+                            headline: transformDLText(currentMod.headline || ''),
                             actionlbl: currentMod.actionlbl,
                             headerTag: '1',
                             imageSize: {

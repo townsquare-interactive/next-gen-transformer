@@ -139,7 +139,7 @@ const Contact = z.object({
             isPrimaryPhone: z.boolean(),
         })
     ),
-    address: Address,
+    address: Address.optional(),
     hideZip: z.optional(z.boolean()),
     advanced: z.optional(
         z.object({
@@ -336,6 +336,7 @@ const ButtonList = z.array(
         btnSize: OptionalString,
         linkType: z.string(),
         blockBtn: z.optional(z.boolean()),
+        action: OptionalString,
     })
 )
 

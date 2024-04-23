@@ -314,6 +314,66 @@ const aiReqSchema = z.object({
     }),
 })
 
+const SocialSchema = z.array(z.string().url())
+
+const SEOGlobalSchema = z.object({
+    aiosp_home_title: z.string().optional(),
+    aiosp_home_description: z.string().optional(),
+})
+
+const ColorsSchema = z.object({
+    primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+})
+
+const CustomComponentSchema = z.object({
+    type: z.string(),
+    apiKey: z.string().optional(),
+})
+
+const ReviewSchema = z.object({
+    text: z.string(),
+    name: z.string().optional(),
+})
+
+const PageSectionSchema = z.object({
+    headline: z.string().optional(),
+    ctaText: z.string().optional(),
+    image: z.string().url().optional(),
+    subheader: z.string().optional(),
+    ctaLink: z.string().url().optional(),
+    desc: z.string().optional(),
+    desc2: z.string().optional(),
+    reviewHeadline: z.string().optional(),
+    reviews: z.array(ReviewSchema).optional(),
+    components: z
+        .array(
+            z.object({
+                type: z.string(),
+                videoUrl: z.string().url().optional(),
+            })
+        )
+        .optional(),
+})
+
+const PageSchema = z.object({
+    sections: z.array(PageSectionSchema),
+})
+
+export const LandingInputSchema = z.object({
+    siteName: z.string(),
+    url: z.string().url(),
+    logo: z.string().url().optional(),
+    favicon: z.string().url().optional(),
+    phoneNumber: z.string().regex(/^\(\d{3}\) \d{3}-\d{4}$/),
+    email: z.string().email().optional(),
+    socials: SocialSchema.optional(),
+    seo: z.object({ global: SEOGlobalSchema }).optional(),
+    colors: ColorsSchema,
+    customComponents: z.array(CustomComponentSchema).optional(),
+    page: PageSchema,
+})
+
 export type AiReq = z.infer<typeof aiReqSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof zSections>

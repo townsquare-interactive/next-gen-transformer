@@ -11,7 +11,7 @@ import {
     checkIfSiteExistsPostgres,
 } from '../src/controllers/create-site-controller.js'
 import { zodDataParse } from '../schema/output-zod.js'
-import { saveInputSchema, createSiteInputSchema } from '../schema/input-zod.js'
+import { saveInputSchema, createSiteInputSchema, LandingInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
 import { createLandingPageFiles } from '../src/controllers/landing-controller.js'
@@ -42,46 +42,27 @@ router.post('/save', async (req, res) => {
 
 //save from luna cms
 router.post('/landing', async (req, res) => {
-    /* try {
+    try {
         //check input data for correct structure
-        //zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+        zodDataParse(req.body, LandingInputSchema, 'savedInput', 'safeParse')
 
         try {
-            const data = await createLandingPageFiles(req.body)
+            const apexID = stripUrl(req.body.url)
+            console.log('apexid check', apexID, req.body.url)
+
+            const data = await createLandingPageFiles(req.body, apexID)
             await publish({ ...data })
 
-            res.json('posting to s3 folder: ' + data.siteIdentifier)
+            const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
+            console.log('domain status: ', response)
+            res.json(' Domain status: ' + response)
         } catch (err) {
             console.error(err)
-            res.status(500).json({ err: 'Something went wrong' })
+            res.status(500).json(`Site not able to be created. (Already created or error)`)
         }
     } catch (err) {
         console.log(err)
         res.status(500).json({ err: 'incorrect data structure received' })
-    } */
-
-    try {
-        //check if site is already created in s3
-        const apexID = stripUrl(req.body.url)
-        console.log('apexid check', apexID, req.body.url)
-
-        //check postgres for it
-        //const siteStatusPostgres = await checkIfSiteExistsPostgres(req.body.subdomain)
-
-        //if (siteStatusPostgres === 'site exists' || siteExistsInS3) {
-
-        //const siteListStatus = await addToSiteList(req.body)
-        const data = await createLandingPageFiles(req.body, apexID)
-        await publish({ ...data })
-        //const siteExistsInS3 = await folderExistsInS3(apexID)
-        /*         if (siteExistsInS3) {
-            res.json('existing site updating: ' + apexID) */
-        const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
-        console.log('domain status: ', response)
-        res.json(' Domain status: ' + response)
-    } catch (err) {
-        console.error(err)
-        res.status(500).json(`Site not able to be created. (Already created or error)`)
     }
 })
 
