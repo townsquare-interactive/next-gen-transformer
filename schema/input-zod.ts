@@ -294,6 +294,9 @@ const aiReqSchema = z.object({
     colors: z.object({
         primary: z.string(),
         accent: z.string(),
+        buttonHover: z.string().optional(),
+        footerBackground: z.string().optional(),
+        footerText: z.string().optional(),
     }),
     favicon: z.string(),
     customComponents: z.array(

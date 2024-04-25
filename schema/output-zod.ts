@@ -321,6 +321,12 @@ export const SiteDataSchema = z.object({
             hideSocial: z.boolean(),
         })
         .nullable(),
+    analytics: z
+        .object({
+            gaId: OptionalString,
+            gtmId: OptionalString,
+        })
+        .optional(),
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>

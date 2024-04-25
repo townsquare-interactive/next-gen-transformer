@@ -976,7 +976,7 @@ export const createFontCss = (fonts: any, siteType = 'website') => {
 }
 
 export const createColorClasses = (themeStyles: ThemeStyles) => {
-    const colorVars = `
+    const colorVars = `@use 'sass:color';
     :root {
         --logo: ${themeStyles['logoColor']};
         --hd: ${themeStyles['headingColor']};
@@ -1014,28 +1014,38 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
         --promo4: ${themeStyles['promoColor4']};
         --promo5: ${themeStyles['promoColor5']};
         --promo6: ${themeStyles['promoColor6']};
-       }
+        }
        `
 
     const textColors = ` body .txt-font .dsc a{ color: var(--link);}
-    .accent-txt{color:var(--txt-accent);} 
-    .txt-color{color:var(--txt);} 
-    .txt-color-hd{color:var(--hd);} 
-    .txt-color-sh{color:var(--sh);} 
-    .navLink:hover{color: var(--nav-hover);} 
-    .navLink{color:var(--nav-txt);} 
-    .social-icon{color:var(--nav-txt);} 
-    .social-icon:hover, .footer-icon:hover {background-color:var(--btn-background); color:var(--btn-txt);}
-    .current-page{color:var(--nav-current);} 
-    .caption-txt{color:var(--caption-txt);}
-    .box-links{color:var(--link);}
-    .box-links:hover{color:var(--nav-hover);}
-    .testimonial-txt-color{color:var(--btn-background);}
-    .testimonials-mod.well .hero, .card-mod .hero, .photogallery-mod.well .hero{
-    &.item, .desc {color:var(--hero-txt);}
-    .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
-}
-    `
+       .accent-txt{color:var(--txt-accent);} 
+       .txt-color{color:var(--txt);} 
+       .txt-color-hd{color:var(--hd);} 
+       .txt-color-sh{color:var(--sh);} 
+       .navLink:hover{color: var(--nav-hover);} 
+       .navLink{color:var(--nav-txt);} 
+       .social-icon{color:var(--nav-txt);} 
+       .social-icon:hover, .footer-icon:hover {background-color:var(--btn-background); color:var(--btn-txt);}
+       .current-page{color:var(--nav-current);} 
+       .caption-txt{color:var(--caption-txt);}
+       .box-links{color:var(--link);}
+       .box-links:hover{color:var(--nav-hover);}
+       .testimonial-txt-color{color:var(--btn-background);}
+       .testimonials-mod.well .hero, .card-mod .hero, .photogallery-mod.well .hero{
+       &.item, .desc {color:var(--hero-txt);}
+       .stars, .quotes, .hd, .sh {color:var(--txt-accent);}
+   }
+   .cta-landing {
+    &:hover, &:focus, &:focus {
+    box-shadow: 0.2em 0.2em darken(${themeStyles.btnBackground}, 10%) !important;
+    transform: translateY(-0.25em);
+    }}
+
+    .social-landing-icon:hover{
+        //background: color.complement(${themeStyles.footerText})
+        background: adjust-hue(${themeStyles.footerText}, 80deg)
+    }
+       `
 
     const btnStyles = ` .btn_1{color: var(--btn-txt); background-color: var(--btn-background);} 
     .btn_1:hover{color: var(--btn-background); background-color: var(--btn-txt);} 

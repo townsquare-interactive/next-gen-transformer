@@ -1,5 +1,5 @@
 import { fontList } from '../../templates/layout-variables.js'
-import { convertDescText, stripUrl } from '../utils.js'
+import { convertDescText } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import { createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
 import { AiPageModules, AiReq } from '../../schema/input-zod.js'
@@ -60,13 +60,16 @@ export const createLayoutFile = async (req: any, apexID: string) => {
     const phoneNumber = req.phoneNumber
     const email = req.email
     const seo = req.seo
-    const colors: { primary: string; accent: string } = req.colors
+    const colors: { primary: string; accent: string; footerBackground?: string; footerText?: string; buttonHover?: string } = req.colors
     const favicon = req.favicon
     //const fonts = req.fonts
     const url = req.url
     const customComponents = req.customComponents
 
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+
+    //const darkenColor = sass.compileString(`$newColor:darken(${colors.primary}, 30%); --newColor:$newColor;`)
+    //console.log(darkenColor)
 
     const themeStyles = {
         logoColor: '#444444',
@@ -95,15 +98,15 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         BckdHeaderSocial: '#ffffff',
         accentBackgroundColor: colors.accent,
         backgroundHero: colors.accent,
-        footerBackground: colors.accent,
-        footerText: '#ffffff',
-        footerLink: '#7fa7b8',
+        footerBackground: colors.footerBackground ? colors.footerBackground : colors.accent || '#fff',
+        footerText: colors.footerText || '#fff',
+        footerLink: colors.buttonHover || '#7fa7b8',
         promoText: '#ffffff',
         promoColor: colors.primary,
         promoColor2: colors.accent,
-        promoColor3: '#7fa7b8',
+        promoColor3: colors.buttonHover || '#7fa7b8',
         promoColor4: colors.accent,
-        promoColor5: '#f2f6fc',
+        promoColor5: colors.buttonHover || '#f2f6fc',
         promoColor6: colors.accent,
     }
 
@@ -566,8 +569,8 @@ const createPageFile = (req: AiReq) => {
         },
         attrs: {},
         seo: {
-            title: '',
-            descr: '',
+            title: req.seo.global.aiosp_home_title || '',
+            descr: req.seo.global.aiosp_home_description || '',
             selectedImages: '',
             imageOverride: '',
         },
