@@ -247,7 +247,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         },
         siteName: siteName,
         phoneNumber: phoneNumber,
-        //email: '',
+        email: email,
         url: 'guaranteedservice.com',
         cmsNav: [
             {
@@ -268,7 +268,13 @@ export const createLayoutFile = async (req: any, apexID: string) => {
                 slug: 'home',
             },
         ],
-        seo: seo,
+        //seo: seo,
+        seo: {
+            global: {
+                aiosp_home_title: req.title || '',
+                aiosp_home_description: req.description || '',
+            },
+        },
         cmsColors: {
             logoColor: '#444444',
             headingColor: colors.accent,
@@ -532,7 +538,7 @@ const pageReq = {
 const createPageFile = (req: AiReq) => {
     const title = 'landing'
     const slug = 'landing'
-    const seo = req.page.seo
+
     let sectionModules
     if (req.page.sections) {
         sectionModules = createModulesWithSections(req.page.sections)
@@ -569,8 +575,8 @@ const createPageFile = (req: AiReq) => {
         },
         attrs: {},
         seo: {
-            title: req.seo.global.aiosp_home_title || '',
-            descr: req.seo.global.aiosp_home_description || '',
+            title: req.title || '',
+            descr: req.description || '',
             selectedImages: '',
             imageOverride: '',
         },
