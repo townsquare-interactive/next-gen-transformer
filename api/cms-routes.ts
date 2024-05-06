@@ -54,8 +54,8 @@ router.post('/landing', async (req, res) => {
             await publish({ ...data })
 
             const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
-            console.log('domain status: ', response)
-            res.json(' Domain status: ' + response)
+            console.log(response)
+            res.json(response)
         } catch (err) {
             console.error(err)
             res.status(500).json(`Site not able to be created. (Already created or error)`)
@@ -136,7 +136,7 @@ router.post('/create-site', async (req, res) => {
             }
         } catch (err) {
             console.error(err)
-            res.status(500).json(`Site not able to be created. (Already created or error)`)
+            res.status(500).json(`Domain not able to be created. (Already created or error)`)
         }
     } catch (err) {
         console.log(err)

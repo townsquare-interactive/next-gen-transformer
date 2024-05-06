@@ -124,8 +124,17 @@ export function btnIconConvert(icon: string) {
 
 //Strip url of protocol and .production / .com
 export const stripUrl = (url: string) => {
-    const removeProtocol = url.replace(/(^\w+:|^)\/\//, '')
-    return removeProtocol.replace(/\..*/, '')
+    // Remove protocol
+    const withoutProtocol = url.replace(/(^\w+:|^)\/\//, '')
+
+    // Remove www prefix
+    const withoutWww = withoutProtocol.replace(/^www\./, '')
+
+    // Extract domain name
+    const domainNameMatch = withoutWww.match(/^[\w-]+/)
+    const domainName = domainNameMatch ? domainNameMatch[0] : ''
+
+    return domainName
 }
 
 //strip anything between / ... /

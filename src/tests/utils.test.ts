@@ -10,6 +10,7 @@ import {
     isButton,
     decideBtnCount,
     createModalPageList,
+    stripUrl,
 } from '../utils'
 import { it, describe, expect } from 'vitest'
 
@@ -275,5 +276,26 @@ describe('Create modals list', () => {
 
     it('should result in an array with a modal that has autopen to true using items field', () => {
         expect(createModalPageList(modulesItemAutoOpentrue)).toStrictEqual(modalListAutoOpentrue)
+    })
+})
+
+describe('stripUrl', () => {
+    it('should return the unchanged value if no protocol is inside', () => {
+        expect(stripUrl('taco')).toStrictEqual('taco')
+    })
+    it('should remove www.', () => {
+        expect(stripUrl('www.taco')).toStrictEqual('taco')
+    })
+    it('should remove https://', () => {
+        expect(stripUrl('https://taco.org')).toStrictEqual('taco')
+    })
+    it('should remove both www. and https://', () => {
+        expect(stripUrl('https://longer-one.com')).toStrictEqual('longer-one')
+    })
+    it('should remove the .net', () => {
+        expect(stripUrl('green.net')).toStrictEqual('green')
+    })
+    it('should remove the slug after .com', () => {
+        expect(stripUrl('https://hlbowman.com/local/heating-air-conditioning-service')).toStrictEqual('hlbowman')
     })
 })
