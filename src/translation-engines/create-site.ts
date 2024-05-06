@@ -1,4 +1,4 @@
-import { layout1 } from '../../templates/template1.js'
+import { layout1, layoutLanding } from '../../templates/template1.js'
 
 interface reqBody {
     clientId: string
@@ -20,20 +20,33 @@ function transformLayoutTemplate(layoutTemplate: any, basePath: string) {
 export const transformCreateSite = async (req: reqBody) => {
     const basePath = req.subdomain
 
-    let siteLayout = transformLayoutTemplate(layout1.layout, basePath)
+    let layout
+    switch (req.templateIdentifier) {
+        case '1':
+            layout = layout1
+            break
+        case '2':
+            layout = layoutLanding
+            break
+        default:
+            layout = layout1
+            break
+    }
+
+    let siteLayout = transformLayoutTemplate(layout.layout, basePath)
 
     try {
         const siteData = {
             siteIdentifier: basePath,
             siteLayout: siteLayout,
-            pages: layout1.pages,
+            pages: layout.pages,
             assets: [],
-            globalStyles: layout1.layout.styles,
+            globalStyles: layout.layout.styles,
         }
 
         return siteData
     } catch (error) {
         console.log(error)
-        throw{ error: 'Create site transformer error' }
+        throw { error: 'Create site transformer error' }
     }
 }

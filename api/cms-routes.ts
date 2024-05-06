@@ -1,4 +1,4 @@
-import { addFileS3, folderExistsInS3 } from '../src/s3Functions.js'
+import { addFileS3, folderExistsInS3, getFileS3 } from '../src/s3Functions.js'
 import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
@@ -196,6 +196,16 @@ router.patch('/unpublish', async (req, res) => {
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Something went wrong in the transformer' })
+    }
+})
+
+router.get('/get-templates', async (req, res) => {
+    try {
+        const siteTemplates = await getFileS3(`global-assets/templates/siteTemplates.json`, 'templates not found in s3')
+        res.json(siteTemplates)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Something went wrong' })
     }
 })
 

@@ -1,0 +1,14 @@
+{
+    "templates": [
+        {
+            "templateIdentifier": "1",
+            "label": "Default",
+            "thumbnailUrl": "https://townsquareinteractive.s3.amazonaws.com/global-assets/templates/template1.jpg"
+        },
+        {
+            "templateIdentifier": "2",
+            "label": "Landing",
+            "thumbnailUrl": "https://townsquareinteractive.s3.amazonaws.com/global-assets/templates/landing-template.jpg"
+        }
+    ]
+}
