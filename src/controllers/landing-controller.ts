@@ -2,7 +2,7 @@ import { fontList } from '../../templates/layout-variables.js'
 import { convertDescText } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import { createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
-import { AiPageModules, AiReq } from '../../schema/input-zod.js'
+import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import { Layout } from '../../types.js'
 
@@ -248,7 +248,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         siteName: siteName,
         phoneNumber: phoneNumber,
         email: email,
-        url: 'guaranteedservice.com',
+        url: url,
         cmsNav: [
             {
                 ID: 862283,
@@ -268,13 +268,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
                 slug: 'home',
             },
         ],
-        //seo: seo,
-        seo: {
-            global: {
-                aiosp_home_title: req.title || '',
-                aiosp_home_description: req.description || '',
-            },
-        },
+        seo: seo,
         cmsColors: {
             logoColor: '#444444',
             headingColor: colors.accent,
@@ -575,8 +569,8 @@ const createPageFile = (req: AiReq) => {
         },
         attrs: {},
         seo: {
-            title: req.title || '',
-            descr: req.description || '',
+            title: req.title || req.seo?.global.aiosp_home_title || '',
+            descr: req.description || req.seo?.global.aiosp_home_description || '',
             selectedImages: '',
             imageOverride: '',
         },
@@ -605,7 +599,7 @@ function transformDLText(inputText: string): string {
     return inputText ? outputText : ''
 }
 
-const createModules = (modules: AiPageModules, colors: Colors) => {
+const createModules = (modules: AiPageModules, colors: LandingColors) => {
     let newModules = []
     let modCount = 1
     for (let i = 0; i < modules.length; i++) {

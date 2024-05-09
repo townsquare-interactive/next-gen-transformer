@@ -236,12 +236,14 @@ const addressSchema = z.object({
 })
 
 const seoGlobalSchema = z.object({
-    aiosp_home_title: z.string().optional(),
-    aiosp_google_verify: z.string().optional(),
-    aiosp_home_description: z.string().optional(),
-    aiosp_page_title_format: z.string().optional(),
-    aiosp_description_format: z.string().optional(),
-    aiosp_404_title_format: z.string().optional(),
+    global: z.object({
+        aiosp_home_title: z.string().optional(),
+        aiosp_google_verify: z.string().optional(),
+        aiosp_home_description: z.string().optional(),
+        aiosp_page_title_format: z.string().optional(),
+        aiosp_description_format: z.string().optional(),
+        aiosp_404_title_format: z.string().optional(),
+    }),
 })
 
 const zSections = z.array(
@@ -280,6 +282,14 @@ const pageModules = z.array(
     })
 )
 
+const LandingColorsSchema = z.object({
+    primary: z.string().optional(),
+    accent: z.string().optional(),
+    buttonHover: z.string().optional(),
+    footerBackground: z.string().optional(),
+    footerText: z.string().optional(),
+})
+
 const aiReqSchema = z.object({
     logo: z.string(),
     socials: z.array(z.string()),
@@ -288,16 +298,10 @@ const aiReqSchema = z.object({
     phoneNumber: z.string(),
     email: z.string().email(),
     url: z.string(),
-    seo: z.object({
-        global: seoGlobalSchema,
-    }),
-    colors: z.object({
-        primary: z.string(),
-        accent: z.string(),
-        buttonHover: z.string().optional(),
-        footerBackground: z.string().optional(),
-        footerText: z.string().optional(),
-    }),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    seo: seoGlobalSchema.optional(),
+    colors: LandingColorsSchema,
     favicon: z.string(),
     customComponents: z.array(
         z.object({
@@ -312,7 +316,6 @@ const aiReqSchema = z.object({
         pageType: z.string(),
         url: z.string(),
         modules: pageModules,
-        seo: seoGlobalSchema,
         sections: zSections.optional(),
     }),
 })
@@ -322,6 +325,7 @@ const SocialSchema = z.array(z.string().url())
 const SEOGlobalSchema = z.object({
     aiosp_home_title: z.string().optional(),
     aiosp_home_description: z.string().optional(),
+    aiosp_google_verify: z.string().optional(),
 })
 
 const ColorsSchema = z.object({
@@ -380,3 +384,4 @@ export const LandingInputSchema = z.object({
 export type AiReq = z.infer<typeof aiReqSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof zSections>
+export type LandingColors = z.infer<typeof LandingColorsSchema>
