@@ -1,6 +1,6 @@
 //import { z } from 'zod'
 import { SiteDataType } from '../schema/output-zod'
-import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot } from '../types'
+import { CMSNavItem, CMSPage, Contact, LunaModule, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot, FontType } from '../types'
 
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 const globalAssets = bucketUrl + '/global-assets'
@@ -122,7 +122,6 @@ export function btnIconConvert(icon: string) {
     }
 }
 
-//Strip url of protocol and .production / .com
 export const stripUrl = (url: string) => {
     // Remove protocol
     const withoutProtocol = url.replace(/(^\w+:|^)\/\//, '')
@@ -969,18 +968,25 @@ export const createFontCss = (fonts: any, siteType = 'website') => {
         const headlineFont = fonts.list[fonts.sections.hdrs.value]
         const bodyFont = fonts.list[fonts.sections.body.value]
         const featuredFont = fonts.list[fonts.sections.feat.value]
-        const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
-        const uniqueFontGroup = removeDuplicatesArray(fontTypes)
-        if (siteType === 'landing') {
-            uniqueFontGroup.push('Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0')
-        }
-        fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
-        fontClasses = ` body {font-family:${bodyFont.label}}
-    .hd-font{font-family:${headlineFont.label}} 
-    .txt-font{font-family:${bodyFont.label}}
-    .feat-font{font-family:${featuredFont.label}}
-    `
+
+        return createFontImport(headlineFont, bodyFont, featuredFont, siteType)
     }
+    return { fontImportGroup, fontClasses }
+}
+
+export const createFontImport = (headlineFont: FontType, bodyFont: FontType, featuredFont: FontType, siteType: string) => {
+    const fontTypes = [headlineFont.google, bodyFont.google, featuredFont.google]
+    const uniqueFontGroup = removeDuplicatesArray(fontTypes)
+    if (siteType === 'landing') {
+        uniqueFontGroup.push('Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0')
+    }
+    console.log('unique font group', uniqueFontGroup)
+    const fontImportGroup = `@import url(https://fonts.googleapis.com/css?family=${uniqueFontGroup.join('|')}&display=swap);`
+    const fontClasses = ` body {font-family:${bodyFont.label}}
+.hd-font{font-family:${headlineFont.label}} 
+.txt-font{font-family:${bodyFont.label}}
+.feat-font{font-family:${featuredFont.label}}
+`
     return { fontImportGroup, fontClasses }
 }
 
@@ -1025,6 +1031,7 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
         --promo6: ${themeStyles['promoColor6']};
         }
        `
+    console.log('here is the btnBackground', themeStyles.btnBackground)
 
     const textColors = ` body .txt-font .dsc a{ color: var(--link);}
        .accent-txt{color:var(--txt-accent);} 

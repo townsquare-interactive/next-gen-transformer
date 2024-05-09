@@ -844,6 +844,12 @@ interface Font {
     family: string
 }
 
+export interface FontType {
+    label: string
+    google?: string
+    'font-family': string
+}
+
 interface SectionFonts {
     [key: string]: Font
 }
