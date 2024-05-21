@@ -6,11 +6,13 @@ import { convertDescText, createFontImport, socialConvert } from './utils.js'
 export const transformSocial = (socials: string[]) => {
     let newSocials = []
     for (let i = 0; i < socials.length; i++) {
-        newSocials.push({
-            url: socials[i],
-            icon: socialConvert(socials[i]),
-            name: socials[i],
-        })
+        if (socials[i]) {
+            newSocials.push({
+                url: socials[i],
+                icon: socialConvert(socials[i]),
+                name: socials[i],
+            })
+        }
     }
     return newSocials
 }
@@ -29,10 +31,10 @@ export const createModulesWithSections = (sections: Sections) => {
             modules.push({
                 headline: section.headline,
                 actionlbl: section.ctaText || 'GIVE US A CALL',
-                image: section.image,
+                image: section.image?.includes('[') ? '' : section.image,
                 subheader: section.subheader,
                 type: 'dl',
-                weblink: section.ctaLink,
+                weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
             })
         }
         if (i === 1) {
@@ -40,8 +42,8 @@ export const createModulesWithSections = (sections: Sections) => {
                 modules.push({
                     type: 'banner',
                     headline: section.headline,
-                    actionlbl: section.ctaLink || 'CALL US NOW',
-                    weblink: section.ctaLink,
+                    actionlbl: section.ctaText || 'CALL US NOW',
+                    weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
                 })
             }
             if (section.desc) {
@@ -70,8 +72,8 @@ export const createModulesWithSections = (sections: Sections) => {
                 modules.push({
                     type: 'banner',
                     headline: section.headline,
-                    actionlbl: section.ctaLink || 'CALL US NOW',
-                    weblink: section.ctaLink,
+                    actionlbl: section.ctaText || 'CALL US NOW',
+                    weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
                 })
             }
         }
@@ -87,7 +89,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     modules.push({
                         type: 'form',
                     })
-                } else if (currentComponent.type === 'video') {
+                } else if (currentComponent.type === 'video' && currentComponent.videoUrl != '[second_section_videoUrl]') {
                     modules.push({
                         type: 'video',
                         videoUrl: currentComponent.videoUrl,
