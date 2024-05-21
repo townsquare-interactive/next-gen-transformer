@@ -2,32 +2,36 @@ import { CreateSiteParams, Layout } from '../../types.js'
 import { addFileS3, getFileS3 } from '../s3Functions.js'
 import { sql } from '@vercel/postgres'
 
+const publishDomain = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
+    //add domains to layout file or removes if deleting
+    if (method === 'POST') {
+        siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
+        console.log('published domains', siteLayout.publishedDomains)
+    } else if (method === 'DELETE') {
+        //remove site from list if deleting
+        siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain: string) => domain != domainName)
+    }
+    await addFileS3(siteLayout, `${subdomain}/layout`)
+}
+
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST') => {
     /*     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
     console.log('current site list', currentSiteList) */
 
     const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
-    const domainName = subdomain + '.vercel.app'
+    let domainName = subdomain + '.vercel.app'
+    let altDomain = subdomain + '-lp' + '' + '.vercel.app'
 
     if (typeof siteLayout != 'string') {
         //new check with layout file
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+        const isAltDomainPublishedAlready = publishedDomains.filter((domain) => domain === altDomain).length
         console.log('is pub already', isDomainPublishedAlready)
 
-        if (method === 'POST' ? !isDomainPublishedAlready : isDomainPublishedAlready) {
+        if (method === 'POST' ? !isDomainPublishedAlready && !isAltDomainPublishedAlready : isDomainPublishedAlready) {
             console.log('here is the domain: ', domainName)
-
-            //add domains to layout file or removes if deleting
-            if (method === 'POST') {
-                siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
-                console.log('published domains', siteLayout.publishedDomains)
-            } else if (method === 'DELETE') {
-                //remove site from list if deleting
-                siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain) => domain != domainName)
-            }
-            await addFileS3(siteLayout, `${subdomain}/layout`)
 
             //vercep api url changes between post vs delete
             const vercelApiUrl =
@@ -65,17 +69,20 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                     })
                     if (secondDomain.status === 409) {
                         //throw new Error('Unable to create domain, both versions taken')
-
                         return {
                             message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
                             domain: domainName,
                         }
                     } else {
+                        domainName = subdomain + '-lp' + '.vercel.app'
+                        await publishDomain(method, siteLayout, domainName, subdomain)
                         return {
                             message: `domain added with postfix -lp because other domain is taken`,
-                            domain: subdomain + '-lp' + '.vercel.app',
+                            domain: domainName,
                         }
                     }
+                } else {
+                    await publishDomain(method, siteLayout, domainName, subdomain)
                 }
             } catch (err) {
                 console.log('Domain task error: ', err)
@@ -84,7 +91,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         } else {
             return {
                 message: method === 'POST' ? 'domain already published, updating site data' : 'domain cannot be removed as it is not connected to the apexID',
-                domain: domainName,
+                domain: publishedDomains[0],
             }
         }
     } else {
