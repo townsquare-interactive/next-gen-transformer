@@ -50,12 +50,16 @@ router.post('/landing', async (req, res) => {
             const apexID = stripUrl(req.body.url)
             console.log('apexid check', apexID, req.body.url)
 
-            const data = await createLandingPageFiles(req.body, apexID)
-            await publish({ ...data })
-
             const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
             console.log(response)
-            res.json(response)
+            if (typeof response != 'string' && response.status === 'Error') {
+                res.status(500).json(response)
+            } else {
+                const data = await createLandingPageFiles(req.body, apexID)
+                await publish({ ...data })
+
+                res.json(response)
+            }
         } catch (err) {
             console.error(err)
             res.status(500).json(`Site not able to be created. (Already created or error)`)

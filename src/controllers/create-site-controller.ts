@@ -72,13 +72,15 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                         return {
                             message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
                             domain: domainName,
+                            status: 'Error',
                         }
                     } else {
                         domainName = subdomain + '-lp' + '.vercel.app'
                         await publishDomain(method, siteLayout, domainName, subdomain)
                         return {
                             message: `domain added with postfix -lp because other domain is taken`,
-                            domain: domainName,
+                            domain: 'https://' + domainName,
+                            status: 'Success',
                         }
                     }
                 } else {
@@ -91,13 +93,14 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         } else {
             return {
                 message: method === 'POST' ? 'domain already published, updating site data' : 'domain cannot be removed as it is not connected to the apexID',
-                domain: publishedDomains[0],
+                domain: 'https://' + publishedDomains[0],
+                status: 'Success',
             }
         }
     } else {
         return `Subdomain ${subdomain} not found in list of created sites`
     }
-    return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName }
+    return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: 'https://' + domainName, status: 'Success' }
 }
 
 export const changePublishStatusInSiteData = async (subdomain: string, status: boolean) => {
