@@ -79,7 +79,7 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                         await publishDomain(method, siteLayout, domainName, subdomain)
                         return {
                             message: `domain added with postfix -lp because other domain is taken`,
-                            domain: 'https://' + domainName,
+                            domain: domainName,
                             status: 'Success',
                         }
                     }
@@ -93,14 +93,14 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         } else {
             return {
                 message: method === 'POST' ? 'domain already published, updating site data' : 'domain cannot be removed as it is not connected to the apexID',
-                domain: 'https://' + publishedDomains[0],
+                domain: publishedDomains[0],
                 status: 'Success',
             }
         }
     } else {
         return `Subdomain ${subdomain} not found in list of created sites`
     }
-    return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: 'https://' + domainName, status: 'Success' }
+    return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName, status: 'Success' }
 }
 
 export const changePublishStatusInSiteData = async (subdomain: string, status: boolean) => {
