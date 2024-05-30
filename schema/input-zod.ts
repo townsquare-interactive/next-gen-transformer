@@ -303,7 +303,7 @@ const aiReqSchema = z.object({
     description: z.string().optional(),
     seo: seoGlobalSchema.optional(),
     colors: LandingColorsSchema,
-    favicon: z.string(),
+    favicon: z.string().optional(),
     customComponents: z.array(
         z.object({
             type: z.string(),
@@ -321,7 +321,7 @@ const aiReqSchema = z.object({
     }),
 })
 
-const SocialSchema = z.array(z.string().url())
+const SocialSchema = z.array(z.string())
 
 const SEOGlobalSchema = z.object({
     aiosp_home_title: z.string().optional(),
@@ -347,9 +347,9 @@ const ReviewSchema = z.object({
 const PageSectionSchema = z.object({
     headline: z.string().optional(),
     ctaText: z.string().optional(),
-    image: z.string().url().optional(),
+    image: z.string().optional(),
     subheader: z.string().optional(),
-    ctaLink: z.string().url().optional(),
+    ctaLink: z.string().optional(),
     desc: z.string().optional(),
     desc2: z.string().optional(),
     reviewHeadline: z.string().optional(),
@@ -358,7 +358,7 @@ const PageSectionSchema = z.object({
         .array(
             z.object({
                 type: z.string(),
-                videoUrl: z.string().url().optional(),
+                videoUrl: z.string().optional(),
             })
         )
         .optional(),
@@ -370,9 +370,9 @@ const PageSchema = z.object({
 
 export const LandingInputSchema = z.object({
     siteName: z.string(),
-    url: z.string().url(),
-    logo: z.string().url().optional(),
-    favicon: z.string().url().optional(),
+    url: z.string(),
+    logo: z.string().optional(),
+    favicon: z.string().optional(),
     phoneNumber: z.string().regex(/^\(\d{3}\) \d{3}-\d{4}$/),
     email: z.string().email().optional(),
     socials: SocialSchema.optional(),
