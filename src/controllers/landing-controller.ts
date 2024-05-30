@@ -58,13 +58,13 @@ export const createLayoutFile = async (req: any, apexID: string) => {
     const phoneNumber = req.phoneNumber
     const email = req.email
     const seo = req.seo
-    const colors: { primary: string; accent: string; footerBackground?: string; footerText?: string; buttonHover?: string } = req.colors
+    const colors: LandingColors = req.colors
     const favicon = req.favicon
     const url = req.url
     const customComponents = req.customComponents
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
 
-    const themeStyles = {
+    const themeColors = {
         logoColor: '#444444',
         headingColor: colors.accent || '#092150',
         subHeadingColor: colors.accent || '#092150',
@@ -87,7 +87,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         navCurrent: colors.primary || '#db1a21',
         backgroundMain: '#ffffff',
         bckdContent: 'rgba(255,255,255,1)',
-        headerBackground: 'rgba(255,255,255,1)',
+        headerBackground: colors.headerBackground ? colors.headerBackground : 'rgba(255,255,255,1)',
         BckdHeaderSocial: '#ffffff',
         accentBackgroundColor: colors.accent || '#092150',
         backgroundHero: colors.accent || '#092150',
@@ -170,7 +170,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         }
     }
 
-    const newStyles = await createGlobalStylesheet(themeStyles, fonts, code, { pages: [] }, apexID)
+    const newStyles = await createGlobalStylesheet(themeColors, fonts, code, { pages: [] }, apexID)
 
     //to create
     // apexID, siteName, publishedDomains, fill out widget array, fill out social array
@@ -304,44 +304,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
             },
         ],
         seo: seo,
-        cmsColors: {
-            logoColor: '#444444',
-            headingColor: colors.accent,
-            subHeadingColor: colors.accent,
-            textColor: '#444444',
-            linkColor: colors.primary,
-            linkHover: colors.primary,
-            btnText: '#ffffff',
-            btnBackground: colors.primary,
-            textColorAccent: '#ffffff',
-            heroSubheadline: '#ffffff',
-            heroText: '#ffffff',
-            heroBtnText: '#ffffff',
-            heroBtnBackground: '#444444',
-            heroLink: '#DDDDDD',
-            heroLinkHover: '#dddddd',
-            captionText: '#ffffff',
-            captionBackground: 'rgba(0,0,0,0.4)',
-            NavText: '#666666',
-            navHover: colors.primary,
-            navCurrent: colors.primary,
-            backgroundMain: '#ffffff',
-            bckdContent: 'rgba(255,255,255,1)',
-            headerBackground: 'rgba(255,255,255,1)',
-            BckdHeaderSocial: '#ffffff',
-            accentBackgroundColor: colors.accent,
-            backgroundHero: colors.accent,
-            footerBackground: colors.accent,
-            footerText: '#ffffff',
-            footerLink: '#7fa7b8',
-            promoText: '#ffffff',
-            promoColor: colors.primary,
-            promoColor2: colors.accent,
-            promoColor3: '#7fa7b8',
-            promoColor4: colors.accent,
-            promoColor5: '#f2f6fc',
-            promoColor6: colors.accent,
-        },
+        cmsColors: themeColors,
         theme: 'beacon-theme_charlotte',
         cmsUrl: url,
         s3Folder: apexID,
