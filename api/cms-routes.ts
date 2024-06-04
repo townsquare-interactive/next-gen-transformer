@@ -58,11 +58,15 @@ router.post('/landing', async (req, res) => {
             if (typeof response != 'string' && response.status === 'Error') {
                 res.status(500).json(response)
             } else {
-                res.json(response)
+                //add test timeout
+                setTimeout(() => {
+                    res.json(response)
+                }, 700) // 700 milliseconds delay
+                //res.json(response)
             }
         } catch (err) {
             console.error(err)
-            res.status(500).json(`Site not able to be created. (Already created or error)`)
+            res.status(500).json({ message: `Error creating site`, status: 'Error' })
         }
     } catch (err) {
         console.log(err)
