@@ -1409,3 +1409,7 @@ export const getlandingPageOptions = () => {
 
     return { ctaBtns: headerBtns, hideNav: true, hideSocial: true, mobileHeaderBtns: mobileHeaderBtns }
 }
+
+export function removeWhiteSpace(str: string) {
+    return str.replace(/\s+/g, '')
+}

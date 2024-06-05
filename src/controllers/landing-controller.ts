@@ -1,5 +1,5 @@
 import { fontList } from '../../templates/layout-variables.js'
-import { convertDescText } from '../utils.js'
+import { convertDescText, removeWhiteSpace } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import { createModulesWithSections, createReviewItems, transformFonts, transformSocial } from '../landing-utils.js'
 import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
@@ -55,7 +55,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
     const socials = req.socials
     const address = req.address
     const siteName = req.siteName
-    const phoneNumber = req.phoneNumber
+    const phoneNumber = removeWhiteSpace(req.phoneNumber)
     const email = req.email
     const seo = req.seo
     const colors: LandingColors = req.colors
@@ -535,7 +535,7 @@ const createPageFile = (req: AiReq) => {
     } else {
         sectionModules = req.page.modules
     }
-    const modules = createModules(sectionModules, req.colors, req.phoneNumber)
+    const modules = createModules(sectionModules, req.colors, removeWhiteSpace(req.phoneNumber))
 
     const page = {
         data: {
