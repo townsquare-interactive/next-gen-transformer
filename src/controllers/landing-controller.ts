@@ -535,7 +535,7 @@ const createPageFile = (req: AiReq) => {
     } else {
         sectionModules = req.page.modules
     }
-    const modules = createModules(sectionModules, req.colors)
+    const modules = createModules(sectionModules, req.colors, req.phoneNumber)
 
     const page = {
         data: {
@@ -595,7 +595,7 @@ function transformDLText(inputText: string): string {
     return inputText ? outputText : ''
 }
 
-const createModules = (modules: AiPageModules, colors: LandingColors) => {
+const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumber: string) => {
     let newModules = []
     let modCount = 1
     for (let i = 0; i < modules.length; i++) {
@@ -634,13 +634,13 @@ const createModules = (modules: AiPageModules, colors: LandingColors) => {
                                 background: colors.accent,
                             },
                             links: {
-                                weblink: currentMod.weblink,
+                                weblink: currentMod.weblink || `tel:${phoneNumber}` || `tel:${phoneNumber}`,
                             },
                             imageType: 'crop',
                             buttonList: [
                                 {
                                     name: 'btn1',
-                                    link: currentMod.weblink,
+                                    link: currentMod.weblink || `tel:${phoneNumber}`,
                                     window: '0',
                                     label: currentMod.actionlbl,
                                     active: true,
@@ -822,12 +822,12 @@ const createModules = (modules: AiPageModules, colors: LandingColors) => {
                                 background: 'var(--promo)',
                             },
                             links: {
-                                weblink: currentMod.weblink,
+                                weblink: currentMod.weblink || `tel:${phoneNumber}`,
                             },
                             buttonList: [
                                 {
                                     name: 'btn1',
-                                    link: currentMod.weblink,
+                                    link: currentMod.weblink || `tel:${phoneNumber}`,
                                     window: '1',
                                     label: 'CALL US NOW',
                                     active: true,
