@@ -10,17 +10,14 @@ import {
     transformcontact,
     transformNav,
     alternatePromoColors,
-    createColorClasses,
     convertSpecialTokens,
     replaceKey,
     createFontCss,
     createLinkAndButtonVariables,
     determineModRenderType,
-    createBtnStyles,
     createImageSizes,
     createGallerySettings,
     modVariationType,
-    createItemStyles,
     createContactForm,
     convertDescText,
     transformPageSeo,
@@ -42,7 +39,7 @@ import { createCustomComponents, extractIframeSrc, transformVcita } from '../cus
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
-import { dynamoClient } from './dynamo-controller.js'
+import { createColorClasses, createBtnStyles, createItemStyles } from '../style-utils.js'
 
 const toStringSchema = z.coerce.string()
 

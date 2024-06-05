@@ -1,10 +1,10 @@
+import { createItemStyles } from '../style-utils'
 import {
     wrapTextWithPTags,
     isPromoButton,
     removeDuplicatesArray,
     convertSpecialTokens,
     replaceKey,
-    createItemStyles,
     removeFieldsFromObj,
     isLink,
     isButton,

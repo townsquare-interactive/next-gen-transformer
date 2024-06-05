@@ -93,13 +93,14 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         backgroundHero: colors.accent || '#092150',
         footerBackground: colors.footerBackground ? colors.footerBackground : colors.accent || '#fff',
         footerText: colors.footerText || '#fff',
-        footerLink: colors.buttonHover || '#7fa7b8',
+        footerTextOverride: colors.footerText || '',
+        footerLink: colors.tertiary || '#7fa7b8',
         promoText: '#ffffff',
         promoColor: colors.primary || '#db1a21',
         promoColor2: colors.accent || '#092150',
-        promoColor3: colors.buttonHover || '#7fa7b8',
+        promoColor3: colors.tertiary || '#7fa7b8',
         promoColor4: colors.accent || '#092150',
-        promoColor5: colors.buttonHover || '#f2f6fc',
+        promoColor5: colors.tertiary || '#f2f6fc',
         promoColor6: colors.accent || '#092150',
     }
 

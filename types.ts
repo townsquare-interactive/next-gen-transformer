@@ -133,6 +133,7 @@ export interface ThemeStyles {
     backgroundHero: string
     footerBackground: string
     footerText: string
+    footerTextOverride?: string
     footerLink: string
     promoText: string
     promoColor: string

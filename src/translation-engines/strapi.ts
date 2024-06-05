@@ -14,10 +14,11 @@ import {
     addItemExtraSettings,
     manageAnchorLinks,
 } from '../strapi-utils.js'
-import { createItemStyles, createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
+import { createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
 import { getFileS3 } from '../s3Functions.js'
 //import z from 'zod'
 import { Contact, Request, anchorTags } from '../../types.js'
+import { createItemStyles } from '../style-utils.js'
 
 /* import { exec } from 'child_process'
 
@@ -258,7 +259,7 @@ export const transformStrapi = async (req: Request) => {
                     head_script: '',
                     columnStyles: 'full-column',
                     anchorTags: anchorTags,
-                    pageType:''
+                    pageType: '',
                 },
                 attrs: {},
                 seo: {

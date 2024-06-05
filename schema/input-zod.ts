@@ -289,6 +289,7 @@ const LandingColorsSchema = z.object({
     footerBackground: z.string().optional(),
     footerText: z.string().optional(),
     headerBackground: z.string().optional(),
+    tertiary: z.string().optional(),
 })
 
 const aiReqSchema = z.object({
