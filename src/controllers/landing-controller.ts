@@ -830,7 +830,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                                     name: 'btn1',
                                     link: currentMod.weblink || `tel:${phoneNumber}`,
                                     window: '1',
-                                    label: 'CALL US NOW',
+                                    label: currentMod.actionlbl || 'CALL US NOW',
                                     active: true,
                                     btnType: 'btn_promo',
                                     btnSize: 'btn_xl-landing',
