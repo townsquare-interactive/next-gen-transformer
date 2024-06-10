@@ -232,3 +232,51 @@ export const transformFonts = (scrapedFonts: ScrapedFonts[]) => {
     const fontData = getFontObjectsFromTopTwoFonts(topTwoFonts, fontList)
     return fontData
 }
+
+interface FontRequest {
+    key: string
+    count: number
+    isFirstPlace: boolean
+}
+
+export const createFontData = (fontsReq?: FontRequest[]) => {
+    //set default fonts that can be changed later
+    const defaultFontData = {
+        sections: {
+            hdrs: {
+                label: 'Headlines',
+                value: 'Oswald',
+                family: "'Oswald'",
+            },
+            body: {
+                label: 'Text',
+                value: 'Open-Sans',
+                family: "'Open Sans'",
+            },
+            feat: {
+                label: 'Featured Headlines',
+                value: 'Oswald',
+                family: "'Oswald'",
+            },
+        },
+        fontImport:
+            '@import url(https://fonts.googleapis.com/css?family=Oswald:400,700|Open+Sans:400,700,400italic,700italic|Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap);',
+    }
+
+    let fonts = {
+        sections: defaultFontData.sections,
+        list: fontList,
+    }
+    let fontImport = defaultFontData.fontImport
+    if (fontsReq) {
+        const fontInfo = transformFonts(fontsReq)
+        fontImport = fontInfo.fontImport
+
+        fonts = {
+            sections: fontInfo.fontSections,
+            list: fontList,
+        }
+    }
+
+    return { fonts, fontImport }
+}

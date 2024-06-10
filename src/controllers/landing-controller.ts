@@ -1,7 +1,7 @@
 import { fontList } from '../../templates/layout-variables.js'
 import { convertDescText, removeWhiteSpace } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
-import { createModulesWithSections, createReviewItems, transformFonts, transformSocial } from '../landing-utils.js'
+import { createFontData, createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
 import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
@@ -133,51 +133,11 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         },
     ]
 
-    const code = { CSS: '' }
+    const fontData = createFontData(req.fonts)
 
-    const defaultFontData = {
-        sections: {
-            hdrs: {
-                label: 'Headlines',
-                value: 'Oswald',
-                family: "'Oswald'",
-            },
-            body: {
-                label: 'Text',
-                value: 'Open-Sans',
-                family: "'Open Sans'",
-            },
-            feat: {
-                label: 'Featured Headlines',
-                value: 'Oswald',
-                family: "'Oswald'",
-            },
-        },
-        fontImport:
-            '@import url(https://fonts.googleapis.com/css?family=Oswald:400,700|Open+Sans:400,700,400italic,700italic|Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap);',
-    }
+    const newStyles = await createGlobalStylesheet(themeColors, fontData.fonts, { CSS: '' }, { pages: [] }, apexID)
 
-    let fonts = {
-        sections: defaultFontData.sections,
-        list: fontList,
-    }
-    let fontImport = defaultFontData.fontImport
-    if (req.fonts) {
-        const fontInfo = transformFonts(req.fonts)
-        fontImport = fontInfo.fontImport
-
-        fonts = {
-            sections: fontInfo.fontSections,
-            list: fontList,
-        }
-    }
-
-    const newStyles = await createGlobalStylesheet(themeColors, fonts, code, { pages: [] }, apexID)
-
-    //to create
-    // apexID, siteName, publishedDomains, fill out widget array, fill out social array
     //probably still need to create styles in case we edit those functions
-
     const layoutTemplate = {
         logos: {
             footer: {
@@ -311,7 +271,7 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         cmsUrl: url,
         s3Folder: apexID,
         favicon: favicon,
-        fontImport: fontImport,
+        fontImport: fontData.fontImport,
         publishedDomains: currentLayout.publishedDomains || [],
         config: {
             zapierUrl: '',
@@ -1012,10 +972,10 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
 
 export const createLandingPageFiles = async (req: any, apexID: string) => {
     try {
-    const layoutContents = await createLayoutFile(req, apexID)
-    const page = createPageFile(req)
+        const layoutContents = await createLayoutFile(req, apexID)
+        const page = createPageFile(req)
 
-    return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
+        return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
     } catch (err) {
         throw new TransformError(err.message)
     }
