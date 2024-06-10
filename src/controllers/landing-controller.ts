@@ -1,7 +1,7 @@
 import { fontList } from '../../templates/layout-variables.js'
 import { convertDescText, removeWhiteSpace } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
-import { createFontData, createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
+import { addLogoToWebchat, createFontData, createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
 import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
@@ -62,8 +62,13 @@ export const createLayoutFile = async (req: any, apexID: string) => {
     const colors: LandingColors = req.colors
     const favicon = req.favicon
     const url = req.url
-    const customComponents = req.customComponents
+    let customComponents = req.customComponents
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+
+    //assign logo to webchat widget
+    if (customComponents?.length > 0 && logo) {
+        customComponents = addLogoToWebchat(customComponents, logo)
+    }
 
     const themeColors = {
         logoColor: '#444444',

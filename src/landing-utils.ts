@@ -280,3 +280,12 @@ export const createFontData = (fontsReq?: FontRequest[]) => {
 
     return { fonts, fontImport }
 }
+
+export const addLogoToWebchat = (customComponents: { type: string; logo?: String; apiKey: string }[], logo: string) => {
+    for (let i = 0; i < customComponents.length; i++) {
+        if (customComponents[i].type === 'Webchat') {
+            customComponents[i].logo = logo
+        }
+    }
+    return customComponents
+}
