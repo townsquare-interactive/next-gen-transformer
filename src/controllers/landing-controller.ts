@@ -5,6 +5,7 @@ import { createModulesWithSections, createReviewItems, transformFonts, transform
 import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
+import { TransformError } from '../errors.js'
 
 const layoutReq = {
     logo: 'http://guaranteedservice.com/files/2023/02/guaranteedservice.png',
@@ -1010,8 +1011,12 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
 }
 
 export const createLandingPageFiles = async (req: any, apexID: string) => {
+    try {
     const layoutContents = await createLayoutFile(req, apexID)
     const page = createPageFile(req)
 
     return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
+    } catch (err) {
+        throw new TransformError(err.message)
+    }
 }

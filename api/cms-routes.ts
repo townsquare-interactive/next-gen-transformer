@@ -15,6 +15,8 @@ import { saveInputSchema, createSiteInputSchema, LandingInputSchema } from '../s
 import { sql } from '@vercel/postgres'
 import express from 'express'
 import { createLandingPageFiles } from '../src/controllers/landing-controller.js'
+import type { DomainRes } from '../types.js'
+import { handleError } from '../src/errors.js'
 const router = express.Router()
 
 //save from luna cms
@@ -40,37 +42,28 @@ router.post('/save', async (req, res) => {
     }
 })
 
-//save from luna cms
 router.post('/landing', async (req, res) => {
     try {
-        //check input data for correct structure
         zodDataParse(req.body, LandingInputSchema, 'savedInput', 'safeParse')
 
-        try {
-            const apexID = stripUrl(req.body.url)
-            console.log('apexid check', apexID, req.body.url)
+        const apexID = stripUrl(req.body.url)
 
-            const data = await createLandingPageFiles(req.body, apexID)
-            await publish({ ...data })
+        const data = await createLandingPageFiles(req.body, apexID)
+        await publish({ ...data })
 
-            const response = await modifyVercelDomainPublishStatus(apexID, 'POST')
-            console.log(response)
-            if (typeof response != 'string' && response.status === 'Error') {
-                res.status(500).json(response)
-            } else {
-                //add test timeout
-                setTimeout(() => {
-                    res.json(response)
-                }, 700) // 700 milliseconds delay
-                //res.json(response)
-            }
-        } catch (err) {
-            console.error(err)
-            res.status(500).json({ message: `Error creating site`, status: 'Error' })
+        const response: DomainRes = await modifyVercelDomainPublishStatus(apexID, 'POST')
+        console.log(response)
+
+        if (response.status === 'Error') {
+            return res.status(400).json(response)
         }
+
+        // Add timeout for delay
+        setTimeout(() => {
+            res.json(response)
+        }, 1400)
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ err: 'incorrect data structure received' })
+        handleError(err, res, req.body.url)
     }
 })
 
@@ -118,8 +111,6 @@ router.post('/migrate', async (req, res) => {
 
 //website data sent for site creation
 router.post('/create-site', async (req, res) => {
-    console.log('create site route')
-
     try {
         //check input data for correct structure
         zodDataParse(req.body, createSiteInputSchema, 'createSite', 'parse')

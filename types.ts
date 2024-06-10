@@ -879,3 +879,9 @@ export interface CreateSiteParams {
     templateIdentifier: string
     publishedDomains?: string[]
 }
+
+export interface DomainRes {
+    message: string
+    domain: string
+    status: 'Error' | 'Success'
+}
