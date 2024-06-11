@@ -58,10 +58,7 @@ router.post('/landing', async (req, res) => {
             return res.status(400).json(response)
         }
 
-        // Add timeout for delay
-        setTimeout(() => {
-            res.json(response)
-        }, 1400)
+        res.json(response)
     } catch (err) {
         handleError(err, res, req.body.url)
     }

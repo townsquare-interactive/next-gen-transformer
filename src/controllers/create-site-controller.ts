@@ -15,6 +15,54 @@ const publishDomain = async (method: string, siteLayout: any, domainName: string
     await addFileS3(siteLayout, `${subdomain}/layout`)
 }
 
+//verify domain has been added to project
+const verifyDomain = async (domainName: string) => {
+    //const vercelApiUrl = `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+
+    /*  try {
+        const fetchDomainData = async () => {
+            const response = await fetch(vercelApiUrl, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                },
+            })
+            return response.json()
+        }
+*/
+
+    const vercelApiUrl = `https://${domainName}`
+
+    const fetchDomainData = async (url: string, retries = 3, delayMs = 1400) => {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            const response = await fetch(url, {
+                method: 'GET',
+            })
+
+            if (response.status === 200) {
+                console.log(`Domain GET request successful on attempt ${attempt}`)
+                return true
+            }
+
+            //If there are still attempts left delay time and try again
+            if (attempt < retries) {
+                console.log(`Domain GET attempt ${attempt} failed, retrying after delay...`)
+                await new Promise((resolve) => setTimeout(resolve, delayMs))
+            } else {
+                console.log(`All ${retries} attempts failed`)
+                return false
+            }
+        }
+    }
+
+    try {
+        const isVerified = await fetchDomainData(vercelApiUrl)
+        return isVerified
+    } catch (err) {
+        throw new SiteDeploymentError(err.message)
+    }
+}
+
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST'): Promise<DomainRes> => {
     /*     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
@@ -79,10 +127,14 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                         } else {
                             domainName = subdomain + '-lp' + '.vercel.app'
                             await publishDomain(method, siteLayout, domainName, subdomain)
-                            return {
-                                message: `domain added with postfix -lp because other domain is taken`,
-                                domain: domainName,
-                                status: 'Success',
+                            if (await verifyDomain(domainName)) {
+                                return {
+                                    message: `domain added with postfix -lp because other domain is taken`,
+                                    domain: domainName,
+                                    status: 'Success',
+                                }
+                            } else {
+                                throw new SiteDeploymentError('Unable to verify domain has been published')
                             }
                         }
                     } else {
@@ -111,8 +163,11 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                 status: 'Error',
             }
         }
-
-        return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName, status: 'Success' }
+        if (await verifyDomain(domainName)) {
+            return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName, status: 'Success' }
+        } else {
+            throw new SiteDeploymentError('Unable to verify domain has been published')
+        }
     } catch (err) {
         throw new SiteDeploymentError(err.message)
     }
