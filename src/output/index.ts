@@ -20,14 +20,13 @@ export const publish = async (data: PublishData) => {
     //Use zod to check data for types
     console.log('here is siteid', siteIdentifier)
     stringSchema.parse(siteIdentifier)
-    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
-    zodDataParse(pages, CMSPagesSchema, 'Pages')
+    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout', 'parse')
+    zodDataParse(pages, CMSPagesSchema, 'Pages', 'parse')
 
     const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
 
     await addFileS3(siteLayout, `${s3SitePath}/layout`)
 
-    //const pageList = []
     if (pages && pages?.length != 0) {
         for (let i = 0; i < pages.length; i++) {
             console.log('page posting', `${s3SitePath}/pages/${pages[i].data.slug}`)

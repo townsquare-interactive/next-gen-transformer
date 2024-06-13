@@ -77,7 +77,7 @@ export const createModulesWithSections = (sections: Sections) => {
                 })
             }
         }
-        if (section.components?.length > 0) {
+        if (section.components && section.components.length > 0) {
             for (let x = 0; x < section.components.length; x++) {
                 let currentComponent = section.components[x]
                 if (currentComponent.type === 'coupon') {
@@ -102,7 +102,7 @@ export const createModulesWithSections = (sections: Sections) => {
     return modules
 }
 
-export const createReviewItems = (reviews: { name: string; text: string }[]) => {
+export const createReviewItems = (reviews: { name?: string; text: string }[]) => {
     let items = []
     for (let i = 0; i < reviews.length; i++) {
         const newItem = {

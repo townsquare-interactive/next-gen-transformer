@@ -496,13 +496,8 @@ const createPageFile = (req: AiReq) => {
     const title = 'landing'
     const slug = 'landing'
 
-    let sectionModules
-    if (req.page.sections) {
-        sectionModules = createModulesWithSections(req.page.sections)
-    } else {
-        sectionModules = req.page.modules
-    }
-    const modules = createModules(sectionModules, req.colors, removeWhiteSpace(req.phoneNumber))
+    const sectionModules = createModulesWithSections(req.page.sections)
+    const modules = createModules(sectionModules, req.colors, removeWhiteSpace(req.phoneNumber || ''))
 
     const page = {
         data: {
@@ -982,6 +977,6 @@ export const createLandingPageFiles = async (req: any, apexID: string) => {
 
         return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
     } catch (err) {
-        throw new TransformError(err.message)
+        throw new TransformError({ message: err.message, errorID: 'GEN-003' })
     }
 }

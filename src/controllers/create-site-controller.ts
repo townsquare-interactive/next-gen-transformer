@@ -19,18 +19,6 @@ const publishDomain = async (method: string, siteLayout: any, domainName: string
 const verifyDomain = async (domainName: string) => {
     //const vercelApiUrl = `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
 
-    /*  try {
-        const fetchDomainData = async () => {
-            const response = await fetch(vercelApiUrl, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
-                },
-            })
-            return response.json()
-        }
-*/
-
     const vercelApiUrl = `https://${domainName}`
 
     const fetchDomainData = async (url: string, retries = 3, delayMs = 1400) => {
@@ -118,12 +106,11 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                             }),
                         })
                         if (secondDomainAttempt.status === 409) {
-                            //throw new Error('Unable to create domain, both versions taken')
-                            return {
+                            throw new SiteDeploymentError({
                                 message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
                                 domain: domainName,
-                                status: 'Error',
-                            }
+                                errorID: 'DMN-001',
+                            })
                         } else {
                             domainName = subdomain + '-lp' + '.vercel.app'
                             await publishDomain(method, siteLayout, domainName, subdomain)
@@ -134,7 +121,11 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
                                     status: 'Success',
                                 }
                             } else {
-                                throw new SiteDeploymentError('Unable to verify domain has been published')
+                                throw new SiteDeploymentError({
+                                    message: 'Unable to verify domain has been published',
+                                    domain: domainName,
+                                    errorID: 'DMN-002',
+                                })
                             }
                         }
                     } else {
@@ -166,10 +157,18 @@ export const modifyVercelDomainPublishStatus = async (subdomain: string, method:
         if (await verifyDomain(domainName)) {
             return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName, status: 'Success' }
         } else {
-            throw new SiteDeploymentError('Unable to verify domain has been published')
+            throw new SiteDeploymentError({
+                message: 'Unable to verify domain has been published',
+                domain: domainName,
+                errorID: 'DMN-002',
+            })
         }
     } catch (err) {
-        throw new SiteDeploymentError(err.message)
+        throw new SiteDeploymentError({
+            message: err.message,
+            domain: '',
+            errorID: 'GEN-003',
+        })
     }
 }
 

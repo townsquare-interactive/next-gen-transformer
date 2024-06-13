@@ -246,7 +246,7 @@ const seoGlobalSchema = z.object({
     }),
 })
 
-const zSections = z.array(
+/* const zSections = z.array(
     z.object({
         headline: z.string().optional(),
         reviewHeadline: z.string().optional(),
@@ -265,8 +265,9 @@ const zSections = z.array(
             })
         ),
     })
-)
+) */
 
+//after modification of req pageå
 const pageModules = z.array(
     z.object({
         headline: z.string().optional(),
@@ -278,7 +279,7 @@ const pageModules = z.array(
         videoUrl: z.string().optional(),
         desc1: z.string().optional(),
         desc2: z.string().optional(),
-        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+        reviews: z.array(z.object({ name: z.string().optional(), text: z.string() })).optional(),
     })
 )
 
@@ -292,13 +293,13 @@ const LandingColorsSchema = z.object({
     tertiary: z.string().optional(),
 })
 
-const aiReqSchema = z.object({
+/* export const aiReqSchema = z.object({
     logo: z.string(),
     socials: z.array(z.string()),
     address: addressSchema.optional(),
     siteName: z.string(),
     phoneNumber: z.string(),
-    email: z.string().email(),
+    email: z.string().email().optional(),
     url: z.string(),
     title: z.string().optional(),
     description: z.string().optional(),
@@ -320,7 +321,7 @@ const aiReqSchema = z.object({
         modules: pageModules,
         sections: zSections.optional(),
     }),
-})
+}) */
 
 const SocialSchema = z.array(z.string())
 
@@ -330,9 +331,19 @@ const SEOGlobalSchema = z.object({
     aiosp_google_verify: z.string().optional(),
 })
 
-const ColorsSchema = z.object({
+/* const ColorInputSchema = z.object({
     primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
     accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+}) */
+
+const ColorInputSchema = z.object({
+    primary: z.string().optional(),
+    accent: z.string().optional(),
+    buttonHover: z.string().optional(),
+    footerBackground: z.string().optional(),
+    footerText: z.string().optional(),
+    headerBackground: z.string().optional(),
+    tertiary: z.string().optional(),
 })
 
 const CustomComponentSchema = z.object({
@@ -345,28 +356,52 @@ const ReviewSchema = z.object({
     name: z.string().optional(),
 })
 
-const PageSectionSchema = z.object({
-    headline: z.string().optional(),
-    ctaText: z.string().optional(),
-    image: z.string().optional(),
-    subheader: z.string().optional(),
-    ctaLink: z.string().optional(),
-    desc: z.string().optional(),
-    desc2: z.string().optional(),
-    reviewHeadline: z.string().optional(),
-    reviews: z.array(ReviewSchema).optional(),
-    components: z
-        .array(
+const PageSectionSchema = z.array(
+    z.object({
+        headline: z.string().optional(),
+        ctaText: z.string().optional(),
+        image: z.string().optional(),
+        subheader: z.string().optional(),
+        ctaLink: z.string().optional(),
+        desc: z.string().optional(),
+        desc2: z.string().optional(),
+        reviewHeadline: z.string().optional(),
+        reviews: z.array(ReviewSchema).optional(),
+        components: z
+            .array(
+                z.object({
+                    type: z.string(),
+                    videoUrl: z.string().optional(),
+                    image: z.string().optional(),
+                })
+            )
+            .optional(),
+    })
+)
+
+/* const zSections = z.array(
+    z.object({
+        headline: z.string().optional(),
+        reviewHeadline: z.string().optional(),
+        ctaText: z.string().optional(),
+        image: z.string().optional(),
+        subheader: z.string().optional(),
+        ctaLink: z.string().optional(),
+        desc: z.string().optional(),
+        desc2: z.string().optional(),
+        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+        components: z.array(
             z.object({
                 type: z.string(),
+                image: z.string().optional(),
                 videoUrl: z.string().optional(),
             })
-        )
-        .optional(),
-})
-
+        ),
+    })
+) */
 const PageSchema = z.object({
-    sections: z.array(PageSectionSchema),
+    sections: PageSectionSchema,
+    modules: z.unknown(),
 })
 
 export const LandingInputSchema = z.object({
@@ -374,16 +409,23 @@ export const LandingInputSchema = z.object({
     url: z.string(),
     logo: z.string().optional(),
     favicon: z.string().optional(),
-    phoneNumber: z.string().regex(/^\(\d{3}\) \d{3}-\d{4}$/),
-    email: z.string().email().optional(),
+    /* z
+        .string()
+        .regex(/^\(\d{3}\) \d{3}-\d{4}$/)
+        .optional(), */
+    phoneNumber: z.string().optional(),
+    //email: z.string().email().optional(),
+    email: z.union([z.string().email(), z.literal('')]),
     socials: SocialSchema.optional(),
     seo: z.object({ global: SEOGlobalSchema }).optional(),
-    colors: ColorsSchema,
+    colors: ColorInputSchema,
     customComponents: z.array(CustomComponentSchema).optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
     page: PageSchema,
 })
 
-export type AiReq = z.infer<typeof aiReqSchema>
+export type AiReq = z.infer<typeof LandingInputSchema>
 export type AiPageModules = z.infer<typeof pageModules>
-export type Sections = z.infer<typeof zSections>
+export type Sections = z.infer<typeof PageSectionSchema>
 export type LandingColors = z.infer<typeof LandingColorsSchema>
