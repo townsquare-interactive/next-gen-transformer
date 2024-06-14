@@ -267,13 +267,13 @@ const ThemeColorsSchema = z.object({
 
 const VcitaDataSchema = z.object({
     actions: z.array(ActionSchema),
-    themeColors: ThemeColorsSchema,
+    themeColors: ThemeColorsSchema.optional(),
     businessId: z.string(),
     titleText: z.string().optional(),
     mainAction: z.string().optional(),
     descText: z.string().optional(),
     businessInfo: z.unknown().optional(),
-    showMyAccountBtn: z.boolean(),
+    showMyAccountBtn: z.boolean().optional(),
     widgetLabel: z.string().optional(),
 })
 

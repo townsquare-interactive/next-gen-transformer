@@ -1,6 +1,6 @@
-import type { Sections } from '../schema/input-zod.js'
+import type { CustomComponent, Sections } from '../schema/input-zod.js'
 import { fontList } from '../templates/layout-variables.js'
-import { FontType } from '../types.js'
+import { FontType, ThemeStyles } from '../types.js'
 import { convertDescText, createFontImport, socialConvert } from './utils.js'
 
 export const transformSocial = (socials: string[]) => {
@@ -282,7 +282,7 @@ export const createFontData = (fontsReq?: FontRequest[]) => {
 }
 
 export const addSiteInfoToWebchat = (
-    customComponents: { type: string; logo?: String; apiKey: string; siteName?: string }[],
+    customComponents: { type: string; logo?: string; apiKey?: string; siteName?: string }[],
     logo: string,
     siteName: string
 ) => {
@@ -293,4 +293,175 @@ export const addSiteInfoToWebchat = (
         }
     }
     return customComponents
+}
+
+export const changeBMPToEngage = (customComponents: { type: string; logo?: string; apiKey?: string; siteName?: string }[]) => {
+    for (let i = 0; i < customComponents.length; i++) {
+        if (customComponents[i].type === 'BMP') {
+            customComponents[i].type = 'Engage'
+        }
+    }
+    return customComponents
+}
+
+export const checkComponentsForScheduleNowApi = (customComponents: { type: string; logo?: string; apiKey?: string; siteName?: string }[]) => {
+    for (let i = 0; i < customComponents.length; i++) {
+        if (customComponents[i].type === 'ScheduleEngine') {
+            if (customComponents[i].apiKey) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+export const customizeWidgets = (customComponents: CustomComponent[], themeColors: ThemeStyles, logo: string, siteName: string, phoneNumber: string) => {
+    let transformedComponents
+    let vcita
+    let hasEngage = false
+    let scheduleEngineWidgetActive = false
+
+    //assign logo/sitename to webchat widget
+    if (customComponents?.length > 0) {
+        transformedComponents = changeBMPToEngage(customComponents)
+
+        if (logo) {
+            transformedComponents = addSiteInfoToWebchat(customComponents, logo, siteName)
+        }
+
+        scheduleEngineWidgetActive = checkComponentsForScheduleNowApi(customComponents)
+
+        const engageArray = transformedComponents.filter((component) => component.type === 'Engage')
+
+        hasEngage = engageArray.length > 0
+
+        if (hasEngage) {
+            const actions = [
+                {
+                    name: 'schedule',
+                    text: 'Schedule Now',
+                    href: 'https://tstest.myclients.io/site/9mov7u02gx2b57pf/action/w4h7zch15hst5825?mode=embed',
+                    target: '',
+                    dataOrigin: 'livesite_menu',
+                    class: 'livesite-schedule',
+                },
+                {
+                    name: 'contact',
+                    text: 'Get in touch',
+                    href: 'https://tstest.myclients.io/site/9mov7u02gx2b57pf/action/195y3g4o90w7gk0x?mode:embed',
+                    target: '',
+                    dataOrigin: 'livesite_menu',
+                    dataOptions: 'title:Contact Request;message:',
+                },
+            ]
+
+            //Filter out webchat when engage is being used
+            transformedComponents = transformedComponents.filter((component) => component.type !== 'Webchat')
+            scheduleEngineWidgetActive = false
+
+            vcita = {
+                businessId: engageArray[0].apiKey,
+                actions: actions,
+                themeStyles: themeColors,
+            }
+        }
+        console.log(transformedComponents)
+    }
+
+    //create header buttons
+    const createHeaderButtons = (phoneNumber: string, scheduleEngineWidgetActive: boolean, hasEngage: boolean) => {
+        //if (!hasEngage) {
+        return {
+            desktopButtons: [
+                {
+                    label: 'GET 24/7 SERVICE CALL NOW',
+                    link: `tel:${phoneNumber}`,
+                    active: true,
+                    opensModal: -1,
+                    window: 1,
+                    btnType: 'btn_cta_landing',
+                    btnSize: 'btn_md',
+                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
+                    icon: {
+                        iconPrefix: 'fas',
+                        iconModel: 'mobile-screen',
+                    },
+                },
+                {
+                    label: 'Schedule NOW',
+                    link: `tel:${phoneNumber}`,
+                    active: true,
+                    opensModal: -1,
+                    window: 1,
+                    btnType: 'btn_cta_landing',
+                    btnSize: 'btn_md',
+                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
+                    action: scheduleEngineWidgetActive ? 'schedule' : '',
+                    icon: {
+                        iconPrefix: 'far',
+                        iconModel: 'calendar',
+                    },
+                },
+            ],
+            mobileHeaderButtons: [
+                {
+                    label: 'CALL NOW',
+                    link: `tel:${phoneNumber}`,
+                    active: true,
+                    opensModal: -1,
+                    window: 1,
+                    btnType: 'btn_cta_landing',
+                    btnSize: 'btn_md',
+                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
+                    icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
+                },
+                {
+                    label: 'Schedule',
+                    link: `tel:${phoneNumber}`,
+                    active: true,
+                    opensModal: -1,
+                    window: 1,
+                    btnType: 'btn_cta_landing',
+                    btnSize: 'btn_md',
+                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
+                    action: scheduleEngineWidgetActive ? 'schedule' : '',
+                    icon: {
+                        iconPrefix: 'far',
+                        iconModel: 'calendar',
+                    },
+                },
+            ],
+        }
+        /*}  else {
+                               {
+                    name: 'call',
+                    text: 'Click to give us a call',
+                }, 
+                    
+                }*/
+    }
+
+    const headerButtons = createHeaderButtons(phoneNumber, scheduleEngineWidgetActive, hasEngage)
+
+    return { customComponents: transformedComponents, headerButtons, vcita }
+}
+
+export function transformDLText(inputText: string): string {
+    // Split the input text into words
+    const words = inputText.split(' ')
+
+    // Get the last word
+    const lastWord = words.pop() || ''
+
+    // Join the remaining words with spaces
+    const remainingText = words.join(' ')
+
+    // Create the output text with span tags
+    const outputText = `
+        <span class='mobiletext'>${remainingText}</span>
+        <br>
+        <span class='guarn'>${lastWord}</span>
+    `
+
+    return inputText ? outputText : ''
 }

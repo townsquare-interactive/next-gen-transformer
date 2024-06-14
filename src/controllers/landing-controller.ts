@@ -1,7 +1,15 @@
 import { fontList } from '../../templates/layout-variables.js'
 import { convertDescText, removeWhiteSpace } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
-import { addSiteInfoToWebchat, createFontData, createModulesWithSections, createReviewItems, transformSocial } from '../landing-utils.js'
+import {
+    addSiteInfoToWebchat,
+    createFontData,
+    createModulesWithSections,
+    createReviewItems,
+    customizeWidgets,
+    transformDLText,
+    transformSocial,
+} from '../landing-utils.js'
 import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
@@ -109,6 +117,8 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         promoColor5: colors.tertiary || '#f2f6fc',
         promoColor6: colors.accent || '#092150',
     }
+
+    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber)
 
     const scrapedFontsExample = [
         {
@@ -284,70 +294,14 @@ export const createLayoutFile = async (req: any, apexID: string) => {
         },
         styles: { global: newStyles.global, custom: newStyles.custom },
         headerOptions: {
-            ctaBtns: [
-                {
-                    label: 'GET 24/7 SERVICE CALL NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
-                    icon: {
-                        iconPrefix: 'fas',
-                        iconModel: 'mobile-screen',
-                    },
-                },
-                {
-                    label: 'Schedule NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: 'schedule',
-                    icon: {
-                        iconPrefix: 'far',
-                        iconModel: 'calendar',
-                    },
-                },
-            ],
+            ctaBtns: widgetData.headerButtons.desktopButtons,
             hideNav: true,
             hideSocial: true,
-            mobileHeaderBtns: [
-                {
-                    label: 'CALL NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
-                    icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
-                },
-                {
-                    label: 'Schedule',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: 'schedule',
-                    icon: {
-                        iconPrefix: 'far',
-                        iconModel: 'calendar',
-                    },
-                },
-            ],
+            mobileHeaderBtns: widgetData.headerButtons.mobileHeaderButtons,
         },
         siteType: 'landing',
-        customComponents: customComponents,
+        customComponents: widgetData.customComponents,
+        vcita: widgetData.vcita,
     }
 
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
@@ -535,26 +489,6 @@ const createPageFile = (req: AiReq) => {
     }
 
     return page
-}
-
-function transformDLText(inputText: string): string {
-    // Split the input text into words
-    const words = inputText.split(' ')
-
-    // Get the last word
-    const lastWord = words.pop() || ''
-
-    // Join the remaining words with spaces
-    const remainingText = words.join(' ')
-
-    // Create the output text with span tags
-    const outputText = `
-        <span class='mobiletext'>${remainingText}</span>
-        <br>
-        <span class='guarn'>${lastWord}</span>
-    `
-
-    return inputText ? outputText : ''
 }
 
 const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumber: string) => {

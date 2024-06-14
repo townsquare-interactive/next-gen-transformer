@@ -349,6 +349,8 @@ const ColorInputSchema = z.object({
 const CustomComponentSchema = z.object({
     type: z.string(),
     apiKey: z.string().optional(),
+    logo: z.string().optional(),
+    siteName: z.string().optional(),
 })
 
 const ReviewSchema = z.object({
@@ -426,6 +428,7 @@ export const LandingInputSchema = z.object({
 })
 
 export type AiReq = z.infer<typeof LandingInputSchema>
+export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof PageSectionSchema>
 export type LandingColors = z.infer<typeof LandingColorsSchema>
