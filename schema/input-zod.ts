@@ -1,5 +1,5 @@
 import { z } from 'zod'
-
+const OptionalString = z.string().optional()
 /* ----------------------------------- Saved Data -------------------------------------*/
 
 const CodeSchema = z.object({
@@ -8,6 +8,17 @@ const CodeSchema = z.object({
     header: z.string(),
     tab: z.string(),
     visible: z.number(),
+})
+
+export const AddressSchema = z.object({
+    zip: z.string(),
+    city: z.string(),
+    name: z.string().optional(),
+    state: z.string(),
+    street: z.string(),
+    street2: z.string().optional(),
+    coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
+    url: OptionalString,
 })
 
 export const NavMenuItemSchema = z.object({
@@ -224,7 +235,7 @@ const coordinatesSchema = z.object({
     long: z.string().optional(),
 })
 
-const addressSchema = z.object({
+/* const addressSchema = z.object({
     zip: z.string().optional(),
     city: z.string().optional(),
     name: z.string().optional(),
@@ -233,7 +244,7 @@ const addressSchema = z.object({
     street2: z.string().optional(),
     coordinates: coordinatesSchema.optional(),
     url: z.string(),
-})
+}) */
 
 const seoGlobalSchema = z.object({
     global: z.object({
@@ -425,6 +436,16 @@ export const LandingInputSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
     page: PageSchema,
+    address: AddressSchema.optional(),
+    fonts: z
+        .array(
+            z.object({
+                key: z.string(),
+                count: z.number(),
+                isFirstPlace: z.boolean(),
+            })
+        )
+        .optional(),
 })
 
 export type AiReq = z.infer<typeof LandingInputSchema>

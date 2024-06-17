@@ -331,7 +331,7 @@ export async function transformcontact(contactInfo: Contact) {
         location: ['fas', 'location-pin'],
     }
 
-    const newAdd = contactInfo.address.street?.replaceAll(' ', '+')
+    const newAdd = contactInfo.address?.street?.replaceAll(' ', '+')
     const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
     const contactLinks = []
     const multiPhones = contactInfo.phone.length > 1 ? true : false

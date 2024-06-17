@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NavMenuItemSchema } from './input-zod.js'
+import { NavMenuItemSchema, AddressSchema } from './input-zod.js'
 import { ValidationError } from '../src/errors.js'
 const Slot = z.object({})
 const OptionalString = z.string().optional()
@@ -97,17 +97,6 @@ const SeoSchema = z.object({
     imageOverride: OptionalString,
 })
 
-const Address = z.object({
-    zip: z.string(),
-    city: z.string(),
-    name: z.string().nullable(),
-    state: z.string(),
-    street: z.string(),
-    street2: z.string().nullable().optional(),
-    coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
-    url: OptionalString,
-})
-
 const hours = z.object({
     friday: z.string().nullish(),
     monday: z.string().nullish(),
@@ -140,7 +129,7 @@ const Contact = z.object({
             isPrimaryPhone: z.boolean(),
         })
     ),
-    address: Address.optional(),
+    address: AddressSchema.optional(),
     hideZip: z.optional(z.boolean()),
     advanced: z.optional(
         z.object({
@@ -528,9 +517,7 @@ export const PageListSchema = z.object({
 
 //check data based off Zod schema
 export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel: 'safeParse' | 'parse' = 'safeParse') => {
-    let validatedPageData
-
-    validatedPageData = schema.safeParse(data)
+    const validatedPageData = schema.safeParse(data)
 
     if (validatedPageData.success === false) {
         console.log(validatedPageData.error)
@@ -546,7 +533,11 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
             throw new ValidationError(zodErrorObject)
         }
     } else {
-        return
+        /*         if (type === 'input') {
+            let parsedPageData = schema.parse(data)
+            console.log('validated page data', validatedPageData.data)
+        } */
+        return validatedPageData.data
     }
 }
 
