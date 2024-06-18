@@ -1,154 +1,46 @@
-import { fontList } from '../../templates/layout-variables.js'
-import { convertDescText, removeWhiteSpace } from '../utils.js'
+import { convertDescText, removeWhiteSpace, stripUrl } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import {
-    addSiteInfoToWebchat,
     createFontData,
+    createLandingColors,
     createModulesWithSections,
     createReviewItems,
     customizeWidgets,
     transformDLText,
     transformSocial,
 } from '../landing-utils.js'
-import type { AiPageModules, AiReq, LandingColors } from '../../schema/input-zod.js'
+import { LandingInputSchema, type AiPageModules, type LandingReq, type LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
 import { TransformError } from '../errors.js'
+import { zodDataParse } from '../../schema/output-zod.js'
 
-const layoutReq = {
-    logo: 'http://guaranteedservice.com/files/2023/02/guaranteedservice.png',
-    socials: [
-        'http://www.facebook.com/GuaranteedServiceNJ',
-        'http://www.youtube.com/channel/UCTF0w4Gyxi34P3G3hRWguAA',
-        'https://www.google.com/maps/place/Guaranteed+Service/@40.3801104,-74.571654,11z/data=!3m1!4b1!4m5!3m4!1s0x89c3c4c47750b5bb:0x1a7085e031fb3be7!8m2!3d40.3791538!4d-74.435907',
-        'http://www.linkedin.com/guaranteed-service/',
-        'http://instagram.com/guaranteedservicenj',
-    ],
-    address: {
-        zip: '08736',
-        city: 'Manasquan',
-        name: 'Guaranteed Service',
-        state: 'NJ',
-        street: '',
-        street2: '',
-        coordinates: {
-            lat: '40.126226',
-            long: '-74.049304',
-        },
-        url: 'https://www.google.com/maps/place/+08736',
-    },
-    siteName: 'Guaranteed Service',
-    phoneNumber: '(732) 351-2519',
-    email: 'info@guaranteedservice.com',
-    url: 'guaranteedservice.com',
-    seo: {
-        global: {
-            aiosp_home_title: 'Heating, Cooling, Plumbing & Electric | Manasquan, NJ | Guaranteed Service',
-            aiosp_google_verify: 'onyUq1G14_37dkL1WYEDgNjd-LEGiwY5KtNb-dxIWv0',
-            aiosp_home_description: 'Guaranteed Service in Manasquan, NJ offers HVAC services and electrical services. Call today for an estimate!',
-            aiosp_page_title_format: '%page_title% | %blog_title%',
-            aiosp_description_format: '%description%',
-            aiosp_404_title_format: 'Nothing found for %request_words%',
-        },
-    },
-    colors: { primary: '#fc070a', accent: '#002253' },
-    favicon: 'https://townsquareinteractive.s3.amazonaws.com/guaranteedservice/assets/guaranteedservice.png',
-    customComponents: [
-        { type: 'Webchat', apiKey: 'mf2k0sam3vr14qfd2x3dk7po8ob0141b' },
-        { type: 'ScheduleEngine', apiKey: 'cl8d8jgjd00pv09pcdsyo89bc' },
-    ],
+export const validateRequestData = (req: { body: LandingReq }) => {
+    //validate request data with zod
+    const siteData = zodDataParse(req.body, LandingInputSchema, 'input', 'parse')
+
+    return { apexID: stripUrl(req.body.url), siteData }
 }
 
-export const createLayoutFile = async (req: any, apexID: string) => {
-    const logo = req.logo
-    const socials = req.socials
-    const address = req.address
-    const siteName = req.siteName
-    const phoneNumber = removeWhiteSpace(req.phoneNumber)
-    const email = req.email
-    const seo = req.seo
-    const colors: LandingColors = req.colors
-    const favicon = req.favicon
-    const url = req.url
-    let customComponents = req.customComponents
+export const createLayoutFile = async (siteData: any, apexID: string) => {
+    const logo = siteData.logo
+    const socials = siteData.socials
+    const address = siteData.address
+    const siteName = siteData.siteName
+    const phoneNumber = removeWhiteSpace(siteData.phoneNumber || '')
+    const email = siteData.email
+    const seo = siteData.seo
+    const colors: LandingColors = siteData.colors
+    const favicon = siteData.favicon
+    const url = siteData.url
+    let customComponents = siteData.customComponents
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
 
-    //assign logo/sitename to webchat widget
-    if (customComponents?.length > 0 && logo) {
-        customComponents = addSiteInfoToWebchat(customComponents, logo, siteName)
-    }
-
-    const themeColors = {
-        logoColor: '#444444',
-        headingColor: colors.accent || '#092150',
-        subHeadingColor: colors.accent || '#092150',
-        textColor: '#444444',
-        linkColor: colors.primary || '#db1a21',
-        linkHover: colors.primary || '#db1a21',
-        btnText: '#ffffff',
-        btnBackground: colors.primary || '#db1a21',
-        textColorAccent: '#ffffff',
-        heroSubheadline: '#ffffff',
-        heroText: '#ffffff',
-        heroBtnText: '#ffffff',
-        heroBtnBackground: '#444444',
-        heroLink: '#DDDDDD',
-        heroLinkHover: '#dddddd',
-        captionText: '#ffffff',
-        captionBackground: 'rgba(0,0,0,0.4)',
-        NavText: '#666666',
-        navHover: colors.primary || '#db1a21',
-        navCurrent: colors.primary || '#db1a21',
-        backgroundMain: '#ffffff',
-        bckdContent: 'rgba(255,255,255,1)',
-        headerBackground: colors.headerBackground ? colors.headerBackground : 'rgba(255,255,255,1)',
-        BckdHeaderSocial: '#ffffff',
-        accentBackgroundColor: colors.accent || '#092150',
-        backgroundHero: colors.accent || '#092150',
-        footerBackground: colors.footerBackground ? colors.footerBackground : colors.accent || '#fff',
-        footerText: colors.footerText || '#fff',
-        footerTextOverride: colors.footerText || '',
-        footerLink: colors.tertiary || '#7fa7b8',
-        promoText: '#ffffff',
-        promoColor: colors.primary || '#db1a21',
-        promoColor2: colors.accent || '#092150',
-        promoColor3: colors.tertiary || '#7fa7b8',
-        promoColor4: colors.accent || '#092150',
-        promoColor5: colors.tertiary || '#f2f6fc',
-        promoColor6: colors.accent || '#092150',
-    }
+    const themeColors = createLandingColors(colors)
 
     const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber)
 
-    const scrapedFontsExample = [
-        {
-            key: '"Merriweather Sans", Helvetica, sans-serif',
-            count: 1425,
-            isFirstPlace: true,
-        },
-        {
-            key: '"Open Sans", Helvetica, Arial, sans-serif',
-            count: 77,
-            isFirstPlace: false,
-        },
-        {
-            key: '"Times New Roman"',
-            count: 66,
-            isFirstPlace: false,
-        },
-        {
-            key: '"Glyphicons Halflings"',
-            count: 8,
-            isFirstPlace: false,
-        },
-        {
-            key: '"Material Design Icons"',
-            count: 1,
-            isFirstPlace: false,
-        },
-    ]
-
-    const fontData = createFontData(req.fonts)
+    const fontData = createFontData(siteData.fonts)
 
     const newStyles = await createGlobalStylesheet(themeColors, fontData.fonts, { CSS: '' }, { pages: [] }, apexID)
 
@@ -307,151 +199,12 @@ export const createLayoutFile = async (req: any, apexID: string) => {
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
 }
 
-const pageReq = {
-    id: '737969',
-    modules: [
-        {
-            headline: 'Heating Service & Repair GUARANTEED',
-            actionlbl: 'GIVE US A CALL',
-            image: 'http://guaranteedservice.com/files/2023/03/heatingserviceaddl.jpg',
-            subheader: 'Top Notch Technicians<br>24/7 Service<br>No Money Down Financing',
-            type: 'dl',
-            weblink: 'tel:+17323512519',
-        },
-        {
-            type: 'coupon',
-            image: 'http://nextgenprototype.production.townsquareinteractive.com/files/2024/03/50_off_any_service_coupon.png',
-        },
-        {
-            type: 'form',
-        },
-        {
-            type: 'banner',
-            headline: 'FAST LOCAL SERVICE. <br> Contact Our Team Today!',
-            actionlbl: 'CALL US NOW',
-            weblink: 'tel:+17323512519',
-        },
-        {
-            type: 'text content',
-            desc1: 'Because of how much use your heating unit gets during the cold months, it experiences wear and tear and eventually may require repairs. However, before you experience complete system failure, it&#39;s important that you&#39;re aware of the signs your system needs repairs so we can fix them before they evolve into more serious and costly problems.',
-            desc2: '<i>It doesn&#39;t emit enough warmth<br>It cycles on and off too often<br>It provides uneven heating throughout your home<br>It will not turn on or shut off<br>It makes unusual or loud noises<br>You need to frequently adjust the thermostat<br>You smell burning<br>Your energy bills are unusually high</i><br><br>It&#39;s extremely important that you don&#39;t ignore any of these symptoms. The sooner you call our New Jersey heating repair experts, the quicker we can diagnose the issue and perform the necessary repairs.',
-            headline: 'Common symptoms of a malfunctioning heater include:',
-        },
-        {
-            type: 'video',
-            videoUrl: 'https://www.youtube.com/embed/HxZmwV60Sg0',
-        },
-        {
-            type: 'headline',
-            headline: 'Here&#39;s what our satisfied customers are saying...',
-        },
-        {
-            type: 'reviews',
-            reviews: [
-                {
-                    text: 'Already Recommended to Neighbors[rn]Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Professional & Friendly[rn]Truly great service! He was professional & friendly. He is clearly experienced because he installed a water-pressure sub pump backup system for us which is a complicated job. He came back again a couple of days later to replace an old leaking toilet. He was considerate with cleaning up afterwards too. I highly recommend Guaranteed Services & especially Rob.',
-                },
-                {
-                    text: 'I Could Not Be Happier with the Service[rn]I am so impressed! I had a water leak and the technician came out to fix my problem shortly afterwards. I could not of been happier with his service. Barry was polite, honest and extremely hard working. I truly appreciate all he did to help me on a bad situation.I highly recommend Guaranteed Services for all your needs. Thanks again!!',
-                },
-                {
-                    text: 'Now we have a great system with a lifetime warranty.[rn]These guys are the BEST. They replaced my old heating and air conditioning with energy star system. I love it. Quick and efficient. AL is a lovely young representative and he explained in detail what we getting. Brian, Tommy and Greg the installers, they worked very clean and they are wonderful. Now we have a great system with a lifetime warranty. Thank you GUARANTEED SERVICE.',
-                    name: 'Kay G.',
-                },
-                {
-                    text: 'Already Recommended to Neighbors[rn]Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors[rn]Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors[rn]Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors[rn]Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-            ],
-        },
-        {
-            type: 'banner',
-            headline: 'Our Name Says It All. <br> Get Guaranteed Service 24/7',
-            actionlbl: 'CALL US NOW',
-            weblink: 'tel:+17323512519',
-        },
-    ],
-    sections: [
-        {
-            headline: 'Heating Service & Repair GUARANTEED',
-            ctaText: '',
-            image: 'http://guaranteedservice.com/files/2023/03/heatingserviceaddl.jpg',
-            subheader: 'Top Notch Technicians<br>24/7 Service<br>No Money Down Financing',
-            ctaLink: 'tel:+17323512519',
-            components: [{ type: 'coupon' }, { type: 'form' }],
-        },
-        {
-            headline: 'FAST LOCAL SERVICE. <br> Contact Our Team Today!',
-            desc: `Because of how much use your heating unit gets during the cold months, it experiences wear and tear and eventually may require repairs. However, before you experience complete system failure, it's important that you're aware of the signs your system needs repairs so we can fix them before they evolve into more serious and costly problems.`,
-            ctaText: '',
-            subheader: `Common symptoms of a malfunctioning heater include:`,
-            desc2: '<i>It doesn&#39;t emit enough warmth<br>It cycles on and off too often<br>It provides uneven heating throughout your home<br>It will not turn on or shut off<br>It makes unusual or loud noises<br>You need to frequently adjust the thermostat<br>You smell burning<br>Your energy bills are unusually high</i><br><br>It&#39;s extremely important that you don&#39;t ignore any of these symptoms. The sooner you call our New Jersey heating repair experts, the quicker we can diagnose the issue and perform the necessary repairs.',
-            ctaLink: 'tel:+17323512519',
-            components: [{ type: 'video', videoUrl: 'https://www.youtube.com/embed/HxZmwV60Sg0' }],
-        },
-        {
-            reviewHeadline: 'Here&#39;s what our satisfied customers are saying...',
-            reviews: [
-                {
-                    text: 'Already Recommended to Neighbors<br>Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Professional & Friendly<br>Truly great service! He was professional & friendly. He is clearly experienced because he installed a water-pressure sub pump backup system for us which is a complicated job. He came back again a couple of days later to replace an old leaking toilet. He was considerate with cleaning up afterwards too. I highly recommend Guaranteed Services & especially Rob.',
-                },
-                {
-                    text: 'I Could Not Be Happier with the Service<br>I am so impressed! I had a water leak and the technician came out to fix my problem shortly afterwards. I could not of been happier with his service. Barry was polite, honest and extremely hard working. I truly appreciate all he did to help me on a bad situation.I highly recommend Guaranteed Services for all your needs. Thanks again!!',
-                },
-                {
-                    text: 'Now we have a great system with a lifetime warranty.<br>These guys are the BEST. They replaced my old heating and air conditioning with energy star system. I love it. Quick and efficient. AL is a lovely young representative and he explained in detail what we getting. Brian, Tommy and Greg the installers, they worked very clean and they are wonderful. Now we have a great system with a lifetime warranty. Thank you GUARANTEED SERVICE.',
-                    name: 'Kay G.',
-                },
-                {
-                    text: 'Already Recommended to Neighbors<br>Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors<br>Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors<br>Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-                {
-                    text: 'Already Recommended to Neighbors<br>Got an estimate in 1 day and install 2 days later. Everything was amazingly smooth and effortless and our new system is fantastic. Love our new thermostats too. We were very pleased, especially right now when people are having so many problems getting supplies and equipment. Already recommended to neighbors.',
-                    name: 'Nancy Troskey',
-                },
-            ],
-            headline: 'Our Name Says It All. <br> Get Guaranteed Service 24/7',
-            ctaText: '',
-            ctaLink: 'tel:+17323512519',
-        },
-    ],
-}
-
-const createPageFile = (req: AiReq) => {
+const createPageFile = (siteData: LandingReq) => {
     const title = 'landing'
     const slug = 'landing'
 
-    const sectionModules = createModulesWithSections(req.page.sections)
-    const modules = createModules(sectionModules, req.colors, removeWhiteSpace(req.phoneNumber || ''))
+    const sectionModules = createModulesWithSections(siteData.page.sections)
+    const modules = createModules(sectionModules, siteData.colors, removeWhiteSpace(siteData.phoneNumber || ''))
 
     const page = {
         data: {
@@ -481,8 +234,8 @@ const createPageFile = (req: AiReq) => {
         },
         attrs: {},
         seo: {
-            title: req.title || req.seo?.global.aiosp_home_title || '',
-            descr: req.description || req.seo?.global.aiosp_home_description || '',
+            title: siteData.title || siteData.seo?.global.aiosp_home_title || '',
+            descr: siteData.description || siteData.seo?.global.aiosp_home_description || '',
             selectedImages: '',
             imageOverride: '',
         },
@@ -904,10 +657,10 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
     return newModules
 }
 
-export const createLandingPageFiles = async (req: any, apexID: string) => {
+export const createLandingPageFiles = async (siteData: LandingReq, apexID: string) => {
     try {
-        const layoutContents = await createLayoutFile(req, apexID)
-        const page = createPageFile(req)
+        const layoutContents = await createLayoutFile(siteData, apexID)
+        const page = createPageFile(siteData)
 
         return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
     } catch (err) {

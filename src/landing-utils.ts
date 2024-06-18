@@ -1,4 +1,4 @@
-import type { CustomComponent, Sections } from '../schema/input-zod.js'
+import type { CustomComponent, LandingColors, Sections } from '../schema/input-zod.js'
 import { fontList } from '../templates/layout-variables.js'
 import { FontType, ThemeStyles } from '../types.js'
 import { convertDescText, createFontImport, socialConvert } from './utils.js'
@@ -62,7 +62,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     headline: section.reviewHeadline,
                 })
             }
-            if (section.reviews) {
+            if (section.reviews && section.reviews.length > 0) {
                 modules.push({
                     type: 'reviews',
                     reviews: section.reviews,
@@ -464,4 +464,46 @@ export function transformDLText(inputText: string): string {
     `
 
     return inputText ? outputText : ''
+}
+
+export const createLandingColors = (colors: LandingColors) => {
+    return {
+        logoColor: '#444444',
+        headingColor: colors.accent || '#092150',
+        subHeadingColor: colors.accent || '#092150',
+        textColor: '#444444',
+        linkColor: colors.primary || '#db1a21',
+        linkHover: colors.primary || '#db1a21',
+        btnText: '#ffffff',
+        btnBackground: colors.primary || '#db1a21',
+        textColorAccent: '#ffffff',
+        heroSubheadline: '#ffffff',
+        heroText: '#ffffff',
+        heroBtnText: '#ffffff',
+        heroBtnBackground: '#444444',
+        heroLink: '#DDDDDD',
+        heroLinkHover: '#dddddd',
+        captionText: '#ffffff',
+        captionBackground: 'rgba(0,0,0,0.4)',
+        NavText: '#666666',
+        navHover: colors.primary || '#db1a21',
+        navCurrent: colors.primary || '#db1a21',
+        backgroundMain: '#ffffff',
+        bckdContent: 'rgba(255,255,255,1)',
+        headerBackground: colors.headerBackground ? colors.headerBackground : 'rgba(255,255,255,1)',
+        BckdHeaderSocial: '#ffffff',
+        accentBackgroundColor: colors.accent || '#092150',
+        backgroundHero: colors.accent || '#092150',
+        footerBackground: colors.footerBackground ? colors.footerBackground : colors.accent || '#fff',
+        footerText: colors.footerText || '#fff',
+        footerTextOverride: colors.footerText || '',
+        footerLink: colors.tertiary || '#7fa7b8',
+        promoText: '#ffffff',
+        promoColor: colors.primary || '#db1a21',
+        promoColor2: colors.accent || '#092150',
+        promoColor3: colors.tertiary || '#7fa7b8',
+        promoColor4: colors.accent || '#092150',
+        promoColor5: colors.tertiary || '#f2f6fc',
+        promoColor6: colors.accent || '#092150',
+    }
 }

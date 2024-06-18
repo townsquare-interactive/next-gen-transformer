@@ -3,18 +3,19 @@ import { stripUrl } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
-import { publish } from '../src/output/index.js'
+import { saveToS3 } from '../src/output/index.js'
 import {
-    modifyVercelDomainPublishStatus,
+    publishDomainToVercel,
     changePublishStatusInSiteData,
     getDomainList,
     checkIfSiteExistsPostgres,
+    removeDomainFromVercel,
 } from '../src/controllers/create-site-controller.js'
 import { zodDataParse } from '../schema/output-zod.js'
-import { saveInputSchema, createSiteInputSchema, LandingInputSchema } from '../schema/input-zod.js'
+import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
-import { createLandingPageFiles } from '../src/controllers/landing-controller.js'
+import { createLandingPageFiles, validateRequestData } from '../src/controllers/landing-controller.js'
 import type { DomainRes } from '../types.js'
 import { handleError } from '../src/errors.js'
 const router = express.Router()
@@ -29,7 +30,7 @@ router.post('/save', async (req, res) => {
             const url = req.body.siteData.config.website.url
             const basePath = stripUrl(url)
             const data = await transformLuna(req)
-            await publish({ ...data })
+            await saveToS3({ ...data })
 
             res.json('posting to s3 folder: ' + basePath)
         } catch (err) {
@@ -37,72 +38,23 @@ router.post('/save', async (req, res) => {
             res.status(500).json({ err: 'Something went wrong' })
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ err: 'incorrect data structure received' })
+        handleError(err, res)
     }
 })
 
 router.post('/landing', async (req, res) => {
     try {
-        zodDataParse(req.body, LandingInputSchema, 'savedInput', 'safeParse')
+        const { apexID, siteData } = validateRequestData(req)
 
-        const apexID = stripUrl(req.body.url)
+        const data = await createLandingPageFiles(siteData, apexID)
+        await saveToS3({ ...data })
 
-        const data = await createLandingPageFiles(req.body, apexID)
-        await publish({ ...data })
-
-        const response: DomainRes = await modifyVercelDomainPublishStatus(apexID, 'POST')
+        const response: DomainRes = await publishDomainToVercel(apexID)
         console.log(response)
-
-        if (response.status === 'Error') {
-            return res.status(400).json(response)
-        }
 
         res.json(response)
     } catch (err) {
         handleError(err, res, req.body.url)
-    }
-})
-
-//currently all pages are not passed in save from cms
-router.post('/migrate', async (req, res) => {
-    try {
-        //check input data for correct structure
-        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
-
-        //transform to migrate form
-        //move data into pages
-        let newPages = {}
-        for (let [key, value] of Object.entries(req.body.siteData.pages)) {
-            console.log(value)
-            let newPage: any = value
-            if (newPage.publisher) {
-                value = { ...newPage, data: newPage.publisher.data }
-                newPages = { ...newPages, [key]: value }
-            }
-        }
-
-        if (req.body.siteData.config.website.favicon.src) {
-            req.body.savedData.favicon = req.body.siteData.config.website.favicon.src
-        }
-
-        //change savedData to have all pages
-        req.body.savedData = { ...req.body.savedData, pages: newPages }
-
-        try {
-            const url = req.body.siteData.config.website.url
-            const basePath = stripUrl(url)
-            const data = await transformLuna(req)
-            await publish({ ...data })
-
-            res.json('posting to s3 folder: ' + basePath)
-        } catch (err) {
-            console.error(err)
-            res.status(500).json({ err: 'Something went wrong' })
-        }
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({ err: 'incorrect data structure received' })
     }
 })
 
@@ -125,8 +77,8 @@ router.post('/create-site', async (req, res) => {
             } else {
                 //const siteListStatus = await addToSiteList(req.body)
                 const data = await transformCreateSite(req.body)
-                await publish({ ...data })
-                const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
+                await saveToS3({ ...data })
+                const response = await publishDomainToVercel(req.body.subdomain)
                 console.log('domain status: ', response)
                 res.json(' Domain status: ' + response)
             }
@@ -142,56 +94,48 @@ router.post('/create-site', async (req, res) => {
 
 //publish site domain to vercel
 router.patch('/domain-publish', async (req, res) => {
-    console.log('publish site route', req.body)
-
     try {
-        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'POST')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const response = await publishDomainToVercel(validatedRequest.subdomain)
         console.log(response)
         res.json(response)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
+        handleError(err, res)
     }
 })
 
 //remove site domain to vercel
 router.patch('/remove-domain', async (req, res) => {
-    console.log('removing domain site route', req.body)
-
     try {
-        const response = await modifyVercelDomainPublishStatus(req.body.subdomain, 'DELETE')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const response = await removeDomainFromVercel(validatedRequest.subdomain)
         console.log(response)
         res.json(response)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
+        handleError(err, res)
     }
 })
 
 //update publish status for site
 router.patch('/publish', async (req, res) => {
-    console.log('publish site route', req.body)
-
     try {
-        const response = await changePublishStatusInSiteData(req.body.subdomain, true)
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, true)
         console.log(response)
         res.json(response)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
+        handleError(err, res)
     }
 })
 
 router.patch('/unpublish', async (req, res) => {
-    console.log('unpublish site route', req.body)
-
     try {
-        const response = await changePublishStatusInSiteData(req.body.subdomain, false)
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, false)
         console.log(response)
         res.json(response)
     } catch (err) {
-        console.error(err)
-        res.status(500).json({ err: 'Something went wrong in the transformer' })
+        handleError(err, res)
     }
 })
 
@@ -328,6 +272,48 @@ router.post('/delete-row', async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ 'this is error': { error } })
+    }
+})
+
+//currently all pages are not passed in save from cms
+router.post('/migrate', async (req, res) => {
+    try {
+        //check input data for correct structure
+        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+
+        //transform to migrate form
+        //move data into pages
+        let newPages = {}
+        for (let [key, value] of Object.entries(req.body.siteData.pages)) {
+            console.log(value)
+            let newPage: any = value
+            if (newPage.publisher) {
+                value = { ...newPage, data: newPage.publisher.data }
+                newPages = { ...newPages, [key]: value }
+            }
+        }
+
+        if (req.body.siteData.config.website.favicon.src) {
+            req.body.savedData.favicon = req.body.siteData.config.website.favicon.src
+        }
+
+        //change savedData to have all pages
+        req.body.savedData = { ...req.body.savedData, pages: newPages }
+
+        try {
+            const url = req.body.siteData.config.website.url
+            const basePath = stripUrl(url)
+            const data = await transformLuna(req)
+            await saveToS3({ ...data })
+
+            res.json('posting to s3 folder: ' + basePath)
+        } catch (err) {
+            console.error(err)
+            res.status(500).json({ err: 'Something went wrong' })
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ err: 'incorrect data structure received' })
     }
 })
 

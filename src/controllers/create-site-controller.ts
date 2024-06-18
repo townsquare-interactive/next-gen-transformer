@@ -3,7 +3,7 @@ import { SiteDeploymentError } from '../errors.js'
 import { addFileS3, getFileS3 } from '../s3Functions.js'
 import { sql } from '@vercel/postgres'
 
-const publishDomain = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
+const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
     //add domains to layout file or removes if deleting
     if (method === 'POST') {
         siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
@@ -21,6 +21,7 @@ const verifyDomain = async (domainName: string) => {
 
     const vercelApiUrl = `https://${domainName}`
 
+    //fetch domain to see if you get a response
     const fetchDomainData = async (url: string, retries = 3, delayMs = 1400) => {
         for (let attempt = 1; attempt <= retries; attempt++) {
             const response = await fetch(url, {
@@ -52,122 +53,97 @@ const verifyDomain = async (domainName: string) => {
 }
 
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const modifyVercelDomainPublishStatus = async (subdomain: string, method: 'POST' | 'DELETE' = 'POST'): Promise<DomainRes> => {
-    /*     const currentSiteList: CreateSiteParams[] = await getFileS3(`sites/site-list.json`, [])
-    console.log('current site list', currentSiteList) */
+export const publishDomainToVercel = async (subdomain: string): Promise<DomainRes> => {
+    /*     try { */
+    const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    let domainName = subdomain + '.vercel.app'
+    let altDomain = subdomain + '-lp' + '' + '.vercel.app'
 
-    try {
-        const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
-        let domainName = subdomain + '.vercel.app'
-        let altDomain = subdomain + '-lp' + '' + '.vercel.app'
+    if (typeof siteLayout != 'string') {
+        //new check with layout file
+        let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
+        const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+        const isAltDomainPublishedAlready = publishedDomains.filter((domain) => domain === altDomain).length
+        console.log('is pub already', isDomainPublishedAlready)
 
-        if (typeof siteLayout != 'string') {
-            //new check with layout file
-            let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
-            const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
-            const isAltDomainPublishedAlready = publishedDomains.filter((domain) => domain === altDomain).length
-            console.log('is pub already', isDomainPublishedAlready)
+        if (!isDomainPublishedAlready && !isAltDomainPublishedAlready) {
+            console.log('domain: ', domainName)
 
-            if (method === 'POST' ? !isDomainPublishedAlready && !isAltDomainPublishedAlready : isDomainPublishedAlready) {
-                console.log('domain: ', domainName)
+            //vercep api url changes between post vs delete
+            const vercelApiUrl = `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
 
-                //vercep api url changes between post vs delete
-                const vercelApiUrl =
-                    method === 'POST'
-                        ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
-                        : method === 'DELETE'
-                        ? `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
-                        : ''
+            //Add or remove domain to vercel via vercel api
+            const response = await fetch(vercelApiUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                },
+                body: JSON.stringify({
+                    name: domainName,
+                }),
+            })
 
-                //Add or remove domain to vercel via vercel api
-                try {
-                    const response = await fetch(vercelApiUrl, {
-                        method: method,
-                        headers: {
-                            Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
-                        },
-                        body: JSON.stringify({
-                            name: domainName,
-                        }),
+            console.log('vercel domain response', response)
+
+            //if domain name already exists try adding again with postfix
+            if (response.status === 409) {
+                console.log('domain already exists, adding -lp postfix')
+                const secondDomainAttempt = await fetch(vercelApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        name: subdomain + '-lp' + '.vercel.app',
+                    }),
+                })
+                if (secondDomainAttempt.status === 409) {
+                    throw new SiteDeploymentError({
+                        message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
+                        domain: domainName,
+                        errorID: 'DMN-001',
                     })
-
-                    console.log('vercel domain response', response)
-
-                    //if domain name already exists try adding again with postfix
-                    if (response.status === 409) {
-                        console.log('domain already exists, adding -lp postfix')
-                        const secondDomainAttempt = await fetch(vercelApiUrl, {
-                            method: method,
-                            headers: {
-                                Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
-                            },
-                            body: JSON.stringify({
-                                name: subdomain + '-lp' + '.vercel.app',
-                            }),
-                        })
-                        if (secondDomainAttempt.status === 409) {
-                            throw new SiteDeploymentError({
-                                message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
-                                domain: domainName,
-                                errorID: 'DMN-001',
-                            })
-                        } else {
-                            domainName = subdomain + '-lp' + '.vercel.app'
-                            await publishDomain(method, siteLayout, domainName, subdomain)
-                            if (await verifyDomain(domainName)) {
-                                return {
-                                    message: `domain added with postfix -lp because other domain is taken`,
-                                    domain: domainName,
-                                    status: 'Success',
-                                }
-                            } else {
-                                throw new SiteDeploymentError({
-                                    message: 'Unable to verify domain has been published',
-                                    domain: domainName,
-                                    errorID: 'DMN-002',
-                                })
-                            }
+                } else {
+                    domainName = subdomain + '-lp' + '.vercel.app'
+                    await modifyDomainPublishStatus('POST', siteLayout, domainName, subdomain)
+                    if (await verifyDomain(domainName)) {
+                        return {
+                            message: `domain added with postfix -lp because other domain is taken`,
+                            domain: domainName,
+                            status: 'Success',
                         }
                     } else {
-                        await publishDomain(method, siteLayout, domainName, subdomain)
-                    }
-                } catch (err) {
-                    // throw new Error('Domain task error: ')
-                    return {
-                        message: err.message,
-                        domain: domainName,
-                        status: 'Error',
+                        throw new SiteDeploymentError({
+                            message: 'Unable to verify domain has been published',
+                            domain: domainName,
+                            errorID: 'DMN-002',
+                        })
                     }
                 }
             } else {
-                return {
-                    message:
-                        method === 'POST' ? 'domain already published, updating site data' : 'domain cannot be removed as it is not connected to the apexID',
-                    domain: publishedDomains[0],
-                    status: 'Success',
-                }
+                await modifyDomainPublishStatus('POST', siteLayout, domainName, subdomain)
             }
         } else {
             return {
-                message: `ApexID ${subdomain} not found in list of created sites`,
-                domain: domainName,
-                status: 'Error',
+                message: 'domain already published, updating site data',
+                domain: publishedDomains[0],
+                status: 'Success',
             }
         }
-        if (await verifyDomain(domainName)) {
-            return { message: `site domain ${method === 'POST' ? 'published' : 'unpublished'}`, domain: domainName, status: 'Success' }
-        } else {
-            throw new SiteDeploymentError({
-                message: 'Unable to verify domain has been published',
-                domain: domainName,
-                errorID: 'DMN-002',
-            })
-        }
-    } catch (err) {
+    } else {
         throw new SiteDeploymentError({
-            message: err.message,
-            domain: '',
-            errorID: 'GEN-003',
+            message: `ApexID ${subdomain} not found in list of created sites`,
+            domain: domainName,
+            errorID: 'AMS-006',
+        })
+    }
+    if (await verifyDomain(domainName)) {
+        return { message: `site domain published'`, domain: domainName, status: 'Success' }
+    } else {
+        throw new SiteDeploymentError({
+            message: 'Unable to verify domain has been published',
+            domain: domainName,
+            errorID: 'DMN-002',
         })
     }
 }
@@ -257,4 +233,61 @@ export async function checkIfSiteExistsPostgres(domain: string) {
         console.log(error)
         throw { 'this is error': { error } }
     }
+}
+
+export const removeDomainFromVercel = async (subdomain: string): Promise<DomainRes> => {
+    const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    let domainName = subdomain
+    if (!subdomain.includes('.vercel.app')) {
+        domainName = subdomain + '.vercel.app'
+    }
+
+    if (typeof siteLayout != 'string') {
+        //new check with layout file
+        let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
+        const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+
+        if (isDomainPublishedAlready) {
+            console.log('domain: ', domainName)
+
+            //vercep api url changes between post vs delete
+            const vercelApiUrl = `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
+
+            //Add or remove domain to vercel via vercel api
+            try {
+                const response = await fetch(vercelApiUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        name: domainName,
+                    }),
+                })
+
+                console.log('vercel domain response', response)
+
+                await modifyDomainPublishStatus('DELETE', siteLayout, domainName, subdomain)
+            } catch (err) {
+                throw new SiteDeploymentError({
+                    message: err.message,
+                    domain: domainName,
+                    errorID: 'GEN-003',
+                })
+            }
+        } else {
+            throw new SiteDeploymentError({
+                message: `'domain cannot be removed as it is not connected to the apexID`,
+                domain: domainName,
+                errorID: 'AMS-006',
+            })
+        }
+    } else {
+        throw new SiteDeploymentError({
+            message: `ApexID ${subdomain} not found in list of created sites`,
+            domain: domainName,
+            errorID: 'AMS-006',
+        })
+    }
+    return { message: `site domain unpublished`, domain: domainName, status: 'Success' }
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { NavMenuItemSchema, AddressSchema } from './input-zod.js'
 import { ValidationError } from '../src/errors.js'
+import { AddressSchema, NavMenuItemSchema } from './utils-zod.js'
 const Slot = z.object({})
 const OptionalString = z.string().optional()
 

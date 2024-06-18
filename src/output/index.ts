@@ -7,12 +7,8 @@ import { z } from 'zod'
 
 const stringSchema = z.string()
 
-export const publish = async (data: PublishData) => {
+export const saveToS3 = async (data: PublishData) => {
     const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
-
-    //create layout json schema
-    //const layoutJsonSchema = zodToJsonSchema(SiteDataSchema, 'layout schema')
-    //console.log('json schema', JSON.stringify(layoutJsonSchema))
 
     //const pagesJsonSchema = zodToJsonSchema(CMSPagesSchema, 'layout schema')
     //console.log('json schema for pages', JSON.stringify(pagesJsonSchema))

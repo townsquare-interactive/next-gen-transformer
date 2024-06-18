@@ -1,5 +1,5 @@
 import { z } from 'zod'
-const OptionalString = z.string().optional()
+import { AddressSchema, NavMenuItemSchema } from './utils-zod'
 /* ----------------------------------- Saved Data -------------------------------------*/
 
 const CodeSchema = z.object({
@@ -8,34 +8,6 @@ const CodeSchema = z.object({
     header: z.string(),
     tab: z.string(),
     visible: z.number(),
-})
-
-export const AddressSchema = z.object({
-    zip: z.string(),
-    city: z.string(),
-    name: z.string().optional(),
-    state: z.string(),
-    street: z.string(),
-    street2: z.string().optional(),
-    coordinates: z.optional(z.object({ lat: z.string().or(z.number()), long: z.string().or(z.number()) })),
-    url: OptionalString,
-})
-
-export const NavMenuItemSchema = z.object({
-    ID: z.number(),
-    menu_list_id: z.number(),
-    title: z.string(),
-    post_type: z.string(),
-    type: z.string().nullish(),
-    menu_item_parent: z.union([z.string(), z.number()]).nullable(),
-    object_id: z.number().nullish(),
-    object: z.string(),
-    target: z.string().nullable(),
-    classes: z.string().or(z.array(z.unknown())).nullable(),
-    menu_order: z.number(),
-    mi_url: z.string().nullable(),
-    url: z.string(),
-    disabled: z.boolean().optional(),
 })
 
 const NavsSchema = z.object({
@@ -228,55 +200,7 @@ export const createSiteInputSchema = z.object({
     type: z.literal('apex'),
 })
 
-//------------------------AI Schema-----------------------
-
-const coordinatesSchema = z.object({
-    lat: z.string().optional(),
-    long: z.string().optional(),
-})
-
-/* const addressSchema = z.object({
-    zip: z.string().optional(),
-    city: z.string().optional(),
-    name: z.string().optional(),
-    state: z.string().optional(),
-    street: z.string().optional(),
-    street2: z.string().optional(),
-    coordinates: coordinatesSchema.optional(),
-    url: z.string(),
-}) */
-
-const seoGlobalSchema = z.object({
-    global: z.object({
-        aiosp_home_title: z.string().optional(),
-        aiosp_google_verify: z.string().optional(),
-        aiosp_home_description: z.string().optional(),
-        aiosp_page_title_format: z.string().optional(),
-        aiosp_description_format: z.string().optional(),
-        aiosp_404_title_format: z.string().optional(),
-    }),
-})
-
-/* const zSections = z.array(
-    z.object({
-        headline: z.string().optional(),
-        reviewHeadline: z.string().optional(),
-        ctaText: z.string().optional(),
-        image: z.string().optional(),
-        subheader: z.string().optional(),
-        ctaLink: z.string().optional(),
-        desc: z.string().optional(),
-        desc2: z.string().optional(),
-        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
-        components: z.array(
-            z.object({
-                type: z.string(),
-                image: z.string().optional(),
-                videoUrl: z.string().optional(),
-            })
-        ),
-    })
-) */
+/*------------------------Landing Page Schema------------------------------------------------------*/
 
 //after modification of req pageå
 const pageModules = z.array(
@@ -304,36 +228,6 @@ const LandingColorsSchema = z.object({
     tertiary: z.string().optional(),
 })
 
-/* export const aiReqSchema = z.object({
-    logo: z.string(),
-    socials: z.array(z.string()),
-    address: addressSchema.optional(),
-    siteName: z.string(),
-    phoneNumber: z.string(),
-    email: z.string().email().optional(),
-    url: z.string(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    seo: seoGlobalSchema.optional(),
-    colors: LandingColorsSchema,
-    favicon: z.string().optional(),
-    customComponents: z.array(
-        z.object({
-            type: z.string(),
-            apiKey: z.string(),
-        })
-    ),
-    page: z.object({
-        id: z.string(),
-        title: z.string(),
-        slug: z.string(),
-        pageType: z.string(),
-        url: z.string(),
-        modules: pageModules,
-        sections: zSections.optional(),
-    }),
-}) */
-
 const SocialSchema = z.array(z.string())
 
 const SEOGlobalSchema = z.object({
@@ -341,11 +235,6 @@ const SEOGlobalSchema = z.object({
     aiosp_home_description: z.string().optional(),
     aiosp_google_verify: z.string().optional(),
 })
-
-/* const ColorInputSchema = z.object({
-    primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-    accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-}) */
 
 const ColorInputSchema = z.object({
     primary: z.string().optional(),
@@ -392,42 +281,17 @@ const PageSectionSchema = z.array(
     })
 )
 
-/* const zSections = z.array(
-    z.object({
-        headline: z.string().optional(),
-        reviewHeadline: z.string().optional(),
-        ctaText: z.string().optional(),
-        image: z.string().optional(),
-        subheader: z.string().optional(),
-        ctaLink: z.string().optional(),
-        desc: z.string().optional(),
-        desc2: z.string().optional(),
-        reviews: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
-        components: z.array(
-            z.object({
-                type: z.string(),
-                image: z.string().optional(),
-                videoUrl: z.string().optional(),
-            })
-        ),
-    })
-) */
 const PageSchema = z.object({
     sections: PageSectionSchema,
-    modules: z.unknown(),
 })
 
+//request body coming from AI tool
 export const LandingInputSchema = z.object({
     siteName: z.string(),
     url: z.string(),
     logo: z.string().optional(),
     favicon: z.string().optional(),
-    /* z
-        .string()
-        .regex(/^\(\d{3}\) \d{3}-\d{4}$/)
-        .optional(), */
     phoneNumber: z.string().optional(),
-    //email: z.string().email().optional(),
     email: z.union([z.string().email(), z.literal('')]),
     socials: SocialSchema.optional(),
     seo: z.object({ global: SEOGlobalSchema }).optional(),
@@ -448,7 +312,11 @@ export const LandingInputSchema = z.object({
         .optional(),
 })
 
-export type AiReq = z.infer<typeof LandingInputSchema>
+export const SubdomainInputSchema = z.object({
+    subdomain: z.string().min(1),
+})
+
+export type LandingReq = z.infer<typeof LandingInputSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof PageSectionSchema>
