@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AddressSchema, NavMenuItemSchema } from './utils-zod'
+import { AddressSchema, NavMenuItemSchema } from './utils-zod.js'
 /* ----------------------------------- Saved Data -------------------------------------*/
 
 const CodeSchema = z.object({
