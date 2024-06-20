@@ -178,6 +178,10 @@ const layoutReq = {
     customComponents: [
         { type: 'Webchat', apiKey: 'mf2k0sam3vr14qfd2x3dk7po8ob0141b' },
         { type: 'ScheduleEngine', apiKey: 'cl8d8jgjd00pv09pcdsyo89bc' },
+        {
+            type: 'BMP',
+            apiKey: 'WI-TLS9L59J8UGP3ZQ8B83G',
+        },
     ],
 }
 

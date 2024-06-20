@@ -374,7 +374,7 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
         return {
             desktopButtons: [
                 {
-                    label: 'GET 24/7 SERVICE CALL NOW',
+                    label: hasEngage ? 'CONTACT US' : 'GET 24/7 SERVICE CALL NOW',
                     link: `tel:${phoneNumber}`,
                     active: true,
                     opensModal: -1,
@@ -386,6 +386,7 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
                         iconPrefix: 'fas',
                         iconModel: 'mobile-screen',
                     },
+                    action: hasEngage ? 'ls-contact' : '',
                 },
                 {
                     label: 'Schedule NOW',
@@ -396,7 +397,7 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
                     btnType: 'btn_cta_landing',
                     btnSize: 'btn_md',
                     googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: scheduleEngineWidgetActive ? 'schedule' : '',
+                    action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
                     icon: {
                         iconPrefix: 'far',
                         iconModel: 'calendar',
@@ -405,15 +406,16 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
             ],
             mobileHeaderButtons: [
                 {
-                    label: 'CALL NOW',
+                    label: hasEngage ? 'CONTACT' : 'CALL NOW',
                     link: `tel:${phoneNumber}`,
                     active: true,
                     opensModal: -1,
-                    window: 1,
+                    window: 0,
                     btnType: 'btn_cta_landing',
                     btnSize: 'btn_md',
                     googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
                     icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
+                    action: hasEngage ? 'ls-contact' : '',
                 },
                 {
                     label: 'Schedule',
@@ -424,7 +426,7 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
                     btnType: 'btn_cta_landing',
                     btnSize: 'btn_md',
                     googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: scheduleEngineWidgetActive ? 'schedule' : '',
+                    action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
                     icon: {
                         iconPrefix: 'far',
                         iconModel: 'calendar',
@@ -432,13 +434,6 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
                 },
             ],
         }
-        /*}  else {
-                               {
-                    name: 'call',
-                    text: 'Click to give us a call',
-                }, 
-                    
-                }*/
     }
 
     const headerButtons = createHeaderButtons(phoneNumber, scheduleEngineWidgetActive, hasEngage)
