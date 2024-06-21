@@ -23,6 +23,27 @@ export const addGuarnSpan = (text: string) => {
     } else return ''
 }
 
+function convertIframe(input: string): string {
+    // Regular expression to find the <iframe ... >
+    const iframeRegex = /<iframe[^>]*>/i
+    const match = input.match(iframeRegex)
+
+    if (match) {
+        // Extract the matched <iframe ... >
+        let iframeTag = match[0]
+        // Ensure it ends with ' />'
+        if (!iframeTag.endsWith('/>')) {
+            iframeTag = iframeTag.slice(0, -1) + '/>'
+        }
+        // Return the modified iframe tag with closing </iframe>
+        console.log(iframeTag + '</iframe>')
+        return iframeTag + '</iframe>'
+    } else {
+        // Return an empty string if no match is found
+        return ''
+    }
+}
+
 export const createModulesWithSections = (sections: Sections) => {
     let modules = []
     for (let i = 0; i < sections.length; i++) {
@@ -88,6 +109,7 @@ export const createModulesWithSections = (sections: Sections) => {
                 } else if (currentComponent.type === 'form') {
                     modules.push({
                         type: 'form',
+                        embed: currentComponent.embed ? convertIframe(currentComponent.embed) : '',
                     })
                 } else if (currentComponent.type === 'video' && currentComponent.videoUrl != '[second_section_videoUrl]') {
                     modules.push({

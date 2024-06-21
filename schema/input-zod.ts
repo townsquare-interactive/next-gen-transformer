@@ -202,7 +202,7 @@ export const createSiteInputSchema = z.object({
 
 /*------------------------Landing Page Schema------------------------------------------------------*/
 
-//after modification of req pageå
+//after modification of req page but before moving into sections
 const pageModules = z.array(
     z.object({
         headline: z.string().optional(),
@@ -215,6 +215,7 @@ const pageModules = z.array(
         desc1: z.string().optional(),
         desc2: z.string().optional(),
         reviews: z.array(z.object({ name: z.string().optional(), text: z.string() })).optional(),
+        embed: z.string().optional(),
     })
 )
 
@@ -275,6 +276,7 @@ const PageSectionSchema = z.array(
                     type: z.string(),
                     videoUrl: z.string().optional(),
                     image: z.string().optional(),
+                    embed: z.string().optional(),
                 })
             )
             .optional(),

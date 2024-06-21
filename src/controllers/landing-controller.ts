@@ -391,6 +391,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     contactFormData: {
                         formTitle: '',
                         formService: 'webhook',
+                        formEmbed: currentMod.embed || '',
                         email: '',
                         formFields: [
                             {

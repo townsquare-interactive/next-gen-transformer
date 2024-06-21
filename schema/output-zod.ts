@@ -23,6 +23,7 @@ const ContactFormData = z.object({
     formTitle: z.string().optional(),
     formService: z.string(),
     email: z.string().optional(),
+    formEmbed: z.string().optional(),
     formFields: z.array(
         z.object({
             name: z.string(),
