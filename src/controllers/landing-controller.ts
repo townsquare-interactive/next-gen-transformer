@@ -664,6 +664,12 @@ export const createLandingPageFiles = async (siteData: LandingReq, apexID: strin
 
         return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
     } catch (err) {
-        throw new TransformError({ message: err.message, errorID: 'GEN-003' })
+        throw new TransformError({
+            message: err.message,
+            errorID: 'GEN-003',
+            state: {
+                siteStatus: 'Process stopped when creating site files',
+            },
+        })
     }
 }

@@ -524,8 +524,10 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
         const pathList = zodErrorLoop(JSON.parse(validatedPageData.error))
         const zodErrorObject = {
             message: type === 'input' ? 'Error validating form fields' : 'Validation error on output data going to S3',
-            errorID: type === 'input' ? 'VAL-004' : 'VAL-005',
-            erroredFields: pathList.join(' | '),
+            errorType: type === 'input' ? 'VAL-004' : 'VAL-005',
+            state: {
+                errorFields: pathList.join(' | '),
+            },
         }
         if (parseLevel === 'safeParse') {
             return console.log('Zod parse error', zodErrorObject)
@@ -533,10 +535,6 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
             throw new ValidationError(zodErrorObject)
         }
     } else {
-        /*         if (type === 'input') {
-            let parsedPageData = schema.parse(data)
-            console.log('validated page data', validatedPageData.data)
-        } */
         return validatedPageData.data
     }
 }

@@ -24,15 +24,15 @@ yarn dev
 
 App runs locally on [http://localhost:8080](http://localhost:8080)
 
-# Error ID List
+# Error Type List
 
-This section provides detailed information about the error IDs used in the project.
+This section provides nformation about the error types used in the project.
 
-| Error ID | Description                                                                                                               |
-| -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| DMN-001  | Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name. |
-| DMN-002  | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL.                          |
-| GEN-003  | General JavaScript error when going through site deployment tasks.                                                        |
-| VAL-004  | Error validating incoming request data.                                                                                   |
-| VAL-005  | Error validating transformed data being sent to S3.                                                                       |
-| AMS-006  | Site files not found in s3, domain cannot be updated                                                                      |
+| Error Type | Description                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| DMN-001    | Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name. |
+| DMN-002    | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL.                          |
+| GEN-003    | General JavaScript error when going through site deployment tasks.                                                        |
+| VAL-004    | Error validating incoming request data.                                                                                   |
+| VAL-005    | Error validating transformed data being sent to S3.                                                                       |
+| AMS-006    | Site files not found in s3, domain cannot be updated.                                                                     |

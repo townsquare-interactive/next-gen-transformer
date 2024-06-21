@@ -101,7 +101,10 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
                     throw new SiteDeploymentError({
                         message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
                         domain: domainName,
-                        errorID: 'DMN-001',
+                        errorType: 'DMN-001',
+                        state: {
+                            domainStatus: 'Domain not added for project',
+                        },
                     })
                 } else {
                     domainName = subdomain + '-lp' + '.vercel.app'
@@ -116,7 +119,10 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
                         throw new SiteDeploymentError({
                             message: 'Unable to verify domain has been published',
                             domain: domainName,
-                            errorID: 'DMN-002',
+                            errorType: 'DMN-002',
+                            state: {
+                                domainStatus: 'Domain not added for project',
+                            },
                         })
                     }
                 }
@@ -134,7 +140,10 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
         throw new SiteDeploymentError({
             message: `ApexID ${subdomain} not found in list of created sites`,
             domain: domainName,
-            errorID: 'AMS-006',
+            errorType: 'AMS-006',
+            state: {
+                domainStatus: 'Domain not added for project',
+            },
         })
     }
     if (await verifyDomain(domainName)) {
@@ -143,7 +152,10 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
         throw new SiteDeploymentError({
             message: 'Unable to verify domain has been published',
             domain: domainName,
-            errorID: 'DMN-002',
+            errorType: 'DMN-002',
+            state: {
+                domainStatus: 'Domain not added for project',
+            },
         })
     }
 }
@@ -272,21 +284,30 @@ export const removeDomainFromVercel = async (subdomain: string): Promise<DomainR
                 throw new SiteDeploymentError({
                     message: err.message,
                     domain: domainName,
-                    errorID: 'GEN-003',
+                    errorType: 'GEN-003',
+                    state: {
+                        domainStatus: 'Domain unable to be removed from project',
+                    },
                 })
             }
         } else {
             throw new SiteDeploymentError({
                 message: `'domain cannot be removed as it is not connected to the apexID`,
                 domain: domainName,
-                errorID: 'AMS-006',
+                errorType: 'AMS-006',
+                state: {
+                    domainStatus: 'Domain unable to be removed as it was not found in S3 check',
+                },
             })
         }
     } else {
         throw new SiteDeploymentError({
             message: `ApexID ${subdomain} not found in list of created sites`,
             domain: domainName,
-            errorID: 'AMS-006',
+            errorType: 'AMS-006',
+            state: {
+                domainStatus: 'Domain unable to be removed as it was not found in S3 check',
+            },
         })
     }
     return { message: `site domain unpublished`, domain: domainName, status: 'Success' }
