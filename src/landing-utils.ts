@@ -221,14 +221,12 @@ export const transformFonts = (scrapedFonts: ScrapedFonts[]) => {
                 family: "'Oswald'",
             },
         }
+
         topTwoFonts.forEach((fontKey, index) => {
             // Add dashes for between space to match
             const modifiedFontKey = fontKey.replace(/ /g, '-')
             for (const key in fontList) {
                 if (modifiedFontKey.includes(key)) {
-                    //const type = index === 0 ? 'bodyFont' : 'headlineFont'
-                    //fontLabels.push({ font: fontList[key], type })
-
                     // Determine type of font based on index
                     if (index === 0) {
                         fontObject.bodyFont = fontList[key]
@@ -240,7 +238,6 @@ export const transformFonts = (scrapedFonts: ScrapedFonts[]) => {
                         fontSections.hdrs = { label: 'Headlines', value: key, family: key }
                         fontSections.feat = { label: 'Featured Headlines', value: key, family: key }
                     }
-
                     break
                 }
             }
@@ -326,6 +323,10 @@ export const changeBMPToEngage = (customComponents: { type: string; logo?: strin
     return customComponents
 }
 
+export function removeEmptyApiComponents(components: { type: string; apiKey?: string }[]) {
+    return components.filter((component) => !!component.apiKey)
+}
+
 export const checkComponentsForScheduleNowApi = (customComponents: { type: string; logo?: string; apiKey?: string; siteName?: string }[]) => {
     for (let i = 0; i < customComponents.length; i++) {
         if (customComponents[i].type === 'ScheduleEngine') {
@@ -345,7 +346,8 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
 
     //assign logo/sitename to webchat widget
     if (customComponents?.length > 0) {
-        transformedComponents = changeBMPToEngage(customComponents)
+        const validatedComponents = removeEmptyApiComponents(customComponents)
+        transformedComponents = changeBMPToEngage(validatedComponents)
 
         if (logo) {
             transformedComponents = addSiteInfoToWebchat(customComponents, logo, siteName)
@@ -356,7 +358,6 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
         const engageArray = transformedComponents.filter((component) => component.type === 'Engage')
 
         hasEngage = engageArray.length > 0
-
         if (hasEngage) {
             const actions = [
                 {
@@ -392,69 +393,64 @@ export const customizeWidgets = (customComponents: CustomComponent[], themeColor
 
     //create header buttons
     const createHeaderButtons = (phoneNumber: string, scheduleEngineWidgetActive: boolean, hasEngage: boolean) => {
-        //if (!hasEngage) {
+        const desktopButtons = []
+        const mobileHeaderButtons = []
+
+        if (hasEngage || phoneNumber) {
+            desktopButtons.push({
+                label: hasEngage ? 'CONTACT US' : phoneNumber,
+                link: `tel:${phoneNumber}`,
+                active: true,
+                opensModal: -1,
+                window: 0,
+                btnType: 'btn_cta_landing',
+                btnSize: 'btn_md',
+                googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
+                icon: {
+                    iconPrefix: 'fas',
+                    iconModel: 'mobile-screen',
+                },
+                action: hasEngage ? 'ls-contact' : '',
+            })
+
+            mobileHeaderButtons.push({
+                label: hasEngage ? 'CONTACT' : 'CALL NOW',
+                link: `tel:${phoneNumber}`,
+                active: true,
+                opensModal: -1,
+                window: 0,
+                btnType: 'btn_cta_landing',
+                btnSize: 'btn_md',
+                googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
+                icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
+                action: hasEngage ? 'ls-contact' : '',
+            })
+        }
+
+        //add schedule button if using widgets
+        if (scheduleEngineWidgetActive || hasEngage) {
+            const scheduleButton = {
+                link: `tel:${phoneNumber}`,
+                active: true,
+                opensModal: -1,
+                window: 1,
+                btnType: 'btn_cta_landing',
+                btnSize: 'btn_md',
+                googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
+                action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
+                icon: {
+                    iconPrefix: 'far',
+                    iconModel: 'calendar',
+                },
+            }
+
+            desktopButtons.push({ ...scheduleButton, label: 'Schedule NOW' })
+            mobileHeaderButtons.push({ ...scheduleButton, label: 'Schedule' })
+        }
+
         return {
-            desktopButtons: [
-                {
-                    label: hasEngage ? 'CONTACT US' : 'GET 24/7 SERVICE CALL NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
-                    icon: {
-                        iconPrefix: 'fas',
-                        iconModel: 'mobile-screen',
-                    },
-                    action: hasEngage ? 'ls-contact' : '',
-                },
-                {
-                    label: 'Schedule NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
-                    icon: {
-                        iconPrefix: 'far',
-                        iconModel: 'calendar',
-                    },
-                },
-            ],
-            mobileHeaderButtons: [
-                {
-                    label: hasEngage ? 'CONTACT' : 'CALL NOW',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 0,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
-                    icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
-                    action: hasEngage ? 'ls-contact' : '',
-                },
-                {
-                    label: 'Schedule',
-                    link: `tel:${phoneNumber}`,
-                    active: true,
-                    opensModal: -1,
-                    window: 1,
-                    btnType: 'btn_cta_landing',
-                    btnSize: 'btn_md',
-                    googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                    action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
-                    icon: {
-                        iconPrefix: 'far',
-                        iconModel: 'calendar',
-                    },
-                },
-            ],
+            desktopButtons: desktopButtons,
+            mobileHeaderButtons: mobileHeaderButtons,
         }
     }
 
