@@ -1,5 +1,5 @@
 import { addFileS3, folderExistsInS3, getFileS3 } from '../src/s3Functions.js'
-import { stripUrl } from '../src/utils.js'
+import { convertUrlToApexId } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
@@ -28,7 +28,7 @@ router.post('/save', async (req, res) => {
 
         try {
             const url = req.body.siteData.config.website.url
-            const basePath = stripUrl(url)
+            const basePath = convertUrlToApexId(url)
             const data = await transformLuna(req)
             await saveToS3({ ...data })
 
@@ -196,7 +196,7 @@ router.post('/site-data/strapi', async (req, res) => {
 
 //save all of site data in one file to s3
 router.post('/cms', async (req, res) => {
-    const basePath = stripUrl(req.body.config.website.url)
+    const basePath = convertUrlToApexId(req.body.config.website.url)
 
     try {
         await addFileS3(req.body, `${basePath}/siteData`)
@@ -302,7 +302,7 @@ router.post('/migrate', async (req, res) => {
 
         try {
             const url = req.body.siteData.config.website.url
-            const basePath = stripUrl(url)
+            const basePath = convertUrlToApexId(url)
             const data = await transformLuna(req)
             await saveToS3({ ...data })
 

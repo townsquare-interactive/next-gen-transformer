@@ -122,18 +122,27 @@ export function btnIconConvert(icon: string) {
     }
 }
 
-export const stripUrl = (url: string) => {
+export const convertUrlToApexId = (url: string) => {
     // Remove protocol
     const withoutProtocol = url.replace(/(^\w+:|^)\/\//, '')
 
     // Remove www prefix
     const withoutWww = withoutProtocol.replace(/^www\./, '')
 
-    // Extract domain name
-    const domainNameMatch = withoutWww.match(/^[\w-]+/)
-    const domainName = domainNameMatch ? domainNameMatch[0] : ''
+    // Extract the domain part (before the first '/')
+    const domain = withoutWww.split('/')[0]
 
-    return domainName
+    // Replace all periods except the last one with hyphens
+    const lastPeriodIndex = domain.lastIndexOf('.')
+    const transformedDomain = domain.substring(0, lastPeriodIndex).replace(/\./g, '-') + domain.substring(lastPeriodIndex)
+
+    // Remove the TLD
+    const domainParts = transformedDomain.split('.')
+    if (domainParts.length > 1) {
+        domainParts.pop() // Remove the last part (TLD)
+    }
+
+    return domainParts.join('.')
 }
 
 //strip anything between / ... /

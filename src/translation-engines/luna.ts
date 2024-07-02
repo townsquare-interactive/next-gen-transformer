@@ -1,13 +1,13 @@
 import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../../src/controllers/cms-controller.js'
 import { getFileS3, addFileS3 } from '../../src/s3Functions.js'
-import { stripUrl, setColors, stripImageFolders } from '../../src/utils.js'
+import { convertUrlToApexId, setColors, stripImageFolders } from '../../src/utils.js'
 import { LunaRequest } from '../../types.js'
 
 export const transformLuna = async (req: LunaRequest) => {
     try {
         //grab url to make S3 folder name
         const cmsUrl = req.body.siteData.config.website.url
-        const basePath = stripUrl(cmsUrl)
+        const basePath = convertUrlToApexId(cmsUrl)
         const themeStyles: any = setColors(req.body.siteData.design.colors, req.body.siteData.design.themes.selected)
         const assets = []
         const currentPageList = await getFileS3(`${basePath}/pages/page-list.json`)

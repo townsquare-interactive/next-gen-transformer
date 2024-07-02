@@ -10,7 +10,7 @@ import {
     isButton,
     decideBtnCount,
     createModalPageList,
-    stripUrl,
+    convertUrlToApexId,
 } from '../utils'
 import { it, describe, expect } from 'vitest'
 
@@ -281,21 +281,30 @@ describe('Create modals list', () => {
 
 describe('stripUrl', () => {
     it('should return the unchanged value if no protocol is inside', () => {
-        expect(stripUrl('taco')).toStrictEqual('taco')
+        expect(convertUrlToApexId('taco')).toStrictEqual('taco')
     })
     it('should remove www.', () => {
-        expect(stripUrl('www.taco')).toStrictEqual('taco')
+        expect(convertUrlToApexId('www.taco.net')).toStrictEqual('taco')
     })
     it('should remove https://', () => {
-        expect(stripUrl('https://taco.org')).toStrictEqual('taco')
+        expect(convertUrlToApexId('https://taco.org')).toStrictEqual('taco')
+    })
+    it('should remove both https:// and www.', () => {
+        expect(convertUrlToApexId('https://www.taco.org')).toStrictEqual('taco')
     })
     it('should remove both www. and https://', () => {
-        expect(stripUrl('https://longer-one.com')).toStrictEqual('longer-one')
+        expect(convertUrlToApexId('https://longer-one.com')).toStrictEqual('longer-one')
     })
     it('should remove the .net', () => {
-        expect(stripUrl('green.net')).toStrictEqual('green')
+        expect(convertUrlToApexId('green.net')).toStrictEqual('green')
     })
     it('should remove the slug after .com', () => {
-        expect(stripUrl('https://hlbowman.com/local/heating-air-conditioning-service')).toStrictEqual('hlbowman')
+        expect(convertUrlToApexId('https://hlbowman.com/local/heating-air-conditioning-service')).toStrictEqual('hlbowman')
+    })
+    it('should add "-" marks when there is a period inside of the subdomain area', () => {
+        expect(convertUrlToApexId('https://go.jeosahelectric.com/optin-for-services')).toStrictEqual('go-jeosahelectric')
+    })
+    it('should add "-" marks when there are multiple periods inside the subdomain', () => {
+        expect(convertUrlToApexId('https://sub.domain.example.com/')).toStrictEqual('sub-domain-example')
     })
 })

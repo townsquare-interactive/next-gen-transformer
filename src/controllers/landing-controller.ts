@@ -1,4 +1,4 @@
-import { convertDescText, removeWhiteSpace, stripUrl } from '../utils.js'
+import { convertDescText, removeWhiteSpace, convertUrlToApexId } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import {
     createFontData,
@@ -19,7 +19,7 @@ export const validateRequestData = (req: { body: LandingReq }) => {
     //validate request data with zod
     const siteData = zodDataParse(req.body, LandingInputSchema, 'input', 'parse')
 
-    return { apexID: stripUrl(req.body.url), siteData }
+    return { apexID: convertUrlToApexId(req.body.url), siteData }
 }
 
 export const createLayoutFile = async (siteData: any, apexID: string) => {
