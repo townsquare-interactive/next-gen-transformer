@@ -125,9 +125,10 @@ export function btnIconConvert(icon: string) {
 export const convertUrlToApexId = (url: string) => {
     // Remove protocol
     const withoutProtocol = url.replace(/(^\w+:|^)\/\//, '')
+    const withoutTSI = withoutProtocol.replace('.production.townsquareinteractive', '')
 
     // Remove www prefix
-    const withoutWww = withoutProtocol.replace(/^www\./, '')
+    const withoutWww = withoutTSI.replace(/^www\./, '')
 
     // Extract the domain part (before the first '/')
     const domain = withoutWww.split('/')[0]

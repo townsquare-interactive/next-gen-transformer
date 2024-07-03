@@ -308,3 +308,6 @@ describe('stripUrl', () => {
         expect(convertUrlToApexId('https://sub.domain.example.com/')).toStrictEqual('sub-domain-example')
     })
 })
+it('should remove .production.townsquare.', () => {
+    expect(convertUrlToApexId('https://clttestsiteforjoshedwards.production.townsquareinteractive.com')).toStrictEqual('clttestsiteforjoshedwards')
+})
