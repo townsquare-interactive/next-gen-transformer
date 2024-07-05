@@ -287,6 +287,12 @@ const PageSchema = z.object({
     sections: PageSectionSchema,
 })
 
+const HeaderButtonSchema = z.object({
+    label: z.string().optional(),
+    type: z.union([z.literal('phone'), z.literal('email'), z.literal('link')]).optional(),
+    link: z.string().optional(),
+})
+
 //request body coming from AI tool
 export const LandingInputSchema = z.object({
     siteName: z.string(),
@@ -299,6 +305,7 @@ export const LandingInputSchema = z.object({
     seo: z.object({ global: SEOGlobalSchema }).optional(),
     colors: ColorInputSchema,
     customComponents: z.array(CustomComponentSchema).optional(),
+    headerButton: HeaderButtonSchema.optional(),
     title: z.string().optional(),
     description: z.string().optional(),
     page: PageSchema,
@@ -318,6 +325,7 @@ export const SubdomainInputSchema = z.object({
     subdomain: z.string().min(1),
 })
 
+export type HeaderButtons = z.infer<typeof HeaderButtonSchema>
 export type LandingReq = z.infer<typeof LandingInputSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>

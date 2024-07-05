@@ -38,7 +38,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
 
     const themeColors = createLandingColors(colors)
 
-    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber)
+    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber, email, siteData.headerButton)
 
     const fontData = createFontData(siteData.fonts)
 
