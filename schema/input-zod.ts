@@ -289,7 +289,7 @@ const PageSchema = z.object({
 
 const HeaderButtonSchema = z.object({
     label: z.string().optional(),
-    type: z.union([z.literal('phone'), z.literal('email'), z.literal('link')]).optional(),
+    type: z.union([z.literal('phone'), z.literal('email'), z.literal('link'), z.literal('')]).optional(),
     link: z.string().optional(),
 })
 
