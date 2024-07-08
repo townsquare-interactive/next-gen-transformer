@@ -293,6 +293,11 @@ const HeaderButtonSchema = z.object({
     link: z.string().optional(),
 })
 
+const ScriptsSchema = z.object({
+    header: z.string().optional(),
+    body: z.string().optional(),
+})
+
 //request body coming from AI tool
 export const LandingInputSchema = z.object({
     siteName: z.string(),
@@ -306,6 +311,7 @@ export const LandingInputSchema = z.object({
     colors: ColorInputSchema,
     customComponents: z.array(CustomComponentSchema).optional(),
     headerButton: HeaderButtonSchema.optional(),
+    code: ScriptsSchema.optional(),
     title: z.string().optional(),
     description: z.string().optional(),
     page: PageSchema,

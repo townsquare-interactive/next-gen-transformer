@@ -191,6 +191,10 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
             hideSocial: true,
             mobileHeaderBtns: widgetData.headerButtons.mobileHeaderButtons,
         },
+        scripts: {
+            footer: siteData.code?.body || '',
+            header: siteData.code?.header || '',
+        },
         siteType: 'landing',
         customComponents: widgetData.customComponents,
         vcita: widgetData.vcita,
