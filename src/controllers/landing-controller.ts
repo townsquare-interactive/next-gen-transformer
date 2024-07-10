@@ -235,6 +235,7 @@ const createPageFile = (siteData: LandingReq) => {
             columnStyles: 'full-column',
             scripts: '',
             pageModals: [],
+            page_type: 'homepage',
         },
         attrs: {},
         seo: {

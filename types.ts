@@ -321,6 +321,7 @@ export interface SiteData {
     fontImport: string
     config: Config
     allStyles?: string
+    siteType?: string
 }
 
 export interface PublishData {

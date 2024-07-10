@@ -24,7 +24,7 @@ const router = express.Router()
 router.post('/save', async (req, res) => {
     try {
         //check input data for correct structure
-        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+        zodDataParse(req.body, saveInputSchema, 'savedInput', 'safeParse')
 
         try {
             const url = req.body.siteData.config.website.url

@@ -269,7 +269,7 @@ const VcitaDataSchema = z.object({
 
 export const SiteDataSchema = z.object({
     logos: Logo.describe('Data for all logo slots'),
-    social: z.array(socialItem.optional()),
+    social: z.array(socialItem.optional()).optional(),
     contact: Contact,
     siteName: z.string(),
     url: z.string(),
@@ -359,13 +359,14 @@ export const ModuleItemSchema = z.object({
     actionlbl: OptionalString,
     captionOn: OptionalString,
     headerTag: OptionalString,
-    imageSize: z.optional(
+    /*     imageSize: z.optional(
         z.object({
             width: z.number().nullable(),
             height: z.number().nullable(),
             size: z.string().or(z.number()).nullable(),
         })
-    ),
+    ), */
+    imageSize: z.unknown().optional(),
     modColor1: OptionalString,
     newwindow: OptionalString,
     pagelink2: OptionalString,
@@ -518,6 +519,19 @@ export const PageListSchema = z.object({
 
 //check data based off Zod schema
 export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel: 'safeParse' | 'parse' = 'safeParse') => {
+    const zodErrorLoop = (error: any) => {
+        const pathList = []
+        for (let i = 0; i < error.length; i++) {
+            const currentErrorPath = error[i].path
+            const innerPathList = []
+            for (let x = 0; x < currentErrorPath.length; x++) {
+                innerPathList.push(currentErrorPath[x])
+            }
+            pathList.push(innerPathList.join('->'))
+        }
+        return pathList
+    }
+
     const validatedPageData = schema.safeParse(data)
 
     if (validatedPageData.success === false) {
@@ -538,18 +552,4 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
     } else {
         return validatedPageData.data
     }
-}
-
-const zodErrorLoop = (error: any) => {
-    const pathList = []
-    for (let i = 0; i < error.length; i++) {
-        //console.log('error 1', error[i])
-        const currentErrorPath = error[i].path
-        const innerPathList = []
-        for (let x = 0; x < currentErrorPath.length; x++) {
-            innerPathList.push(currentErrorPath[x])
-        }
-        pathList.push(innerPathList.join('->'))
-    }
-    return pathList
 }

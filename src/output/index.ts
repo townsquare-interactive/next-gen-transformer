@@ -16,8 +16,8 @@ export const saveToS3 = async (data: PublishData) => {
     //Use zod to check data for types
     console.log('here is siteid', siteIdentifier)
     stringSchema.parse(siteIdentifier)
-    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout', 'parse')
-    zodDataParse(pages, CMSPagesSchema, 'Pages', 'parse')
+    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout', siteLayout.siteType === 'landing' ? 'parse' : 'safeParse')
+    zodDataParse(pages, CMSPagesSchema, 'Pages', siteLayout.siteType === 'landing' ? 'parse' : 'safeParse')
 
     const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
 

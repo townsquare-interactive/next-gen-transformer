@@ -46,6 +46,7 @@ export const fontList = {
     },
     Arial: {
         label: 'Arial',
+        google: '',
         'font-family': 'Arial',
         'is-body-font': '1',
         'is-feat-font': '1',
@@ -565,6 +566,7 @@ export const fontList = {
     },
     'Times-New-Roman': {
         label: 'Times New Roman',
+        google: '',
         'font-family': 'Times New Roman',
         'is-body-font': '1',
         'is-feat-font': '1',
