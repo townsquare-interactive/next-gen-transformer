@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AddressSchema, NavMenuItemSchema } from './utils-zod.js'
+import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
 /* ----------------------------------- Saved Data -------------------------------------*/
 
 const CodeSchema = z.object({
@@ -316,6 +316,7 @@ export const LandingInputSchema = z.object({
     description: z.string().optional(),
     page: PageSchema,
     address: AddressSchema.optional(),
+    analytics: AnalyticsSchema.optional(),
     fonts: z
         .array(
             z.object({

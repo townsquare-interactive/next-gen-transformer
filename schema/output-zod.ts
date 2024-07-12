@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { ValidationError } from '../src/errors.js'
-import { AddressSchema, NavMenuItemSchema } from './utils-zod.js'
+import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
 const Slot = z.object({})
 const OptionalString = z.string().optional()
 
@@ -312,12 +312,7 @@ export const SiteDataSchema = z.object({
             hideSocial: z.boolean().optional(),
         })
         .nullable(),
-    analytics: z
-        .object({
-            gaId: OptionalString,
-            gtmId: OptionalString,
-        })
-        .optional(),
+    analytics: AnalyticsSchema.optional(),
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>

@@ -28,3 +28,8 @@ export const NavMenuItemSchema = z.object({
     url: z.string(),
     disabled: z.boolean().optional(),
 })
+
+export const AnalyticsSchema = z.object({
+    gaId: OptionalString,
+    gtmId: OptionalString,
+})

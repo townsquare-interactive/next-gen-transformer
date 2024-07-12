@@ -35,6 +35,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
     const url = siteData.url
     let customComponents = siteData.customComponents
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+    const analytics = siteData.analytics
 
     const themeColors = createLandingColors(colors)
 
@@ -198,6 +199,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
         siteType: 'landing',
         customComponents: widgetData.customComponents,
         vcita: widgetData.vcita,
+        analytics: analytics,
     }
 
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
