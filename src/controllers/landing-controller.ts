@@ -19,7 +19,7 @@ export const validateRequestData = (req: { body: LandingReq }) => {
     //validate request data with zod
     const siteData = zodDataParse(req.body, LandingInputSchema, 'input', 'parse')
 
-    return { apexID: convertUrlToApexId(req.body.url), siteData }
+    return { apexID: convertUrlToApexId(siteData.url), siteData }
 }
 
 export const createLayoutFile = async (siteData: any, apexID: string) => {
@@ -206,11 +206,11 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
 }
 
 const createPageFile = (siteData: LandingReq) => {
-    const title = 'landing'
-    const slug = 'landing'
+    const title = siteData.pageUri ? siteData.pageUri : 'landing'
+    const slug = siteData.pageUri ? siteData.pageUri : 'landing'
 
     const sectionModules = createModulesWithSections(siteData.page.sections)
-    const modules = createModules(sectionModules, siteData.colors, removeWhiteSpace(siteData.phoneNumber || ''))
+    const modules = createModules(sectionModules, removeWhiteSpace(siteData.phoneNumber || ''))
 
     const page = {
         data: {

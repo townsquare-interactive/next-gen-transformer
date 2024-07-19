@@ -47,9 +47,9 @@ router.post('/landing', async (req, res) => {
         const { apexID, siteData } = validateRequestData(req)
 
         const data = await createLandingPageFiles(siteData, apexID)
-        await saveToS3({ ...data })
+        const response = await saveToS3({ ...data })
 
-        const response: DomainRes = await publishDomainToVercel(apexID)
+        //const response: DomainRes = await publishDomainToVercel(apexID) //domain actions currently disabled for landing
         console.log(response)
 
         res.json(response)

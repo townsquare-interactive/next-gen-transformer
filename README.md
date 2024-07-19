@@ -36,3 +36,4 @@ This section provides nformation about the error types used in the project.
 | VAL-004    | Error validating incoming request data.                                                                                   |
 | VAL-005    | Error validating transformed data being sent to S3.                                                                       |
 | AMS-006    | Site files not found in s3, domain cannot be updated.                                                                     |
+| AMS-007    | Error when trying to upload site files to S3                                                                              |

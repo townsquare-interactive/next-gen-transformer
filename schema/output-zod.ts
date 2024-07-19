@@ -517,12 +517,18 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
     const zodErrorLoop = (error: any) => {
         const pathList = []
         for (let i = 0; i < error.length; i++) {
+            console.log('errror things', error[i])
             const currentErrorPath = error[i].path
             const innerPathList = []
             for (let x = 0; x < currentErrorPath.length; x++) {
                 innerPathList.push(currentErrorPath[x])
             }
-            pathList.push(innerPathList.join('->'))
+            const errorStatus = {
+                //fieldPath: innerPathList.join(' -> '),
+                fieldPath: error[i].path,
+                message: error[i].message,
+            }
+            pathList.push(errorStatus)
         }
         return pathList
     }
@@ -536,7 +542,7 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
             message: type === 'input' ? 'Error validating form fields' : 'Validation error on output data going to S3',
             errorType: type === 'input' ? 'VAL-004' : 'VAL-005',
             state: {
-                errorFields: pathList.join(' | '),
+                erroredFields: pathList,
             },
         }
         if (parseLevel === 'safeParse') {

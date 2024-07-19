@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ValidationError, TransformError, SiteDeploymentError, handleError } from './errors'
+import { ValidationError, TransformError, SiteDeploymentError, handleError, DataUploadError } from './errors'
 
 // Mocking uuidv4 to always return the same UUID
 vi.mock('uuid', () => ({
@@ -23,14 +23,14 @@ describe('handleError', () => {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
-        const error = new ValidationError({ message: 'Validation error', errorType: 'VAL-001', state: 'invalid' })
+        const error = new ValidationError({ message: 'Validation error', errorType: 'VAL-001', state: { erroredFields: ['phone'] } })
 
         handleError(error, mockResponse)
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'VAL-001', state: 'invalid' },
+            { errorType: 'VAL-001', state: { erroredFields: ['phone'] } },
             expect.any(String)
         )
 
@@ -39,9 +39,9 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'VAL-001',
-            message: 'Validation error',
+            message: 'Validation error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: undefined,
-            state: 'invalid',
+            state: { erroredFields: ['phone'] },
             status: 'Error',
         })
     })
@@ -67,7 +67,7 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'TRN-001',
-            message: 'Error transforming site data: Transform error',
+            message: 'Error transforming site data: Transform error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
             status: 'Error',
         })
@@ -99,7 +99,38 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'DEP-001',
-            message: 'Error creating site: Deployment error',
+            message: 'Error creating site: Deployment error (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            domain: 'example.com',
+            status: 'Error',
+        })
+    })
+    it('should log the error and send response with error ID for DataUploadError', () => {
+        const mockResponse = {
+            status: vi.fn().mockReturnThis(),
+            json: vi.fn(),
+        }
+        const error = new DataUploadError({
+            message: 'Data upload error',
+            domain: 'example.com',
+            errorType: 'AWS-007',
+            state: 'deploymentState',
+        })
+
+        handleError(error, mockResponse)
+
+        // Check if console.error was called with the correct message
+        expect(console.error).toHaveBeenCalledWith(
+            '[Error ID: 12345678-1234-1234-1234-123456789abc]',
+            { errorType: 'AWS-007', state: 'deploymentState' },
+            expect.any(String)
+        )
+
+        // Check if response was sent with the correct status and JSON
+        expect(mockResponse.status).toHaveBeenCalledWith(500)
+        expect(mockResponse.json).toHaveBeenCalledWith({
+            id: '12345678-1234-1234-1234-123456789abc',
+            errorType: 'AWS-007',
+            message: 'Error uploading to S3: Data upload error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
             status: 'Error',
         })
@@ -126,7 +157,7 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'GEN-003',
-            message: 'An unexpected error occurred:Function failed to call',
+            message: 'An unexpected error occurred:Function failed to call (Error ID: 12345678-1234-1234-1234-123456789abc)',
             status: 'Error',
             domain: 'example.com',
         })
