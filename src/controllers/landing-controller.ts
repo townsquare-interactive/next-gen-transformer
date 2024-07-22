@@ -14,6 +14,7 @@ import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
 import { TransformError } from '../errors.js'
 import { zodDataParse } from '../../schema/output-zod.js'
+import { v4 as uuidv4 } from 'uuid'
 
 export const validateRequestData = (req: { body: LandingReq }) => {
     //validate request data with zod
@@ -251,18 +252,21 @@ const createPageFile = (siteData: LandingReq) => {
     return page
 }
 
-const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumber: string) => {
+const createModules = (modules: AiPageModules, phoneNumber: string) => {
     let newModules = []
     let modCount = 1
     for (let i = 0; i < modules.length; i++) {
         const currentMod = modules[i]
         let newMod
+
+        const modID = uuidv4()
         if (currentMod.type === 'dl') {
-            console.log('headline test', currentMod.headline)
+            const dlOverlayColor = 'rgb(0,0,0,0.5)'
+
             newMod = {
                 attributes: {
-                    id: '5cf59c97_e330_4565_97d0_9c166550903d',
-                    uid: '5cf59c97_e330_4565_97d0_9c166550903d',
+                    id: modID,
+                    uid: modID,
                     type: 'parallax_1',
                     align: 'left',
                     items: [
@@ -279,16 +283,13 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                                 height: 1080,
                                 size: '261.61 kB',
                             },
-                            modColor1: colors.accent,
+                            modColor1: dlOverlayColor,
                             newwindow: '0',
                             subheader: currentMod.subheader,
                             isFeatured: '',
-                            modOpacity: 0.42,
+                            modOpacity: 0,
                             newwindow2: '1',
                             promoColor: 'var(--promo)',
-                            itemStyle: {
-                                background: colors.accent,
-                            },
                             links: {
                                 weblink: currentMod.weblink || `tel:${phoneNumber}` || `tel:${phoneNumber}`,
                             },
@@ -335,8 +336,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     imgsize: 'widescreen_2_4_1',
                     blockSwitch1: 1,
                     scale_to_fit: '',
-                    customClassName: 'acdl white deskadstart',
-                    modId: '5cf59c97_e330_4565_97d0_9c166550903d',
+                    customClassName: '',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -344,11 +345,10 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                 componentType: 'Parallax',
             }
         } else if (currentMod.type === 'coupon') {
-            //'http://nextgenprototype.production.townsquareinteractive.com/files/2024/03/50_off_any_service_coupon.png'
             newMod = {
                 attributes: {
-                    id: '9e6df334_a8d8_465f_fb68_989f2e4fd5b1',
-                    uid: '9e6df334_a8d8_465f_fb68_989f2e4fd5b1',
+                    id: modID,
+                    uid: modID,
                     type: 'article_1',
                     items: [
                         {
@@ -369,8 +369,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     imgsize: 'no_sizing',
                     hideTitle: 0,
                     blockSwitch1: 1,
-                    customClassName: 'adcoupons couponAdd',
-                    modId: '9e6df334_a8d8_465f_fb68_989f2e4fd5b1',
+                    customClassName: '',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -380,8 +380,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'form') {
             newMod = {
                 attributes: {
-                    id: '14d36b73_a89c_4cc0_fe84_3b8ca9724ad0',
-                    uid: '14d36b73_a89c_4cc0_fe84_3b8ca9724ad0',
+                    id: modID,
+                    uid: modID,
                     type: 'plugin',
                     items: [
                         {
@@ -394,7 +394,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     columns: 1,
                     imgsize: 'no_sizing',
                     blockSwitch1: 1,
-                    customClassName: 'formsplitformv2 sign_up deskadform',
+                    customClassName: '',
                     contactFormData: {
                         formTitle: '',
                         formService: 'webhook',
@@ -454,7 +454,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                             btnType: 'btn_1 btn_p1',
                         },
                     },
-                    modId: '14d36b73_a89c_4cc0_fe84_3b8ca9724ad0',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -464,8 +464,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'banner') {
             newMod = {
                 attributes: {
-                    id: '5cd0c223_3db2_439e_c02c_367a4bf641fa',
-                    uid: '5cd0c223_3db2_439e_c02c_367a4bf641fa',
+                    id: modID,
+                    uid: modID,
                     type: 'banner_1',
                     items: [
                         {
@@ -503,8 +503,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                             isBeaconHero: false,
                             imagePriority: false,
                             itemCount: 1,
-                            btnStyles:
-                                ' #id_5cd0c223_3db2_439e_c02c_367a4bf641fa .item_1 .btn2_override {color:#ffffff; background-color:transparent;} #id_5cd0c223_3db2_439e_c02c_367a4bf641fa .item_1 .btn_promo {color: var(--promo); background-color: #ffffff;}\n            #id_5cd0c223_3db2_439e_c02c_367a4bf641fa .item_1 .btn_promo:hover{color: #ffffff; background-color: var(--promo3);}',
+                            btnStyles: ` #id_${modID} .item_1 .btn2_override {color:#ffffff; background-color:transparent;} #id_${modID} .item_1 .btn_promo {color: var(--promo); background-color: #ffffff;}\n            #id_${modID} .item_1 .btn_promo:hover{color: #ffffff; background-color: var(--promo3);}`,
                             nextImageSizes: '100vw',
                             isFeatureButton: false,
                         },
@@ -514,8 +513,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     imgsize: 'widescreen_2_4_1',
                     hideTitle: 0,
                     blockSwitch1: 1,
-                    customClassName: 'adbanner',
-                    modId: '5cd0c223_3db2_439e_c02c_367a4bf641fa',
+                    customClassName: '',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -525,8 +524,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'text content') {
             newMod = {
                 attributes: {
-                    id: 'a8480c39_b0ed_44aa_eaea_ce9f091296bb',
-                    uid: 'a8480c39_b0ed_44aa_eaea_ce9f091296bb',
+                    id: modID,
+                    uid: modID,
                     lazy: '',
                     type: 'article_1',
                     well: '',
@@ -566,8 +565,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     imgsize: 'square_1_1',
                     hideTitle: 0,
                     blockSwitch1: 1,
-                    customClassName: 'largertext',
-                    modId: 'a8480c39_b0ed_44aa_eaea_ce9f091296bb',
+                    customClassName: '',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -578,8 +577,8 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'video') {
             newMod = {
                 attributes: {
-                    id: '911fddb4_52f2_44ae_ab6e_e85ee20db52f',
-                    uid: '911fddb4_52f2_44ae_ab6e_e85ee20db52f',
+                    id: modID,
+                    uid: modID,
                     type: 'article_1',
                     items: [
                         {
@@ -602,7 +601,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     columns: 1,
                     imgsize: 'square_1_1',
                     blockSwitch1: 1,
-                    modId: '911fddb4_52f2_44ae_ab6e_e85ee20db52f',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -613,13 +612,13 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'reviews' && currentMod.reviews) {
             newMod = {
                 attributes: {
-                    id: '491801eb_6a65_41c5_ad06_9c37849163ca',
-                    uid: '491801eb_6a65_41c5_ad06_9c37849163ca',
+                    id: modID,
+                    uid: modID,
                     type: 'review_carousel',
                     columns: 1,
                     imgsize: 'square_1_1',
                     blockSwitch1: 1,
-                    modId: '491801eb_6a65_41c5_ad06_9c37849163ca',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -630,15 +629,16 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
         } else if (currentMod.type === 'headline') {
             newMod = {
                 attributes: {
-                    id: 'f051be2e_23a6_4425_e1e4_891f5c31b18c',
-                    uid: 'f051be2e_23a6_4425_e1e4_891f5c31b18c',
+                    id: modID,
+                    uid: modID,
                     type: 'article_1',
                     items: [
                         {
                             align: 'center',
                             headline: currentMod.headline,
                             itemCount: 1,
-                            btnStyles: ' #id_f051be2e_23a6_4425_e1e4_891f5c31b18c .item_1 .btn2_override {color:#ffffff; background-color:transparent;} ',
+                            btnStyles: ` #id_${modID} .item_1 .btn2_override {color:#ffffff; background-color:transparent;} `,
+
                             nextImageSizes: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px',
                             isFeatureButton: false,
                             headSize: 'xl',
@@ -647,7 +647,7 @@ const createModules = (modules: AiPageModules, colors: LandingColors, phoneNumbe
                     ],
                     columns: 1,
                     customClassName: 'satytext',
-                    modId: 'f051be2e_23a6_4425_e1e4_891f5c31b18c',
+                    modId: modID,
                     modCount: modCount,
                     columnLocation: 0,
                     isSingleColumn: false,
@@ -669,8 +669,9 @@ export const createLandingPageFiles = async (siteData: LandingReq, apexID: strin
     try {
         const layoutContents = await createLayoutFile(siteData, apexID)
         const page = createPageFile(siteData)
+        let siteID = layoutContents.siteIdentifier
 
-        return { siteLayout: layoutContents.siteLayout, siteIdentifier: layoutContents.siteIdentifier, pages: [page] }
+        return { siteLayout: layoutContents.siteLayout, siteIdentifier: siteID, pages: [page] }
     } catch (err) {
         throw new TransformError({
             message: err.message,

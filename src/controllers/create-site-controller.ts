@@ -22,6 +22,7 @@ const verifyDomain = async (domainName: string) => {
     const vercelApiUrl = `https://${domainName}`
 
     //fetch domain to see if you get a response
+
     const fetchDomainData = async (url: string, retries = 3, delayMs = 1400) => {
         for (let attempt = 1; attempt <= retries; attempt++) {
             const response = await fetch(url, {

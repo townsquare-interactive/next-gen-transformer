@@ -518,7 +518,7 @@ export const createLandingColors = (colors: LandingColors) => {
         heroLink: '#DDDDDD',
         heroLinkHover: '#dddddd',
         captionText: '#ffffff',
-        captionBackground: 'rgba(0,0,0,0.4)',
+        captionBackground: 'rgb(0,0,0,0.3)',
         NavText: '#666666',
         navHover: colors.primary || '#db1a21',
         navCurrent: colors.primary || '#db1a21',

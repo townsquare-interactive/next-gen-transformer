@@ -63,11 +63,6 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
 
     }
        `
-    //#1F71F3
-    //#6D169A
-    //#bc63e9
-    //#fc0909
-    //#1CB965
 
     const textColors = ` body .txt-font .dsc a{ color: var(--link);}
        .accent-txt{color:var(--txt-accent);} 
