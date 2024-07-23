@@ -19,18 +19,22 @@ describe('handleError', () => {
     })
 
     it('should log the error and send response with error ID for ValidationError', () => {
-        const mockResponse = {
+        const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
-        const error = new ValidationError({ message: 'Validation error', errorType: 'VAL-001', state: { erroredFields: ['phone'] } })
+        const error = new ValidationError({
+            message: 'Validation error',
+            errorType: 'VAL-001',
+            state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] },
+        })
 
         handleError(error, mockResponse)
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'VAL-001', state: { erroredFields: ['phone'] } },
+            { errorType: 'VAL-001', state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] } },
             expect.any(String)
         )
 
@@ -41,24 +45,28 @@ describe('handleError', () => {
             errorType: 'VAL-001',
             message: 'Validation error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: undefined,
-            state: { erroredFields: ['phone'] },
+            state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] },
             status: 'Error',
         })
     })
 
     it('should log the error and send response with error ID for TransformError', () => {
-        const mockResponse = {
+        const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
-        const error = new TransformError('Transform error', 'TRN-001', 'errorState')
+        const error = new TransformError({
+            message: 'Transform error',
+            errorType: 'TRN-001',
+            state: { siteStatus: 'deploymentState' },
+        })
 
         handleError(error, mockResponse, 'example.com')
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'TRN-001', state: 'errorState' },
+            { errorType: 'TRN-001', state: { siteStatus: 'deploymentState' } },
             expect.any(String)
         )
 
@@ -69,12 +77,13 @@ describe('handleError', () => {
             errorType: 'TRN-001',
             message: 'Error transforming site data: Transform error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
+            state: { siteStatus: 'deploymentState' },
             status: 'Error',
         })
     })
 
     it('should log the error and send response with error ID for SiteDeploymentError', () => {
-        const mockResponse = {
+        const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
@@ -82,7 +91,9 @@ describe('handleError', () => {
             message: 'Deployment error',
             domain: 'example.com',
             errorType: 'DEP-001',
-            state: 'deploymentState',
+            state: {
+                domainStatus: 'Domain unable to be removed from project',
+            },
         })
 
         handleError(error, mockResponse)
@@ -90,7 +101,12 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'DEP-001', state: 'deploymentState' },
+            {
+                errorType: 'DEP-001',
+                state: {
+                    domainStatus: 'Domain unable to be removed from project',
+                },
+            },
             expect.any(String)
         )
 
@@ -101,11 +117,14 @@ describe('handleError', () => {
             errorType: 'DEP-001',
             message: 'Error creating site: Deployment error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
+            state: {
+                domainStatus: 'Domain unable to be removed from project',
+            },
             status: 'Error',
         })
     })
     it('should log the error and send response with error ID for DataUploadError', () => {
-        const mockResponse = {
+        const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
@@ -113,7 +132,7 @@ describe('handleError', () => {
             message: 'Data upload error',
             domain: 'example.com',
             errorType: 'AWS-007',
-            state: 'deploymentState',
+            state: { fileStatus: 'deploymentState' },
         })
 
         handleError(error, mockResponse)
@@ -121,7 +140,7 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'AWS-007', state: 'deploymentState' },
+            { errorType: 'AWS-007', state: { fileStatus: 'deploymentState' } },
             expect.any(String)
         )
 
@@ -132,16 +151,17 @@ describe('handleError', () => {
             errorType: 'AWS-007',
             message: 'Error uploading to S3: Data upload error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
+            state: { fileStatus: 'deploymentState' },
             status: 'Error',
         })
     })
 
     it('should log the error and send response with error ID for unexpected errors', () => {
-        const mockResponse = {
+        const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
-        const error = new Error('Function failed to call')
+        const error: any = new Error('Function failed to call')
 
         handleError(error, mockResponse, 'example.com')
 
@@ -157,9 +177,10 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'GEN-003',
-            message: 'An unexpected error occurred:Function failed to call (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            message: 'An unexpected error occurred: Function failed to call (Error ID: 12345678-1234-1234-1234-123456789abc)',
             status: 'Error',
             domain: 'example.com',
+            state: undefined,
         })
     })
 })

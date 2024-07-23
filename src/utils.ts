@@ -14,7 +14,7 @@ export const socials = {
 
 export function socialConvert(str: string) {
     let icon = iconConvert(str)
-    console.log('after', icon)
+
     if (icon === socials.google) {
         return ['fab', socials.google]
     } else if (icon === socials.facebook) {

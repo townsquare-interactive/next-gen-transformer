@@ -1,0 +1,39 @@
+import { describe, it, expect, vi } from 'vitest'
+import { zodDataParse } from './output-zod'
+import { z } from 'zod'
+import { ValidationError } from '../src/errors.js'
+describe('zodDataParse', () => {
+    const ExampleSchema = z.object({
+        name: z.string(),
+        age: z.number().min(0),
+    })
+    it('should return parsed data for valid input', () => {
+        const data = { name: 'John Doe', age: 30 }
+        const result = zodDataParse(data, ExampleSchema)
+        expect(result).toEqual(data)
+    })
+    it('should log the zod error with an invalid input with safeParse param', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        const data = { name: 'John Doe', age: -5 }
+        const result = zodDataParse(data, ExampleSchema, 'input', 'safeParse')
+        expect(consoleSpy).toHaveBeenCalledWith('Zod parse error', {
+            message: 'Error validating form fields',
+            errorType: 'VAL-004',
+            state: { errorFields: 'age' },
+        })
+        consoleSpy.mockRestore()
+    })
+    it('should throw ValidationError for invalid input with parse', () => {
+        const data = { name: 'John Doe', age: -5 }
+        expect(() => {
+            zodDataParse(data, ExampleSchema, 'input', 'parse')
+        }).toThrowError(
+            new ValidationError({
+                message: 'Error validating form fields',
+                errorType: 'VAL-004',
+                state: { errorFields: 'age' },
+            })
+        )
+    })
+})
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0cHV0LXpvZC50ZXN0LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc2NoZW1hL291dHB1dC16b2QudGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsUUFBUSxFQUFFLEVBQUUsRUFBRSxNQUFNLEVBQUUsRUFBRSxFQUFFLE1BQU0sUUFBUSxDQUFBO0FBQ2pELE9BQU8sRUFBRSxZQUFZLEVBQUUsTUFBTSxjQUFjLENBQUE7QUFDM0MsT0FBTyxFQUFFLENBQUMsRUFBRSxNQUFNLEtBQUssQ0FBQTtBQUN2QixPQUFPLEVBQUUsZUFBZSxFQUFFLE1BQU0sZUFBZSxDQUFBO0FBRS9DLFFBQVEsQ0FBQyxjQUFjLEVBQUUsR0FBRyxFQUFFO0lBQzFCLE1BQU0sYUFBYSxHQUFHLENBQUMsQ0FBQyxNQUFNLENBQUM7UUFDM0IsSUFBSSxFQUFFLENBQUMsQ0FBQyxNQUFNLEVBQUU7UUFDaEIsR0FBRyxFQUFFLENBQUMsQ0FBQyxNQUFNLEVBQUUsQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDO0tBQ3pCLENBQUMsQ0FBQTtJQUVGLEVBQUUsQ0FBQywyQ0FBMkMsRUFBRSxHQUFHLEVBQUU7UUFDakQsTUFBTSxJQUFJLEdBQUcsRUFBRSxJQUFJLEVBQUUsVUFBVSxFQUFFLEdBQUcsRUFBRSxFQUFFLEVBQUUsQ0FBQTtRQUMxQyxNQUFNLE1BQU0sR0FBRyxZQUFZLENBQUMsSUFBSSxFQUFFLGFBQWEsQ0FBQyxDQUFBO1FBQ2hELE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUE7SUFDaEMsQ0FBQyxDQUFDLENBQUE7SUFFRixFQUFFLENBQUMscUVBQXFFLEVBQUUsR0FBRyxFQUFFO1FBQzNFLE1BQU0sVUFBVSxHQUFHLEVBQUUsQ0FBQyxLQUFLLENBQUMsT0FBTyxFQUFFLEtBQUssQ0FBQyxDQUFDLGtCQUFrQixDQUFDLEdBQUcsRUFBRSxHQUFFLENBQUMsQ0FBQyxDQUFBO1FBQ3hFLE1BQU0sSUFBSSxHQUFHLEVBQUUsSUFBSSxFQUFFLFVBQVUsRUFBRSxHQUFHLEVBQUUsQ0FBQyxDQUFDLEVBQUUsQ0FBQTtRQUMxQyxNQUFNLE1BQU0sR0FBRyxZQUFZLENBQUMsSUFBSSxFQUFFLGFBQWEsRUFBRSxPQUFPLEVBQUUsV0FBVyxDQUFDLENBQUE7UUFFdEUsTUFBTSxDQUFDLFVBQVUsQ0FBQyxDQUFDLG9CQUFvQixDQUFDLGlCQUFpQixFQUFFO1lBQ3ZELE9BQU8sRUFBRSw4QkFBOEI7WUFDdkMsU0FBUyxFQUFFLFNBQVM7WUFDcEIsS0FBSyxFQUFFLEVBQUUsV0FBVyxFQUFFLEtBQUssRUFBRTtTQUNoQyxDQUFDLENBQUE7UUFFRixVQUFVLENBQUMsV0FBVyxFQUFFLENBQUE7SUFDNUIsQ0FBQyxDQUFDLENBQUE7SUFFRixFQUFFLENBQUMsMkRBQTJELEVBQUUsR0FBRyxFQUFFO1FBQ2pFLE1BQU0sSUFBSSxHQUFHLEVBQUUsSUFBSSxFQUFFLFVBQVUsRUFBRSxHQUFHLEVBQUUsQ0FBQyxDQUFDLEVBQUUsQ0FBQTtRQUUxQyxNQUFNLENBQUMsR0FBRyxFQUFFO1lBQ1IsWUFBWSxDQUFDLElBQUksRUFBRSxhQUFhLEVBQUUsT0FBTyxFQUFFLE9BQU8sQ0FBQyxDQUFBO1FBQ3ZELENBQUMsQ0FBQyxDQUFDLFlBQVksQ0FDWCxJQUFJLGVBQWUsQ0FBQztZQUNoQixPQUFPLEVBQUUsOEJBQThCO1lBQ3ZDLFNBQVMsRUFBRSxTQUFTO1lBQ3BCLEtBQUssRUFBRSxFQUFFLFdBQVcsRUFBRSxLQUFLLEVBQUU7U0FDaEMsQ0FBQyxDQUNMLENBQUE7SUFDTCxDQUFDLENBQUMsQ0FBQTtBQUNOLENBQUMsQ0FBQyxDQUFBIn0=

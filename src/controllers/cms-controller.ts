@@ -38,7 +38,8 @@ import {
 import { createCustomComponents, extractIframeSrc, transformVcita } from '../customComponentsUtils.js'
 import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
-import { PageListSchema, zodDataParse } from '../../schema/output-zod.js'
+import { PageListSchema } from '../../schema/output-zod.js'
+import { zodDataParse } from '../../schema/utils-zod.js'
 import { createColorClasses, createBtnStyles, createItemStyles } from '../style-utils.js'
 
 const toStringSchema = z.coerce.string()
@@ -428,7 +429,6 @@ const transformPageModules = (
 
                 let modRenderType = ''
                 if (currentModule.type === 'plugin' && currentModule.items[0]?.plugin === '[map]') {
-                    console.log('map time')
                     modRenderType = 'Map'
                 } else {
                     modRenderType = determineModRenderType(currentModule.type)
@@ -716,6 +716,3 @@ export const createPageList = (page: { title: string; slug: string; id: string; 
 
     return pageData
 }
-
-//b dynamoClient
-//throughout the evening prewritten toast or topic

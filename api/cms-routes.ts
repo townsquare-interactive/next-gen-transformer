@@ -11,12 +11,11 @@ import {
     checkIfSiteExistsPostgres,
     removeDomainFromVercel,
 } from '../src/controllers/create-site-controller.js'
-import { zodDataParse } from '../schema/output-zod.js'
+import { zodDataParse } from '../schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
 import { createLandingPageFiles, validateRequestData } from '../src/controllers/landing-controller.js'
-import type { DomainRes } from '../types.js'
 import { handleError } from '../src/errors.js'
 const router = express.Router()
 
@@ -49,11 +48,11 @@ router.post('/landing', async (req, res) => {
         const data = await createLandingPageFiles(siteData, apexID)
         const response = await saveToS3({ ...data })
 
-        //const response: DomainRes = await publishDomainToVercel(apexID) //domain actions currently disabled for landing
         console.log(response)
 
         res.json(response)
     } catch (err) {
+        err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
     }
 })

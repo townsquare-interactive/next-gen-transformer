@@ -13,7 +13,7 @@ import { LandingInputSchema, type AiPageModules, type LandingReq, type LandingCo
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
 import { TransformError } from '../errors.js'
-import { zodDataParse } from '../../schema/output-zod.js'
+import { zodDataParse } from '../../schema/utils-zod.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const validateRequestData = (req: { body: LandingReq }) => {
@@ -675,7 +675,7 @@ export const createLandingPageFiles = async (siteData: LandingReq, apexID: strin
     } catch (err) {
         throw new TransformError({
             message: err.message,
-            errorID: 'GEN-003',
+            errorType: 'GEN-003',
             state: {
                 siteStatus: 'Process stopped when creating site files',
             },
