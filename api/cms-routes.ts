@@ -15,8 +15,9 @@ import { zodDataParse } from '../schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
-import { createLandingPageFiles, validateRequestData } from '../src/controllers/landing-controller.js'
+import { validateRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/errors.js'
+import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 const router = express.Router()
 
 //save from luna cms

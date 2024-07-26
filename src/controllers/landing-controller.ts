@@ -206,7 +206,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
 }
 
-const createPageFile = (siteData: LandingReq) => {
+export const createPageFile = (siteData: LandingReq) => {
     const title = siteData.pageUri ? siteData.pageUri : 'landing'
     const slug = siteData.pageUri ? siteData.pageUri : 'landing'
 
@@ -663,22 +663,4 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
     }
 
     return newModules
-}
-
-export const createLandingPageFiles = async (siteData: LandingReq, apexID: string) => {
-    try {
-        const layoutContents = await createLayoutFile(siteData, apexID)
-        const page = createPageFile(siteData)
-        let siteID = layoutContents.siteIdentifier
-
-        return { siteLayout: layoutContents.siteLayout, siteIdentifier: siteID, pages: [page] }
-    } catch (err) {
-        throw new TransformError({
-            message: err.message,
-            errorType: 'GEN-003',
-            state: {
-                siteStatus: 'Process stopped when creating site files',
-            },
-        })
-    }
 }
