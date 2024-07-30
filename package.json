@@ -7,7 +7,8 @@
     "scripts": {
         "test": "vitest",
         "start": "npx tsx index.ts",
-        "dev": "npx tsx index.ts"
+        "dev": "npx tsx index.ts",
+        "generate-readme": "node generateReadme.js"
     },
     "author": "",
     "license": "ISC",
