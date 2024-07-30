@@ -2,7 +2,7 @@ import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import type { PublishData } from '../../types.js'
 import { SiteDataSchema, CMSPagesSchema } from '../../schema/output-zod.js'
-import { zodDataParse } from '../../schema/utils-zod.js'
+import { logZodDataParse, zodDataParse } from '../../schema/utils-zod.js'
 import { z } from 'zod'
 import { DataUploadError } from '../errors.js'
 //import { zodToJsonSchema } from 'zod-to-json-schema'
@@ -18,8 +18,16 @@ export const saveToS3 = async (data: PublishData) => {
     //Use zod to check data for types
     console.log('here is siteid', siteIdentifier)
     stringSchema.parse(siteIdentifier)
-    zodDataParse(siteLayout, SiteDataSchema, 'Site Layout', siteLayout.siteType === 'landing' ? 'parse' : 'safeParse')
-    zodDataParse(pages, CMSPagesSchema, 'Pages', siteLayout.siteType === 'landing' ? 'parse' : 'safeParse')
+
+    //Run parsing checks (right now only throws errors when creating landing pages)
+    if (siteLayout.siteType === 'landing') {
+        zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
+        zodDataParse(pages, CMSPagesSchema, 'Pages')
+    } else {
+        //log zod parsing errors without disrupting process
+        logZodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
+        logZodDataParse(pages, CMSPagesSchema, 'Pages')
+    }
 
     try {
         const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
@@ -31,7 +39,7 @@ export const saveToS3 = async (data: PublishData) => {
                 await addFileS3(pages[i], `${s3SitePath}/pages/${pages[i].data.slug}`)
             }
 
-            //update pagelist
+            //update or add pagelist file
             let newPageList
             newPageList = await updatePageList(pages, s3SitePath)
         } else {

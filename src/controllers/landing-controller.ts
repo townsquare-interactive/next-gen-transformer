@@ -12,15 +12,14 @@ import {
 import { LandingInputSchema, type AiPageModules, type LandingReq, type LandingColors } from '../../schema/input-zod.js'
 import { getFileS3 } from '../s3Functions.js'
 import type { Layout } from '../../types.js'
-import { TransformError } from '../errors.js'
-import { zodDataParse } from '../../schema/utils-zod.js'
 import { v4 as uuidv4 } from 'uuid'
+import { zodDataParse } from '../../schema/utils-zod.js'
 
-export const validateRequestData = (req: { body: LandingReq }) => {
-    //validate request data with zod
-    const siteData = zodDataParse(req.body, LandingInputSchema, 'input', 'parse')
+export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
+    const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
+    const apexID = convertUrlToApexId(siteData.url)
 
-    return { apexID: convertUrlToApexId(siteData.url), siteData }
+    return { apexID, siteData }
 }
 
 export const createLayoutFile = async (siteData: any, apexID: string) => {

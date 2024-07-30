@@ -1,19 +1,19 @@
 import { describe, it, expect, vi } from 'vitest'
-import { zodDataParse } from './utils-zod'
+import { logZodDataParse, zodDataParse } from './utils-zod'
 import { z } from 'zod'
 import { ValidationError } from '../src/errors.js'
 
-describe('zodDataParse', () => {
-    const ExampleSchema = z.object({
-        name: z.string(),
-        age: z.number().min(0).optional(),
-        status: z
-            .object({
-                occupation: z.string(),
-            })
-            .optional(),
-    })
+const ExampleSchema = z.object({
+    name: z.string(),
+    age: z.number().min(0).optional(),
+    status: z
+        .object({
+            occupation: z.string(),
+        })
+        .optional(),
+})
 
+describe('zodDataParse', () => {
     it('should return parsed data for valid input', () => {
         const data = { name: 'John Doe', age: 30 }
         const result = zodDataParse(data, ExampleSchema)
@@ -24,7 +24,7 @@ describe('zodDataParse', () => {
         const dataError = { name: 'John Doe', age: -5 }
 
         try {
-            zodDataParse(dataError, ExampleSchema, 'input', 'parse')
+            zodDataParse(dataError, ExampleSchema, 'input')
         } catch (error) {
             expect(error).toBeInstanceOf(ValidationError)
             expect(error.message).toBe('Error validating form fields')
@@ -40,32 +40,11 @@ describe('zodDataParse', () => {
         }
     })
 
-    it('should log the zod error but NOT throw an error with an invalid input with safeParse param', () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        const dataErrorSafe = { name: 'John Doe', age: -5 }
-        zodDataParse(dataErrorSafe, ExampleSchema, 'input', 'safeParse')
-
-        expect(consoleSpy).toHaveBeenCalledWith('Zod parse error', {
-            message: 'Error validating form fields',
-            errorType: 'VAL-004',
-            state: {
-                erroredFields: [
-                    {
-                        fieldPath: ['age'],
-                        message: 'Number must be greater than or equal to 0',
-                    },
-                ],
-            },
-        })
-
-        consoleSpy.mockRestore()
-    })
-
     it('should provide all field error data when multiple are present', () => {
         const dataMultipleErrors = { name: 'John Doe', age: -5, status: { occupation: null } }
 
         try {
-            zodDataParse(dataMultipleErrors, ExampleSchema, 'input', 'parse')
+            zodDataParse(dataMultipleErrors, ExampleSchema, 'input')
         } catch (error) {
             expect(error).toBeInstanceOf(ValidationError)
             expect(error.message).toBe('Error validating form fields')
@@ -88,7 +67,7 @@ describe('zodDataParse', () => {
         const dataNoName = { age: 5, status: { occupation: 'construction' } }
 
         try {
-            zodDataParse(dataNoName, ExampleSchema, 'input', 'parse')
+            zodDataParse(dataNoName, ExampleSchema, 'input')
         } catch (error) {
             expect(error).toBeInstanceOf(ValidationError)
             expect(error.message).toBe('Error validating form fields')
@@ -106,26 +85,48 @@ describe('zodDataParse', () => {
     it('should NOT throw an error when an optional field is not included', () => {
         const dataNoAge = { name: 'Jo', status: { occupation: 'construction' } }
 
-        const parsedDataOutput = zodDataParse(dataNoAge, ExampleSchema, 'input', 'parse')
+        const parsedDataOutput = zodDataParse(dataNoAge, ExampleSchema, 'input')
         expect(parsedDataOutput).toBeTruthy()
     })
 
     it('should log a different message and type for output data', () => {
         const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
         const data2 = { name: 'John Doe', age: -5 }
-        zodDataParse(data2, ExampleSchema, 'output', 'safeParse')
+        try {
+            zodDataParse(data2, ExampleSchema, 'output')
+        } catch (error) {
+            expect(consoleSpy).toHaveBeenCalledWith({
+                message: 'Validation error on output data going to S3',
+                errorType: 'VAL-005',
+                state: {
+                    erroredFields: [
+                        {
+                            fieldPath: ['age'],
+                            message: 'Number must be greater than or equal to 0',
+                        },
+                    ],
+                },
+            })
+
+            consoleSpy.mockRestore()
+        }
+    })
+})
+
+describe('logZodDataParse', () => {
+    it('should log the zod error but NOT throw an error with an invalid input with the logZodDataParse function', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        const dataErrorSafe = { name: 'John Doe', age: -5 }
+        logZodDataParse(dataErrorSafe, ExampleSchema, 'input')
 
         expect(consoleSpy).toHaveBeenCalledWith('Zod parse error', {
-            message: 'Validation error on output data going to S3',
-            errorType: 'VAL-005',
-            state: {
-                erroredFields: [
-                    {
-                        fieldPath: ['age'],
-                        message: 'Number must be greater than or equal to 0',
-                    },
-                ],
-            },
+            message: 'Zod parsing error log on input',
+            erroredFields: [
+                {
+                    fieldPath: ['age'],
+                    message: 'Number must be greater than or equal to 0',
+                },
+            ],
         })
 
         consoleSpy.mockRestore()

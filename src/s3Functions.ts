@@ -45,7 +45,6 @@ export const getFileS3 = async (key: string, rtnObj: any = { pages: [] }, type =
             }
         }
     } catch (err) {
-        console.error(`Error fetching file ${key} from S3:`)
         console.log(`File ${key} not found in S3, creating a new file`)
         return rtnObj
     }
@@ -209,19 +208,6 @@ export const moveAllS3Objs = async () => {
         })
 
     listAllKeys({ Bucket: 'bucket-name' }).then(console.log).catch(console.log) */
-}
-
-//add any file, pass it the file and key for filename
-export const addFileS3List = async (file: any, key: string) => {
-    //console.log('File to be added', file)
-
-    await s3.putObject({
-        Body: JSON.stringify(file),
-        Bucket: tsiBucket,
-        Key: key,
-    })
-
-    console.log('S3 File Added')
 }
 
 export const deleteFileS3 = async (key: string) => {

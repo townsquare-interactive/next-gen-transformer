@@ -36,7 +36,7 @@ import {
     getlandingPageOptions,
 } from '../utils.js'
 import { createCustomComponents, extractIframeSrc, transformVcita } from '../customComponentsUtils.js'
-import { addFileS3, getFileS3, getCssFile, addFileS3List, deleteFileS3 } from '../s3Functions.js'
+import { addFileS3, getFileS3, getCssFile, deleteFileS3 } from '../s3Functions.js'
 import { CMSPage, ThemeStyles, Layout, Page, LunaModule, ModuleItem, GlobalStyles } from '../../types.js'
 import { PageListSchema } from '../../schema/output-zod.js'
 import { zodDataParse } from '../../schema/utils-zod.js'
@@ -179,14 +179,14 @@ export const deletePages = async (pages: CMSPage[], basePath: string) => {
 //Update pagelist file in s3 or create if not already there
 export const updatePageList = async (page: CMSPage[] | Page[], basePath: string) => {
     console.log('page list updater started ------')
-    const pageListUrl = `${basePath}/pages/page-list.json`
+    const pageListUrl = `${basePath}/pages/page-list`
     let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
     addPagesToList(pageListFile, page, basePath)
     //Can use add file when ready, instead of addpagelist logging
     console.log('new page list', pageListFile)
 
-    zodDataParse(pageListFile, PageListSchema, 'Pages', 'parse')
-    await addFileS3List(pageListFile, pageListUrl)
+    zodDataParse(pageListFile, PageListSchema, 'Pages')
+    await addFileS3(pageListFile, pageListUrl)
     return pageListFile
 }
 

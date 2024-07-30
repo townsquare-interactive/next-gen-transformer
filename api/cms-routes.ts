@@ -3,7 +3,7 @@ import { convertUrlToApexId } from '../src/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
-import { saveToS3 } from '../src/output/index.js'
+import { saveToS3 } from '../src/output/save-to-s3.js'
 import {
     publishDomainToVercel,
     changePublishStatusInSiteData,
@@ -11,11 +11,11 @@ import {
     checkIfSiteExistsPostgres,
     removeDomainFromVercel,
 } from '../src/controllers/create-site-controller.js'
-import { zodDataParse } from '../schema/utils-zod.js'
+import { logZodDataParse, zodDataParse } from '../schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema } from '../schema/input-zod.js'
 import { sql } from '@vercel/postgres'
 import express from 'express'
-import { validateRequestData } from '../src/controllers/landing-controller.js'
+import { validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 const router = express.Router()
@@ -24,7 +24,7 @@ const router = express.Router()
 router.post('/save', async (req, res) => {
     try {
         //check input data for correct structure
-        zodDataParse(req.body, saveInputSchema, 'savedInput', 'safeParse')
+        logZodDataParse(req.body, saveInputSchema, 'savedInput')
 
         try {
             const url = req.body.siteData.config.website.url
@@ -44,7 +44,7 @@ router.post('/save', async (req, res) => {
 
 router.post('/landing', async (req, res) => {
     try {
-        const { apexID, siteData } = validateRequestData(req)
+        const { apexID, siteData } = validateLandingRequestData(req)
 
         const data = await createLandingPageFiles(siteData, apexID)
         const response = await saveToS3({ ...data })
@@ -62,7 +62,7 @@ router.post('/landing', async (req, res) => {
 router.post('/create-site', async (req, res) => {
     try {
         //check input data for correct structure
-        zodDataParse(req.body, createSiteInputSchema, 'createSite', 'parse')
+        zodDataParse(req.body, createSiteInputSchema, 'createSite')
 
         try {
             //check if site is already created in s3
@@ -95,7 +95,7 @@ router.post('/create-site', async (req, res) => {
 //publish site domain to vercel
 router.patch('/domain-publish', async (req, res) => {
     try {
-        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
         const response = await publishDomainToVercel(validatedRequest.subdomain)
         console.log(response)
         res.json(response)
@@ -107,7 +107,7 @@ router.patch('/domain-publish', async (req, res) => {
 //remove site domain to vercel
 router.patch('/remove-domain', async (req, res) => {
     try {
-        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
         const response = await removeDomainFromVercel(validatedRequest.subdomain)
         console.log(response)
         res.json(response)
@@ -119,7 +119,7 @@ router.patch('/remove-domain', async (req, res) => {
 //update publish status for site
 router.patch('/publish', async (req, res) => {
     try {
-        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
         const response = await changePublishStatusInSiteData(validatedRequest.subdomain, true)
         console.log(response)
         res.json(response)
@@ -130,7 +130,7 @@ router.patch('/publish', async (req, res) => {
 
 router.patch('/unpublish', async (req, res) => {
     try {
-        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input', 'parse')
+        const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
         const response = await changePublishStatusInSiteData(validatedRequest.subdomain, false)
         console.log(response)
         res.json(response)
@@ -279,7 +279,7 @@ router.post('/delete-row', async (req, res) => {
 router.post('/migrate', async (req, res) => {
     try {
         //check input data for correct structure
-        zodDataParse(req.body, saveInputSchema, 'savedInput', 'parse')
+        zodDataParse(req.body, saveInputSchema, 'savedInput')
 
         //transform to migrate form
         //move data into pages

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { ZodError, ZodTypeAny, z } from 'zod'
 import { ValidationError } from '../src/errors.js'
 const OptionalString = z.string().optional()
 
@@ -35,32 +35,29 @@ export const AnalyticsSchema = z.object({
     gtmId: OptionalString,
 })
 
-//check data based off Zod schema
-export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel: 'safeParse' | 'parse' = 'safeParse') => {
-    const zodErrorLoop = (error: any) => {
-        const pathList = []
-        for (let i = 0; i < error.length; i++) {
-            console.log('errror things', error[i])
-            const currentErrorPath = error[i].path
-            const innerPathList = []
-            for (let x = 0; x < currentErrorPath.length; x++) {
-                innerPathList.push(currentErrorPath[x])
-            }
-            const errorStatus = {
-                //fieldPath: innerPathList.join(' -> '),
-                fieldPath: error[i].path,
-                message: error[i].message,
-            }
-            pathList.push(errorStatus)
+const zodErrorLoop = (error: any) => {
+    const pathList = []
+    for (let i = 0; i < error.errors.length; i++) {
+        const currentErrorPath = error.errors[i].path
+        const innerPathList = []
+        for (let x = 0; x < currentErrorPath.length; x++) {
+            innerPathList.push(currentErrorPath[x])
         }
-        return pathList
+        const errorStatus = {
+            fieldPath: error.errors[i].path,
+            message: error.errors[i].message,
+        }
+        pathList.push(errorStatus)
     }
+    return pathList
+}
 
+export const zodDataParse = <T, S extends ZodTypeAny>(data: T, schema: S, type: string = 'input'): T => {
     const validatedPageData = schema.safeParse(data)
 
-    if (validatedPageData.success === false) {
+    if (!validatedPageData.success) {
         console.log(validatedPageData.error)
-        const pathList = zodErrorLoop(JSON.parse(validatedPageData.error))
+        const pathList = zodErrorLoop(validatedPageData.error)
 
         const zodErrorObject = {
             message: type === 'input' ? 'Error validating form fields' : 'Validation error on output data going to S3',
@@ -69,12 +66,24 @@ export const zodDataParse = (data: any, schema: any, type = 'input', parseLevel:
                 erroredFields: pathList,
             },
         }
-        if (parseLevel === 'safeParse') {
-            return console.log('Zod parse error', zodErrorObject)
-        } else {
-            throw new ValidationError(zodErrorObject)
-        }
+        console.log(zodErrorObject)
+        throw new ValidationError(zodErrorObject)
     } else {
         return validatedPageData.data
+    }
+}
+
+export const logZodDataParse = <T, S extends ZodTypeAny>(data: T, schema: S, type: string = 'input'): void => {
+    const validatedPageData = schema.safeParse(data)
+
+    if (!validatedPageData.success) {
+        const pathList = zodErrorLoop(validatedPageData.error)
+
+        const zodErrorObject = {
+            message: 'Zod parsing error log on ' + type,
+            erroredFields: pathList,
+        }
+
+        return console.log('Zod parse error', zodErrorObject)
     }
 }

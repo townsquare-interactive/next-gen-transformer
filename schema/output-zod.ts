@@ -280,7 +280,7 @@ export const SiteDataSchema = z.object({
     theme: z.string().describe('cms website theme'),
     cmsUrl: z.string().describe('current luna url'),
     s3Folder: z.string().describe('siteID where data is stored in s3'),
-    favicon: z.string(),
+    favicon: z.string().optional(),
     fontImport: z.string().describe('CSS for importing google fonts'),
     config: Config,
     contactFormData: ContactFormData.optional(),
