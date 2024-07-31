@@ -35,6 +35,8 @@ export function socialConvert(str: string) {
         return ['fab', 'vimeo']
     } else if (icon === 'x-twitter') {
         return ['fab', 'x-twitter']
+    } else if (icon === 'tiktok') {
+        return ['fab', 'tiktok']
     } else {
         return ['fas', 'rocket']
     }
@@ -61,6 +63,8 @@ export function iconConvert(str: string) {
         return 'vimeo'
     } else if (str.indexOf('/x.com') !== -1) {
         return 'x-twitter'
+    } else if (str.indexOf('tiktok') !== -1) {
+        return 'tiktok'
     } else {
         return 'social'
     }
