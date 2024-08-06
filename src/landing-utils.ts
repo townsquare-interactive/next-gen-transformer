@@ -52,10 +52,10 @@ export const createModulesWithSections = (sections: Sections) => {
             modules.push({
                 headline: section.headline,
                 actionlbl: section.ctaText || 'GIVE US A CALL',
-                image: section.image?.includes('[') ? '' : section.image,
+                image: section.image,
                 subheader: section.subheader,
                 type: 'dl',
-                weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
+                weblink: section.ctaLink,
             })
         }
         if (i === 1) {
@@ -64,7 +64,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     type: 'banner',
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
-                    weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
+                    weblink: section.ctaLink,
                 })
             }
             if (section.desc) {
@@ -94,13 +94,13 @@ export const createModulesWithSections = (sections: Sections) => {
                     type: 'banner',
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
-                    weblink: section.ctaLink?.includes('[') ? '' : section.ctaLink,
+                    weblink: section.ctaLink,
                 })
             }
         }
         if (section.components && section.components.length > 0) {
             for (let x = 0; x < section.components.length; x++) {
-                let currentComponent = section.components[x]
+                const currentComponent = section.components[x]
                 if (currentComponent.type === 'coupon') {
                     modules.push({
                         type: 'coupon',
@@ -110,8 +110,9 @@ export const createModulesWithSections = (sections: Sections) => {
                     modules.push({
                         type: 'form',
                         embed: currentComponent.embed ? convertIframe(currentComponent.embed) : '',
+                        contactFormTitle: currentComponent.contactFormTitle,
                     })
-                } else if (currentComponent.type === 'video' && currentComponent.videoUrl != '[second_section_videoUrl]') {
+                } else if (currentComponent.type === 'video') {
                     modules.push({
                         type: 'video',
                         videoUrl: currentComponent.videoUrl,

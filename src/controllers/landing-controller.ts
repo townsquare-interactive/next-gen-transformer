@@ -395,7 +395,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                     blockSwitch1: 1,
                     customClassName: '',
                     contactFormData: {
-                        formTitle: '',
+                        formTitle: currentMod.contactFormTitle || '',
                         formService: 'webhook',
                         formEmbed: currentMod.embed || '',
                         email: '',

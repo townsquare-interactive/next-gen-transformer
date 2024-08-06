@@ -216,6 +216,7 @@ const pageModules = z.array(
         desc2: z.string().optional(),
         reviews: z.array(z.object({ name: z.string().optional(), text: z.string() })).optional(),
         embed: z.string().optional(),
+        contactFormTitle: z.string().optional(),
     })
 )
 
@@ -277,6 +278,7 @@ const PageSectionSchema = z.array(
                     videoUrl: z.string().optional(),
                     image: z.string().optional(),
                     embed: z.string().optional(),
+                    contactFormTitle: z.string().optional(),
                 })
             )
             .optional(),
