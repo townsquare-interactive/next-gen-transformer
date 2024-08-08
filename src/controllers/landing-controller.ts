@@ -39,7 +39,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
 
     const themeColors = createLandingColors(colors)
 
-    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber, email, siteData.headerButton)
+    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber, email, siteData.headerCtaButtons)
 
     const fontData = createFontData(siteData.fonts)
 
@@ -254,13 +254,17 @@ export const createPageFile = (siteData: LandingReq) => {
 const createModules = (modules: AiPageModules, phoneNumber: string) => {
     let newModules = []
     let modCount = 1
+    let bannerCount = 1
     for (let i = 0; i < modules.length; i++) {
         const currentMod = modules[i]
         let newMod
 
-        const modID = uuidv4()
+        const modID = uuidv4() //unique module ID
+        const btnClassName = `${currentMod.type}-btn${currentMod.type === 'banner' ? '-' + bannerCount : ''}`
+
         if (currentMod.type === 'dl') {
             const dlOverlayColor = 'rgb(0,0,0,0.5)'
+            const dlDataLayerEvent = currentMod.dataLayerEvent || 'dl_click'
 
             newMod = {
                 attributes: {
@@ -291,6 +295,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             promoColor: 'var(--promo)',
                             links: {
                                 weblink: currentMod.weblink || `tel:${phoneNumber}` || `tel:${phoneNumber}`,
+                                dataLayerEvent: dlDataLayerEvent,
                             },
                             imageType: 'crop',
                             buttonList: [
@@ -306,6 +311,8 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                                     blockBtn: false,
                                     opensModal: -1,
                                     btnStyle: 'round',
+                                    cName: btnClassName,
+                                    dataLayerEvent: dlDataLayerEvent,
                                 },
                                 {
                                     name: 'btn2',
@@ -461,6 +468,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                 componentType: 'ContactFormRoutes',
             }
         } else if (currentMod.type === 'banner') {
+            const bannerDataLayerEvent = currentMod.dataLayerEvent || `banner_click_${bannerCount}`
             newMod = {
                 attributes: {
                     id: modID,
@@ -479,6 +487,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             },
                             links: {
                                 weblink: currentMod.weblink || `tel:${phoneNumber}`,
+                                dataLayerEvent: bannerDataLayerEvent,
                             },
                             buttonList: [
                                 {
@@ -493,6 +502,8 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                                     blockBtn: false,
                                     opensModal: -1,
                                     btnStyle: 'round',
+                                    cName: btnClassName,
+                                    dataLayerEvent: bannerDataLayerEvent,
                                 },
                             ],
                             linkNoBtn: false,
@@ -520,6 +531,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                 },
                 componentType: 'Banner',
             }
+            bannerCount += 1
         } else if (currentMod.type === 'text content') {
             newMod = {
                 attributes: {
@@ -637,7 +649,6 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             headline: currentMod.headline,
                             itemCount: 1,
                             btnStyles: ` #id_${modID} .item_1 .btn2_override {color:#ffffff; background-color:transparent;} `,
-
                             nextImageSizes: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 1200px',
                             isFeatureButton: false,
                             headSize: 'xl',

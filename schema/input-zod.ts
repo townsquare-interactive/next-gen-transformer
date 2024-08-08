@@ -217,6 +217,7 @@ const pageModules = z.array(
         reviews: z.array(z.object({ name: z.string().optional(), text: z.string() })).optional(),
         embed: z.string().optional(),
         contactFormTitle: z.string().optional(),
+        dataLayerEvent: z.string().optional(),
     })
 )
 
@@ -267,6 +268,7 @@ const PageSectionSchema = z.array(
         image: z.string().optional(),
         subheader: z.string().optional(),
         ctaLink: z.string().optional(),
+        dataLayerEvent: z.string().optional(),
         desc: z.string().optional(),
         desc2: z.string().optional(),
         reviewHeadline: z.string().optional(),
@@ -293,7 +295,10 @@ const HeaderButtonSchema = z.object({
     label: z.string().optional(),
     type: z.union([z.literal('phone'), z.literal('email'), z.literal('link'), z.literal('')]).optional(),
     link: z.string().optional(),
+    dataLayerEvent: z.string().optional(),
 })
+
+const HeaderButtonsObj = z.object({ contactButton: HeaderButtonSchema.optional(), scheduleButton: HeaderButtonSchema.optional() }).optional()
 
 const ScriptsSchema = z.object({
     header: z.string().optional(),
@@ -313,7 +318,7 @@ export const LandingInputSchema = z.object({
     seo: z.object({ global: SEOGlobalSchema }).optional(),
     colors: ColorInputSchema,
     customComponents: z.array(CustomComponentSchema).optional(),
-    headerButton: HeaderButtonSchema.optional(),
+    headerCtaButtons: HeaderButtonsObj,
     code: ScriptsSchema.optional(),
     title: z.string().optional(),
     description: z.string().optional(),
@@ -335,7 +340,7 @@ export const SubdomainInputSchema = z.object({
     subdomain: z.string().min(1),
 })
 
-export type HeaderButtons = z.infer<typeof HeaderButtonSchema>
+export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type LandingReq = z.infer<typeof LandingInputSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>

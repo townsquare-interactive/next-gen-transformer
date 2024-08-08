@@ -56,6 +56,7 @@ export const createModulesWithSections = (sections: Sections) => {
                 subheader: section.subheader,
                 type: 'dl',
                 weblink: section.ctaLink,
+                dataLayerEvent: section.dataLayerEvent || '',
             })
         }
         if (i === 1) {
@@ -65,6 +66,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
                     weblink: section.ctaLink,
+                    dataLayerEvent: section.dataLayerEvent || '',
                 })
             }
             if (section.desc) {
@@ -95,6 +97,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
                     weblink: section.ctaLink,
+                    dataLayerEvent: section.dataLayerEvent || '',
                 })
             }
         }
@@ -346,7 +349,7 @@ export const customizeWidgets = (
     siteName: string,
     phoneNumber: string,
     email: string,
-    headerButton: HeaderButtons
+    headerButtonData: HeaderButtons
 ) => {
     let transformedComponents
     let vcita
@@ -412,19 +415,20 @@ export const customizeWidgets = (
         const mobileHeaderButtons = []
 
         const getButtonLabel = (hasEngage: boolean, phoneNumber: string, headerButtonData?: HeaderButtons) => {
-            if (headerButtonData?.label) return headerButtonData.label
-            if (hasEngage || headerButtonData?.type === 'email' || headerButtonData?.type === 'link') return 'CONTACT US'
-            return phoneNumber ? phoneNumber : ''
+            if (headerButtonData?.contactButton?.label) return headerButtonData.contactButton.label
+            if (hasEngage) return 'CONTACT US'
+            if (phoneNumber) return phoneNumber
+            if (email) return 'CONTACT US'
+            return 'CONTACT US'
         }
 
-        const getButtonLink = (phoneNumber: string, email: string, headerButtonData?: HeaderButtons) => {
-            if (headerButtonData?.link) return headerButtonData.link
-            if (headerButtonData?.type === 'phone' && phoneNumber) return `tel:${phoneNumber}`
-            if (headerButtonData?.type === 'email' && email) return `mailto:${email}`
-            return phoneNumber ? `tel:${phoneNumber}` : ''
+        const getButtonLink = (phoneNumber: string, email: string, headerButtonData: HeaderButtons) => {
+            if (headerButtonData?.contactButton?.link) return headerButtonData.contactButton.link
+            if (hasEngage) return ''
+            return phoneNumber ? `tel:${phoneNumber}` : email ? `mailto:${email}` : ''
         }
 
-        if (hasEngage || phoneNumber || headerButtonData?.link || headerButtonData?.type === 'email') {
+        if (hasEngage || phoneNumber || headerButtonData?.contactButton?.link || email) {
             const label = getButtonLabel(hasEngage, phoneNumber, headerButtonData)
             const link = getButtonLink(phoneNumber, email, headerButtonData)
 
@@ -433,41 +437,45 @@ export const customizeWidgets = (
                 link,
                 active: true,
                 opensModal: -1,
-                window: headerButtonData?.link ? 1 : 0,
+                window: headerButtonData?.contactButton?.link ? 1 : 0,
                 btnType: 'btn_cta_landing',
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
                 icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
-                action: hasEngage ? 'ls-contact' : '',
+                action: headerButtonData?.contactButton?.link ? '' : hasEngage ? 'ls-contact' : '',
+                dataLayerEvent: headerButtonData?.contactButton?.dataLayerEvent || 'promotion_click',
+                cName: 'promo-cta',
             }
 
             desktopButtons.push(commonButtonProps)
 
             mobileHeaderButtons.push({
                 ...commonButtonProps,
-                label: headerButtonData?.label ? headerButtonData.label : hasEngage ? 'CONTACT' : 'CALL NOW',
+                label: headerButtonData?.contactButton?.label ? headerButtonData?.contactButton?.label : hasEngage ? 'CONTACT' : 'CALL NOW',
             })
         }
 
         //add schedule button if using widgets
-        if (scheduleEngineWidgetActive || hasEngage) {
+        if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.scheduleButton?.link) {
             const scheduleButton = {
-                link: `tel:${phoneNumber}`,
+                link: headerButtonData?.scheduleButton?.link ? headerButtonData?.scheduleButton?.link : ``,
                 active: true,
                 opensModal: -1,
                 window: 1,
                 btnType: 'btn_cta_landing',
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                action: scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
+                action: headerButtonData?.scheduleButton?.link ? '' : scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
                 icon: {
                     iconPrefix: 'far',
                     iconModel: 'calendar',
                 },
+                dataLayerEvent: headerButtonData?.scheduleButton?.dataLayerEvent || 'schedule_click',
+                cName: 'schedule-cta',
             }
 
-            desktopButtons.push({ ...scheduleButton, label: 'Schedule NOW' })
-            mobileHeaderButtons.push({ ...scheduleButton, label: 'Schedule' })
+            desktopButtons.push({ ...scheduleButton, label: headerButtonData?.scheduleButton?.label || 'Schedule NOW' })
+            mobileHeaderButtons.push({ ...scheduleButton, label: headerButtonData?.scheduleButton?.label || 'Schedule' })
         }
 
         return {
@@ -476,7 +484,7 @@ export const customizeWidgets = (
         }
     }
 
-    const headerButtons = createHeaderButtons(phoneNumber, email, scheduleEngineWidgetActive, hasEngage, headerButton)
+    const headerButtons = createHeaderButtons(phoneNumber, email, scheduleEngineWidgetActive, hasEngage, headerButtonData)
 
     return { customComponents: transformedComponents, headerButtons, vcita }
 }

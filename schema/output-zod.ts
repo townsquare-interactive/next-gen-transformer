@@ -329,6 +329,8 @@ const ButtonList = z.array(
         linkType: z.string(),
         blockBtn: z.optional(z.boolean()),
         action: OptionalString,
+        cName: OptionalString,
+        dataLayerEvent: OptionalString,
     })
 )
 
@@ -404,6 +406,7 @@ export const ModuleItemSchema = z.object({
             pagelink: OptionalString,
             weblink2: OptionalString,
             pagelink2: OptionalString,
+            dataLayerEvent: OptionalString,
         })
         .optional(),
     video: z
