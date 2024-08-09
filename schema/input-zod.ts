@@ -217,7 +217,8 @@ const pageModules = z.array(
         reviews: z.array(z.object({ name: z.string().optional(), text: z.string() })).optional(),
         embed: z.string().optional(),
         contactFormTitle: z.string().optional(),
-        dataLayerEvent: z.string().optional(),
+        dataLayerEventBtn: z.string().optional(),
+        dataLayerEventWrap: z.string().optional(),
     })
 )
 
@@ -268,7 +269,8 @@ const PageSectionSchema = z.array(
         image: z.string().optional(),
         subheader: z.string().optional(),
         ctaLink: z.string().optional(),
-        dataLayerEvent: z.string().optional(),
+        dataLayerEventBtn: z.string().optional(),
+        dataLayerEventWrap: z.string().optional(),
         desc: z.string().optional(),
         desc2: z.string().optional(),
         reviewHeadline: z.string().optional(),
@@ -295,7 +297,7 @@ const HeaderButtonSchema = z.object({
     label: z.string().optional(),
     type: z.union([z.literal('phone'), z.literal('email'), z.literal('link'), z.literal('')]).optional(),
     link: z.string().optional(),
-    dataLayerEvent: z.string().optional(),
+    dataLayerEventBtn: z.string().optional(),
 })
 
 const HeaderButtonsObj = z.object({ contactButton: HeaderButtonSchema.optional(), scheduleButton: HeaderButtonSchema.optional() }).optional()

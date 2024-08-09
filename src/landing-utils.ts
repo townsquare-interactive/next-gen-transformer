@@ -56,7 +56,8 @@ export const createModulesWithSections = (sections: Sections) => {
                 subheader: section.subheader,
                 type: 'dl',
                 weblink: section.ctaLink,
-                dataLayerEvent: section.dataLayerEvent || '',
+                dataLayerEventBtn: section.dataLayerEventBtn || '',
+                dataLayerEventWrap: section.dataLayerEventWrap || '',
             })
         }
         if (i === 1) {
@@ -66,7 +67,8 @@ export const createModulesWithSections = (sections: Sections) => {
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
                     weblink: section.ctaLink,
-                    dataLayerEvent: section.dataLayerEvent || '',
+                    dataLayerEventBtn: section.dataLayerEventBtn || '',
+                    dataLayerEventWrap: section.dataLayerEventWrap || '',
                 })
             }
             if (section.desc) {
@@ -97,7 +99,8 @@ export const createModulesWithSections = (sections: Sections) => {
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
                     weblink: section.ctaLink,
-                    dataLayerEvent: section.dataLayerEvent || '',
+                    dataLayerEventBtn: section.dataLayerEventBtn || '',
+                    dataLayerEventWrap: section.dataLayerEventWrap || '',
                 })
             }
         }
@@ -112,7 +115,7 @@ export const createModulesWithSections = (sections: Sections) => {
                 } else if (currentComponent.type === 'form') {
                     modules.push({
                         type: 'form',
-                        embed: currentComponent.embed ? convertIframe(currentComponent.embed) : '',
+                        embed: currentComponent.embed || '',
                         contactFormTitle: currentComponent.contactFormTitle,
                     })
                 } else if (currentComponent.type === 'video') {
@@ -443,8 +446,8 @@ export const customizeWidgets = (
                 googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
                 icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
                 action: headerButtonData?.contactButton?.link ? '' : hasEngage ? 'ls-contact' : '',
-                dataLayerEvent: headerButtonData?.contactButton?.dataLayerEvent || 'promotion_click',
-                cName: 'promo-cta',
+                dataLayerEvent: headerButtonData?.contactButton?.dataLayerEventBtn || 'header_btn_1_click',
+                cName: 'header-btn-1',
             }
 
             desktopButtons.push(commonButtonProps)
@@ -470,8 +473,8 @@ export const customizeWidgets = (
                     iconPrefix: 'far',
                     iconModel: 'calendar',
                 },
-                dataLayerEvent: headerButtonData?.scheduleButton?.dataLayerEvent || 'schedule_click',
-                cName: 'schedule-cta',
+                dataLayerEvent: headerButtonData?.scheduleButton?.dataLayerEventBtn || 'header_btn_2_click',
+                cName: 'header-btn-2',
             }
 
             desktopButtons.push({ ...scheduleButton, label: headerButtonData?.scheduleButton?.label || 'Schedule NOW' })

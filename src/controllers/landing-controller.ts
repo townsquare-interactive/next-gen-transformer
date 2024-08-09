@@ -264,7 +264,8 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
 
         if (currentMod.type === 'dl') {
             const dlOverlayColor = 'rgb(0,0,0,0.5)'
-            const dlDataLayerEvent = currentMod.dataLayerEvent || 'dl_click'
+            const dlBtnDataLayerEvent = currentMod.dataLayerEventBtn || 'dl_btn_click'
+            const dlImgDataLayerEvent = currentMod.dataLayerEventWrap || 'dl_img_click'
 
             newMod = {
                 attributes: {
@@ -295,7 +296,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             promoColor: 'var(--promo)',
                             links: {
                                 weblink: currentMod.weblink || `tel:${phoneNumber}` || `tel:${phoneNumber}`,
-                                dataLayerEvent: dlDataLayerEvent,
+                                dataLayerEventWrap: dlImgDataLayerEvent,
                             },
                             imageType: 'crop',
                             buttonList: [
@@ -312,7 +313,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                                     opensModal: -1,
                                     btnStyle: 'round',
                                     cName: btnClassName,
-                                    dataLayerEvent: dlDataLayerEvent,
+                                    dataLayerEvent: dlBtnDataLayerEvent,
                                 },
                                 {
                                     name: 'btn2',
@@ -468,7 +469,9 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                 componentType: 'ContactFormRoutes',
             }
         } else if (currentMod.type === 'banner') {
-            const bannerDataLayerEvent = currentMod.dataLayerEvent || `banner_click_${bannerCount}`
+            const bannerBtnDataLayerEvent = currentMod.dataLayerEventBtn || `banner_${bannerCount}_btn_click_`
+            const bannerImgDataLayerEvent = currentMod.dataLayerEventWrap || `banner_${bannerCount}_bar_click_`
+
             newMod = {
                 attributes: {
                     id: modID,
@@ -487,7 +490,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             },
                             links: {
                                 weblink: currentMod.weblink || `tel:${phoneNumber}`,
-                                dataLayerEvent: bannerDataLayerEvent,
+                                dataLayerEventWrap: bannerImgDataLayerEvent,
                             },
                             buttonList: [
                                 {
@@ -503,7 +506,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                                     opensModal: -1,
                                     btnStyle: 'round',
                                     cName: btnClassName,
-                                    dataLayerEvent: bannerDataLayerEvent,
+                                    dataLayerEvent: bannerBtnDataLayerEvent,
                                 },
                             ],
                             linkNoBtn: false,

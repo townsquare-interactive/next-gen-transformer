@@ -406,7 +406,7 @@ export const ModuleItemSchema = z.object({
             pagelink: OptionalString,
             weblink2: OptionalString,
             pagelink2: OptionalString,
-            dataLayerEvent: OptionalString,
+            dataLayerEventWrap: OptionalString,
         })
         .optional(),
     video: z

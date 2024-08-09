@@ -1,0 +1,128 @@
+{
+    "url": "https://www.toymaniausa.com/",
+    "s3Folder": "toymaniausa.com",
+    "pageName": "Home",
+    "pageUri": "home",
+    "landingPageUrl": "",
+    "siteName": "Toy Mania USA",
+    "title": "Family Owned | Toy Mania Charlotte | United States",
+    "description": "",
+    "logo": "https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/toymaniausa.com/images/selected/Toy-Mania-Logo-600.png",
+    "favicon": "",
+    "phoneNumber": "\n(704) 910.2001",
+    "email": "",
+    "colors": {
+        "primary": "#0033a0",
+        "accent": "#001238",
+        "tertiary": "",
+        "headerBackground": "",
+        "footerText": "#333333",
+        "footerBackground": "#F5F5F5"
+    },
+    "seo": {
+        "global": {
+            "aiosp_home_title": "Top HVAC & Plumbing Services",
+            "aiosp_google_verify": "[google_verify]",
+            "aiosp_home_description": "Expert HVAC and Plumbing Services for Your Home. Contact Us Today!",
+            "aiosp_page_title_format": "%page_title% | %blog_title%",
+            "aiosp_description_format": "%description%",
+            "aiosp_404_title_format": "Nothing found for %request_words%"
+        }
+    },
+    "analytics": {
+        "gtmId": "",
+        "gaId": ""
+    },
+    "customComponents": [
+        {
+            "type": "Webchat",
+            "apiKey": ""
+        },
+        {
+            "type": "ScheduleEngine",
+            "apiKey": ""
+        },
+        {
+            "type": "BMP",
+            "apiKey": ""
+        }
+    ],
+    "page": {
+        "sections": [
+            {
+                "headline": "Reliable HVAC & Plumbing",
+                "subheader": "Professional Services for Your Home",
+                "ctaText": "Get a Free Quote",
+                "dataLayerEventBtn": "",
+                "dataLayerEventWrap": "",
+                "ctaLink": "",
+                "image": "",
+                "components": [
+                    {
+                        "type": "coupon",
+                        "image": ""
+                    },
+                    {
+                        "type": "form",
+                        "embed": "",
+                        "contactFormTitle": ""
+                    }
+                ]
+            },
+            {
+                "headline": "Why Choose Us?",
+                "subheader": "Exceptional Service You Can Trust",
+                "desc": "Our team of certified HVAC and plumbing experts provide top-notch services to ensure your home is comfortable and functional. We pride ourselves on delivering timely and efficient solutions for all your heating, cooling, and plumbing needs.",
+                "desc2": "We offer a wide range of HVAC and plumbing services to meet all your home needs. Our experienced technicians are here to provide quality service and ensure your satisfaction. From minor repairs to major installations, we handle it all with professionalism and care.",
+                "ctaText": "Learn More",
+                "ctaLink": "",
+                "dataLayerEventBtn": "",
+                "dataLayerEventWrap": "",
+                "components": [
+                    {
+                        "type": "video",
+                        "videoUrl": ""
+                    }
+                ],
+                "descLessText": "Our team of certified HVAC and plumbing experts provide top-notch services to ensure your home is comfortable and functional. We pride ourselves on delivering timely and efficient solutions for all your heating, cooling, and plumbing needs.",
+                "descMoreText": "At our company, we understand that your home is your sanctuary. That's why we offer a comprehensive range of HVAC and plumbing services to keep your systems running smoothly. Our technicians are equipped with the latest tools and technology to diagnose and fix problems quickly. Whether it's emergency repairs, routine maintenance, or new installations, we have you covered.",
+                "descMaxText": "Our commitment to quality and customer satisfaction sets us apart in the HVAC and plumbing industry. We offer personalized service plans tailored to your specific needs, ensuring that your systems are operating at peak performance year-round. Our team is available 24/7 to address any issues that may arise, providing peace of mind that you're in good hands. Trust us to keep your home comfortable, safe, and efficient.",
+                "desc2LessText": "We offer a wide range of HVAC and plumbing services to meet all your home needs. Our experienced technicians are here to provide quality service and ensure your satisfaction. From minor repairs to major installations, we handle it all with professionalism and care.",
+                "desc2MoreText": "Our services include heating and air conditioning repairs, plumbing repairs and installations, routine maintenance, and emergency services. We use only the highest quality parts and equipment to ensure lasting results. Our team is dedicated to providing excellent customer service and ensuring that every job is done right the first time.",
+                "desc2MaxText": "In addition to our repair and installation services, we offer comprehensive maintenance plans to keep your HVAC and plumbing systems running efficiently. Regular maintenance can prevent costly breakdowns and extend the life of your equipment. Our technicians will work with you to create a maintenance schedule that fits your needs, ensuring that your systems are always in top condition. We also offer energy-efficient solutions to help you save on utility bills and reduce your environmental footprint."
+            },
+            {
+                "headline": "Get Started Today",
+                "ctaText": "Contact Us Now",
+                "ctaLink": "",
+                "dataLayerEventBtn": "",
+                "dataLayerEventWrap": "",
+                "reviewHeadline": "",
+                "reviews": []
+            }
+        ]
+    },
+    "socials": ["http://www.facebook.com/toymaniacharlotte", "https://instagram.com/toymaniausa/", "http://www.instagram.com/toymaniausa"],
+    "address": {
+        "street": "123 Toy Lane",
+        "city": "Playtown",
+        "state": "Funland",
+        "zip": "12345"
+    },
+    "code": {
+        "header": "",
+        "body": ""
+    },
+    "headerCtaButtons": {
+        "contactButton": {
+            "link": "",
+            "label": "",
+            "dataLayerEventBtn": ""
+        },
+        "scheduleButton": {
+            "dataLayerEventBtnBtn": "",
+            "link": "",
+            "label": ""
+        }
+    }
+}
