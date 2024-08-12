@@ -180,7 +180,7 @@ const layoutReq = {
         { type: 'ScheduleEngine', apiKey: 'cl8d8jgjd00pv09pcdsyo89bc' },
         {
             type: 'BMP',
-            apiKey: 'WI-TLS9L59J8UGP3ZQ8B83G',
+            apiKey: 'd2g9nvoehntqdy39',
         },
     ],
 }

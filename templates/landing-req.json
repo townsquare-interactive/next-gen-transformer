@@ -114,15 +114,15 @@
         "body": ""
     },
     "headerCtaButtons": {
-        "contactButton": {
-            "link": "",
+        "button1": {
             "label": "",
-            "dataLayerEventBtn": ""
-        },
-        "scheduleButton": {
-            "dataLayerEventBtnBtn": "",
             "link": "",
-            "label": ""
+            "dataLayerEvent": ""
+        },
+        "button2": {
+            "label": "",
+            "link": "",
+            "dataLayerEvent": ""
         }
     }
 }

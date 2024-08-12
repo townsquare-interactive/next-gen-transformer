@@ -297,10 +297,10 @@ const HeaderButtonSchema = z.object({
     label: z.string().optional(),
     type: z.union([z.literal('phone'), z.literal('email'), z.literal('link'), z.literal('')]).optional(),
     link: z.string().optional(),
-    dataLayerEventBtn: z.string().optional(),
+    dataLayerEvent: z.string().optional(),
 })
 
-const HeaderButtonsObj = z.object({ contactButton: HeaderButtonSchema.optional(), scheduleButton: HeaderButtonSchema.optional() }).optional()
+const HeaderButtonsObj = z.object({ button1: HeaderButtonSchema.optional(), button2: HeaderButtonSchema.optional() }).optional()
 
 const ScriptsSchema = z.object({
     header: z.string().optional(),

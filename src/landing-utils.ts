@@ -49,6 +49,7 @@ export const createModulesWithSections = (sections: Sections) => {
     for (let i = 0; i < sections.length; i++) {
         const section = sections[i]
         if (section.headline && i === 0) {
+            //add ...section before then replace the fields we want
             modules.push({
                 headline: section.headline,
                 actionlbl: section.ctaText || 'GIVE US A CALL',
@@ -418,7 +419,7 @@ export const customizeWidgets = (
         const mobileHeaderButtons = []
 
         const getButtonLabel = (hasEngage: boolean, phoneNumber: string, headerButtonData?: HeaderButtons) => {
-            if (headerButtonData?.contactButton?.label) return headerButtonData.contactButton.label
+            if (headerButtonData?.button1?.label) return headerButtonData.button1.label
             if (hasEngage) return 'CONTACT US'
             if (phoneNumber) return phoneNumber
             if (email) return 'CONTACT US'
@@ -426,12 +427,12 @@ export const customizeWidgets = (
         }
 
         const getButtonLink = (phoneNumber: string, email: string, headerButtonData: HeaderButtons) => {
-            if (headerButtonData?.contactButton?.link) return headerButtonData.contactButton.link
+            if (headerButtonData?.button1?.link) return headerButtonData.button1.link
             if (hasEngage) return ''
             return phoneNumber ? `tel:${phoneNumber}` : email ? `mailto:${email}` : ''
         }
 
-        if (hasEngage || phoneNumber || headerButtonData?.contactButton?.link || email) {
+        if (hasEngage || phoneNumber || headerButtonData?.button1?.link || email) {
             const label = getButtonLabel(hasEngage, phoneNumber, headerButtonData)
             const link = getButtonLink(phoneNumber, email, headerButtonData)
 
@@ -440,13 +441,13 @@ export const customizeWidgets = (
                 link,
                 active: true,
                 opensModal: -1,
-                window: headerButtonData?.contactButton?.link ? 1 : 0,
+                window: headerButtonData?.button1?.link ? 1 : 0,
                 btnType: 'btn_cta_landing',
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
                 icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
-                action: headerButtonData?.contactButton?.link ? '' : hasEngage ? 'ls-contact' : '',
-                dataLayerEvent: headerButtonData?.contactButton?.dataLayerEventBtn || 'header_btn_1_click',
+                action: headerButtonData?.button1?.link ? '' : hasEngage ? 'ls-contact' : '',
+                dataLayerEvent: headerButtonData?.button1?.dataLayerEvent || 'header_btn_1_click',
                 cName: 'header-btn-1',
             }
 
@@ -454,31 +455,31 @@ export const customizeWidgets = (
 
             mobileHeaderButtons.push({
                 ...commonButtonProps,
-                label: headerButtonData?.contactButton?.label ? headerButtonData?.contactButton?.label : hasEngage ? 'CONTACT' : 'CALL NOW',
+                label: headerButtonData?.button1?.label ? headerButtonData?.button1?.label : hasEngage ? 'CONTACT' : 'CALL NOW',
             })
         }
 
         //add schedule button if using widgets
-        if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.scheduleButton?.link) {
+        if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.button2?.link) {
             const scheduleButton = {
-                link: headerButtonData?.scheduleButton?.link ? headerButtonData?.scheduleButton?.link : ``,
+                link: headerButtonData?.button2?.link ? headerButtonData?.button2?.link : ``,
                 active: true,
                 opensModal: -1,
                 window: 1,
                 btnType: 'btn_cta_landing',
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
-                action: headerButtonData?.scheduleButton?.link ? '' : scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
+                action: headerButtonData?.button2?.link ? '' : scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
                 icon: {
                     iconPrefix: 'far',
                     iconModel: 'calendar',
                 },
-                dataLayerEvent: headerButtonData?.scheduleButton?.dataLayerEventBtn || 'header_btn_2_click',
+                dataLayerEvent: headerButtonData?.button2?.dataLayerEvent || 'header_btn_2_click',
                 cName: 'header-btn-2',
             }
 
-            desktopButtons.push({ ...scheduleButton, label: headerButtonData?.scheduleButton?.label || 'Schedule NOW' })
-            mobileHeaderButtons.push({ ...scheduleButton, label: headerButtonData?.scheduleButton?.label || 'Schedule' })
+            desktopButtons.push({ ...scheduleButton, label: headerButtonData?.button2?.label || 'Schedule NOW' })
+            mobileHeaderButtons.push({ ...scheduleButton, label: headerButtonData?.button2?.label || 'Schedule' })
         }
 
         return {
