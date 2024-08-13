@@ -44,12 +44,12 @@ function convertIframe(input: string): string {
     }
 }
 
+//use the request sections to create modules
 export const createModulesWithSections = (sections: Sections) => {
     let modules = []
     for (let i = 0; i < sections.length; i++) {
         const section = sections[i]
         if (section.headline && i === 0) {
-            //add ...section before then replace the fields we want
             modules.push({
                 headline: section.headline,
                 actionlbl: section.ctaText || 'GIVE US A CALL',
@@ -460,7 +460,7 @@ export const customizeWidgets = (
         }
 
         //add schedule button if using widgets
-        if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.button2?.link) {
+        if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.button2?.link || headerButtonData?.button2?.label) {
             const scheduleButton = {
                 link: headerButtonData?.button2?.link ? headerButtonData?.button2?.link : ``,
                 active: true,
