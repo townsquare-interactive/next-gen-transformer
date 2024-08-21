@@ -1,6 +1,7 @@
 import { convertDescText, removeWhiteSpace, convertUrlToApexId } from '../utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import {
+    checkModulesForBMP,
     createFontData,
     createLandingColors,
     createModulesWithSections,
@@ -39,7 +40,9 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
 
     const themeColors = createLandingColors(colors)
 
-    const widgetData = customizeWidgets(customComponents || [], themeColors, logo || '', siteName, phoneNumber, email, siteData.headerCtaButtons)
+    const hasEngage = checkModulesForBMP(customComponents)
+
+    const widgetData = customizeWidgets(customComponents, themeColors, logo || '', siteName, phoneNumber, email, siteData.headerCtaButtons, hasEngage)
 
     const fontData = createFontData(siteData.fonts)
 
@@ -58,7 +61,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         hasLinks: false,
                         alignment: 'center',
                         image_src: logo,
-                        image_link: '/',
+                        image_link: '',
                     },
                     {
                         markup: '',
@@ -79,7 +82,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         hasLinks: false,
                         alignment: 'center',
                         image_src: logo,
-                        image_link: '/',
+                        image_link: '',
                     },
                     {
                         show: 0,
@@ -88,7 +91,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         hasLinks: false,
                         alignment: 'left',
                         image_src: '',
-                        image_link: '/',
+                        image_link: '',
                     },
                     {
                         show: 0,
@@ -97,7 +100,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         hasLinks: false,
                         alignment: 'left',
                         image_src: '',
-                        image_link: '/',
+                        image_link: '',
                     },
                 ],
                 activeSlots: [0],
@@ -112,7 +115,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         hasLinks: false,
                         alignment: 'center',
                         image_src: logo,
-                        image_link: '/',
+                        image_link: '',
                     },
                     {
                         markup: '',
@@ -200,6 +203,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
         customComponents: widgetData.customComponents,
         vcita: widgetData.vcita,
         analytics: analytics,
+        formService: hasEngage ? 'BMP' : 'webhook',
     }
 
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
@@ -404,7 +408,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                     customClassName: '',
                     contactFormData: {
                         formTitle: currentMod.contactFormTitle || '',
-                        formService: 'webhook',
+                        formService: '',
                         formEmbed: currentMod.embed || '',
                         email: '',
                         formFields: [

@@ -346,6 +346,18 @@ export const checkComponentsForScheduleNowApi = (customComponents: { type: strin
     return false
 }
 
+export const checkModulesForBMP = (modules: CustomComponent[]) => {
+    let transformedComponents
+
+    transformedComponents = changeBMPToEngage(modules)
+
+    const engageArray = transformedComponents.filter((component) => component.type === 'Engage' && component.apiKey != '')
+
+    const hasEngage = engageArray.length > 0
+
+    return hasEngage
+}
+
 export const customizeWidgets = (
     customComponents: CustomComponent[],
     themeColors: ThemeStyles,
@@ -353,11 +365,11 @@ export const customizeWidgets = (
     siteName: string,
     phoneNumber: string,
     email: string,
-    headerButtonData: HeaderButtons
+    headerButtonData: HeaderButtons,
+    hasEngage: boolean
 ) => {
     let transformedComponents
     let vcita
-    let hasEngage = false
     let scheduleEngineWidgetActive = false
 
     //assign logo/sitename to webchat widget
@@ -370,10 +382,8 @@ export const customizeWidgets = (
         }
 
         scheduleEngineWidgetActive = checkComponentsForScheduleNowApi(customComponents)
+        const engageArray = transformedComponents.filter((component) => component.type === 'Engage' && component.apiKey != '')
 
-        const engageArray = transformedComponents.filter((component) => component.type === 'Engage')
-
-        hasEngage = engageArray.length > 0
         if (hasEngage) {
             const actions = [
                 {

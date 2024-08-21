@@ -4,11 +4,11 @@ import { TransformError } from '../errors.js'
 
 export const createLandingPageFiles = async (siteData: LandingReq, apexID: string) => {
     try {
-        const layoutContents = await createLayoutFile(siteData, apexID)
+        const { siteLayout, siteIdentifier } = await createLayoutFile(siteData, apexID)
         const page = createPageFile(siteData)
-        let siteID = layoutContents.siteIdentifier
-        console.log('Successfully created site files:', { siteLayout: layoutContents.siteLayout, siteIdentifier: siteID, pages: [page] })
-        return { siteLayout: layoutContents.siteLayout, siteIdentifier: siteID, pages: [page] }
+        let siteID = siteIdentifier
+        console.log('Successfully created site files:', { siteLayout: siteLayout, siteIdentifier: siteID, pages: [page] })
+        return { siteLayout: siteLayout, siteIdentifier: siteID, pages: [page] }
     } catch (err) {
         console.error('Caught error in createLandingPageFiles:', err)
         throw new TransformError({

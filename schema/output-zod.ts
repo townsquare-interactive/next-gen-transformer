@@ -313,6 +313,7 @@ export const SiteDataSchema = z.object({
         })
         .nullable(),
     analytics: AnalyticsSchema.optional(),
+    formService: z.string().optional(),
 })
 
 export type SiteDataType = z.infer<typeof SiteDataSchema>
