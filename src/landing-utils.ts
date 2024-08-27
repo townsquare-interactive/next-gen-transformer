@@ -349,7 +349,7 @@ export const checkComponentsForScheduleNowApi = (customComponents: { type: strin
 export const checkModulesForBMP = (modules: CustomComponent[]) => {
     let transformedComponents
 
-    transformedComponents = changeBMPToEngage(modules)
+    transformedComponents = modules?.length > 0 ? changeBMPToEngage(modules) : []
 
     const engageArray = transformedComponents.filter((component) => component.type === 'Engage' && component.apiKey != '')
 

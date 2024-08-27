@@ -40,7 +40,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
 
     const themeColors = createLandingColors(colors)
 
-    const hasEngage = checkModulesForBMP(customComponents)
+    const hasEngage = customComponents?.length > 0 ? checkModulesForBMP(customComponents) : false
 
     const widgetData = customizeWidgets(customComponents, themeColors, logo || '', siteName, phoneNumber, email, siteData.headerCtaButtons, hasEngage)
 
