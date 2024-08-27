@@ -1,0 +1,23 @@
+{
+    "DMN-001": {
+        "description": "Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name."
+    },
+    "DMN-002": {
+        "description": "After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL."
+    },
+    "GEN-003": {
+        "description": "General JavaScript error when going through site deployment tasks."
+    },
+    "VAL-004": {
+        "description": "Error validating incoming request data."
+    },
+    "VAL-005": {
+        "description": "Error validating transformed data being sent to S3."
+    },
+    "AMS-006": {
+        "description": "Site files not found in s3, domain cannot be updated."
+    },
+    "AMS-007": {
+        "description": "Error when trying to upload site files to S3."
+    }
+}

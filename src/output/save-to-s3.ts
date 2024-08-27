@@ -1,10 +1,10 @@
-import { addAssetFromSiteToS3, addFileS3 } from '../s3Functions.js'
+import { addAssetFromSiteToS3, addFileS3 } from '../utilities/s3Functions.js'
 import { updatePageList } from '../controllers/cms-controller.js'
 import type { PublishData } from '../../types.js'
-import { SiteDataSchema, CMSPagesSchema } from '../../schema/output-zod.js'
-import { logZodDataParse, zodDataParse } from '../../schema/utils-zod.js'
+import { SiteDataSchema, CMSPagesSchema } from '../schema/output-zod.js'
+import { logZodDataParse, zodDataParse } from '../schema/utils-zod.js'
 import { z } from 'zod'
-import { DataUploadError } from '../errors.js'
+import { DataUploadError } from '../utilities/errors.js'
 //import { zodToJsonSchema } from 'zod-to-json-schema'
 
 const stringSchema = z.string()

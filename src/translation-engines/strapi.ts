@@ -13,12 +13,12 @@ import {
     createContactInfo,
     addItemExtraSettings,
     manageAnchorLinks,
-} from '../strapi-utils.js'
-import { createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utils.js'
-import { getFileS3 } from '../s3Functions.js'
+} from '../utilities/strapi-utils.js'
+import { createGallerySettings, alternatePromoColors, transformcontact, createFontCss } from '../utilities/utils.js'
+import { getFileS3 } from '../utilities/s3Functions.js'
 //import z from 'zod'
 import { Contact, Request, anchorTags } from '../../types.js'
-import { createItemStyles } from '../style-utils.js'
+import { createItemStyles } from '../utilities/style-utils.js'
 
 /* import { exec } from 'child_process'
 

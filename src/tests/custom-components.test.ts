@@ -1,4 +1,4 @@
-import { getFloatingReviewButtons, extractIframeSrc } from '../customComponentsUtils'
+import { getFloatingReviewButtons, extractIframeSrc } from '../utilities/customComponentsUtils'
 import { it, describe, expect } from 'vitest'
 
 describe('Get Floating Review Buttons', () => {

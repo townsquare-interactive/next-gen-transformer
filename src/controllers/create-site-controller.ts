@@ -1,6 +1,6 @@
 import type { CreateSiteParams, DomainRes, Layout } from '../../types.js'
-import { SiteDeploymentError } from '../errors.js'
-import { addFileS3, getFileS3 } from '../s3Functions.js'
+import { SiteDeploymentError } from '../utilities/errors.js'
+import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 
 const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {

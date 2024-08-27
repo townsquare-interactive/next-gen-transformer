@@ -3423,15 +3423,19 @@ export const layoutLanding = {
             ],
         },
         siteType: 'landing',
-        /* customComponents: [
+        /*     "customComponents": [
         {
-            type: 'Webchat',
-            apiKey: 'mf2k0sam3vr14qfd2x3dk7po8ob0141b',
+            "type": "Webchat",
+            "apiKey": ""
         },
         {
-            type: 'ScheduleEngine',
-            apiKey: 'cl8d8jgjd00pv09pcdsyo89bc',
+            "type": "ScheduleEngine",
+            "apiKey": ""
         },
+        {
+            "type": "BMP",
+            "apiKey": "d2g9nvoehntqdy39"
+        }
     ], */
     },
     pages: [

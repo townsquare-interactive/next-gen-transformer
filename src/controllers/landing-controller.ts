@@ -1,4 +1,4 @@
-import { convertDescText, removeWhiteSpace, convertUrlToApexId } from '../utils.js'
+import { convertDescText, removeWhiteSpace, convertUrlToApexId } from '../utilities/utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import {
     checkModulesForBMP,
@@ -9,12 +9,12 @@ import {
     customizeWidgets,
     transformDLText,
     transformSocial,
-} from '../landing-utils.js'
-import { LandingInputSchema, type AiPageModules, type LandingReq, type LandingColors } from '../../schema/input-zod.js'
-import { getFileS3 } from '../s3Functions.js'
+} from '../utilities/landing-utils.js'
+import { LandingInputSchema, type AiPageModules, type LandingReq, type LandingColors } from '../schema/input-zod.js'
+import { getFileS3 } from '../utilities/s3Functions.js'
 import type { Layout } from '../../types.js'
 import { v4 as uuidv4 } from 'uuid'
-import { zodDataParse } from '../../schema/utils-zod.js'
+import { zodDataParse } from '../schema/utils-zod.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)

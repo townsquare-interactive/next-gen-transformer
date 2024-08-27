@@ -1,4 +1,4 @@
-import { CompositeData } from './schema/output-zod'
+import { CompositeData } from './src/schema/output-zod'
 
 export interface Page {
     data: {

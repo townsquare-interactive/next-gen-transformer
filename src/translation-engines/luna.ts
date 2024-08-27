@@ -1,6 +1,6 @@
 import { updatePageList, transformPagesData, createOrEditLayout, deletePages, createGlobalStylesheet } from '../../src/controllers/cms-controller.js'
-import { getFileS3, addFileS3 } from '../../src/s3Functions.js'
-import { convertUrlToApexId, setColors, stripImageFolders } from '../../src/utils.js'
+import { getFileS3, addFileS3 } from '../utilities/s3Functions.js'
+import { convertUrlToApexId, setColors, stripImageFolders } from '../utilities/utils.js'
 import { LunaRequest } from '../../types.js'
 
 export const transformLuna = async (req: LunaRequest) => {

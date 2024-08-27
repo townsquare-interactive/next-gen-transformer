@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { validateLandingRequestData } from '../../controllers/landing-controller'
-import { LandingReq } from '../../../schema/input-zod'
-import { TransformError } from '../../errors'
+import { LandingReq } from '../../schema/input-zod'
+import { TransformError } from '../../utilities/errors'
 import { createLandingPageFiles } from '../../translation-engines/landing'
-import { CMSPagesSchema, SiteDataSchema } from '../../../schema/output-zod'
+import { CMSPagesSchema, SiteDataSchema } from '../../schema/output-zod'
 
 const validExampleData: LandingReq = {
     siteName: 'Example Site',

@@ -1,6 +1,6 @@
-import type { LandingReq } from '../../schema/input-zod.js'
+import type { LandingReq } from '../schema/input-zod.js'
 import { createLayoutFile, createPageFile } from '../controllers/landing-controller.js'
-import { TransformError } from '../errors.js'
+import { TransformError } from '../utilities/errors.js'
 
 export const createLandingPageFiles = async (siteData: LandingReq, apexID: string) => {
     try {
