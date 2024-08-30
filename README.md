@@ -10,6 +10,10 @@ Routes
 
 Take a look at the zod input and output files in the schema directory to have an idea of the JSON data needed for these requests.
 
+## Landing Page Domains
+
+By default the landing route will add the S3 files and they will be accessible at www.townsquareignite.com/landing/siteName/pageName. However if the env variable CREATE_SITE_DOMAINS is active then a seperate domain for that client will be created by vercel at clientName.vercel.app.
+
 ## Getting Started
 
 If running locally, need S3 credentials to be able to upload the needed created JSON files to S3 (CMS env variables below). Vercel env variables are needed to work with domains on the projects. Remember DO NOT ever commit your .env file to GitHub as it is not safe to expose the S3 variables.
@@ -29,14 +33,15 @@ App runs locally on [http://localhost:8080](http://localhost:8080)
 This section provides information about the error types used in the project.
 
 <!-- ERROR_TABLE_START -->
-| Error Type | Description |
+
+| Error Type | Description                                                                                                               |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| DMN-001 | Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name. |
-| DMN-002 | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL. |
-| GEN-003 | General JavaScript error when going through site deployment tasks. |
-| VAL-004 | Error validating incoming request data. |
-| VAL-005 | Error validating transformed data being sent to S3. |
-| AMS-006 | Site files not found in s3, domain cannot be updated. |
-| AMS-007 | Error when trying to upload site files to S3. |
+| DMN-001    | Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name. |
+| DMN-002    | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL.                          |
+| GEN-003    | General JavaScript error when going through site deployment tasks.                                                        |
+| VAL-004    | Error validating incoming request data.                                                                                   |
+| VAL-005    | Error validating transformed data being sent to S3.                                                                       |
+| AMS-006    | Site files not found in s3, domain cannot be updated.                                                                     |
+| AMS-007    | Error when trying to upload site files to S3.                                                                             |
 
 <!-- ERROR_TABLE_END -->

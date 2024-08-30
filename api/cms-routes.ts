@@ -17,6 +17,7 @@ import express from 'express'
 import { validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
+import { DomainRes } from '../types.js'
 const router = express.Router()
 
 //save from luna cms
@@ -41,16 +42,23 @@ router.post('/save', async (req, res) => {
     }
 })
 
+const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '1' ? true : false //publish new url for each client
 router.post('/landing', async (req, res) => {
     try {
         const { apexID, siteData } = validateLandingRequestData(req)
 
         const data = await createLandingPageFiles(siteData, apexID)
-        const response = await saveToS3({ ...data })
+        const s3Res = await saveToS3({ ...data })
 
-        console.log(response)
+        if (useDomainPublish) {
+            const response: DomainRes = await publishDomainToVercel(apexID, siteData.pageUri || '')
 
-        res.json(response)
+            console.log(response)
+            res.json(response)
+        } else {
+            console.log(s3Res)
+            res.json(s3Res)
+        }
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)

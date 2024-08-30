@@ -54,7 +54,7 @@ const verifyDomain = async (domainName: string) => {
 }
 
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const publishDomainToVercel = async (subdomain: string): Promise<DomainRes> => {
+export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Promise<DomainRes> => {
     /*     try { */
     const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
     let domainName = subdomain + '.vercel.app'
@@ -133,7 +133,7 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
         } else {
             return {
                 message: 'domain already published, updating site data',
-                domain: publishedDomains[0],
+                domain: `${publishedDomains[0] + (pageUri ? `/${pageUri}` : '')}`,
                 status: 'Success',
             }
         }
@@ -148,7 +148,7 @@ export const publishDomainToVercel = async (subdomain: string): Promise<DomainRe
         })
     }
     if (await verifyDomain(domainName)) {
-        return { message: `site domain published'`, domain: domainName, status: 'Success' }
+        return { message: `site domain published'`, domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`, status: 'Success' }
     } else {
         throw new SiteDeploymentError({
             message: 'Unable to verify domain has been published',
