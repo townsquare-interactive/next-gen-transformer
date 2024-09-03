@@ -2,6 +2,7 @@ import type { CreateSiteParams, DomainRes, Layout } from '../../types.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
+import { convertUrlToApexId } from '../utilities/utils.js'
 
 const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
     //add domains to layout file or removes if deleting
@@ -249,14 +250,12 @@ export async function checkIfSiteExistsPostgres(domain: string) {
 }
 
 export const removeDomainFromVercel = async (subdomain: string): Promise<DomainRes> => {
-    const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+    const apexID = convertUrlToApexId(subdomain, false)
+    const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
     let domainName = subdomain
-    if (!subdomain.includes('.vercel.app')) {
-        domainName = subdomain + '.vercel.app'
-    }
 
     if (typeof siteLayout != 'string') {
-        //new check with layout file
+        //check that this url is tied with the S3 layout published domains field
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
 
@@ -293,7 +292,7 @@ export const removeDomainFromVercel = async (subdomain: string): Promise<DomainR
             }
         } else {
             throw new SiteDeploymentError({
-                message: `'domain cannot be removed as it is not connected to the apexID`,
+                message: `'domain cannot be removed as it is not connected to the apexID S3 folder`,
                 domain: domainName,
                 errorType: 'AMS-006',
                 state: {
@@ -303,7 +302,7 @@ export const removeDomainFromVercel = async (subdomain: string): Promise<DomainR
         }
     } else {
         throw new SiteDeploymentError({
-            message: `ApexID ${subdomain} not found in list of created sites`,
+            message: `ApexID ${apexID} not found in list of created sites`,
             domain: domainName,
             errorType: 'AMS-006',
             state: {

@@ -1,4 +1,4 @@
-import { addFileS3, folderExistsInS3, getFileS3 } from '../src/utilities/s3Functions.js'
+import { addFileS3, deleteFileS3, folderExistsInS3, getFileS3 } from '../src/utilities/s3Functions.js'
 import { convertUrlToApexId } from '../src/utilities/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
@@ -12,12 +12,13 @@ import {
     removeDomainFromVercel,
 } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
-import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema } from '../src/schema/input-zod.js'
+import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, LandingInputSchema } from '../src/schema/input-zod.js'
 import express from 'express'
 import { validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
+import { removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 const router = express.Router()
 
 //save from luna cms
@@ -46,7 +47,6 @@ const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '1' ? true : false 
 router.post('/landing', async (req, res) => {
     try {
         const { apexID, siteData } = validateLandingRequestData(req)
-
         const data = await createLandingPageFiles(siteData, apexID)
         const s3Res = await saveToS3({ ...data })
 
@@ -59,6 +59,16 @@ router.post('/landing', async (req, res) => {
             console.log(s3Res)
             res.json(s3Res)
         }
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res, req.body.url)
+    }
+})
+
+router.post('/remove-landing', async (req, res) => {
+    try {
+        const response = await removeLandingSite(req.body)
+        res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)

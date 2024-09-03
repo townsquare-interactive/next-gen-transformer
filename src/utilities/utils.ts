@@ -126,7 +126,7 @@ export function btnIconConvert(icon: string) {
     }
 }
 
-export const convertUrlToApexId = (url: string) => {
+export const convertUrlToApexId = (url: string, changeHyphens = true) => {
     // Remove protocol
     const withoutProtocol = url.replace(/(^\w+:|^)\/\//, '')
     const withoutTSI = withoutProtocol.replace('.production.townsquareinteractive', '')
@@ -135,19 +135,37 @@ export const convertUrlToApexId = (url: string) => {
     const withoutWww = withoutTSI.replace(/^www\./, '')
 
     // Extract the domain part (before the first '/')
-    const domain = withoutWww.split('/')[0]
+    let domain = withoutWww.split('/')[0]
 
-    // Replace all periods except the last one with hyphens
-    const lastPeriodIndex = domain.lastIndexOf('.')
-    const transformedDomain = domain.substring(0, lastPeriodIndex).replace(/\./g, '-') + domain.substring(lastPeriodIndex)
+    if (domain.includes('.vercel')) {
+        //remove vercel domain postfixes
+        domain = removeCustomVercelDomainPostfixes(domain)
+    }
+
+    if (changeHyphens) {
+        // Replace all periods except the last one with hyphens
+        const lastPeriodIndex = domain.lastIndexOf('.')
+        domain = domain.substring(0, lastPeriodIndex).replace(/\./g, '-') + domain.substring(lastPeriodIndex)
+    } else {
+        domain = domain.split('.')[0]
+    }
 
     // Remove the TLD
-    const domainParts = transformedDomain.split('.')
+    const domainParts = domain.split('.')
     if (domainParts.length > 1) {
         domainParts.pop() // Remove the last part (TLD)
     }
-
+    console.log('domain after convert func', domain)
     return domainParts.join('.')
+}
+
+const removeCustomVercelDomainPostfixes = (str: string) => {
+    let apexID = str
+    apexID = apexID.replace('-preview', '')
+    apexID = apexID.replace('-lp', '')
+    apexID = apexID.replace('-prev', '')
+    apexID = apexID.replace('-main', '')
+    return apexID
 }
 
 //strip anything between / ... /

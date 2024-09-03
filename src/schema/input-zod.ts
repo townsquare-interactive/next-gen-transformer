@@ -262,6 +262,10 @@ const ReviewSchema = z.object({
     name: z.string().optional(),
 })
 
+export const RemoveLandingPageSchema = z.object({
+    url: z.string(),
+})
+
 const PageSectionSchema = z.array(
     z.object({
         headline: z.string().optional(),
@@ -348,3 +352,4 @@ export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof PageSectionSchema>
 export type LandingColors = z.infer<typeof LandingColorsSchema>
+export type RemoveLandingPageReq = z.infer<typeof RemoveLandingPageSchema>

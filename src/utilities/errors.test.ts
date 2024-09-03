@@ -115,7 +115,7 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'DEP-001',
-            message: 'Error creating site: Deployment error (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            message: 'Error with site deployment: Deployment error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
             state: {
                 domainStatus: 'Domain unable to be removed from project',

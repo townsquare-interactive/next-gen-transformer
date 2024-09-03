@@ -125,7 +125,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
         res.status(500).json({
             id: errorID,
             errorType: err.errorType,
-            message: 'Error creating site: ' + err.message + errorIDMessage,
+            message: 'Error with site deployment: ' + err.message + errorIDMessage,
             domain: err.domain,
             state: err.state,
             status: errorStatus,

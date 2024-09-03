@@ -4,6 +4,7 @@ import request from 'request-promise'
 const tsiBucket = 'townsquareinteractive'
 const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 import { S3 } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
 
 const s3 = new S3({
@@ -208,6 +209,35 @@ export const moveAllS3Objs = async () => {
         })
 
     listAllKeys({ Bucket: 'bucket-name' }).then(console.log).catch(console.log) */
+}
+
+/* const s3Client = new S3Client({ region: 'your-region' }) */
+
+export const deleteFolderS3 = async (folderKey: string) => {
+    const listParams = {
+        Bucket: tsiBucket,
+        Prefix: folderKey,
+    }
+
+    const listedObjects = await s3.send(new ListObjectsV2Command(listParams))
+
+    if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
+        console.log('Folder is empty or does not exist')
+        return
+    }
+
+    // Delete all files within the folder
+    const deleteParams = {
+        Bucket: tsiBucket,
+        Delete: {
+            Objects: listedObjects.Contents.map(({ Key }) => ({ Key })),
+            Quiet: true,
+        },
+    }
+
+    await s3.send(new DeleteObjectsCommand(deleteParams))
+
+    console.log('S3 Folder Deleted')
 }
 
 export const deleteFileS3 = async (key: string) => {
