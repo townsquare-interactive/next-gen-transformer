@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { ValidationError } from '../utilities/errors.js'
 import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
+
 const Slot = z.object({
-    show: z.number(),
+    show: z.number().optional(),
     type: z.string().optional(),
     markup: z.string().optional(),
     hasLinks: z.boolean().optional(),
