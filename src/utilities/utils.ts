@@ -161,6 +161,7 @@ export const convertUrlToApexId = (url: string, changeHyphens = true) => {
 
 const removeCustomVercelDomainPostfixes = (str: string) => {
     let apexID = str
+    apexID = apexID.replace('.vercel', '')
     apexID = apexID.replace('-preview', '')
     apexID = apexID.replace('-lp', '')
     apexID = apexID.replace('-prev', '')

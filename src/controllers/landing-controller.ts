@@ -15,6 +15,7 @@ import { getFileS3 } from '../utilities/s3Functions.js'
 import type { Layout } from '../../types.js'
 import { v4 as uuidv4 } from 'uuid'
 import { zodDataParse } from '../schema/utils-zod.js'
+import { SiteDataType } from '../schema/output-zod.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
@@ -209,7 +210,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
     return { siteLayout: layoutTemplate, siteIdentifier: apexID }
 }
 
-export const createPageFile = (siteData: LandingReq) => {
+export const createPageFile = (siteData: LandingReq, siteLayout: SiteDataType) => {
     const title = siteData.pageUri ? siteData.pageUri : 'landing'
     const slug = siteData.pageUri ? siteData.pageUri : 'landing'
 
@@ -250,6 +251,7 @@ export const createPageFile = (siteData: LandingReq) => {
             selectedImages: '',
             imageOverride: '',
         },
+        siteLayout: siteLayout,
     }
 
     return page

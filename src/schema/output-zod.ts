@@ -1,7 +1,15 @@
 import { z } from 'zod'
 import { ValidationError } from '../utilities/errors.js'
 import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
-const Slot = z.object({})
+const Slot = z.object({
+    show: z.number(),
+    type: z.string().optional(),
+    markup: z.string().optional(),
+    hasLinks: z.boolean().optional(),
+    alignment: z.string().optional(),
+    image_src: z.any().optional(),
+    image_link: z.string().optional(),
+})
 const OptionalString = z.string().optional()
 
 const CompositeItemSchema = z.object({
@@ -62,20 +70,16 @@ const LogoItem = z
     .object({
         slots: z.array(Slot),
         activeSlots: z.array(z.number()),
+        pct: z.number().optional(),
     })
     .nullish()
+    .optional()
 
 const Logo = z.object({
     // fonts: z.array(z.unknown()),
-    footer: z.object({
-        LogoItem,
-    }),
-    header: z.object({
-        LogoItem,
-    }),
-    mobile: z.object({
-        LogoItem,
-    }),
+    footer: LogoItem,
+    header: LogoItem,
+    mobile: LogoItem,
     //list: z.record(z.string()), //remove
 })
 
@@ -168,7 +172,7 @@ const Config = z.object({
         })
         .optional(),
     zapierUrl: z.string(),
-    makeUrl: z.string(),
+    makeUrl: z.string().optional(),
 })
 
 const ThemeStyles = z.object({
@@ -258,7 +262,7 @@ const ThemeColorsSchema = z.object({
 const VcitaDataSchema = z.object({
     actions: z.array(ActionSchema),
     themeColors: ThemeColorsSchema.optional(),
-    businessId: z.string(),
+    businessId: z.string().optional(),
     titleText: z.string().optional(),
     mainAction: z.string().optional(),
     descText: z.string().optional(),
@@ -501,6 +505,7 @@ export const CMSPagesSchema = z.array(
         seo: SeoSchema,
         head_script: OptionalString,
         JS: OptionalString,
+        siteLayout: SiteDataSchema.optional(),
     })
 )
 
