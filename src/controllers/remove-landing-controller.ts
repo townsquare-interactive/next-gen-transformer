@@ -1,10 +1,10 @@
 import type { Layout } from '../../types'
-import { RemoveLandingPageReq, RemoveLandingPageSchema } from '../schema/input-zod'
-import { zodDataParse } from '../schema/utils-zod'
+import { RemoveLandingPageReq, RemoveLandingPageSchema } from '../schema/input-zod.js'
+import { zodDataParse } from '../schema/utils-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { deleteFileS3, deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
-import { convertUrlToApexId } from '../utilities/utils'
-import { removeDomainFromVercel } from './create-site-controller'
+import { convertUrlToApexId } from '../utilities/utils.js'
+import { removeDomainFromVercel } from './create-site-controller.js'
 
 export const removeLandingSite = async (req: RemoveLandingPageReq) => {
     const parsedReq = zodDataParse(req, RemoveLandingPageSchema)
