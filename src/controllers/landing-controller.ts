@@ -19,7 +19,8 @@ import { SiteDataType } from '../schema/output-zod.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
-    const apexID = convertUrlToApexId(siteData.url)
+    const subdomain = siteData.subdomainOverride || siteData.url
+    const apexID = convertUrlToApexId(subdomain)
 
     return { apexID, siteData }
 }
@@ -63,12 +64,6 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         alignment: 'center',
                         image_src: logo,
                         image_link: '',
-                    },
-                    {
-                        markup: '',
-                    },
-                    {
-                        markup: '',
                     },
                 ],
                 activeSlots: [0],
@@ -117,12 +112,6 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         alignment: 'center',
                         image_src: logo,
                         image_link: '',
-                    },
-                    {
-                        markup: '',
-                    },
-                    {
-                        markup: '',
                     },
                 ],
                 activeSlots: [0],

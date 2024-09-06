@@ -315,6 +315,7 @@ const ScriptsSchema = z.object({
 export const LandingInputSchema = z.object({
     siteName: z.string(),
     url: z.string(),
+    subdomainOverride: z.string().optional(),
     pageUri: z.string().optional(),
     logo: z.string().optional(),
     favicon: z.string().optional(),

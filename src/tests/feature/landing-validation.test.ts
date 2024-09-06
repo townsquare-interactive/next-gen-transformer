@@ -33,6 +33,18 @@ describe('validateLandingRequestData', () => {
         expect(result.apexID).toBeTruthy()
     })
 
+    it('should strip the url to create a valid apexID', () => {
+        const req = { body: { ...validExampleData, url: 'https://www.clientname.com' } }
+        const result = validateLandingRequestData(req)
+        expect(result.apexID).toEqual('clientname')
+    })
+
+    it('should use subdomainOverride instead of url to create the apexID when available', () => {
+        const overrideReq = { body: { ...validExampleData, subdomainOverride: 'newdomain.vercel.app' } }
+        const result = validateLandingRequestData(overrideReq)
+        expect(result.apexID).toEqual('newdomain')
+    })
+
     it('should throw a ValidationError for invalid input', () => {
         const req = {
             body: {
