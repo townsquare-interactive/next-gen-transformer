@@ -886,3 +886,8 @@ export interface DomainRes {
     domain: string
     status: 'Error' | 'Success'
 }
+
+export interface DomainOptions {
+    domain: string
+    usingPreview: boolean
+}

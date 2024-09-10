@@ -1,6 +1,6 @@
 //import { z } from 'zod'
 import { SiteDataType } from '../schema/output-zod'
-import { CMSNavItem, CMSPage, Contact, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot, FontType } from '../../types'
+import { CMSNavItem, CMSPage, Contact, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot, FontType, DomainOptions } from '../../types'
 
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 const globalAssets = bucketUrl + '/global-assets'
@@ -1179,4 +1179,19 @@ export const getlandingPageOptions = () => {
 
 export function removeWhiteSpace(str: string) {
     return str.replace(/\s+/g, '')
+}
+
+export const createRandomFiveCharString = (): string => {
+    return Math.random().toString(36).substring(2, 7)
+}
+
+//check if there is a domain that has been randomly generated in list of publishedDomains
+export const checkApexIDInDomain = (checkingDomain: string, domainOptions: DomainOptions, postfix: string): boolean => {
+    const apexAndHyphen = domainOptions.domain + '-'
+
+    if (checkingDomain.includes(apexAndHyphen)) {
+        const regex = new RegExp(`${apexAndHyphen}.{5}\\${postfix}`)
+        return regex.test(checkingDomain)
+    }
+    return false
 }

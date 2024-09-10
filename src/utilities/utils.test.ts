@@ -11,6 +11,7 @@ import {
     decideBtnCount,
     createModalPageList,
     convertUrlToApexId,
+    checkApexIDInDomain,
 } from './utils'
 import { it, describe, expect } from 'vitest'
 
@@ -310,4 +311,27 @@ describe('stripUrl', () => {
 })
 it('should remove .production.townsquare.', () => {
     expect(convertUrlToApexId('https://clttestsiteforjoshedwards.production.townsquareinteractive.com')).toStrictEqual('clttestsiteforjoshedwards')
+})
+
+describe('checkApexIDInDomain', () => {
+    it('should return true when a domain contains - followed by random characters and the postfix', () => {
+        const checkingDomain = 'yo-djfdd.vercel.app'
+        const domainOptions = { domain: 'yo', usingPreview: true }
+        const postfix = '.vercel.app'
+        expect(checkApexIDInDomain(checkingDomain, domainOptions, postfix)).toStrictEqual(true)
+    })
+
+    it('should return false when a domain does not have a - and five random characters', () => {
+        const checkingDomain2 = 'yooverridevercel.app'
+        const domainOptions = { domain: 'yo', usingPreview: true }
+        const postfix = '.vercel.app'
+        expect(checkApexIDInDomain(checkingDomain2, domainOptions, postfix)).toStrictEqual(false)
+    })
+
+    it('should return false when a domain does not have a matching postfix', () => {
+        const checkingDomain2 = 'yo-djfdd.com'
+        const domainOptions = { domain: 'yo', usingPreview: true }
+        const postfix = '.vercel.app'
+        expect(checkApexIDInDomain(checkingDomain2, domainOptions, postfix)).toStrictEqual(false)
+    })
 })

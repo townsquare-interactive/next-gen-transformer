@@ -1,8 +1,8 @@
-import type { CreateSiteParams, DomainRes, Layout } from '../../types.js'
+import type { CreateSiteParams, DomainOptions, DomainRes, Layout } from '../../types.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
-import { convertUrlToApexId } from '../utilities/utils.js'
+import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
 
 const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
     //add domains to layout file or removes if deleting
@@ -53,28 +53,28 @@ const verifyDomain = async (domainName: string) => {
     }
 }
 
-const createRandomFiveCharString = (): string => {
-    return (Math.random() + 1).toString(36).substring(5)
-}
-
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const publishDomainToVercel = async (domainOptions: { domain: string; usingPreview: boolean }, apexID: string, pageUri = ''): Promise<DomainRes> => {
+export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID: string, pageUri = ''): Promise<DomainRes> => {
     const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
     const postfix = domainOptions.usingPreview ? '.vercel.app' : ''
     let domainName = domainOptions.domain + postfix
     let randomString = createRandomFiveCharString()
     let randomStringDomain = domainOptions.domain + '-' + randomString
     let altDomain = randomStringDomain + postfix
-    console.log('domainNametest', domainName)
 
     if (typeof siteLayout != 'string') {
         //new check with layout file
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
-        const isAltDomainPublishedAlready = publishedDomains.filter((domain) => domain === altDomain).length
-        console.log('is pub already', isDomainPublishedAlready)
 
-        if (!isDomainPublishedAlready && !isAltDomainPublishedAlready) {
+        //check if a random char generated domain has already been published
+        const publishedAltDomain = publishedDomains.filter((domain) => checkApexIDInDomain(domain, domainOptions, postfix))
+
+        if (publishedAltDomain.length) {
+            domainName = publishedAltDomain[0]
+        }
+
+        if (!isDomainPublishedAlready && !publishedAltDomain.length) {
             console.log('domain: ', domainName)
 
             //vercep api url changes between post vs delete
