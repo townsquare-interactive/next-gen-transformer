@@ -19,10 +19,19 @@ import { SiteDataType } from '../schema/output-zod.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
-    const subdomain = siteData.subdomainOverride || siteData.url
-    const apexID = convertUrlToApexId(subdomain)
+    const apexID = convertUrlToApexId(siteData.s3Folder)
+    const domainOptions = {
+        domain: siteData.finalDomain
+            ? siteData.finalDomain
+            : siteData.subdomainOverride
+            ? convertUrlToApexId(siteData.subdomainOverride)
+            : siteData.s3Folder
+            ? convertUrlToApexId(siteData.s3Folder)
+            : '',
+        usingPreview: !siteData.finalDomain,
+    }
 
-    return { apexID, siteData }
+    return { apexID, siteData, domainOptions }
 }
 
 export const createLayoutFile = async (siteData: any, apexID: string) => {

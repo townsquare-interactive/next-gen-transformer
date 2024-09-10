@@ -6,6 +6,7 @@ import { validateLandingRequestData } from '../../controllers/landing-controller
 const validExampleData = {
     siteName: 'Example Site',
     url: 'https://example.com',
+    s3Folder: 'https://example.com',
     email: 'example@example.com',
     colors: {
         primary: '#000000',
@@ -34,7 +35,7 @@ describe('validateLandingRequestData', () => {
     })
 
     it('should strip the url to create a valid apexID', () => {
-        const req = { body: { ...validExampleData, url: 'https://www.clientname.com' } }
+        const req = { body: { ...validExampleData, s3Folder: 'https://www.clientname.com' } }
         const result = validateLandingRequestData(req)
         expect(result.apexID).toEqual('clientname')
     })
@@ -42,7 +43,15 @@ describe('validateLandingRequestData', () => {
     it('should use subdomainOverride instead of url to create the apexID when available', () => {
         const overrideReq = { body: { ...validExampleData, subdomainOverride: 'newdomain.vercel.app' } }
         const result = validateLandingRequestData(overrideReq)
-        expect(result.apexID).toEqual('newdomain')
+        expect(result.apexID).toEqual('example')
+        expect(result.domainOptions).toEqual({ domain: 'newdomain', usingPreview: true })
+    })
+
+    it('should handle a finalDomain correctly', () => {
+        const overrideReq = { body: { ...validExampleData, finalDomain: 'newdomain.vercel.app' } }
+        const result = validateLandingRequestData(overrideReq)
+        expect(result.apexID).toEqual('example')
+        expect(result.domainOptions).toEqual({ domain: 'newdomain.vercel.app', usingPreview: false })
     })
 
     it('should throw a ValidationError for invalid input', () => {

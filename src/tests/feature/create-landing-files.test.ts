@@ -8,6 +8,7 @@ import { CMSPagesSchema, SiteDataSchema } from '../../schema/output-zod'
 const validExampleData: LandingReq = {
     siteName: 'Example Site',
     url: 'https://example.com',
+    s3Folder: 'example.com',
     email: 'example@example.com',
     colors: {
         primary: '#000000',

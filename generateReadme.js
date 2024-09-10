@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-const errors = JSON.parse(fs.readFileSync('./src/errors.json', 'utf8'))
+const errors = JSON.parse(fs.readFileSync('./src/utilities/errors.json', 'utf8'))
 
 // Start errorType table
 let markdown = '| Error Type | Description |\n'

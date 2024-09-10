@@ -19,5 +19,8 @@
     },
     "AMS-007": {
         "description": "Error when trying to upload site files to S3."
+    },
+    "DMN-008": {
+        "description": "Production domain not available."
     }
 }

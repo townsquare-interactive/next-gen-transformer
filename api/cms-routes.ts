@@ -46,12 +46,12 @@ router.post('/save', async (req, res) => {
 const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '1' ? true : false //publish new url for each client
 router.post('/landing', async (req, res) => {
     try {
-        const { apexID, siteData } = validateLandingRequestData(req)
+        const { apexID, siteData, domainOptions } = validateLandingRequestData(req)
         const data = await createLandingPageFiles(siteData, apexID)
         const s3Res = await saveToS3({ ...data })
 
         if (useDomainPublish) {
-            const response: DomainRes = await publishDomainToVercel(apexID, siteData.pageUri || '')
+            const response: DomainRes = await publishDomainToVercel(domainOptions, apexID, siteData.pageUri || '')
 
             console.log(response)
             res.json(response)
@@ -91,7 +91,7 @@ router.post('/create-site', async (req, res) => {
                 //const siteListStatus = await addToSiteList(req.body)
                 const data = await transformCreateSite(req.body)
                 await saveToS3({ ...data })
-                const response = await publishDomainToVercel(req.body.subdomain)
+                const response = await publishDomainToVercel({ domain: req.body.subdomain, usingPreview: true }, req.body.subdomain)
                 console.log('domain status: ', response)
                 res.json(' Domain status: ' + response)
             }
@@ -109,7 +109,7 @@ router.post('/create-site', async (req, res) => {
 router.patch('/domain-publish', async (req, res) => {
     try {
         const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
-        const response = await publishDomainToVercel(validatedRequest.subdomain)
+        const response = await publishDomainToVercel({ domain: validatedRequest.subdomain, usingPreview: true }, validatedRequest.subdomain)
         console.log(response)
         res.json(response)
     } catch (err) {

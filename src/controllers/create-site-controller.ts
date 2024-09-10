@@ -23,7 +23,6 @@ const verifyDomain = async (domainName: string) => {
     const vercelApiUrl = `https://${domainName}`
 
     //fetch domain to see if you get a response
-
     const fetchDomainData = async (url: string, retries = 3, delayMs = 1400) => {
         for (let attempt = 1; attempt <= retries; attempt++) {
             const response = await fetch(url, {
@@ -54,12 +53,19 @@ const verifyDomain = async (domainName: string) => {
     }
 }
 
+const createRandomFiveCharString = (): string => {
+    return (Math.random() + 1).toString(36).substring(5)
+}
+
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Promise<DomainRes> => {
-    /*     try { */
-    const siteLayout: Layout = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
-    let domainName = subdomain + '.vercel.app'
-    let altDomain = subdomain + '-lp' + '' + '.vercel.app'
+export const publishDomainToVercel = async (domainOptions: { domain: string; usingPreview: boolean }, apexID: string, pageUri = ''): Promise<DomainRes> => {
+    const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+    const postfix = domainOptions.usingPreview ? '.vercel.app' : ''
+    let domainName = domainOptions.domain + postfix
+    let randomString = createRandomFiveCharString()
+    let randomStringDomain = domainOptions.domain + '-' + randomString
+    let altDomain = randomStringDomain + postfix
+    console.log('domainNametest', domainName)
 
     if (typeof siteLayout != 'string') {
         //new check with layout file
@@ -88,32 +94,63 @@ export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Pr
             console.log('vercel domain response', response)
 
             //if domain name already exists try adding again with postfix
+            let tries = 0
             if (response.status === 409) {
-                console.log('domain already exists, adding -lp postfix')
+                if (!domainOptions.usingPreview) {
+                    throw new SiteDeploymentError({
+                        message: `production domain "${domainOptions.domain}" is taken and another domain must be provided`,
+                        domain: domainName,
+                        errorType: 'DMN-008',
+                        state: {
+                            domainStatus: 'Domain not added for project',
+                        },
+                    })
+                }
+
+                tries += 1
+                console.log(`domain already exists, adding random char postfix try number ${tries}`)
+
                 const secondDomainAttempt = await fetch(vercelApiUrl, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
                     },
                     body: JSON.stringify({
-                        name: subdomain + '-lp' + '.vercel.app',
+                        name: altDomain,
                     }),
                 })
+
                 if (secondDomainAttempt.status === 409) {
-                    throw new SiteDeploymentError({
-                        message: `domain "${domainName}" and altered domain "${subdomain}-lp.vercel.app" both already taken in another project`,
-                        domain: domainName,
-                        errorType: 'DMN-001',
-                        state: {
-                            domainStatus: 'Domain not added for project',
+                    tries += 1
+                    console.log(`domain already exists again, adding random char postfix try number ${tries}`)
+
+                    altDomain = domainOptions.domain + '-' + createRandomFiveCharString() + postfix
+                    const thirdDomainAttempt = await fetch(vercelApiUrl, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
                         },
+                        body: JSON.stringify({
+                            name: altDomain,
+                        }),
                     })
-                } else {
-                    domainName = subdomain + '-lp' + '.vercel.app'
+
+                    if (thirdDomainAttempt.status === 409) {
+                        throw new SiteDeploymentError({
+                            message: `domain "${domainName}" and altered domain "${altDomain}" both already taken in another project`,
+                            domain: domainName,
+                            errorType: 'DMN-001',
+                            state: {
+                                domainStatus: 'Domain not added for project',
+                            },
+                        })
+                    } /* else {
+                        //domainName = subdomain + '-lp' + postfix 
+                    domainName = altDomain
                     await modifyDomainPublishStatus('POST', siteLayout, domainName, subdomain)
                     if (await verifyDomain(domainName)) {
                         return {
-                            message: `domain added with postfix -lp because other domain is taken`,
+                            message: `domain added with postfix ${altDomain} because other domain is taken`,
                             domain: domainName,
                             status: 'Success',
                         }
@@ -127,20 +164,42 @@ export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Pr
                             },
                         })
                     }
+                    } */
+                }
+                //domainName = subdomain + '-lp' + postfix
+                domainName = altDomain
+                await createRedirectFile(domainName, apexID)
+                if (await verifyDomain(domainName)) {
+                    await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
+
+                    return {
+                        message: `domain added with postfix ${altDomain} because other domain is taken`,
+                        domain: domainName,
+                        status: 'Success',
+                    }
+                } else {
+                    throw new SiteDeploymentError({
+                        message: 'Unable to verify domain has been published',
+                        domain: domainName,
+                        errorType: 'DMN-002',
+                        state: {
+                            domainStatus: 'Domain not added for project',
+                        },
+                    })
                 }
             } else {
-                await modifyDomainPublishStatus('POST', siteLayout, domainName, subdomain)
+                await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
             }
         } else {
             return {
                 message: 'domain already published, updating site data',
-                domain: `${publishedDomains[0] + (pageUri ? `/${pageUri}` : '')}`,
+                domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`,
                 status: 'Success',
             }
         }
     } else {
         throw new SiteDeploymentError({
-            message: `ApexID ${subdomain} not found in list of created sites`,
+            message: `ApexID ${apexID} not found in list of created sites`,
             domain: domainName,
             errorType: 'AMS-006',
             state: {
@@ -148,6 +207,7 @@ export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Pr
             },
         })
     }
+    await createRedirectFile(domainName, apexID)
     if (await verifyDomain(domainName)) {
         return { message: `site domain published'`, domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`, status: 'Success' }
     } else {
@@ -159,6 +219,17 @@ export const publishDomainToVercel = async (subdomain: string, pageUri = ''): Pr
                 domainStatus: 'Domain not added for project',
             },
         })
+    }
+}
+
+const createRedirectFile = async (domainName: string, apexID: string) => {
+    if (convertUrlToApexId(domainName) != apexID) {
+        console.log('creating redirect file for: ', domainName)
+        const redirectFile = {
+            apexId: apexID,
+        }
+
+        await addFileS3(redirectFile, `${convertUrlToApexId(domainName)}/redirect`)
     }
 }
 
