@@ -46,7 +46,7 @@ export const getFileS3 = async (key: string, rtnObj: any = { pages: [] }, type =
             }
         }
     } catch (err) {
-        console.log(`File ${key} not found in S3, creating a new file`)
+        console.log(`File ${key} not found in S3`)
         return rtnObj
     }
 }
@@ -158,61 +158,6 @@ export const addMultipleS3 = async (data: any, pageList: { pages: [] }, basePath
     addFileS3(data, `${basePath}/siteData`)
 }
 
-export const moveAllS3Objs = async () => {
-    /* await s3.listObjects({Prefix: ''}, function(err, data) {
-    if (data.Contents.length) {
-      async.each(data.Contents, function(file, cb) {
-        var params = {
-          Bucket: bucketName,
-          CopySource: bucketName + '/' + file.Key,
-          Key: file.Key.replace(oldPrefix, newPrefix)
-        };
-        s3.copyObject(params, function(copyErr, copyData){
-          if (copyErr) {
-            console.log(copyErr);
-          }
-          else {
-            console.log('Copied: ', params.Key);
-            cb();
-          }
-        });
-      }, done);
-    }
-  }); */
-    /*  console.log('tring to do S3 all bucket')
-    const listObjectsResponse = await s3
-        .listObjectsV2({
-            Bucket: 'townsquareinteractive',
-            Prefix: 'wanderlustadventures',
-            Delimiter: '/',
-        })
-        .promise()
-
-    const folderContentInfo = listObjectsResponse.Contents
-    const folderPrefix = listObjectsResponse.Prefix
-
-    console.log(listObjectsResponse) */
-    /*     const params = {
-        Bucket: 'townsquareinteractive',
-        Prefix: 'wanderlustadventures',
-    }
-
-    const listAllKeys = (params, out = []) =>
-        new Promise((resolve, reject) => {
-            s3.listObjectsV2(params)
-                .promise()
-                .then(({ Contents, IsTruncated, NextContinuationToken }) => {
-                    out.push(...Contents)
-                    !IsTruncated ? resolve(out) : resolve(listAllKeys(Object.assign(params, { ContinuationToken: NextContinuationToken }), out))
-                })
-                .catch(reject)
-        })
-
-    listAllKeys({ Bucket: 'bucket-name' }).then(console.log).catch(console.log) */
-}
-
-/* const s3Client = new S3Client({ region: 'your-region' }) */
-
 export const deleteFolderS3 = async (folderKey: string) => {
     const listParams = {
         Bucket: tsiBucket,
@@ -237,7 +182,7 @@ export const deleteFolderS3 = async (folderKey: string) => {
 
     await s3.send(new DeleteObjectsCommand(deleteParams))
 
-    console.log('S3 Folder Deleted')
+    console.log('S3 Folder Deleted', folderKey)
 }
 
 export const deleteFileS3 = async (key: string) => {

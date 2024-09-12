@@ -4,7 +4,7 @@ import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
 
-const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, subdomain: string) => {
+const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string) => {
     //add domains to layout file or removes if deleting
     if (method === 'POST') {
         siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
@@ -13,7 +13,7 @@ const modifyDomainPublishStatus = async (method: string, siteLayout: any, domain
         //remove site from list if deleting
         siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain: string) => domain != domainName)
     }
-    await addFileS3(siteLayout, `${subdomain}/layout`)
+    await addFileS3(siteLayout, `${apexId}/layout`)
 }
 
 //verify domain has been added to project
@@ -320,15 +320,27 @@ export async function checkIfSiteExistsPostgres(domain: string) {
     }
 }
 
-export const removeDomainFromVercel = async (subdomain: string): Promise<DomainRes> => {
-    const apexID = convertUrlToApexId(subdomain, false)
-    const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
-    let domainName = subdomain
+export const removeDomainFromVercel = async (domain: string): Promise<DomainRes> => {
+    const apexID = convertUrlToApexId(domain, false)
+
+    //check here if redirect file, if so followo breadcrumbs to get to layout
+    const redirectFile: string | { apexId: string } = await getFileS3(`${apexID}/redirect.json`, 'no redirect found')
+
+    let finalApexID = apexID
+
+    //if using a redirect file change the apexID to the redirected ID
+    if (typeof redirectFile != 'string' && redirectFile.apexId) {
+        console.log('redirect file has been found', redirectFile.apexId)
+        finalApexID = redirectFile.apexId
+    }
+
+    const siteLayout: Layout = await getFileS3(`${finalApexID}/layout.json`, 'site not found in s3')
+    let domainName = domain
 
     if (typeof siteLayout != 'string') {
         //check that this url is tied with the S3 layout published domains field
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
-        const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+        const isDomainPublishedAlready = publishedDomains.filter((listedDomain) => listedDomain === domainName).length
 
         if (isDomainPublishedAlready) {
             console.log('domain: ', domainName)
@@ -350,7 +362,7 @@ export const removeDomainFromVercel = async (subdomain: string): Promise<DomainR
 
                 console.log('vercel domain response', response)
 
-                await modifyDomainPublishStatus('DELETE', siteLayout, domainName, subdomain)
+                await modifyDomainPublishStatus('DELETE', siteLayout, domainName, finalApexID)
             } catch (err) {
                 throw new SiteDeploymentError({
                     message: err.message,

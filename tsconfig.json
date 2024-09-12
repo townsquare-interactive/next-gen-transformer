@@ -12,7 +12,8 @@
         "noImplicitAny": true,
         "useUnknownInCatchVariables": false,
         "inlineSourceMap": true,
-        "allowJs": true
+        "allowJs": true,
+        "types": ["vitest", "node"]
     },
     "ts-node": {
         "esm": true
