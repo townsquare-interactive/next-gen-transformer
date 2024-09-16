@@ -329,9 +329,15 @@ describe('checkApexIDInDomain', () => {
     })
 
     it('should return false when a domain does not have a matching postfix', () => {
-        const checkingDomain2 = 'yo-djfdd.com'
+        const checkingDomain3 = 'yo-djfdd.com'
         const domainOptions = { domain: 'yo', usingPreview: true }
         const postfix = '.vercel.app'
-        expect(checkApexIDInDomain(checkingDomain2, domainOptions, postfix)).toStrictEqual(false)
+        expect(checkApexIDInDomain(checkingDomain3, domainOptions, postfix)).toStrictEqual(false)
+    })
+    it('should return true when -lp is added', () => {
+        const checkingDomain4 = 'abc-lp.vercel.app'
+        const domainOptions = { domain: 'abc', usingPreview: true }
+        const postfix = '.vercel.app'
+        expect(checkApexIDInDomain(checkingDomain4, domainOptions, postfix)).toStrictEqual(true)
     })
 })

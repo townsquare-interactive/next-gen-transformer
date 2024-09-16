@@ -1185,13 +1185,20 @@ export const createRandomFiveCharString = (): string => {
     return Math.random().toString(36).substring(2, 7)
 }
 
-//check if there is a domain that has been randomly generated in list of publishedDomains
+//check if there is a domain that has been randomly generated in list of publishedDomains (5 is the current random generated amount)
 export const checkApexIDInDomain = (checkingDomain: string, domainOptions: DomainOptions, postfix: string): boolean => {
     const apexAndHyphen = domainOptions.domain + '-'
 
     if (checkingDomain.includes(apexAndHyphen)) {
+        //check for -lp domains
+        if (checkingDomain === apexAndHyphen + 'lp' + postfix) {
+            return true
+        }
+
+        //check for -(random gen) URLs
         const regex = new RegExp(`${apexAndHyphen}.{5}\\${postfix}`)
         return regex.test(checkingDomain)
     }
+
     return false
 }
