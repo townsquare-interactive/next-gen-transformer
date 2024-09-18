@@ -10,6 +10,7 @@ import {
     getDomainList,
     checkIfSiteExistsPostgres,
     removeDomainFromVercel,
+    checkDomainConfigOnVercel,
 } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, LandingInputSchema } from '../src/schema/input-zod.js'
@@ -72,6 +73,22 @@ router.post('/remove-landing', async (req, res) => {
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
+    }
+})
+
+router.get('/check-domain-config', async (req, res) => {
+    try {
+        const domain = req.query.domain || ''
+
+        if (typeof domain !== 'string') {
+            return res.status(400).json({ error: 'Invalid domain parameter' })
+        }
+
+        const response = await checkDomainConfigOnVercel(domain)
+        res.json(response)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res)
     }
 })
 

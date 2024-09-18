@@ -395,3 +395,46 @@ export const removeDomainFromVercel = async (domain: string): Promise<DomainRes>
     }
     return { message: `site domain unpublished`, domain: domainName, status: 'Success' }
 }
+
+const buildDNSRecords = (aValues: string[]) => {
+    const records = aValues.map((ip) => ({
+        type: 'A',
+        host: '@',
+        value: ip,
+        ttl: 3600,
+    }))
+
+    return records
+}
+
+export const checkDomainConfigOnVercel = async (domain?: string) => {
+    const res = await fetch(`https://api.vercel.com/v6/domains/${domain}/config?strict=true&teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`, {
+        headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
+        },
+        method: 'get',
+    })
+
+    if (!res.ok) {
+        console.error('Error fetching domain config:', res.statusText)
+        throw new Error('Error checking domain config')
+    }
+
+    const data = await res.json()
+    console.log(data)
+
+    const misconfigured = data.misconfigured
+    let dnsRecords = {}
+
+    if (misconfigured) {
+        console.log('the domain is not configured')
+
+        dnsRecords = buildDNSRecords(data.aValues)
+    }
+
+    return {
+        misconfigured: misconfigured,
+        dnsRecords: dnsRecords,
+        domain: domain,
+    }
+}
