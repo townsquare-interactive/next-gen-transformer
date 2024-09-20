@@ -33,6 +33,12 @@ yarn dev
 
 App runs locally on [http://localhost:8080](http://localhost:8080)
 
+Testing set up through vitest. To run tests
+
+```bash
+npm run test
+```
+
 ## Landing Page Domains
 
 By default the landing route will add the S3 files and they will be accessible at www.townsquareignite.com/landing/siteName/pageName. However if the env variable CREATE_SITE_DOMAINS is active then a seperate domain for that client will be created by vercel at clientName.vercel.app.

@@ -442,6 +442,16 @@ export const customizeWidgets = (
             return phoneNumber ? `tel:${phoneNumber}` : email ? `mailto:${email}` : ''
         }
 
+        const icon1 = headerButtonData?.button1?.label ? '' : headerButtonData?.button1?.link ? '' : { iconPrefix: 'fas', iconModel: 'mobile-screen' }
+        const icon2 = headerButtonData?.button2?.label
+            ? ''
+            : headerButtonData?.button2?.link
+            ? ''
+            : {
+                  iconPrefix: 'far',
+                  iconModel: 'calendar',
+              }
+
         if (hasEngage || phoneNumber || headerButtonData?.button1?.link || email) {
             const label = getButtonLabel(hasEngage, phoneNumber, headerButtonData)
             const link = getButtonLink(phoneNumber, email, headerButtonData)
@@ -455,7 +465,7 @@ export const customizeWidgets = (
                 btnType: 'btn_cta_landing',
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined call cta-icon'>phone_android</span>",
-                icon: { iconPrefix: 'fas', iconModel: 'mobile-screen' },
+                icon: icon1,
                 action: headerButtonData?.button1?.link ? '' : hasEngage ? 'ls-contact' : '',
                 dataLayerEvent: headerButtonData?.button1?.dataLayerEvent || 'header_btn_1_click',
                 cName: 'header-btn-1',
@@ -480,10 +490,7 @@ export const customizeWidgets = (
                 btnSize: 'btn_md',
                 googleIcon: "<span class='material-symbols-outlined cta-icon'>calendar_clock</span>",
                 action: headerButtonData?.button2?.link ? '' : scheduleEngineWidgetActive ? 'schedule' : hasEngage ? 'ls-schedule' : '',
-                icon: {
-                    iconPrefix: 'far',
-                    iconModel: 'calendar',
-                },
+                icon: icon2,
                 dataLayerEvent: headerButtonData?.button2?.dataLayerEvent || 'header_btn_2_click',
                 cName: 'header-btn-2',
             }
