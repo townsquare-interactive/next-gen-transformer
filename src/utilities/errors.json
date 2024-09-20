@@ -1,6 +1,6 @@
 {
     "DMN-001": {
-        "description": "Domain not able to be added to Vercel. Both the normal URL and the postfix (-lp) version are taken. Try another URL name."
+        "description": "Domain not able to be added to Vercel. Both the normal URL and the modified postfix version are taken. Try another URL name."
     },
     "DMN-002": {
         "description": "After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL."
@@ -21,6 +21,6 @@
         "description": "Error when trying to upload site files to S3."
     },
     "DMN-008": {
-        "description": "Production domain not available."
+        "description": "Production domain not available, try a different domain."
     }
 }
