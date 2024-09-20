@@ -407,7 +407,7 @@ const buildDNSRecords = (aValues: string[]) => {
     return records
 }
 
-export const checkDomainConfigOnVercel = async (domain?: string) => {
+export const fetchDomainConfig = async (domain: string) => {
     const res = await fetch(`https://api.vercel.com/v6/domains/${domain}/config?strict=true&teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`, {
         headers: {
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_AUTH_TOKEN}`,
@@ -422,7 +422,11 @@ export const checkDomainConfigOnVercel = async (domain?: string) => {
 
     const data = await res.json()
     console.log(data)
+    return data
+}
 
+export const checkDomainConfigOnVercel = async (domain?: string) => {
+    const data = await fetchDomainConfig(domain || '')
     const misconfigured = data.misconfigured
     let dnsRecords = {}
 
