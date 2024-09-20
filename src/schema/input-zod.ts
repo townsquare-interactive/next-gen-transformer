@@ -316,7 +316,7 @@ export const LandingInputSchema = z.object({
     siteName: z.string(),
     url: z.string(),
     s3Folder: z.string(),
-    finalDomain: z.string().optional(),
+    productionDomain: z.string().optional(),
     subdomainOverride: z.string().optional(),
     pageUri: z.string().optional(),
     logo: z.string().optional(),

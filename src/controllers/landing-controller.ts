@@ -21,8 +21,8 @@ export const validateLandingRequestData = (req: { body: LandingReq }, type = 'in
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
     const apexID = convertUrlToApexId(siteData.s3Folder || siteData.url)
     const domainOptions = {
-        domain: siteData.finalDomain
-            ? siteData.finalDomain
+        domain: siteData.productionDomain
+            ? siteData.productionDomain
             : siteData.subdomainOverride
             ? convertUrlToApexId(siteData.subdomainOverride)
             : siteData.s3Folder
@@ -30,7 +30,7 @@ export const validateLandingRequestData = (req: { body: LandingReq }, type = 'in
             : siteData.url
             ? convertUrlToApexId(siteData.url)
             : '',
-        usingPreview: !siteData.finalDomain,
+        usingPreview: !siteData.productionDomain,
     }
 
     return { apexID, siteData, domainOptions }

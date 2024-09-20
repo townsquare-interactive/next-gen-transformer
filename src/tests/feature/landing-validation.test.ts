@@ -47,8 +47,8 @@ describe('validateLandingRequestData', () => {
         expect(result.domainOptions).toEqual({ domain: 'newdomain', usingPreview: true })
     })
 
-    it('should handle a finalDomain correctly', () => {
-        const overrideReq = { body: { ...validExampleData, finalDomain: 'newdomain.vercel.app' } }
+    it('should handle a productionDomain correctly', () => {
+        const overrideReq = { body: { ...validExampleData, productionDomain: 'newdomain.vercel.app' } }
         const result = validateLandingRequestData(overrideReq)
         expect(result.apexID).toEqual('example')
         expect(result.domainOptions).toEqual({ domain: 'newdomain.vercel.app', usingPreview: false })
