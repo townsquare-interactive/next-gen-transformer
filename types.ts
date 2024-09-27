@@ -890,4 +890,12 @@ export interface DomainRes {
 export interface DomainOptions {
     domain: string
     usingPreview: boolean
+    previousAttempt?: string
+}
+
+export interface Dns {
+    type: string
+    host: string
+    value: string
+    ttl: number
 }

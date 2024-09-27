@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
-import { Response } from 'express' // Assuming you're using Express
+import { Response } from 'express'
 import { LandingReq } from '../schema/input-zod'
+import { Dns } from '../../types'
 
 //Type declarations
 interface ErrorState {
@@ -17,6 +18,7 @@ interface SiteDeploymentErrorType extends ErrorClass {
     domain: string
     state: {
         domainStatus: string
+        dns?: Dns[]
     } & ErrorState
 }
 

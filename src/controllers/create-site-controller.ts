@@ -1,8 +1,10 @@
-import type { CreateSiteParams, DomainOptions, DomainRes, Layout } from '../../types.js'
+import type { CreateSiteParams, Dns, DomainOptions, DomainRes, Layout } from '../../types.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
+
+const previewPostFix = '.vercel.app'
 
 const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string) => {
     //add domains to layout file or removes if deleting
@@ -56,24 +58,25 @@ const verifyDomain = async (domainName: string) => {
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID: string, pageUri = ''): Promise<DomainRes> => {
     const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
-    const postfix = domainOptions.usingPreview ? '.vercel.app' : ''
+    const postfix = domainOptions.usingPreview ? previewPostFix : ''
     let domainName = domainOptions.domain + postfix
     let randomString = createRandomFiveCharString()
     let randomStringDomain = domainOptions.domain + '-' + randomString
     let altDomain = randomStringDomain + postfix
 
+    //check if s3 folder exists for domain
     if (typeof siteLayout != 'string') {
-        //new check with layout file
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
 
         //check if a random char generated domain has already been published
         const publishedAltDomain = publishedDomains.filter((domain) => checkApexIDInDomain(domain, domainOptions, postfix))
-
         if (publishedAltDomain.length) {
+            console.log('already an alt domain')
             domainName = publishedAltDomain[0]
         }
 
+        //check if domain has already been published
         if (!isDomainPublishedAlready && !publishedAltDomain.length) {
             console.log('domain: ', domainName)
 
@@ -144,31 +147,22 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                                 domainStatus: 'Domain not added for project',
                             },
                         })
-                    } /* else {
-                        //domainName = subdomain + '-lp' + postfix 
-                    domainName = altDomain
-                    await modifyDomainPublishStatus('POST', siteLayout, domainName, subdomain)
-                    if (await verifyDomain(domainName)) {
-                        return {
-                            message: `domain added with postfix ${altDomain} because other domain is taken`,
-                            domain: domainName,
-                            status: 'Success',
-                        }
-                    } else {
-                        throw new SiteDeploymentError({
-                            message: 'Unable to verify domain has been published',
-                            domain: domainName,
-                            errorType: 'DMN-002',
-                            state: {
-                                domainStatus: 'Domain not added for project',
-                            },
-                        })
                     }
-                    } */
                 }
-                //domainName = subdomain + '-lp' + postfix
                 domainName = altDomain
                 await createRedirectFile(domainName, apexID)
+
+                //isDomainConfigCorrect(domainName, domainOptions, apexID, pageUri)
+                /* const configData = await checkDomainConfigOnVercel(domainName)
+                if (configData.misconfigured) {
+                    const newDomainOptions = {
+                        ...domainOptions,
+                        domain: apexID + previewPostFix,
+                        usingPreview:true,
+                    }
+                    return publishDomainToVercel(newDomainOptions, apexID, pageUri || '')
+                } */
+
                 if (await verifyDomain(domainName)) {
                     await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
 
@@ -191,6 +185,23 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                 await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
             }
         } else {
+            //check config to see if prod domain is set up correctly
+            if (!domainName.includes(previewPostFix) && !domainOptions.usingPreview) {
+                const configData = await checkDomainConfigOnVercel(domainName)
+                const publishedPreviewDomains = publishedDomains.filter((domain) => domain.includes(previewPostFix))
+                const previewDomain = publishedPreviewDomains[0]
+
+                //check if the domain being used is configured yet?
+                if (configData.misconfigured) {
+                    const previewDomainWithSlug = previewDomain + (pageUri ? `/${pageUri}` : '')
+                    return {
+                        message: `production domain ${domainName} is still not configured, here is the preview domain ${previewDomainWithSlug}`,
+                        domain: previewDomainWithSlug,
+                        status: 'Success',
+                    }
+                }
+            }
+
             return {
                 message: 'domain already published, updating site data',
                 domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`,
@@ -208,7 +219,29 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
         })
     }
     await createRedirectFile(domainName, apexID)
+
+    //check domain configuration status
+    const configData = await checkDomainConfigOnVercel(domainName)
+    if (configData.misconfigured) {
+        const newDomainOptions = {
+            domain: apexID,
+            usingPreview: true,
+            previousAttempt: domainName,
+        }
+        return publishDomainToVercel(newDomainOptions, apexID, pageUri || '')
+    }
+
+    //verify the domain is live
     if (await verifyDomain(domainName)) {
+        //if a previous domain was added with a misconfigured config then return a preview URL
+        if (domainOptions.previousAttempt) {
+            return {
+                message: `Original domain ${domainOptions.previousAttempt} has been added but the domain configuration is not set up. Adding a preview free domain to use in the meantime`,
+                domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`,
+                status: 'Success',
+            }
+        }
+
         return { message: `site domain published'`, domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`, status: 'Success' }
     } else {
         throw new SiteDeploymentError({
@@ -245,7 +278,6 @@ export const changePublishStatusInSiteData = async (subdomain: string, status: b
 }
 
 //add created site params to list in s3
-//may not be needed later if we can check s3 for folder
 export const addToSiteList = async (websiteData: CreateSiteParams) => {
     const basePath = websiteData.subdomain
     websiteData.publishedDomains = []
@@ -263,43 +295,6 @@ export const addToSiteList = async (websiteData: CreateSiteParams) => {
     }
 }
 
-//modify site array to add published publishedDomains or remove unpublished domains
-/* const modifySitePublishedDomainsList = async (
-    subdomain: string,
-    currentSiteList: CreateSiteParams[],
-    currentSiteData: CreateSiteParams,
-    domainName: string,
-    method: 'POST' | 'DELETE'
-) => {
-    let newSiteData = currentSiteData
-    if (method === 'POST') {
-        newSiteData.publishedDomains?.push(domainName)
-    } else if (method === 'DELETE') {
-        newSiteData.publishedDomains = currentSiteData.publishedDomains.filter((domain) => domain != domainName)
-    }
-
-    //create array with all but current site working on
-    const newSitesArr = currentSiteList.filter((site) => site.subdomain != subdomain)
-    //push updated site with the others
-    newSitesArr.push(newSiteData)
-    console.log('new list', newSitesArr)
-
-    await addFileS3(newSitesArr, `sites/site-list`)
-} 
-
-//select current site data from site-list using subdomain or id
-export const getSiteObjectFromS3 = async (subdomain: string, currentSiteList: CreateSiteParams[], searchBy = 'subdomain', id = '') => {
-    const arrWithSiteObject =
-        searchBy === 'subdomain' ? currentSiteList.filter((site) => site.subdomain === subdomain) : currentSiteList.filter((site) => site.id === id)
-
-    if (arrWithSiteObject.length > 0) {
-        const currentSiteData = arrWithSiteObject[0]
-        return currentSiteData
-    } else {
-        return `${searchBy === 'subdomain' ? 'subdomain' : 'id'} does not match any created sites`
-    }
-}
-*/
 export const getDomainList = async () => {
     const domainList = await getFileS3(`sites/domains.json`, [])
 
@@ -396,7 +391,7 @@ export const removeDomainFromVercel = async (domain: string): Promise<DomainRes>
     return { message: `site domain unpublished`, domain: domainName, status: 'Success' }
 }
 
-const buildDNSRecords = (aValues: string[]) => {
+const buildDNSRecords = (aValues: string[]): Dns[] => {
     const records = aValues.map((ip) => ({
         type: 'A',
         host: '@',
@@ -426,19 +421,30 @@ export const fetchDomainConfig = async (domain: string) => {
 }
 
 export const checkDomainConfigOnVercel = async (domain?: string) => {
-    const data = await fetchDomainConfig(domain || '')
-    const misconfigured = data.misconfigured
-    let dnsRecords = {}
+    try {
+        const data = await fetchDomainConfig(domain || '')
+        const misconfigured = data.misconfigured
+        let dnsRecords
 
-    if (misconfigured) {
-        console.log('the domain is not configured')
+        if (misconfigured) {
+            console.log('the domain is not configured')
+            dnsRecords = buildDNSRecords(data.aValues)
+        }
 
-        dnsRecords = buildDNSRecords(data.aValues)
-    }
-
-    return {
-        misconfigured: misconfigured,
-        dnsRecords: dnsRecords,
-        domain: domain,
+        return {
+            misconfigured: misconfigured,
+            dnsRecords: dnsRecords,
+            cNames: data.cNames,
+            domain: domain,
+        }
+    } catch (err) {
+        throw new SiteDeploymentError({
+            message: `Error checking domain config: ${err}`,
+            domain: domain || '',
+            errorType: 'DMN-009',
+            state: {
+                domainStatus: 'Unable to check domains config in Vercel',
+            },
+        })
     }
 }

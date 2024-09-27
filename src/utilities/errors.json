@@ -22,5 +22,8 @@
     },
     "DMN-008": {
         "description": "Production domain not available, try a different domain."
+    },
+    "DMN-009": {
+        "description": "Error when checking domains config setup in Vercel"
     }
 }
