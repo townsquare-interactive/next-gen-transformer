@@ -202,8 +202,13 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                 }
             }
 
+            //Set message to note previous attempt if relevant
+            const message = domainOptions.previousAttempt
+                ? `Original domain ${domainOptions.previousAttempt} has been added but the domain configuration is not set up. Adding a preview free domain to use in the meantime`
+                : 'domain already published, updating site data'
+
             return {
-                message: 'domain already published, updating site data',
+                message: message,
                 domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`,
                 status: 'Success',
             }
