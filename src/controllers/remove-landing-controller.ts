@@ -8,9 +8,9 @@ import { removeDomainFromVercel } from './create-site-controller.js'
 
 export const removeLandingSite = async (req: RemoveLandingPageReq) => {
     const parsedReq = zodDataParse(req, RemoveLandingPageSchema)
-    const url = parsedReq.url
-    const apexID = convertUrlToApexId(url, false)
-    const response = await removeDomainFromVercel(url)
+    const domain = parsedReq.domain
+    const apexID = convertUrlToApexId(domain, false)
+    const response = await removeDomainFromVercel(domain)
     await removeSiteFromS3(apexID)
 
     return response

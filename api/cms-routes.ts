@@ -66,13 +66,13 @@ router.post('/landing', async (req, res) => {
     }
 })
 
-router.post('/remove-landing', async (req, res) => {
+router.delete('/landing-domains/:domain', async (req, res) => {
     try {
-        const response = await removeLandingSite(req.body)
+        const response = await removeLandingSite(req.params)
         res.json(response)
     } catch (err) {
-        err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        err.state = { ...err.state, req: req.params }
+        handleError(err, res, req.params.domain)
     }
 })
 

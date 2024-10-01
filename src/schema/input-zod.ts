@@ -263,7 +263,7 @@ const ReviewSchema = z.object({
 })
 
 export const RemoveLandingPageSchema = z.object({
-    url: z.string(),
+    domain: z.string(),
 })
 
 const PageSectionSchema = z.array(
