@@ -5,6 +5,7 @@ This project uses node.js to create and edit JSON files for the purpose of rende
 -   /api/cms-routes/save (POST): save Luna CMS data to create Apex sites
 -   /api/cms-routes/landing (POST): Create/edit a landing page, publishes to www.townsquareignite.com/landing/siteName/pageName, edits site if it already exists
 -   api/cms-routes/landing-domains/ (DELETE): remove domain tied to a landing page client, just pass one like this "/landing-domains/www.example.com"
+-   api/cms-routes/apexIDs/ (DELETE): remove all domains and S3 folders tied to an apexID, just pass the apexID of the client
 -   /api/cms-routes/create-site (POST): Create an Apex site with a default template, adds domain using ApexID
 -   /publish (PATCH): Set an already created Apex site to render with site data (on by default)
 -   /unpublish (PATCH): Set an already created Apex site to redirect to the townsquare main website

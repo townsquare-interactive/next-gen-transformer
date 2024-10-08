@@ -265,6 +265,9 @@ const ReviewSchema = z.object({
 export const RemoveLandingPageSchema = z.object({
     domain: z.string(),
 })
+export const RemoveLandingProjectSchema = z.object({
+    apexID: z.string(),
+})
 
 const PageSectionSchema = z.array(
     z.object({
@@ -356,3 +359,4 @@ export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof PageSectionSchema>
 export type LandingColors = z.infer<typeof LandingColorsSchema>
 export type RemoveLandingPageReq = z.infer<typeof RemoveLandingPageSchema>
+export type RemoveLandingProjectReq = z.infer<typeof RemoveLandingProjectSchema>

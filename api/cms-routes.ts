@@ -19,7 +19,7 @@ import { validateLandingRequestData } from '../src/controllers/landing-controlle
 import { handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
-import { removeLandingSite } from '../src/controllers/remove-landing-controller.js'
+import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 const router = express.Router()
 
 //save from luna cms
@@ -73,6 +73,16 @@ router.delete('/landing-domains/:domain', async (req, res) => {
     } catch (err) {
         err.state = { ...err.state, req: req.params }
         handleError(err, res, req.params.domain)
+    }
+})
+
+router.delete('/apexIDs/:apexID', async (req, res) => {
+    try {
+        const response = await removeLandingProject(req.params)
+        res.json(response)
+    } catch (err) {
+        err.state = { ...err.state, req: req.params }
+        handleError(err, res, req.params.apexID)
     }
 })
 
