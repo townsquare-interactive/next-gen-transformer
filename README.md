@@ -25,6 +25,9 @@ If you are running locally, you need S3 credentials to be able to upload the nee
 -   NEXT_PUBLIC_VERCEL_TEAM_ID: Our Townsquare Vercel team ID
 -   NEXT_PUBLIC_VERCEL_AUTH_TOKEN: Vercel auth token
 -   VERCEL_PROJECT_ID: ID of the current vercel project
+-   CREATE_SITE_DOMAINS: Decides whether or not a domain is published when creating a landing page (default: 1)
+
+These env variables are also present in the .env.example file where you can see any default values and copy them to your .env file.
 
 ```bash
 npm i
@@ -43,7 +46,7 @@ npm run test
 
 ## Landing Page Domains
 
-By default the landing route will add the S3 files and they will be accessible at www.townsquareignite.com/landing/siteName/pageName. However if the env variable CREATE_SITE_DOMAINS is active then a seperate domain for that client will be created by vercel at clientName.vercel.app.
+By default the landing page route will create a domain on the Apex Renderer Vercel project. You can manipulate this activity to not publish a domain with the env variable "CREATE_SITE_DOMAINS".
 
 ## Error Responses
 

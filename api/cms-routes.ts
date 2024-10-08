@@ -44,7 +44,7 @@ router.post('/save', async (req, res) => {
     }
 })
 
-const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '1' ? true : false //publish new url for each client
+const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '0' ? false : true //publish new url for each client
 router.post('/landing', async (req, res) => {
     try {
         const { apexID, siteData, domainOptions } = validateLandingRequestData(req)
