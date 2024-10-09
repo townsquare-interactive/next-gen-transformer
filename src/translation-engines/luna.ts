@@ -44,6 +44,7 @@ export const transformLuna = async (req: LunaRequest) => {
             pages: newPageData.pages || [],
             assets: assets,
             globalStyles: globalStyles || '',
+            siteType: 'full',
         }
 
         return luna

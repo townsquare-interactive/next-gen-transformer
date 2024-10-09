@@ -327,10 +327,11 @@ export interface SiteData {
 export interface PublishData {
     siteIdentifier: string
     usingPreviewMode?: boolean
-    siteLayout: SiteData
+    siteLayout: SiteData | null
     pages?: Page[]
     assets?: { url?: string; fileName: string; name?: string; content?: string }[]
     globalStyles?: GlobalStyles
+    siteType: string
 }
 
 export interface GlobalStyles {

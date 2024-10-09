@@ -3,10 +3,12 @@ import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
+import { ApexPageType } from '../schema/output-zod.js'
+import { String } from 'aws-sdk/clients/apigateway.js'
 
 const previewPostFix = '.vercel.app'
 
-const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string) => {
+const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string, pathName = `${apexId}/layout`) => {
     //add domains to layout file or removes if deleting
     if (method === 'POST') {
         siteLayout.publishedDomains ? siteLayout.publishedDomains.push(domainName) : (siteLayout.publishedDomains = [domainName])
@@ -15,7 +17,21 @@ const modifyDomainPublishStatus = async (method: string, siteLayout: any, domain
         //remove site from list if deleting
         siteLayout.publishedDomains = siteLayout.publishedDomains?.filter((domain: string) => domain != domainName)
     }
-    await addFileS3(siteLayout, `${apexId}/layout`)
+    await addFileS3(siteLayout, pathName)
+}
+
+const modifyLandingDomainPublishStatus = async (method: string, sitePage: ApexPageType, domainName: string, apexId: string, pathName = `${apexId}/layout`) => {
+    console.log('premod doms', sitePage.siteLayout)
+    //add domains to layout file or removes if deleting
+    if (method === 'POST') {
+        sitePage.siteLayout.publishedDomains ? sitePage.siteLayout?.publishedDomains.push(domainName) : (sitePage.siteLayout.publishedDomains = [domainName])
+        console.log('published domains', sitePage.siteLayout?.publishedDomains)
+    } else if (method === 'DELETE') {
+        //remove site from list if deleting
+        sitePage.siteLayout.publishedDomains = sitePage.siteLayout?.publishedDomains?.filter((domain: string) => domain != domainName)
+    }
+    console.log('mod doms', sitePage.siteLayout.publishedDomains)
+    await addFileS3(sitePage, pathName)
 }
 
 //verify domain has been added to project
@@ -55,9 +71,29 @@ const verifyDomain = async (domainName: string) => {
     }
 }
 
+export const getPageLayoutVars = async (apexID: string, pageUri: string) => {
+    const landingPage: ApexPageType = await getFileS3(`${apexID}/pages/${pageUri}.json`, 'site not found in s3')
+    if (landingPage.siteLayout) {
+        return landingPage.siteLayout
+    } else {
+        const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+        if (typeof siteLayout != 'string') {
+            return siteLayout
+        } else {
+            return 'site not found in s3'
+        }
+    }
+}
+
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
-export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID: string, pageUri = ''): Promise<DomainRes> => {
-    const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID: string, pageUri = '', type = 'landing'): Promise<DomainRes> => {
+    //const siteLayout = await getPageLayoutVars(apexID, pageUri)
+    const { siteLayout, sitePage } = await getPageandLanding(apexID, pageUri, type)
+    /* let { siteLayout, sitePage } = await getPageandLanding(apexID, pageUri, type)
+    if (!siteLayout) {
+        siteLayout = await getPageLayoutVars(apexID, pageUri)
+    } */
+
     const postfix = domainOptions.usingPreview ? previewPostFix : ''
     let domainName = domainOptions.domain + postfix
     let randomString = createRandomFiveCharString()
@@ -65,9 +101,9 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
     let altDomain = randomStringDomain + postfix
 
     //check if s3 folder exists for domain
-    if (typeof siteLayout != 'string') {
+    if (typeof siteLayout != 'string' && siteLayout) {
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
-        const isDomainPublishedAlready = publishedDomains.filter((domain) => domain === domainName).length
+        const isDomainPublishedAlready = publishedDomains.filter((domain: String) => domain === domainName).length
 
         //check if a random char generated domain has already been published
         const publishedAltDomain = publishedDomains.filter((domain) => checkApexIDInDomain(domain, domainOptions, postfix))
@@ -150,7 +186,7 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                     }
                 }
                 domainName = altDomain
-                await createRedirectFile(domainName, apexID)
+                await createRedirectFile(domainName, apexID, pageUri)
 
                 //isDomainConfigCorrect(domainName, domainOptions, apexID, pageUri)
                 /* const configData = await checkDomainConfigOnVercel(domainName)
@@ -164,7 +200,11 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                 } */
 
                 if (await verifyDomain(domainName)) {
-                    await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
+                    if (type === 'landing' && sitePage?.siteLayout) {
+                        await modifyLandingDomainPublishStatus('POST', sitePage, domainName, apexID, `${apexID}/pages/${pageUri}`)
+                    } else {
+                        await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID, `${apexID}/layout`)
+                    }
 
                     return {
                         message: `domain added with postfix ${altDomain} because other domain is taken`,
@@ -182,7 +222,11 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                     })
                 }
             } else {
-                await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID)
+                if (type === 'landing' && sitePage?.siteLayout) {
+                    await modifyLandingDomainPublishStatus('POST', sitePage, domainName, apexID, `${apexID}/pages/${pageUri}`)
+                } else {
+                    await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID, `${apexID}/layout`)
+                }
             }
         } else {
             //check config to see if prod domain is set up correctly
@@ -223,7 +267,7 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
             },
         })
     }
-    await createRedirectFile(domainName, apexID)
+    await createRedirectFile(domainName, apexID, pageUri)
 
     //check domain configuration status
     const configData = await checkDomainConfigOnVercel(domainName)
@@ -260,19 +304,21 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
     }
 }
 
-const createRedirectFile = async (domainName: string, apexID: string) => {
+const createRedirectFile = async (domainName: string, apexID: string, pageUri: string) => {
     if (convertUrlToApexId(domainName) != apexID) {
         console.log('creating redirect file for: ', domainName)
         const redirectFile = {
             apexId: apexID,
+            pageUri: pageUri,
         }
 
         await addFileS3(redirectFile, `${convertUrlToApexId(domainName)}/redirect`)
     }
 }
 
-export const changePublishStatusInSiteData = async (subdomain: string, status: boolean) => {
-    let siteLayoutFile = await getFileS3(`${subdomain}/layout.json`, 'site not found in s3')
+export const changePublishStatusInSiteData = async (subdomain: string, status: boolean, pageUri: string) => {
+    const siteLayoutFile = await getPageLayoutVars(subdomain, pageUri)
+
     if (typeof siteLayoutFile != 'string') {
         siteLayoutFile.published = status
         await addFileS3(siteLayoutFile, `${subdomain}/layout`)
@@ -320,7 +366,7 @@ export async function checkIfSiteExistsPostgres(domain: string) {
     }
 }
 
-export const removeDomainFromVercel = async (domain: string): Promise<DomainRes> => {
+export const removeDomainFromVercel = async (domain: string, pageUri = '', type = 'landing'): Promise<DomainRes> => {
     const apexID = convertUrlToApexId(domain, false)
 
     //check here if redirect file, if so followo breadcrumbs to get to layout
@@ -334,10 +380,11 @@ export const removeDomainFromVercel = async (domain: string): Promise<DomainRes>
         finalApexID = redirectFile.apexId
     }
 
-    const siteLayout: Layout = await getFileS3(`${finalApexID}/layout.json`, 'site not found in s3')
+    const { siteLayout, sitePage } = await getPageandLanding(finalApexID, pageUri, type)
+
     let domainName = domain
 
-    if (typeof siteLayout != 'string') {
+    if (typeof siteLayout != 'string' && siteLayout) {
         //check that this url is tied with the S3 layout published domains field
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((listedDomain) => listedDomain === domainName).length
@@ -362,7 +409,11 @@ export const removeDomainFromVercel = async (domain: string): Promise<DomainRes>
 
                 console.log('vercel domain response', response)
 
-                await modifyDomainPublishStatus('DELETE', siteLayout, domainName, finalApexID)
+                if (type === 'landing' && sitePage?.siteLayout) {
+                    await modifyLandingDomainPublishStatus('DELETE', sitePage, domainName, finalApexID, `${finalApexID}/pages/${pageUri}`)
+                } else {
+                    await modifyDomainPublishStatus('DELETE', siteLayout, domainName, finalApexID, `$finalAapexID}/layout`)
+                }
             } catch (err) {
                 throw new SiteDeploymentError({
                     message: err.message,
@@ -452,4 +503,19 @@ export const checkDomainConfigOnVercel = async (domain?: string) => {
             },
         })
     }
+}
+
+export const getPageandLanding = async (apexID: string, pageUri: string, type: string) => {
+    let siteLayout
+    let sitePage
+    if (type === 'landing' && pageUri) {
+        const landingPage: ApexPageType = await getFileS3(`${apexID}/pages/${pageUri}.json`, 'site not found in s3')
+        sitePage = landingPage
+        siteLayout = sitePage.siteLayout
+        console.log('slayout', siteLayout)
+    } else {
+        siteLayout = await getPageLayoutVars(apexID, pageUri)
+    }
+
+    return { siteLayout: siteLayout, sitePage: sitePage }
 }

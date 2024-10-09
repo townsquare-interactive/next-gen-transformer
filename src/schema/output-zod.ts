@@ -288,7 +288,7 @@ export const SiteDataSchema = z.object({
     contactFormData: ContactFormData.optional(),
     published: z.boolean().optional(),
     redirectUrl: z.string().optional(),
-    publishedDomains: z.array(z.string().optional()),
+    publishedDomains: z.array(z.string()),
     allStyles: z.string().optional(),
     styles: z
         .object({
@@ -502,7 +502,7 @@ export const ApexPageSchema = z.object({
     seo: SeoSchema,
     head_script: OptionalString,
     JS: OptionalString,
-    siteLayout: SiteDataSchema.optional(),
+    siteLayout: SiteDataSchema,
     requestData: LandingInputSchema.optional(), //save the incoming request data from route into S3 page
 })
 
@@ -523,3 +523,4 @@ export const PageListSchema = z.object({
 export type CompositeData = z.infer<typeof CompositeSchema>
 export type CMSPagesSchemaType = z.infer<typeof CMSPagesSchema>
 export type ApexPageType = z.infer<typeof ApexPageSchema>
+export type PageListType = z.infer<typeof PageListSchema>

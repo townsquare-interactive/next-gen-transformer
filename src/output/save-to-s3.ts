@@ -10,9 +10,9 @@ import { DataUploadError } from '../utilities/errors.js'
 const stringSchema = z.string()
 
 export const saveToS3 = async (data: PublishData) => {
-    const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false } = data
+    const { siteIdentifier, siteLayout, pages, assets, globalStyles, usingPreviewMode = false, siteType } = data
 
-    //const pagesJsonSchema = zodToJsonSchema(CMSPagesSchema, 'layout schema')
+    //const pagesJsonSchema = zodToJsonSchema(CMSPagesArray, 'layout schema')
     //console.log('json schema for pages', JSON.stringify(pagesJsonSchema))
 
     //Use zod to check data for types
@@ -20,8 +20,8 @@ export const saveToS3 = async (data: PublishData) => {
     stringSchema.parse(siteIdentifier)
 
     //Run parsing checks (right now only throws errors when creating landing pages)
-    if (siteLayout.siteType === 'landing') {
-        zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
+    if (siteType === 'landing') {
+        //zodDataParse(siteLayout, SiteDataSchema, 'Site Layout')
         zodDataParse(pages, CMSPagesSchema, 'Pages')
     } else {
         //log zod parsing errors without disrupting process
@@ -31,7 +31,10 @@ export const saveToS3 = async (data: PublishData) => {
 
     try {
         const s3SitePath = usingPreviewMode ? siteIdentifier + '/preview' : siteIdentifier
-        await addFileS3(siteLayout, `${s3SitePath}/layout`)
+
+        if (siteLayout) {
+            await addFileS3(siteLayout, `${s3SitePath}/layout`)
+        }
 
         if (pages && pages?.length != 0) {
             for (let i = 0; i < pages.length; i++) {
@@ -57,7 +60,7 @@ export const saveToS3 = async (data: PublishData) => {
         }
 
         let domain
-        if (siteLayout.siteType === 'landing' && pages && pages?.length > 0) {
+        if (siteType === 'landing' && pages && pages?.length > 0) {
             domain = `www.townsquareignite.com/landing/${siteIdentifier}/${pages[0].data.slug}`
         } else {
             domain = `${siteIdentifier}.vercel.app`

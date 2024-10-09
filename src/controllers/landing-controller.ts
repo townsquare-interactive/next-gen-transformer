@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { zodDataParse } from '../schema/utils-zod.js'
 import { ApexPageType, SiteDataType } from '../schema/output-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
+import { getPageandLanding } from './create-site-controller.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
@@ -50,7 +51,8 @@ export const createLayoutFile = async (siteData: LandingReq, apexID: string) => 
     const favicon = siteData.favicon
     const url = siteData.url
     let customComponents = siteData.customOptions.customComponents || []
-    const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+
+    const { siteLayout, sitePage } = await getPageandLanding(apexID, siteData.pageUri || '', 'landing')
     const analytics = siteData.customOptions.analytics
 
     const themeColors = createLandingColors(colors)
@@ -195,7 +197,7 @@ export const createLayoutFile = async (siteData: LandingReq, apexID: string) => 
         s3Folder: apexID,
         favicon: favicon,
         fontImport: fontData.fontImport,
-        publishedDomains: currentLayout.publishedDomains || [],
+        publishedDomains: typeof siteLayout != 'string' && siteLayout?.publishedDomains ? siteLayout?.publishedDomains : [],
         config: {
             zapierUrl: '',
             makeUrl: process.env.MAKE_URL,

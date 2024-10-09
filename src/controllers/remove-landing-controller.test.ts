@@ -1,11 +1,13 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { removeSiteFromS3 } from './remove-landing-controller'
-import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
+import { deleteFolderS3, getFileS3, deleteFileS3, addFileS3 } from '../utilities/s3Functions.js'
 
 // Mock the S3 functions with correct typing
 vi.mock('../utilities/s3Functions.js', () => ({
     getFileS3: vi.fn<any>(),
     deleteFolderS3: vi.fn<any>(),
+    deleteFileS3: vi.fn<any>(),
+    addFileS3: vi.fn<any>(),
 }))
 
 describe('removeSiteFromS3', () => {
@@ -19,7 +21,7 @@ describe('removeSiteFromS3', () => {
         const mockLayout = { publishedDomains: [] }
         ;(getFileS3 as any).mockResolvedValueOnce(mockLayout)
 
-        await removeSiteFromS3(apexID)
+        await removeSiteFromS3(apexID, '')
 
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
         expect(deleteFolderS3).toHaveBeenCalledWith(apexID)
@@ -29,7 +31,7 @@ describe('removeSiteFromS3', () => {
         const mockLayout = { publishedDomains: ['domain1', 'domain2'] }
         ;(getFileS3 as any).mockResolvedValueOnce(mockLayout)
 
-        await removeSiteFromS3(apexID)
+        await removeSiteFromS3(apexID, '')
 
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
         expect(deleteFolderS3).not.toHaveBeenCalled()
@@ -44,8 +46,9 @@ describe('removeSiteFromS3', () => {
         ;(getFileS3 as any).mockResolvedValueOnce(mockLayoutString)
         ;(getFileS3 as any).mockResolvedValueOnce(mockRedirectFile)
         ;(getFileS3 as any).mockResolvedValueOnce(mockOriginalLayout)
+        ;(deleteFileS3 as any).mockResolvedValue()
 
-        await removeSiteFromS3(apexID)
+        await removeSiteFromS3(apexID, '')
 
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3')
@@ -60,7 +63,7 @@ describe('removeSiteFromS3', () => {
         ;(getFileS3 as any).mockResolvedValueOnce(mockLayoutString)
         ;(getFileS3 as any).mockResolvedValueOnce(mockRedirectString)
 
-        await expect(removeSiteFromS3(apexID)).rejects.toThrowError(`ApexID ${apexID} not found in list of created sites during S3 deletion`)
+        await expect(removeSiteFromS3(apexID, '')).rejects.toThrowError(`ApexID ${apexID} not found in list of created sites during S3 deletion`)
 
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
         expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3')

@@ -4,7 +4,7 @@ This project uses node.js to create and edit JSON files for the purpose of rende
 
 -   /api/cms-routes/save (POST): save Luna CMS data to create Apex sites
 -   /api/cms-routes/landing (POST): Create/edit a landing page, publishes to www.townsquareignite.com/landing/siteName/pageName, edits site if it already exists
--   api/cms-routes/landing-domains/ (DELETE): remove domain tied to a landing page client, just pass one like this "/landing-domains/www.example.com"
+-   api/cms-routes/landing-domains/ (DELETE): remove domain tied to a landing page client, just pass one like this "/landing-domains/www.example.com/pageName". Make sure you passing domain with pagename.
 -   api/cms-routes/apexIDs/ (DELETE): remove all domains and S3 folders tied to an apexID, just pass the apexID of the client
 -   api/cms-routes/landing-request-data?domain="your domain here" (GET): pass a landing domain with page name and it will return the request data saved from the LP creation tool
 -   api/cms-routes/check-domain-config?domain="your domain here" (GET): pass a domain and it will return the configuration status and DNS records needed
@@ -65,17 +65,18 @@ Listed below are the common error types that can be seen in the API response aft
 ### Common Error Types
 
 <!-- ERROR_TABLE_START -->
-| Error Type | Description |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| DMN-001 | Domain not able to be added to Vercel. Both the normal URL and the modified postfix version are taken. Try another URL name. |
-| DMN-002 | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL. |
-| GEN-003 | General JavaScript error when going through site deployment tasks. |
-| VAL-004 | Error validating incoming request data. |
-| VAL-005 | Error validating transformed data being sent to S3. |
-| AMS-006 | Site files not found in s3, domain cannot be updated. |
-| AMS-007 | Error when trying to upload site files to S3. |
-| DMN-008 | Production domain not available, try a different domain. |
-| DMN-009 | Error when checking domains config setup in Vercel |
-| AMS-010 | Unable to find requestData saved in page file, likely older page |
+
+| Error Type | Description                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| DMN-001    | Domain not able to be added to Vercel. Both the normal URL and the modified postfix version are taken. Try another URL name. |
+| DMN-002    | After 3 attempts to verify URL is live we are not able to receive a 200 status from the new URL.                             |
+| GEN-003    | General JavaScript error when going through site deployment tasks.                                                           |
+| VAL-004    | Error validating incoming request data.                                                                                      |
+| VAL-005    | Error validating transformed data being sent to S3.                                                                          |
+| AMS-006    | Site files not found in s3, domain cannot be updated.                                                                        |
+| AMS-007    | Error when trying to upload site files to S3.                                                                                |
+| DMN-008    | Production domain not available, try a different domain.                                                                     |
+| DMN-009    | Error when checking domains config setup in Vercel                                                                           |
+| AMS-010    | Unable to find requestData saved in page file, likely older page                                                             |
 
 <!-- ERROR_TABLE_END -->

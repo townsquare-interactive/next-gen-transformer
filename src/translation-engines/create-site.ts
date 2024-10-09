@@ -42,6 +42,7 @@ export const transformCreateSite = async (req: reqBody) => {
             pages: layout.pages,
             assets: [],
             globalStyles: layout.layout.styles,
+            siteType: req.templateIdentifier === '2' ? 'landing' : 'full',
         }
 
         return siteData

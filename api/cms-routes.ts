@@ -161,7 +161,7 @@ router.patch('/domain-publish', async (req, res) => {
 router.patch('/remove-domain', async (req, res) => {
     try {
         const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
-        const response = await removeDomainFromVercel(validatedRequest.subdomain)
+        const response = await removeDomainFromVercel(validatedRequest.subdomain, '', 'fullSite')
         console.log(response)
         res.json(response)
     } catch (err) {
@@ -173,7 +173,7 @@ router.patch('/remove-domain', async (req, res) => {
 router.patch('/publish', async (req, res) => {
     try {
         const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
-        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, true)
+        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, true, '')
         console.log(response)
         res.json(response)
     } catch (err) {
@@ -184,7 +184,7 @@ router.patch('/publish', async (req, res) => {
 router.patch('/unpublish', async (req, res) => {
     try {
         const validatedRequest = zodDataParse(req.body, SubdomainInputSchema, 'input')
-        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, false)
+        const response = await changePublishStatusInSiteData(validatedRequest.subdomain, false, '')
         console.log(response)
         res.json(response)
     } catch (err) {

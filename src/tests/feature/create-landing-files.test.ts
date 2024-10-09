@@ -158,13 +158,13 @@ describe('createLandingPageFiles', () => {
 
     it('should return a value conforming to SiteDataType', async () => {
         //You can swap out siteData with any valid req
-        const result = await createLandingPageFiles(siteData, apexID)
+        const result: any = await createLandingPageFiles(siteData, apexID)
 
-        expect(result.siteLayout).toBeTruthy()
+        expect(result.pages[0].siteLayout).toBeTruthy()
         expect(result.siteIdentifier).toBeTruthy()
         expect(result.pages).toBeTruthy()
-        expect(result.siteLayout.styles.global).toBeTruthy()
-        expect(() => SiteDataSchema.parse(result.siteLayout)).not.toThrow()
+        expect(result.pages[0].siteLayout.styles.global).toBeTruthy()
+        expect(() => SiteDataSchema.parse(result.pages[0].siteLayout)).not.toThrow()
     })
 
     it('should return the correct siteIdentifier', async () => {
@@ -173,13 +173,13 @@ describe('createLandingPageFiles', () => {
 
         expect(result.siteIdentifier).toBeTruthy()
         expect(result.siteIdentifier).toBe('example')
-        expect(() => SiteDataSchema.parse(result.siteLayout)).not.toThrow()
+        expect(() => SiteDataSchema.parse(result.pages[0].siteLayout)).not.toThrow()
     })
 
     it('should return a valid site layout object conforming to the SiteData zod schema', async () => {
         const resultLayout = await createLandingPageFiles(siteData, apexID)
 
-        expect(() => SiteDataSchema.parse(resultLayout.siteLayout)).not.toThrow()
+        expect(() => SiteDataSchema.parse(resultLayout.pages[0].siteLayout)).not.toThrow()
     })
 
     it('should return a valid pages array conforming to the CMSPage zod schema', async () => {

@@ -8,7 +8,7 @@ export const createLandingPageFiles = async (siteData: LandingReq, apexID: strin
         const page = createPageFile(siteData, siteLayout)
         let siteID = siteIdentifier
         console.log('Successfully created site files:', { siteLayout: siteLayout, siteIdentifier: siteID, pages: [page] })
-        return { siteLayout: siteLayout, siteIdentifier: siteID, pages: [page] }
+        return { siteLayout: null, siteIdentifier: siteID, pages: [page], siteType: 'landing' }
     } catch (err) {
         console.error('Caught error in createLandingPageFiles:', err)
         throw new TransformError({
