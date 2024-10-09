@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ValidationError } from '../../utilities/errors.js'
 import { validateLandingRequestData } from '../../controllers/landing-controller'
+import { LandingReq } from '../../schema/input-zod'
 
 // Define a valid example input that matches the LandingInputSchema
-const validExampleData = {
+const validExampleData: LandingReq = {
     siteName: 'Example Site',
     url: 'https://example.com',
     s3Folder: 'https://example.com',
-    email: 'example@example.com',
+    contactData: {
+        email: 'example@example.com',
+    },
     colors: {
         primary: '#000000',
         accent: '#FFFFFF',
@@ -24,6 +27,8 @@ const validExampleData = {
             },
         ],
     },
+    customOptions: {},
+    logos: {},
 }
 
 describe('validateLandingRequestData', () => {
@@ -54,11 +59,13 @@ describe('validateLandingRequestData', () => {
         expect(result.domainOptions).toEqual({ domain: 'newdomain.vercel.app', usingPreview: false })
     })
 
-    it('should throw a ValidationError for invalid input', () => {
+    it('should throw a ValidationError for Invalid email', () => {
         const req = {
             body: {
                 ...validExampleData,
-                email: 'invalid-email',
+                contactData: {
+                    email: 'invalid-email',
+                },
             },
         }
 
@@ -69,7 +76,7 @@ describe('validateLandingRequestData', () => {
             expect(error.message).toBe('Error validating form fields')
             expect(error.errorType).toBe('VAL-004')
             expect(error.state.erroredFields).toContainEqual({
-                fieldPath: ['email'],
+                fieldPath: ['contactData', 'email'],
                 message: 'Invalid email',
             })
         }
@@ -79,7 +86,9 @@ describe('validateLandingRequestData', () => {
         const req: any = {
             body: {
                 ...validExampleData,
-                email: 'invalid-email',
+                contactData: {
+                    email: 'invalidinput',
+                },
                 colors: {
                     primary: '#000000',
                     accent: 123, // invalid type
@@ -94,7 +103,7 @@ describe('validateLandingRequestData', () => {
             expect(error.message).toBe('Error validating form fields')
             expect(error.errorType).toBe('VAL-004')
             expect(error.state.erroredFields).toContainEqual({
-                fieldPath: ['email'],
+                fieldPath: ['contactData', 'email'],
                 message: 'Invalid email',
             })
             expect(error.state.erroredFields).toContainEqual({
@@ -103,7 +112,6 @@ describe('validateLandingRequestData', () => {
             })
         }
     })
-
     it('should throw a ValidationError when a required field is not present', () => {
         const req: any = {
             body: {

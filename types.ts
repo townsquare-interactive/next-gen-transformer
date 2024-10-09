@@ -169,11 +169,11 @@ export interface Slot {
 }
 
 export interface Address {
-    zip: string
-    city: string
+    zip?: string
+    city?: string
     name?: string
-    state: string
-    street: string
+    state?: string
+    street?: string
     street2?: string
     coordinates?: { lat: string | number; long: string | number }
     url?: string
@@ -191,7 +191,7 @@ export interface Contact {
         wednesday: string
     }
     phone: Phone[]
-    address: Address
+    address?: Address
     hideZip?: boolean
     advanced?: {
         lat: string
@@ -317,7 +317,7 @@ export interface SiteData {
     theme: string
     cmsUrl: string
     s3Folder: string
-    favicon: string
+    favicon?: string
     fontImport: string
     config: Config
     allStyles?: string

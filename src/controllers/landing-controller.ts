@@ -36,28 +36,38 @@ export const validateLandingRequestData = (req: { body: LandingReq }, type = 'in
     return { apexID, siteData, domainOptions }
 }
 
-export const createLayoutFile = async (siteData: any, apexID: string) => {
-    const logo = siteData.logo
+export const createLayoutFile = async (siteData: LandingReq, apexID: string) => {
+    const headerLogo = siteData.logos.header
+    const footerLogo = siteData.logos.footer || headerLogo
     const socials = siteData.socials
-    const address = siteData.address
+    const address = siteData.contactData.address
     const siteName = siteData.siteName
-    const phoneNumber = removeWhiteSpace(siteData.phoneNumber || '')
-    const email = siteData.email
+    const phoneNumber = removeWhiteSpace(siteData.contactData.phoneNumber || '')
+    const email = siteData.contactData.email
     const seo = siteData.seo
     const colors: LandingColors = siteData.colors
     const favicon = siteData.favicon
     const url = siteData.url
-    let customComponents = siteData.customComponents
+    let customComponents = siteData.customOptions.customComponents || []
     const currentLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
-    const analytics = siteData.analytics
+    const analytics = siteData.customOptions.analytics
 
     const themeColors = createLandingColors(colors)
 
     const hasEngage = customComponents?.length > 0 ? checkModulesForBMP(customComponents) : false
 
-    const widgetData = customizeWidgets(customComponents, themeColors, logo || '', siteName, phoneNumber, email, siteData.headerCtaButtons, hasEngage)
+    const widgetData = customizeWidgets(
+        customComponents,
+        themeColors,
+        headerLogo || '',
+        siteName,
+        phoneNumber,
+        email,
+        siteData.customOptions.headerCtaButtons,
+        hasEngage
+    )
 
-    const fontData = createFontData(siteData.fonts)
+    const fontData = createFontData(siteData.customOptions.fonts)
 
     const newStyles = await createGlobalStylesheet(themeColors, fontData.fonts, { CSS: '' }, { pages: [] }, apexID)
 
@@ -73,7 +83,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         markup: '',
                         hasLinks: false,
                         alignment: 'center',
-                        image_src: logo,
+                        image_src: footerLogo,
                         image_link: '',
                     },
                 ],
@@ -88,7 +98,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         markup: '',
                         hasLinks: false,
                         alignment: 'center',
-                        image_src: logo,
+                        image_src: headerLogo,
                         image_link: '',
                     },
                     {
@@ -121,7 +131,7 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
                         markup: '',
                         hasLinks: false,
                         alignment: 'center',
-                        image_src: logo,
+                        image_src: headerLogo,
                         image_link: '',
                     },
                 ],
@@ -197,8 +207,8 @@ export const createLayoutFile = async (siteData: any, apexID: string) => {
             mobileHeaderBtns: widgetData.headerButtons.mobileHeaderButtons,
         },
         scripts: {
-            footer: siteData.code?.body || '',
-            header: siteData.code?.header || '',
+            footer: siteData.customOptions.code?.body || '',
+            header: siteData.customOptions.code?.header || '',
         },
         siteType: 'landing',
         customComponents: widgetData.customComponents,
@@ -215,7 +225,7 @@ export const createPageFile = (siteData: LandingReq, siteLayout: SiteDataType) =
     const slug = siteData.pageUri ? siteData.pageUri : 'landing'
 
     const sectionModules = createModulesWithSections(siteData.page.sections)
-    const modules = createModules(sectionModules, removeWhiteSpace(siteData.phoneNumber || ''))
+    const modules = createModules(sectionModules, removeWhiteSpace(siteData.contactData.phoneNumber || ''))
 
     const page = {
         data: {

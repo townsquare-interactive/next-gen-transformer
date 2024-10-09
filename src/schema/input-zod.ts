@@ -314,29 +314,16 @@ const ScriptsSchema = z.object({
     body: z.string().optional(),
 })
 
-//request body coming from AI tool
-export const LandingInputSchema = z.object({
-    siteName: z.string(),
-    url: z.string(),
-    s3Folder: z.string(),
-    productionDomain: z.string().optional(),
-    subdomainOverride: z.string().optional(),
-    pageUri: z.string().optional(),
-    logo: z.string().optional(),
-    favicon: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    email: z.union([z.string().email(), z.literal('')]),
-    socials: SocialSchema.optional(),
-    seo: z.object({ global: SEOGlobalSchema }).optional(),
-    colors: ColorInputSchema,
-    customComponents: z.array(CustomComponentSchema).optional(),
-    headerCtaButtons: HeaderButtonsObj,
-    code: ScriptsSchema.optional(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    page: PageSchema,
-    address: AddressSchema.optional(),
-    analytics: AnalyticsSchema.optional(),
+export const SubdomainInputSchema = z.object({
+    subdomain: z.string().min(1),
+})
+
+const Logos = z.object({
+    header: z.string().optional(),
+    footer: z.string().optional(),
+})
+
+const CustomOptions = z.object({
     fonts: z
         .array(
             z.object({
@@ -346,10 +333,36 @@ export const LandingInputSchema = z.object({
             })
         )
         .optional(),
+    code: ScriptsSchema.optional(),
+    headerCtaButtons: HeaderButtonsObj,
+    analytics: AnalyticsSchema.optional(),
+    customComponents: z.array(CustomComponentSchema).optional(),
 })
 
-export const SubdomainInputSchema = z.object({
-    subdomain: z.string().min(1),
+const ContactData = z.object({
+    address: AddressSchema.optional(),
+    phoneNumber: z.string().optional(),
+    email: z.union([z.string().email(), z.literal('')]),
+})
+
+//request body coming from AI tool
+export const LandingInputSchema = z.object({
+    siteName: z.string(),
+    url: z.string(),
+    productionDomain: z.string().optional(),
+    subdomainOverride: z.string().optional(),
+    s3Folder: z.string(),
+    pageUri: z.string().optional(),
+    logos: Logos,
+    favicon: z.string().optional(),
+    contactData: ContactData,
+    socials: SocialSchema.optional(),
+    seo: z.object({ global: SEOGlobalSchema }).optional(),
+    colors: ColorInputSchema,
+    title: z.string().optional(),
+    description: z.string().optional(),
+    page: PageSchema,
+    customOptions: CustomOptions,
 })
 
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>

@@ -365,7 +365,7 @@ export async function transformcontact(contactInfo: Contact) {
     }
 
     const newAdd = contactInfo.address?.street?.replaceAll(' ', '+')
-    const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address.zip
+    const mapLink = 'https://www.google.com/maps/place/' + newAdd + '+' + contactInfo.address?.zip
     const contactLinks = []
     const multiPhones = contactInfo.phone.length > 1 ? true : false
     const hideEmail = !multiPhones && contactInfo.email?.length > 1
@@ -412,8 +412,8 @@ export async function transformcontact(contactInfo: Contact) {
         cName: 'map',
         link: mapLink,
         icon: icons.location,
-        content: contactInfo.address.name || '',
-        active: contactInfo.address.street ? true : false,
+        content: contactInfo.address?.name || '',
+        active: contactInfo.address?.street ? true : false,
     }
 
     multiPhones ? contactLinks.unshift(contactMap) : contactLinks.push(contactMap)
