@@ -262,6 +262,7 @@ export const createPageFile = (siteData: LandingReq, siteLayout: SiteDataType) =
             imageOverride: '',
         },
         siteLayout: siteLayout,
+        requestData: siteData,
     }
 
     return page

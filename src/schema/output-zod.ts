@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
+import { LandingInputSchema } from './input-zod.js'
 
 const Slot = z.object({
     show: z.number().optional(),
@@ -506,6 +507,7 @@ export const CMSPagesSchema = z.array(
         head_script: OptionalString,
         JS: OptionalString,
         siteLayout: SiteDataSchema.optional(),
+        requestData: LandingInputSchema.optional(), //save the incoming request data from route into S3 page
     })
 )
 
