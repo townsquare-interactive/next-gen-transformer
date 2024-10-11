@@ -17,8 +17,9 @@ interface ErrorClass {
 interface SiteDeploymentErrorType extends ErrorClass {
     domain: string
     state: {
-        domainStatus: string
+        domainStatus?: string
         dns?: Dns[]
+        dataStatus?: string
     } & ErrorState
 }
 

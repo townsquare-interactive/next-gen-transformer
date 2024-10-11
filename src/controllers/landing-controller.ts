@@ -1,4 +1,4 @@
-import { convertDescText, removeWhiteSpace, convertUrlToApexId } from '../utilities/utils.js'
+import { convertDescText, removeWhiteSpace, convertUrlToApexId, getPageNameFromDomain } from '../utilities/utils.js'
 import { createGlobalStylesheet } from './cms-controller.js'
 import {
     checkModulesForBMP,
@@ -15,7 +15,8 @@ import { getFileS3 } from '../utilities/s3Functions.js'
 import type { Layout } from '../../types.js'
 import { v4 as uuidv4 } from 'uuid'
 import { zodDataParse } from '../schema/utils-zod.js'
-import { SiteDataType } from '../schema/output-zod.js'
+import { ApexPageType, SiteDataType } from '../schema/output-zod.js'
+import { SiteDeploymentError } from '../utilities/errors.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)
@@ -693,4 +694,24 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
     }
 
     return newModules
+}
+
+export const getRequestData = async (domain: string) => {
+    const apexID = convertUrlToApexId(domain)
+    const pageName = getPageNameFromDomain(domain)
+    const s3File = `${apexID}/pages/${pageName}.json`
+    const pageData: ApexPageType = await getFileS3(s3File, 'site not found in s3')
+
+    if (typeof pageData != 'string' && pageData.requestData) {
+        return pageData.requestData
+    } else {
+        throw new SiteDeploymentError({
+            message: `ApexID ${apexID} not found in list of created sites`,
+            domain: domain,
+            errorType: 'AMS-006',
+            state: {
+                dataStatus: 'The request data was not able to be found because the site could not be found in Amazon S3',
+            },
+        })
+    }
 }

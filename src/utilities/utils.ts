@@ -1202,3 +1202,12 @@ export const checkApexIDInDomain = (checkingDomain: string, domainOptions: Domai
 
     return false
 }
+
+export const getPageNameFromDomain = (domain: string) => {
+    const domainSplit = domain.split('/')
+    if (domainSplit.length <= 1) {
+        return 'no page name'
+    }
+    const pageName = domainSplit[domainSplit.length - 1]
+    return pageName
+}

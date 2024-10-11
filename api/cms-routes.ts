@@ -13,9 +13,9 @@ import {
     checkDomainConfigOnVercel,
 } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
-import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, LandingInputSchema } from '../src/schema/input-zod.js'
+import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema } from '../src/schema/input-zod.js'
 import express from 'express'
-import { validateLandingRequestData } from '../src/controllers/landing-controller.js'
+import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
@@ -95,6 +95,19 @@ router.get('/check-domain-config', async (req, res) => {
         }
 
         const response = await checkDomainConfigOnVercel(domain)
+        res.json(response)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res)
+    }
+})
+
+//
+router.get('/landing-request-data', async (req, res) => {
+    try {
+        const reqData = zodDataParse<RequestDataReq, typeof RequestDataSchema>(req.query as RequestDataReq, RequestDataSchema, 'parse')
+        const domain = reqData.domain
+        const response = await getRequestData(domain)
         res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.body }

@@ -12,6 +12,7 @@ import {
     createModalPageList,
     convertUrlToApexId,
     checkApexIDInDomain,
+    getPageNameFromDomain,
 } from './utils'
 import { it, describe, expect } from 'vitest'
 
@@ -339,5 +340,20 @@ describe('checkApexIDInDomain', () => {
         const domainOptions = { domain: 'abc', usingPreview: true }
         const postfix = '.vercel.app'
         expect(checkApexIDInDomain(checkingDomain4, domainOptions, postfix)).toStrictEqual(true)
+    })
+})
+
+describe('getPageNameFromDomain', () => {
+    it('should return the page name from a domain', () => {
+        const domain = 'test.com/home'
+        expect(getPageNameFromDomain(domain)).toBe('home')
+    })
+    it('should handle multiple / marks correctly', () => {
+        const domainHttps = 'https://test.com/home'
+        expect(getPageNameFromDomain(domainHttps)).toBe('home')
+    })
+    it('should return no page name when there is no /', () => {
+        const domainNoPage = 'test.com'
+        expect(getPageNameFromDomain(domainNoPage)).toBe('no page name')
     })
 })

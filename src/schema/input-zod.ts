@@ -365,8 +365,15 @@ export const LandingInputSchema = z.object({
     customOptions: CustomOptions,
 })
 
+export const RequestDataSchema = z.object({
+    domain: z.string().refine((domain) => domain.includes('/'), {
+        message: "The domain must include a '/'",
+    }),
+})
+
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type LandingReq = z.infer<typeof LandingInputSchema>
+export type RequestDataReq = z.infer<typeof RequestDataSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
 export type AiPageModules = z.infer<typeof pageModules>
 export type Sections = z.infer<typeof PageSectionSchema>

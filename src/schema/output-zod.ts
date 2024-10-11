@@ -64,9 +64,6 @@ const CompositeSchema = z.object({
         .optional(),
 })
 
-export type CompositeData = z.infer<typeof CompositeSchema>
-export type CMSPagesSchemaType = z.infer<typeof CMSPagesSchema>
-
 const LogoItem = z
     .object({
         slots: z.array(Slot),
@@ -481,35 +478,35 @@ const ModuleSchema = z.array(
     )
 )
 
-export const CMSPagesSchema = z.array(
-    z.object({
-        data: z.object({
-            id: z.string().or(z.number()),
-            title: z.string(),
-            slug: z.string(),
-            pageType: z.string(),
-            url: z.string(),
-            JS: z.string(),
-            type: z.string(),
-            layout: z.number(),
-            columns: z.number(),
-            modules: ModuleSchema,
-            sections: z.array(z.object({ wide: z.string() })),
-            hideTitle: z.number().or(z.boolean()),
-            head_script: z.string(),
-            columnStyles: z.string(),
-            page_type: OptionalString,
-            pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
-            scripts: z.string().optional(),
-        }),
-        attrs: z.record(z.unknown()).optional(), //for page name changes
-        seo: SeoSchema,
-        head_script: OptionalString,
-        JS: OptionalString,
-        siteLayout: SiteDataSchema.optional(),
-        requestData: LandingInputSchema.optional(), //save the incoming request data from route into S3 page
-    })
-)
+export const ApexPageSchema = z.object({
+    data: z.object({
+        id: z.string().or(z.number()),
+        title: z.string(),
+        slug: z.string(),
+        pageType: z.string(),
+        url: z.string(),
+        JS: z.string(),
+        type: z.string(),
+        layout: z.number(),
+        columns: z.number(),
+        modules: ModuleSchema,
+        sections: z.array(z.object({ wide: z.string() })),
+        hideTitle: z.number().or(z.boolean()),
+        head_script: z.string(),
+        columnStyles: z.string(),
+        page_type: OptionalString,
+        pageModals: z.array(z.object({ modalNum: z.number(), modalTitle: z.string().optional(), autoOpen: z.boolean() })),
+        scripts: z.string().optional(),
+    }),
+    attrs: z.record(z.unknown()).optional(), //for page name changes
+    seo: SeoSchema,
+    head_script: OptionalString,
+    JS: OptionalString,
+    siteLayout: SiteDataSchema.optional(),
+    requestData: LandingInputSchema.optional(), //save the incoming request data from route into S3 page
+})
+
+export const CMSPagesSchema = z.array(ApexPageSchema)
 
 export const PageListSchema = z.object({
     pages: z.array(
@@ -522,3 +519,7 @@ export const PageListSchema = z.object({
         })
     ),
 })
+
+export type CompositeData = z.infer<typeof CompositeSchema>
+export type CMSPagesSchemaType = z.infer<typeof CMSPagesSchema>
+export type ApexPageType = z.infer<typeof ApexPageSchema>
