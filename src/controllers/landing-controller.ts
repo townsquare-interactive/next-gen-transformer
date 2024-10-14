@@ -702,7 +702,17 @@ export const getRequestData = async (domain: string) => {
     const s3File = `${apexID}/pages/${pageName}.json`
     const pageData: ApexPageType = await getFileS3(s3File, 'site not found in s3')
 
-    if (typeof pageData != 'string' && pageData.requestData) {
+    if (typeof pageData != 'string') {
+        if (!pageData.requestData) {
+            throw new SiteDeploymentError({
+                message: `${domain} page file in S3 doest not contain requestData`,
+                domain: domain,
+                errorType: 'AMS-010',
+                state: {
+                    dataStatus: 'The request data was not able to be found in the current saved S3 page file. Likely an older site',
+                },
+            })
+        }
         return pageData.requestData
     } else {
         throw new SiteDeploymentError({
@@ -710,7 +720,7 @@ export const getRequestData = async (domain: string) => {
             domain: domain,
             errorType: 'AMS-006',
             state: {
-                dataStatus: 'The request data was not able to be found because the site could not be found in Amazon S3',
+                dataStatus: 'The request data was not found because the site could not be found in Amazon S3',
             },
         })
     }
