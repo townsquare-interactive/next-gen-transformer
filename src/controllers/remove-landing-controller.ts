@@ -89,7 +89,7 @@ export const removeSiteFromS3 = async (apexID: string, pageUri: string) => {
 }
 
 // add a function that deletes file then if page-list is empty deletes that
-const removeLandingPage = async (apexID: string, pageSlug: string) => {
+export const removeLandingPage = async (apexID: string, pageSlug: string) => {
     await deleteFileS3(`${apexID}/pages/${pageSlug}.json`) //delete page
 
     //get pagelist
@@ -104,8 +104,8 @@ const removeLandingPage = async (apexID: string, pageSlug: string) => {
 
     if (newPageList.pages.length <= 0) {
         console.log('page-list file now empty')
-        await deleteFileS3(`${apexID}/pages/page-list.json`) //delete page
+        await deleteFileS3(`${apexID}/pages/page-list.json`)
     } else {
-        await addFileS3(newPageList, `${apexID}/pages/page-list.json`)
+        await addFileS3(newPageList, `${apexID}/pages/page-list`)
     }
 }

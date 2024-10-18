@@ -703,6 +703,7 @@ export const getRequestData = async (domain: string) => {
     const pageName = getPageNameFromDomain(domain)
     const s3File = `${apexID}/pages/${pageName}.json`
     const pageData: ApexPageType = await getFileS3(s3File, 'site not found in s3')
+    console.log('filename', s3File)
 
     if (typeof pageData != 'string') {
         if (!pageData.requestData) {

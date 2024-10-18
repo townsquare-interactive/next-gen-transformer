@@ -3,7 +3,7 @@ import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
-import { ApexPageType } from '../schema/output-zod.js'
+import { ApexPageType, PageListType } from '../schema/output-zod.js'
 import { String } from 'aws-sdk/clients/apigateway.js'
 
 const previewPostFix = '.vercel.app'
@@ -35,7 +35,7 @@ const modifyLandingDomainPublishStatus = async (method: string, sitePage: ApexPa
 }
 
 //verify domain has been added to project
-const verifyDomain = async (domainName: string) => {
+export const verifyDomain = async (domainName: string) => {
     //const vercelApiUrl = `https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainName}?teamId=${process.env.NEXT_PUBLIC_VERCEL_TEAM_ID}`
 
     const vercelApiUrl = `https://${domainName}`
@@ -85,6 +85,22 @@ export const getPageLayoutVars = async (apexID: string, pageUri: string) => {
     }
 }
 
+//lets check page-list here
+export const checkPageListForDeployements = async (apexID: string, pageUri: string, domainName: string) => {
+    const pageListFile: PageListType = await getFileS3(`${apexID}/pages/page-list.json`, 'not found')
+
+    if (typeof pageListFile != 'string') {
+        for (let i = 0; i < pageListFile.pages.length; i++) {
+            if (!(pageListFile.pages[i].slug === pageUri) && (await verifyDomain(domainName + `/${pageUri}`))) {
+                console.log('we have found an alt page')
+                return true
+            }
+        }
+    }
+    console.log('no alt page found')
+    return false
+}
+
 //takes a site domain and either adds it to vercel or removes it depending on method (POST or DELETE)
 export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID: string, pageUri = '', type = 'landing'): Promise<DomainRes> => {
     //const siteLayout = await getPageLayoutVars(apexID, pageUri)
@@ -103,7 +119,7 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
     //check if s3 folder exists for domain
     if (typeof siteLayout != 'string' && siteLayout) {
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
-        const isDomainPublishedAlready = publishedDomains.filter((domain: String) => domain === domainName).length
+        const isDomainPublishedAlready = publishedDomains.filter((domain: string) => domain === domainName).length
 
         //check if a random char generated domain has already been published
         const publishedAltDomain = publishedDomains.filter((domain) => checkApexIDInDomain(domain, domainOptions, postfix))
@@ -112,8 +128,10 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
             domainName = publishedAltDomain[0]
         }
 
+        const domainAlreadyPublishedWithOtherPage = await checkPageListForDeployements(apexID, pageUri, domainName)
+
         //check if domain has already been published
-        if (!isDomainPublishedAlready && !publishedAltDomain.length) {
+        if (!isDomainPublishedAlready && !publishedAltDomain.length && !domainAlreadyPublishedWithOtherPage) {
             console.log('domain: ', domainName)
 
             //vercep api url changes between post vs delete
@@ -207,14 +225,14 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                     }
 
                     return {
-                        message: `domain added with postfix ${altDomain} because other domain is taken`,
+                        message: `domain added with postfix ${altDomain + (pageUri ? `/${pageUri}` : '')} because other domain is taken`,
                         domain: domainName,
                         status: 'Success',
                     }
                 } else {
                     throw new SiteDeploymentError({
                         message: 'Unable to verify domain has been published',
-                        domain: domainName,
+                        domain: domainName + (pageUri ? `/${pageUri}` : ''),
                         errorType: 'DMN-002',
                         state: {
                             domainStatus: 'Domain not added for project',
@@ -369,7 +387,7 @@ export async function checkIfSiteExistsPostgres(domain: string) {
 export const removeDomainFromVercel = async (domain: string, pageUri = '', type = 'landing'): Promise<DomainRes> => {
     const apexID = convertUrlToApexId(domain, false)
 
-    //check here if redirect file, if so followo breadcrumbs to get to layout
+    //check here if redirect file, if so follow breadcrumbs to get to layout
     const redirectFile: string | { apexId: string } = await getFileS3(`${apexID}/redirect.json`, 'no redirect found')
 
     let finalApexID = apexID
@@ -381,13 +399,18 @@ export const removeDomainFromVercel = async (domain: string, pageUri = '', type 
     }
 
     const { siteLayout, sitePage } = await getPageandLanding(finalApexID, pageUri, type)
-
     let domainName = domain
 
     if (typeof siteLayout != 'string' && siteLayout) {
         //check that this url is tied with the S3 layout published domains field
         let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((listedDomain) => listedDomain === domainName).length
+
+        //check here for page-list length, only delete url if no more?
+        const domainAlreadyPublishedWithOtherPage = await checkPageListForDeployements(apexID, pageUri, domainName)
+        if (domainAlreadyPublishedWithOtherPage) {
+            return { message: `landing page deleted, domain remains unchanged due to other pages existing`, domain: domainName, status: 'Success' }
+        }
 
         if (isDomainPublishedAlready) {
             console.log('domain: ', domainName)

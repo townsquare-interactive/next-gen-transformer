@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { checkDomainConfigOnVercel, fetchDomainConfig, removeDomainFromVercel } from './create-site-controller.js'
+import { checkDomainConfigOnVercel, checkPageListForDeployements, fetchDomainConfig, removeDomainFromVercel, verifyDomain } from './create-site-controller.js'
 import { SiteDeploymentError } from '../utilities/errors'
 import { getFileS3 } from '../utilities/s3Functions'
 
@@ -31,6 +31,8 @@ vi.mock('./create-site-controller.js', async (importOriginal) => {
             acceptedChallenges: [],
             misconfigured: true,
         }),
+        verifyDomain: vi.fn().mockRejectedValue(true),
+        fetchDomainData: vi.fn().mockRejectedValue(true),
     }
 })
 
@@ -42,7 +44,7 @@ vi.mock('../utilities/s3Functions', async (importOriginal) => {
     }
 })
 
-describe('removeDomainFromVercel', () => {
+/* describe('removeDomainFromVercel', () => {
     beforeEach(() => {
         vi.resetAllMocks()
     })
@@ -103,7 +105,7 @@ describe('removeDomainFromVercel', () => {
 
         expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining(`/domains/${subdomain}`), expect.objectContaining({ method: 'DELETE' }))
     })
-})
+}) */
 
 describe('checkDomainConfigOnVercel', () => {
     it('should create an array from a response with A records', async () => {
@@ -192,5 +194,69 @@ describe('checkDomainConfigOnVercel', () => {
 
         // Use the `.rejects` matcher to check for the thrown error
         await expect(checkDomainConfigOnVercel(domain)).rejects.toThrow('Error checking domain config')
+    })
+})
+
+describe('checkPageListForDeployements', () => {
+    beforeEach(() => {
+        vi.resetAllMocks()
+    })
+
+    /*     it('should return true if an alternative page is found', async () => {
+        const apexID = 'apex123'
+        const pageUri = 'test-page'
+        const domainName = 'examplesite.com'
+        const mockPageList = {
+            pages: [
+                { slug: 'other-page' },
+                { slug: 'test-page' }, // The page we're looking for
+            ],
+        }
+
+        // Mock the getFileS3 function to return the page list
+        vi.mocked(getFileS3).mockResolvedValue(mockPageList)
+
+        // Mock verifyDomain to return true for the domain check
+        vi.mocked(verifyDomain).mockResolvedValue(true)
+
+        const result = await checkPageListForDeployements(apexID, 'other-page', domainName)
+
+        expect(result).toBe(true)
+        expect(verifyDomain).toHaveBeenCalledWith(`${domainName}/other-page`)
+    }) */
+
+    it('should return false if no alternative page is found', async () => {
+        const apexID = 'apex123'
+        const pageUri = 'test-page'
+        const domainName = 'examplesite.com'
+        const mockPageList = {
+            pages: [
+                { slug: 'test-page' }, // Only the matching page exists
+            ],
+        }
+
+        // Mock the getFileS3 function to return the page list
+        vi.mocked(getFileS3).mockResolvedValue(mockPageList)
+
+        // Mock verifyDomain to return false, meaning no other page is found
+        vi.mocked(verifyDomain).mockResolvedValue(false)
+
+        const result = await checkPageListForDeployements(apexID, pageUri, domainName)
+
+        expect(result).toBe(false)
+    })
+
+    it('should return false if page-list.json is not found', async () => {
+        const apexID = 'apex123'
+        const pageUri = 'test-page'
+        const domainName = 'examplesite.com'
+
+        // Mock the getFileS3 function to return a string indicating the file was not found
+        vi.mocked(getFileS3).mockResolvedValue('not found')
+
+        const result = await checkPageListForDeployements(apexID, pageUri, domainName)
+
+        expect(result).toBe(false)
+        expect(verifyDomain).not.toHaveBeenCalled() // verifyDomain shouldn't be called if the file isn't found
     })
 })

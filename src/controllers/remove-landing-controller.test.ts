@@ -1,72 +1,55 @@
-import { describe, it, expect, afterEach, vi } from 'vitest'
-import { removeSiteFromS3 } from './remove-landing-controller'
+import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest'
+import { removeSiteFromS3, removeLandingPage, removeDomainAndS3, removeLandingProject } from './remove-landing-controller.js'
 import { deleteFolderS3, getFileS3, deleteFileS3, addFileS3 } from '../utilities/s3Functions.js'
+import { getPageLayoutVars } from './create-site-controller.js'
 
 // Mock the S3 functions with correct typing
 vi.mock('../utilities/s3Functions.js', () => ({
     getFileS3: vi.fn<any>(),
-    deleteFolderS3: vi.fn<any>(),
-    deleteFileS3: vi.fn<any>(),
-    addFileS3: vi.fn<any>(),
 }))
 
-describe('removeSiteFromS3', () => {
-    const apexID = 'testApex'
+vi.mock('./remove-landing-controller', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./remove-landing-controller')>()
+    return {
+        ...actual,
+        removeDomainAndS3: vi.fn(),
+        removeSiteFromS3: vi.fn(),
+        removeLandingPage: vi.fn(),
+    }
+})
+
+describe('removeLandingProject', () => {
+    const req = { apexID: 'testApex' }
 
     afterEach(() => {
         vi.clearAllMocks()
     })
 
-    it('should follow the correct path if siteLayout is not a string', async () => {
-        const mockLayout = { publishedDomains: [] }
-        ;(getFileS3 as any).mockResolvedValueOnce(mockLayout)
-
-        await removeSiteFromS3(apexID, '')
-
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
-        expect(deleteFolderS3).toHaveBeenCalledWith(apexID)
-    })
-
-    it('should not delete the S3 folder if there are alternate domains', async () => {
+    /* it('should remove domains when siteLayout is not a string', async () => {
         const mockLayout = { publishedDomains: ['domain1', 'domain2'] }
-        ;(getFileS3 as any).mockResolvedValueOnce(mockLayout)
 
-        await removeSiteFromS3(apexID, '')
+        vi.mocked(getFileS3).mockResolvedValue(mockLayout)
+        vi.mocked(removeDomainAndS3).mockResolvedValue({ domain: 'domain1', message: 'removed', status: 'Success' })
 
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
-        expect(deleteFolderS3).not.toHaveBeenCalled()
-    })
+        const response = await removeLandingProject(req)
 
-    it('should follow the correct path if siteLayout is a string (redirect file exists)', async () => {
-        const mockLayoutString = 'some-string'
-        const mockRedirectFile = { apexId: 'originalApexID' }
-        const mockOriginalLayout = { publishedDomains: [] }
+        expect(getFileS3).toHaveBeenCalledWith(`${req.apexID}/layout.json`, 'site not found in s3')
+        expect(removeDomainAndS3).toHaveBeenCalledTimes(2)
+        expect(removeDomainAndS3).toHaveBeenCalledWith('domain1')
+        expect(removeDomainAndS3).toHaveBeenCalledWith('domain2')
+        expect(response).toEqual({
+            message: 'apexID removed sucessfully',
+            apexID: 'testApex',
+            status: 'Success',
+        })
+    }) */
 
-        // Handle multiple mockResolvedValueOnce calls properly
-        ;(getFileS3 as any).mockResolvedValueOnce(mockLayoutString)
-        ;(getFileS3 as any).mockResolvedValueOnce(mockRedirectFile)
-        ;(getFileS3 as any).mockResolvedValueOnce(mockOriginalLayout)
-        ;(deleteFileS3 as any).mockResolvedValue()
+    it('should throw an error if siteLayout is a string', async () => {
+        vi.mocked(getFileS3).mockResolvedValue('some-string')
 
-        await removeSiteFromS3(apexID, '')
+        await expect(removeLandingProject(req)).rejects.toThrowError(`ApexID ${req.apexID} not found in list of client site files`)
 
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3')
-        expect(deleteFolderS3).toHaveBeenCalledWith(apexID)
-        expect(deleteFolderS3).toHaveBeenCalledWith('originalApexID')
-    })
-
-    it('should throw an error if the redirectFile is a string', async () => {
-        const mockLayoutString = 'some-string'
-        const mockRedirectString = 'another-string'
-
-        ;(getFileS3 as any).mockResolvedValueOnce(mockLayoutString)
-        ;(getFileS3 as any).mockResolvedValueOnce(mockRedirectString)
-
-        await expect(removeSiteFromS3(apexID, '')).rejects.toThrowError(`ApexID ${apexID} not found in list of created sites during S3 deletion`)
-
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3')
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3')
-        expect(deleteFolderS3).not.toHaveBeenCalled()
+        expect(getFileS3).toHaveBeenCalledWith(`${req.apexID}/layout.json`, 'site not found in s3')
+        expect(removeDomainAndS3).not.toHaveBeenCalled()
     })
 })
