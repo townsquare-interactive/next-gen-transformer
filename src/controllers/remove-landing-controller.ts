@@ -62,7 +62,7 @@ export const removeSiteFromS3 = async (apexID: string, pageUri: string) => {
         if (siteLayout.publishedDomains.length < 1) {
             await removeLandingPage(apexID, pageUri)
         } else {
-            console.log('not deleting s3 folder due to other alternate domains existing')
+            console.log('not deleting s3 file due to other alternate domains existing')
         }
     } else {
         //check if redirect file

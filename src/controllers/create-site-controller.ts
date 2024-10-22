@@ -24,6 +24,14 @@ const modifyLandingDomainPublishStatus = async (method: string, sitePage: ApexPa
     console.log('premod doms', sitePage.siteLayout)
     //add domains to layout file or removes if deleting
     if (method === 'POST') {
+        //check if domain is already in published list
+        const domainInDomainList = sitePage.siteLayout?.publishedDomains?.filter((domain: string) => domain === domainName)
+
+        if (domainInDomainList.length > 0) {
+            console.log('domain already in published list')
+            return
+        }
+
         sitePage.siteLayout.publishedDomains ? sitePage.siteLayout?.publishedDomains.push(domainName) : (sitePage.siteLayout.publishedDomains = [domainName])
         console.log('published domains', sitePage.siteLayout?.publishedDomains)
     } else if (method === 'DELETE') {
@@ -91,7 +99,7 @@ export const checkPageListForDeployements = async (apexID: string, pageUri: stri
 
     if (typeof pageListFile != 'string') {
         for (let i = 0; i < pageListFile.pages.length; i++) {
-            if (!(pageListFile.pages[i].slug === pageUri) && (await verifyDomain(domainName + `/${pageUri}`))) {
+            if (!(pageListFile.pages[i].slug === pageUri)) {
                 console.log('we have found an alt page')
                 return true
             }
@@ -269,6 +277,17 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
                 ? `Original domain ${domainOptions.previousAttempt} has been added but the domain configuration is not set up. Adding a preview free domain to use in the meantime`
                 : 'domain already published, updating site data'
 
+            //check here if page is in publishedDomains?
+            //domain has already been published with another page but we need to add it to json page file
+            if (domainAlreadyPublishedWithOtherPage && !isDomainPublishedAlready) {
+                console.log('adjusting page-list')
+                if (type === 'landing' && sitePage?.siteLayout) {
+                    await modifyLandingDomainPublishStatus('POST', sitePage, domainName, apexID, `${apexID}/pages/${pageUri}`)
+                } else {
+                    await modifyDomainPublishStatus('POST', siteLayout, domainName, apexID, `${apexID}/layout`)
+                }
+            }
+
             return {
                 message: message,
                 domain: `${domainName + (pageUri ? `/${pageUri}` : '')}`,
@@ -295,6 +314,7 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
             usingPreview: true,
             previousAttempt: domainName,
         }
+
         return publishDomainToVercel(newDomainOptions, apexID, pageUri || '')
     }
 
@@ -409,7 +429,14 @@ export const removeDomainFromVercel = async (domain: string, pageUri = '', type 
         //check here for page-list length, only delete url if no more?
         const domainAlreadyPublishedWithOtherPage = await checkPageListForDeployements(apexID, pageUri, domainName)
         if (domainAlreadyPublishedWithOtherPage) {
-            return { message: `landing page deleted, domain remains unchanged due to other pages existing`, domain: domainName, status: 'Success' }
+            //remove page from publishedlist
+            if (type === 'landing' && sitePage?.siteLayout) {
+                await modifyLandingDomainPublishStatus('DELETE', sitePage, domainName, finalApexID, `${finalApexID}/pages/${pageUri}`)
+            } else {
+                await modifyDomainPublishStatus('DELETE', siteLayout, domainName, finalApexID, `$finalAapexID}/layout`)
+            }
+
+            return { message: `landing page ${pageUri} deleted, domain remains unchanged due to other pages existing`, domain: domainName, status: 'Success' }
         }
 
         if (isDomainPublishedAlready) {
