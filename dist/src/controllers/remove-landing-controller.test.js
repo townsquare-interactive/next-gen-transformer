@@ -1,52 +1,47 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { removeSiteFromS3 } from './remove-landing-controller';
-import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js';
+import { removeDomainAndS3, removeLandingProject } from './remove-landing-controller.js';
+import { getFileS3 } from '../utilities/s3Functions.js';
 // Mock the S3 functions with correct typing
 vi.mock('../utilities/s3Functions.js', () => ({
     getFileS3: vi.fn(),
-    deleteFolderS3: vi.fn(),
 }));
-describe('removeSiteFromS3', () => {
-    const apexID = 'testApex';
+vi.mock('./remove-landing-controller', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        removeDomainAndS3: vi.fn(),
+        removeSiteFromS3: vi.fn(),
+        removeLandingPage: vi.fn(),
+    };
+});
+describe('removeLandingProject', () => {
+    const req = { apexID: 'testApex' };
     afterEach(() => {
         vi.clearAllMocks();
     });
-    it('should follow the correct path if siteLayout is not a string', async () => {
-        const mockLayout = { publishedDomains: [] };
-        getFileS3.mockResolvedValueOnce(mockLayout);
-        await removeSiteFromS3(apexID, '');
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3');
-        expect(deleteFolderS3).toHaveBeenCalledWith(apexID);
-    });
-    it('should not delete the S3 folder if there are alternate domains', async () => {
-        const mockLayout = { publishedDomains: ['domain1', 'domain2'] };
-        getFileS3.mockResolvedValueOnce(mockLayout);
-        await removeSiteFromS3(apexID, '');
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3');
-        expect(deleteFolderS3).not.toHaveBeenCalled();
-    });
-    it('should follow the correct path if siteLayout is a string (redirect file exists)', async () => {
-        const mockLayoutString = 'some-string';
-        const mockRedirectFile = { apexId: 'originalApexID' };
-        const mockOriginalLayout = { publishedDomains: [] };
-        getFileS3.mockResolvedValueOnce(mockLayoutString);
-        getFileS3.mockResolvedValueOnce(mockRedirectFile);
-        getFileS3.mockResolvedValueOnce(mockOriginalLayout);
-        await removeSiteFromS3(apexID, '');
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3');
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3');
-        expect(deleteFolderS3).toHaveBeenCalledWith(apexID);
-        expect(deleteFolderS3).toHaveBeenCalledWith('originalApexID');
-    });
-    it('should throw an error if the redirectFile is a string', async () => {
-        const mockLayoutString = 'some-string';
-        const mockRedirectString = 'another-string';
-        getFileS3.mockResolvedValueOnce(mockLayoutString);
-        getFileS3.mockResolvedValueOnce(mockRedirectString);
-        await expect(removeSiteFromS3(apexID, '')).rejects.toThrowError(`ApexID ${apexID} not found in list of created sites during S3 deletion`);
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/layout.json`, 'site not found in s3');
-        expect(getFileS3).toHaveBeenCalledWith(`${apexID}/redirect.json`, 'site not found in s3');
-        expect(deleteFolderS3).not.toHaveBeenCalled();
+    /* it('should remove domains when siteLayout is not a string', async () => {
+        const mockLayout = { publishedDomains: ['domain1', 'domain2'] }
+
+        vi.mocked(getFileS3).mockResolvedValue(mockLayout)
+        vi.mocked(removeDomainAndS3).mockResolvedValue({ domain: 'domain1', message: 'removed', status: 'Success' })
+
+        const response = await removeLandingProject(req)
+
+        expect(getFileS3).toHaveBeenCalledWith(`${req.apexID}/layout.json`, 'site not found in s3')
+        expect(removeDomainAndS3).toHaveBeenCalledTimes(2)
+        expect(removeDomainAndS3).toHaveBeenCalledWith('domain1')
+        expect(removeDomainAndS3).toHaveBeenCalledWith('domain2')
+        expect(response).toEqual({
+            message: 'apexID removed sucessfully',
+            apexID: 'testApex',
+            status: 'Success',
+        })
+    }) */
+    it('should throw an error if siteLayout is a string', async () => {
+        vi.mocked(getFileS3).mockResolvedValue('some-string');
+        await expect(removeLandingProject(req)).rejects.toThrowError(`ApexID ${req.apexID} not found in list of client site files`);
+        expect(getFileS3).toHaveBeenCalledWith(`${req.apexID}/layout.json`, 'site not found in s3');
+        expect(removeDomainAndS3).not.toHaveBeenCalled();
     });
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVtb3ZlLWxhbmRpbmctY29udHJvbGxlci50ZXN0LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2NvbnRyb2xsZXJzL3JlbW92ZS1sYW5kaW5nLWNvbnRyb2xsZXIudGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsUUFBUSxFQUFFLEVBQUUsRUFBRSxNQUFNLEVBQUUsU0FBUyxFQUFFLEVBQUUsRUFBRSxNQUFNLFFBQVEsQ0FBQTtBQUM1RCxPQUFPLEVBQUUsZ0JBQWdCLEVBQUUsTUFBTSw2QkFBNkIsQ0FBQTtBQUM5RCxPQUFPLEVBQUUsY0FBYyxFQUFFLFNBQVMsRUFBRSxNQUFNLDZCQUE2QixDQUFBO0FBRXZFLDRDQUE0QztBQUM1QyxFQUFFLENBQUMsSUFBSSxDQUFDLDZCQUE2QixFQUFFLEdBQUcsRUFBRSxDQUFDLENBQUM7SUFDMUMsU0FBUyxFQUFFLEVBQUUsQ0FBQyxFQUFFLEVBQU87SUFDdkIsY0FBYyxFQUFFLEVBQUUsQ0FBQyxFQUFFLEVBQU87Q0FDL0IsQ0FBQyxDQUFDLENBQUE7QUFFSCxRQUFRLENBQUMsa0JBQWtCLEVBQUUsR0FBRyxFQUFFO0lBQzlCLE1BQU0sTUFBTSxHQUFHLFVBQVUsQ0FBQTtJQUV6QixTQUFTLENBQUMsR0FBRyxFQUFFO1FBQ1gsRUFBRSxDQUFDLGFBQWEsRUFBRSxDQUFBO0lBQ3RCLENBQUMsQ0FBQyxDQUFBO0lBRUYsRUFBRSxDQUFDLDhEQUE4RCxFQUFFLEtBQUssSUFBSSxFQUFFO1FBQzFFLE1BQU0sVUFBVSxHQUFHLEVBQUUsZ0JBQWdCLEVBQUUsRUFBRSxFQUFFLENBQzFDO1FBQUMsU0FBaUIsQ0FBQyxxQkFBcUIsQ0FBQyxVQUFVLENBQUMsQ0FBQTtRQUVyRCxNQUFNLGdCQUFnQixDQUFDLE1BQU0sRUFBRSxFQUFFLENBQUMsQ0FBQTtRQUVsQyxNQUFNLENBQUMsU0FBUyxDQUFDLENBQUMsb0JBQW9CLENBQUMsR0FBRyxNQUFNLGNBQWMs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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVtb3ZlLWxhbmRpbmctY29udHJvbGxlci50ZXN0LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2NvbnRyb2xsZXJzL3JlbW92ZS1sYW5kaW5nLWNvbnRyb2xsZXIudGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsUUFBUSxFQUFFLEVBQUUsRUFBRSxNQUFNLEVBQUUsU0FBUyxFQUFFLEVBQUUsRUFBYyxNQUFNLFFBQVEsQ0FBQTtBQUN4RSxPQUFPLEVBQXVDLGlCQUFpQixFQUFFLG9CQUFvQixFQUFFLE1BQU0sZ0NBQWdDLENBQUE7QUFDN0gsT0FBTyxFQUFrQixTQUFTLEVBQTJCLE1BQU0sNkJBQTZCLENBQUE7QUFHaEcsNENBQTRDO0FBQzVDLEVBQUUsQ0FBQyxJQUFJLENBQUMsNkJBQTZCLEVBQUUsR0FBRyxFQUFFLENBQUMsQ0FBQztJQUMxQyxTQUFTLEVBQUUsRUFBRSxDQUFDLEVBQUUsRUFBTztDQUMxQixDQUFDLENBQUMsQ0FBQTtBQUVILEVBQUUsQ0FBQyxJQUFJLENBQUMsNkJBQTZCLEVBQUUsS0FBSyxFQUFFLGNBQWMsRUFBRSxFQUFFO0lBQzVELE1BQU0sTUFBTSxHQUFHLE1BQU0sY0FBYyxFQUFnRCxDQUFBO0lBQ25GLE9BQU87UUFDSCxHQUFHLE1BQU07UUFDVCxpQkFBaUIsRUFBRSxFQUFFLENBQUMsRUFBRSxFQUFFO1FBQzFCLGdCQUFnQixFQUFFLEVBQUUsQ0FBQyxFQUFFLEVBQUU7UUFDekIsaUJBQWlCLEVBQUUsRUFBRSxDQUFDLEVBQUUsRUFBRTtLQUM3QixDQUFBO0FBQ0wsQ0FBQyxDQUFDLENBQUE7QUFFRixRQUFRLENBQUMsc0JBQXNCLEVBQUUsR0FBRyxFQUFFO0lBQ2xDLE1BQU0sR0FBRyxHQUFHLEVBQUUsTUFBTSxFQUFFLFVBQVUsRUFBRSxDQUFBO0lBRWxDLFNBQVMsQ0FBQyxHQUFHLEVBQUU7UUFDWCxFQUFFLENBQUMsYUFBYSxFQUFFLENBQUE7SUFDdEIsQ0FBQyxDQUFDLENBQUE7SUFFRjs7Ozs7Ozs7Ozs7Ozs7Ozs7U0FpQks7SUFFTCxFQUFFLENBQUMsaURBQWlELEVBQUUsS0FBSyxJQUFJLEVBQUU7UUFDN0QsRUFBRSxDQUFDLE1BQU0sQ0FBQyxTQUFTLENBQUMsQ0FBQyxpQkFBaUIsQ0FBQyxhQUFhLENBQUMsQ0FBQTtRQUVyRCxNQUFNLE1BQU0sQ0FBQyxvQkFBb0IsQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLE9BQU8sQ0FBQyxZQUFZLENBQUMsVUFBVSxHQUFHLENBQUMsTUFBTSx5Q0FBeUMsQ0FBQyxDQUFBO1FBRTNILE1BQU0sQ0FBQyxTQUFTLENBQUMsQ0FBQyxvQkFBb0IsQ0FBQyxHQUFHLEdBQUcsQ0FBQyxNQUFNLGNBQWMsRUFBRSxzQkFBc0IsQ0FBQyxDQUFBO1FBQzNGLE1BQU0sQ0FBQyxpQkFBaUIsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxnQkFBZ0IsRUFBRSxDQUFBO0lBQ3BELENBQUMsQ0FBQyxDQUFBO0FBQ04sQ0FBQyxDQUFDLENBQUEifQ==

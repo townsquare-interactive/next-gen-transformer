@@ -1,17 +1,10 @@
-import { addFileS3, deleteFileS3, folderExistsInS3, getFileS3 } from '../src/utilities/s3Functions.js'
+import { addFileS3, folderExistsInS3, getFileS3 } from '../src/utilities/s3Functions.js'
 import { convertUrlToApexId } from '../src/utilities/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
-import {
-    publishDomainToVercel,
-    changePublishStatusInSiteData,
-    getDomainList,
-    checkIfSiteExistsPostgres,
-    removeDomainFromVercel,
-    checkDomainConfigOnVercel,
-} from '../src/controllers/create-site-controller.js'
+import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema } from '../src/schema/input-zod.js'
 import express from 'express'
@@ -20,6 +13,7 @@ import { handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
+import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
 const router = express.Router()
 
 //save from luna cms
@@ -128,7 +122,6 @@ router.post('/create-site', async (req, res) => {
             if (siteExistsInS3) {
                 return res.status(500).json('site already exists')
             } else {
-                //const siteListStatus = await addToSiteList(req.body)
                 const data = await transformCreateSite(req.body)
                 await saveToS3({ ...data })
                 const response = await publishDomainToVercel({ domain: req.body.subdomain, usingPreview: true }, req.body.subdomain)

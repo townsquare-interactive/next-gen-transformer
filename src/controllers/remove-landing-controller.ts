@@ -5,7 +5,8 @@ import { zodDataParse } from '../schema/utils-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, deleteFileS3, deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { convertUrlToApexId, getPageNameFromDomain } from '../utilities/utils.js'
-import { getPageLayoutVars, removeDomainFromVercel } from './create-site-controller.js'
+import { getPageLayoutVars } from './create-site-controller.js'
+import { removeDomainFromVercel } from './domain-controller'
 
 export const removeLandingProject = async (req: RemoveLandingProjectReq) => {
     const parsedReq = zodDataParse(req, RemoveLandingProjectSchema)
