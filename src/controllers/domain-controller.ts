@@ -1,12 +1,9 @@
-import type { CreateSiteParams, Dns, DomainOptions, DomainRes, Layout } from '../../types.js'
+import type { Dns, DomainOptions, DomainRes, Layout } from '../../types.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
-import { sql } from '@vercel/postgres'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
-import { ApexPageType, PageListType } from '../schema/output-zod.js'
-import { String } from 'aws-sdk/clients/apigateway.js'
+import type { ApexPageType } from '../schema/output-zod.js'
 import { checkPageListForDeployements, createRedirectFile, getPageandLanding } from './create-site-controller.js'
-
 const previewPostFix = '.vercel.app'
 
 export const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string, pathName = `${apexId}/layout`) => {

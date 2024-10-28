@@ -1,10 +1,8 @@
-import type { CreateSiteParams, Dns, DomainOptions, DomainRes, Layout } from '../../types.js'
-import { SiteDeploymentError } from '../utilities/errors.js'
+import type { Layout } from '../../types.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
-import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
+import { convertUrlToApexId } from '../utilities/utils.js'
 import { ApexPageType, PageListType } from '../schema/output-zod.js'
-import { String } from 'aws-sdk/clients/apigateway.js'
 
 export const getPageLayoutVars = async (apexID: string, pageUri: string) => {
     const landingPage: ApexPageType = await getFileS3(`${apexID}/pages/${pageUri}.json`, 'site not found in s3')
