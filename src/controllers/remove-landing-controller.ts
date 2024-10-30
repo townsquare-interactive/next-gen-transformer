@@ -5,38 +5,43 @@ import { zodDataParse } from '../schema/utils-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, deleteFileS3, deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { convertUrlToApexId, getPageNameFromDomain } from '../utilities/utils.js'
-import { getPageLayoutVars } from './create-site-controller.js'
+import { getPageLayoutVars, getPageList } from './create-site-controller.js'
 import { removeDomainFromVercel } from './domain-controller.js'
 
 export const removeLandingProject = async (req: RemoveLandingProjectReq) => {
     const parsedReq = zodDataParse(req, RemoveLandingProjectSchema)
     const apexID = parsedReq.apexID
-    const siteLayout: Layout = await getFileS3(`${apexID}/layout.json`, 'site not found in s3')
+    const oldPageList = await getPageList(apexID)
 
-    console.log('siteLayout:', siteLayout)
+    //need page-list to delete each one
+    for (let i = 0; i < oldPageList.pages.length; i++) {
+        const pageName = oldPageList.pages[i].slug
+        const siteLayout = await getPageLayoutVars(apexID, pageName)
+        console.log('pagename', pageName)
 
-    if (typeof siteLayout != 'string') {
-        const domains = siteLayout.publishedDomains
+        if (typeof siteLayout != 'string') {
+            console.log('we have layout for both')
+            const domains = siteLayout.publishedDomains
 
-        for (let i = domains.length - 1; i >= 0; i--) {
-            console.log('removing domain: ', domains[i])
-            await removeDomainAndS3(domains[i])
+            for (let i = domains.length - 1; i >= 0; i--) {
+                console.log('removing domain: ', domains[i], pageName)
+                await removeDomainAndS3(domains[i], pageName)
+            }
+        } else {
+            throw new SiteDeploymentError({
+                message: `ApexID ${apexID} not found in list of client site files`,
+                domain: apexID,
+                errorType: 'AMS-006',
+                state: {
+                    domainStatus: 'ApexID not found, project not removed',
+                },
+            })
         }
-
-        return {
-            message: 'apexID removed sucessfully',
-            apexID: apexID,
-            status: 'Success',
-        }
-    } else {
-        throw new SiteDeploymentError({
-            message: `ApexID ${apexID} not found in list of client site files`,
-            domain: apexID,
-            errorType: 'AMS-006',
-            state: {
-                domainStatus: 'ApexID not found, project not removed',
-            },
-        })
+    }
+    return {
+        message: 'apexID removed sucessfully',
+        apexID: apexID,
+        status: 'Success',
     }
 }
 
@@ -109,4 +114,5 @@ export const removeLandingPage = async (apexID: string, pageSlug: string) => {
     } else {
         await addFileS3(newPageList, `${apexID}/pages/page-list`)
     }
+    return
 }

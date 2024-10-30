@@ -25,7 +25,6 @@ export const modifyLandingDomainPublishStatus = async (
     apexId: string,
     pathName = `${apexId}/layout`
 ) => {
-    console.log('premod doms', sitePage.siteLayout)
     //add domains to layout file or removes if deleting
     if (method === 'POST') {
         //check if domain is already in published list

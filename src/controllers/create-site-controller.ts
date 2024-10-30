@@ -3,6 +3,7 @@ import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { sql } from '@vercel/postgres'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { ApexPageType, PageListType } from '../schema/output-zod.js'
+import { SiteDeploymentError } from '../utilities/errors.js'
 
 export const getPageLayoutVars = async (apexID: string, pageUri: string) => {
     const landingPage: ApexPageType = await getFileS3(`${apexID}/pages/${pageUri}.json`, 'site not found in s3')
@@ -18,7 +19,7 @@ export const getPageLayoutVars = async (apexID: string, pageUri: string) => {
     }
 }
 
-//lets check page-list here
+//check page list to see if alternate page has same domain
 export const checkPageListForDeployements = async (apexID: string, pageUri: string, domainName: string) => {
     const pageListFile: PageListType = await getFileS3(`${apexID}/pages/page-list.json`, 'not found')
 
@@ -26,11 +27,19 @@ export const checkPageListForDeployements = async (apexID: string, pageUri: stri
         for (let i = 0; i < pageListFile.pages.length; i++) {
             if (!(pageListFile.pages[i].slug === pageUri)) {
                 console.log('we have found an alt page')
-                return true
+
+                //check that domain is the same?
+                const altPageFile = await getFileS3(`${apexID}/pages/${pageListFile.pages[i].slug}.json`, 'not found')
+                const isPubbedDomainTheSame = altPageFile.publishedDomains.filter((pubDomain: string) => pubDomain === domainName)
+
+                if (isPubbedDomainTheSame.length > 1) {
+                    return true
+                }
             }
         }
     }
-    console.log('no alt page found')
+    console.log('alt page does not contain same domain', domainName)
+
     return false
 }
 
@@ -85,10 +94,26 @@ export const getPageandLanding = async (apexID: string, pageUri: string, type: s
         const landingPage: ApexPageType = await getFileS3(`${apexID}/pages/${pageUri}.json`, 'site not found in s3')
         sitePage = landingPage
         siteLayout = sitePage.siteLayout
-        console.log('slayout', siteLayout)
     } else {
         siteLayout = await getPageLayoutVars(apexID, pageUri)
     }
 
     return { siteLayout: siteLayout, sitePage: sitePage }
+}
+
+export const getPageList = async (apexID: string) => {
+    const pageList: PageListType = await getFileS3(`${apexID}/pages/page-list.json`, 'no page list')
+
+    //check that page list exists
+    if (typeof pageList === 'string') {
+        throw new SiteDeploymentError({
+            message: `ApexID ${apexID} not found in list of client site files`,
+            domain: apexID,
+            errorType: 'AMS-006',
+            state: {
+                domainStatus: 'ApexID not found, project not removed',
+            },
+        })
+    }
+    return pageList
 }
