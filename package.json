@@ -8,7 +8,9 @@
         "test": "vitest",
         "start": "npx tsx index.ts",
         "dev": "npx tsx index.ts",
-        "generate-readme": "node generateReadme.js"
+        "generate-readme": "node generateReadme.js && cp README.md public/",
+        "build": "node index.js",
+        "postbuild": "cp README.md public/"
     },
     "author": "",
     "license": "ISC",

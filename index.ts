@@ -31,12 +31,12 @@ app.use('/api/cms-routes', routes)
 const PORT = 8080
 
 app.get('/', (req, res) => {
-    const readmePath = path.join('./', 'README.md')
-
+    const readmePath = path.join(process.cwd(), 'public', 'README.md')
     // Read README file
     fs.readFile(readmePath, 'utf-8', (err, data) => {
         if (err) {
             res.status(500).send('Error loading README')
+            console.log('readme error', err)
             return
         }
 
