@@ -46,10 +46,9 @@ router.post('/landing', async (req, res) => {
         const s3Res = await saveToS3({ ...data })
 
         if (useDomainPublish) {
-            const response: DomainRes = await publishDomainToVercel(domainOptions, apexID, siteData.pageUri || '')
-
-            console.log(response)
-            res.json(response)
+            const domainResponse: DomainRes = await publishDomainToVercel(domainOptions, apexID, siteData.pageUri || '')
+            console.log(domainResponse)
+            res.json(domainResponse)
         } else {
             console.log(s3Res)
             res.json(s3Res)

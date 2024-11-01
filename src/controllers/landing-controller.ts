@@ -39,8 +39,9 @@ export const validateLandingRequestData = (req: { body: LandingReq }, type = 'in
 }
 
 export const createLayoutFile = async (siteData: LandingReq, apexID: string) => {
-    const headerLogo = siteData.logos.header
+    const headerLogo = siteData.logos.header || ''
     const footerLogo = siteData.logos.footer || headerLogo
+    const mobileLogo = siteData.logos.mobile || headerLogo
     const socials = siteData.socials
     const address = siteData.contactData.address
     const siteName = siteData.siteName
@@ -74,95 +75,34 @@ export const createLayoutFile = async (siteData: LandingReq, apexID: string) => 
 
     const newStyles = await createGlobalStylesheet(themeColors, fontData.fonts, { CSS: '' }, { pages: [] }, apexID)
 
-    //probably still need to create styles in case we edit those functions
+    const createLandingLogoSlot = (imageSrc: string) => {
+        return {
+            slots: [
+                {
+                    alignment: 'center',
+                    image_src: imageSrc,
+                    image_link: '',
+                },
+            ],
+        }
+    }
+
     const layoutTemplate = {
         logos: {
-            footer: {
-                pct: 100,
-                slots: [
-                    {
-                        show: 1,
-                        type: 'image',
-                        markup: '',
-                        hasLinks: false,
-                        alignment: 'center',
-                        image_src: footerLogo,
-                        image_link: '',
-                    },
-                ],
-                activeSlots: [0],
-            },
-            header: {
-                pct: 100,
-                slots: [
-                    {
-                        show: 1,
-                        type: 'image',
-                        markup: '',
-                        hasLinks: false,
-                        alignment: 'center',
-                        image_src: headerLogo,
-                        image_link: '',
-                    },
-                    {
-                        show: 0,
-                        type: 'text',
-                        markup: '',
-                        hasLinks: false,
-                        alignment: 'left',
-                        image_src: '',
-                        image_link: '',
-                    },
-                    {
-                        show: 0,
-                        type: 'text',
-                        markup: '',
-                        hasLinks: false,
-                        alignment: 'left',
-                        image_src: '',
-                        image_link: '',
-                    },
-                ],
-                activeSlots: [0],
-            },
-            mobile: {
-                pct: 100,
-                slots: [
-                    {
-                        show: 1,
-                        type: 'image',
-                        markup: '',
-                        hasLinks: false,
-                        alignment: 'center',
-                        image_src: headerLogo,
-                        image_link: '',
-                    },
-                ],
-                activeSlots: [0],
-            },
+            footer: createLandingLogoSlot(footerLogo),
+            header: createLandingLogoSlot(headerLogo),
+            mobile: createLandingLogoSlot(mobileLogo),
         },
         social: socials ? transformSocial(socials) : [],
         contact: {
-            email: [
-                {
-                    name: '',
-                    email: '',
-                    disabled: '',
-                    isPrimaryEmail: false,
-                },
-            ],
             phone: [
                 {
                     name: 'Phone',
                     number: phoneNumber,
-                    disabled: '',
                     isPrimaryPhone: true,
                 },
             ],
             address: address,
-            displayInFooter: true,
-            selectedPrimaryEmailLabel: '',
-            selectedPrimaryPhoneLabel: 'Phone',
             selectedPrimaryPhoneNumber: phoneNumber,
             selectedPrimaryEmailAddress: email,
             showContactBox: false,
@@ -282,6 +222,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
         const modID = uuidv4() //unique module ID
         const btnClassName = `${currentMod.type}-btn${currentMod.type === 'banner' ? '-' + bannerCount : ''}`
 
+        //create each specific landing page module
         if (currentMod.type === 'dl') {
             const dlOverlayColor = 'rgb(0,0,0,0.5)'
             const dlBtnDataLayerEvent = currentMod.dataLayerEventBtn || 'dl_btn_click'
@@ -302,11 +243,6 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             headline: transformDLText(currentMod.headline || ''),
                             actionlbl: currentMod.actionlbl,
                             headerTag: '1',
-                            imageSize: {
-                                width: 1920,
-                                height: 1080,
-                                size: '261.61 kB',
-                            },
                             modColor1: dlOverlayColor,
                             newwindow: '0',
                             subheader: currentMod.subheader,
@@ -381,12 +317,6 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                         {
                             align: 'center',
                             image: currentMod.image,
-                            imageSize: {
-                                src: '/files/2024/03/50_off_any_service_coupon.png',
-                                width: 1080,
-                                height: 1080,
-                                size: '191.82 kB',
-                            },
                             newwindow: '0',
                             imageType: 'nocrop',
                             itemCount: 1,

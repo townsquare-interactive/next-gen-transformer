@@ -321,6 +321,7 @@ export const SubdomainInputSchema = z.object({
 const Logos = z.object({
     header: z.string().optional(),
     footer: z.string().optional(),
+    mobile: z.string().optional(),
 })
 
 const CustomOptions = z.object({

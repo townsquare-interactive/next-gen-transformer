@@ -67,18 +67,16 @@ const CompositeSchema = z.object({
 const LogoItem = z
     .object({
         slots: z.array(Slot),
-        activeSlots: z.array(z.number()),
+        activeSlots: z.array(z.number()).optional(),
         pct: z.number().optional(),
     })
     .nullish()
     .optional()
 
 const Logo = z.object({
-    // fonts: z.array(z.unknown()),
     footer: LogoItem,
     header: LogoItem,
     mobile: LogoItem,
-    //list: z.record(z.string()), //remove
 })
 
 const socialItem = z.object({
@@ -128,8 +126,8 @@ const Contact = z.object({
         z.object({
             name: z.string(),
             number: OptionalString,
-            disabled: z.string().nullable(),
-            isPrimaryPhone: z.boolean(),
+            disabled: z.string().nullable().optional(),
+            isPrimaryPhone: z.boolean().optional(),
         })
     ),
     address: AddressSchema.optional(),
@@ -211,24 +209,6 @@ const ThemeStyles = z.object({
     promoColor5: z.string(),
     promoColor6: z.string(),
 })
-
-/* const CMSNavItem = z.object({
-    ID: z.number(),
-    menu_list_id: z.number(),
-    title: z.string(),
-    post_type: z.string(),
-    type: z.string().nullish(),
-    menu_item_parent: z.union([z.number(), z.string()]),
-    object_id: z.number(),
-    object: z.string(),
-    target: z.string().nullish(),
-    classes: z.string().nullish(),
-    menu_order: z.number(),
-    mi_url: z.string().nullish(),
-    url: z.string(),
-    disabled: z.union([z.boolean(), z.string()]).optional(),
-    slug: z.string(),
-}) */
 
 const CMSNavItemSchema = z.object({
     ...NavMenuItemSchema.shape,
@@ -359,13 +339,6 @@ export const ModuleItemSchema = z.object({
     actionlbl: OptionalString,
     captionOn: OptionalString,
     headerTag: OptionalString,
-    /*     imageSize: z.optional(
-        z.object({
-            width: z.number().nullable(),
-            height: z.number().nullable(),
-            size: z.string().or(z.number()).nullable(),
-        })
-    ), */
     imageSize: z.unknown().optional(),
     modColor1: OptionalString,
     newwindow: OptionalString,
