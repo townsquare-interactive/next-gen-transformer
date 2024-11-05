@@ -1,5 +1,45 @@
 #!/bin/sh
+
+# Run the generate-readme script
+
 npm run generate-readme
 git add public/README.md
 git add README.md
+
+# Run tests once, exiting if tests fail
+
 npm run test:once || exit 1
+
+# Define blacklisted strings (e.g., "NOCOMMIT" or merge conflict markers)
+
+BLACK_LIST="NOCOMMIT|NCOMMIT|NOCOMIT|NOCMMIT|<<<<|>>>>"
+echo "\nChecking for blacklisted strings..."
+
+# Ensure `rg` (ripgrep) is installed for blacklist scanning
+
+if which rg 1> /dev/null; then
+BLACK_LIST="NOCOMMIT|NCOMMIT|NOCOMIT|NOCMMIT|<<<<|>>>>"
+echo "\nChecking for blacklisted strings..."
+for FILE in $(git diff-index --name-status --cached HEAD -- | cut -c3-); do
+    # Skip files in the .husky directory and specific directories
+    if [ "${FILE#*.husky/}" != "$FILE" ]; then
+        echo "\nSkipping evaluation of files in the .husky directory..."
+    elif [ "${FILE#*public/}" != "$FILE" ]; then
+        echo "\nSkipping evaluation of public file..."
+    elif [ "${FILE#\*vendor/}" != "$FILE" ]; then
+        echo "\nSkipping evaluation of vendor file..."
+    else
+      # Run blacklist check on remaining files
+      if rg "$BLACK_LIST" "$FILE"; then
+        echo "\n$FILE has one of the blacklisted words you don't want to commit. Please remove it.\n"
+exit 1
+fi
+fi
+done
+else
+echo "\nInstall ripgrep to scan commit for blacklisted strings and merge conflicts.\n"
+fi
+
+# Exit with success if all checks pass
+
+exit 0
