@@ -1,0 +1,5 @@
+#!/bin/sh
+npm run generate-readme
+git add public/README.md
+git add README.md
+npm run test:once || exit 1

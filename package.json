@@ -6,11 +6,13 @@
     "type": "module",
     "scripts": {
         "test": "vitest",
+        "test:once": "vitest --run",
         "start": "npx tsx index.ts",
         "dev": "npx tsx index.ts",
-        "generate-readme": "node generateReadme.js && cp README.md public/",
+        "generate-readme": "node generateReadme.js",
         "build": "node index.js",
-        "postbuild": "cp README.md public/"
+        "postbuild": "cp README.md public/",
+        "prepare": "husky"
     },
     "author": "",
     "license": "ISC",
@@ -45,6 +47,7 @@
         "@types/node": "^20.16.5",
         "@types/request-promise": "^4.1.48",
         "@types/uuid": "^10.0.0",
+        "husky": "^9.1.6",
         "nodemon": "^3.0.1",
         "sass": "^1.57.1",
         "ts-node": "^10.9.1",
