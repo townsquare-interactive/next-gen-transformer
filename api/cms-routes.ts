@@ -14,6 +14,7 @@ import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
+import { scrapeImagesFromSite } from './scrapers/image-scrape.js'
 const router = express.Router()
 
 //save from luna cms
@@ -312,6 +313,17 @@ router.post('/migrate', async (req, res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({ err: 'incorrect data structure received' })
+    }
+})
+
+router.get('/scrape-images', async (req, res) => {
+    const url = typeof req.query.url === 'string' ? req.query.url : ''
+    try {
+        const response = await scrapeImagesFromSite({ url: url, storagePath: 's3', method: 's3Upload' })
+        res.json(response)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res)
     }
 })
 

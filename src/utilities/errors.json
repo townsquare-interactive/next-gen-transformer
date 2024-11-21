@@ -28,5 +28,8 @@
     },
     "AMS-010": {
         "description": "Unable to find requestData saved in page file, likely older page"
+    },
+    "SCR-011": {
+        "description": "Unable to load URL when scraping site"
     }
 }

@@ -77,5 +77,6 @@ Listed below are the common error types that can be seen in the API response aft
 | DMN-008 | Production domain not available, try a different domain. |
 | DMN-009 | Error when checking domains config setup in Vercel |
 | AMS-010 | Unable to find requestData saved in page file, likely older page |
+| SCR-011 | Unable to load URL when scraping site |
 
 <!-- ERROR_TABLE_END -->

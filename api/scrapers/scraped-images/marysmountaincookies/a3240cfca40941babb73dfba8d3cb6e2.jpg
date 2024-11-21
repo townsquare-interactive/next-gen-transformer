@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en" class="ts_v3 charlotte_theme tsTheme_17 luna_theme unknown-os" ng-app="themeApp" >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Mary's Mountain Cookies | Headquarters in Fort Collins, CO | Order Cookies Online!</title>
+
+    <!-- preconnecting / preloading -->
+    <link rel="preconnect" as="style" id="jquery-ui-css-preload" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.min.css?ver=248_11" crossorigin/>
+    <!-- end of preconnecting / preloading -->
+
+    <!-- links to styles -->
+    <link rel="stylesheet" id="jquery-ui-css"  href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.min.css?ver=248_11" type="text/css" media="all" />
+
+
+    <!-- from beacon-easton theme definition front_actions() -->
+    <link rel="preconnect" id="Source-Sans-Pro-css-preconnect" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro%3A400%2C700&#038;ver=248_11" />
+<link rel="stylesheet" id="Source-Sans-Pro-css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro%3A400%2C700&#038;ver=248_11" type="text/css" media="all"/>
+<link rel="stylesheet" id="theme-css" href="https://marysmountaincookies.com/cms_websites/css/dist/beacon-theme_charlotte/theme.css?ver=1" type="text/css" media="all and (min-width:0px)"/>
+<link rel="stylesheet" id="customize-css" href="https://marysmountaincookies.com/cms_websites/cms_theme_custom_css.php?ver=248_11" type="text/css" media="all"/>
+<!-- from _the_list -->
+
+    <!-- general links to JS for all themes-->
+    <!-- <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script> -->
+    <!-- <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script> -->
+    <!-- <script type="text/javascript" src="https://tsm-js.s3.amazonaws.com/jquery.validate.js?ver=248_11"></script> -->
+    <!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js?ver=248_11"></script> -->
+    <!-- from current/wp-content/themes/tsm-theme-1/plugins/_the_list/_the_list.php -->
+    <!-- <script type="text/javascript" src="https://tsm-js.s3.amazonaws.com/jquery.sonar.min.js?ver=248_11"></script> -->
+    <!-- <script type="text/javascript" src="https://marysmountaincookies.com/wp-content/themes/beacon-easton/js/nwmatcher.js"></script> -->
+    <!-- <script type="text/javascript" src="https://marysmountaincookies.com/wp-content/themes/beacon-easton/js/modernizr-custom-11917.js"></script> -->
+
+    <script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/js/dist/shared/external/scripts.min.js"></script>
+
+<script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/tools/AdminBarAnalytics/js/external-tracking.min.js"></script>
+<link rel="shortcut icon" sizes="16x16 32x32 64x64" href="/files/2020/01/gga.png?w=196&h=196&zc=0">
+<meta property="og:image" content="/files/2019/08/dl.jpg"/>
+<meta property="og:image" content="/files/2017/11/6N2A8629.jpg"/>
+<meta property="og:image" content="/files/2017/11/6N2A8630.jpg"/>
+<meta property="og:image" content="/wp-content/blogs.dir/28278/files/2017/11/cookie-sandwhiches-with-ice-cream-1j6.jpg"/>
+<meta property="og:image" content="/files/2017/11/1N8B5182.jpg"/>
+<meta property="og:image" content="/files/2020/01/1579039142399_arizona_1_.jpg"/>
+<meta property="og:title" content="Mary's Mountain Cookies | Headquarters in Fort Collins, CO | Order Cookies Online!"/>
+<meta property="og:site_name" content="Mary's Mountain Cookies"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://marysmountaincookies.com"/>
+<meta property="og:description" content="Online Cookie Ordering with Nationwide Delivery!  Choose Mary's for your next dessert or cookie in Fort Collins, Colorado! Great for weddings and fundraisers! Front Range Village Location."/>
+<meta name="description" itemprop="description" content="Online Cookie Ordering with Nationwide Delivery!  Choose Mary's for your next dessert or cookie in Fort Collins, Colorado! Great for weddings and fundraisers! Front Range Village Location." />
+<meta name="keywords" itemprop="keywords" content="cookie, dessert, mary's, fort collins, loveland, colorado, wedding, fundraising, franchising, mary's mountain cookies, online ordering" />
+<link rel="canonical" href="https://marysmountaincookies.com" />
+<link rel="stylesheet" id="custom-css-css" href="https://marysmountaincookies.com/cms_websites/cms_custom_css.php?ver=248_11" type="text/css" media="all"/>
+<script>
+ jQuery(document).ready(function() {
+ jQuery('.tsD_quote .item_2, .tsD_quote .item_3,.tsD_quote .item_4, .tsD_quote .item_5,.tsD_quote .item_6').hide();
+
+ var $elements = jQuery('.tsD_quote .item_1,.tsD_quote .item_2,.tsD_quote .item_3,.tsD_quote .item_4,.tsD_quote .item_5,.tsD_quote .item_6');
+
+ function anim_loop(index) {
+ $elements.eq(index).delay(2000).fadeIn(1000, function() {
+ var $self = jQuery(this);
+ setTimeout(function() {
+ $self.fadeOut(2000);
+ anim_loop((index + 1) % $elements.length);
+ }, 3000);
+ });
+}
+
+anim_loop(0);
+});
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K8SWNHEGY4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-K8SWNHEGY4');
+</script>
+
+<!-- Google tag (gtag.js) SECOND GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RHDWMMXFP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-9RHDWMMXFP');
+</script>
+<script type="text/javascript">
+//<![CDATA[
+    var b2b = {
+        'isTestingUser' : 0,
+        'tag':'248_11',
+        'theme': 'beacon-theme_charlotte',
+        'blog_id': 28278,
+        'website_id': 12336,
+        'CID':'', // later
+        'gaId':'UA-32594361-15',
+        'page_type': '',
+        'isPage': '',
+        'post_id': '137079',
+        'home_url':'https://marysmountaincookies.com',
+        'admin_url':'',
+        'plugins_url':'',
+        'basename':'index.php',
+        'isMobile':0,
+        'isTablet':0,
+        'isFrontPage': 1,
+        'isPost':0,
+        'isSuperAdmin':0,
+        'isBeacon':1,
+        'isB2Badmin':0,
+        'hasStore':0,
+        'primary_menu': 0 ,
+        'qstr':[],
+        'containerClasses':{},
+        'post_password_required':0,
+        'onFly':0
+    };
+//]]>
+</script>
+    <script type="text/javascript">
+				window.b2b = window.b2b || {};
+				window.b2b.GA = {"accounts":["UA-32594361-15","UA-26792682-1"]};
+		</script>
+<script type="text/javascript">
+    var analyticsFileTypes = [''];
+    var analyticsSnippet = 'enabled';
+</script>
+
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-32594361-15']);
+    _gaq.push(['_addDevId', 'i9k95']); // Google Analyticator App ID with Google
+    _gaq.push(['_setCampaignCookieTimeout', 0]);
+
+    _gaq.push(['_trackPageview']);
+
+    _gaq.push(['_setAccount', 'UA-26792682-1']);
+_gaq.push(['_setCampaignCookieTimeout', 0]);
+_gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
+        <!-- Master Google tag (gtag.js) -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-PF8RFHR03F"></script>
+            <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PF8RFHR03F');
+        </script>
+
+
+            <!-- Ga4 Script-->
+            <!-- Elapsed Time: 0.0022280216217041s -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-NFJSTBCMZ3"></script>
+            <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-NFJSTBCMZ3'); </script>
+
+
+        <!-- Custom CTC & CTD events -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll("a[href^='tel']").forEach(function(el){
+                    el.addEventListener('click', function (event) {
+                        gtag('event', 'call_click');
+                    });
+                });
+                document.querySelectorAll("a[href^='https://maps.google.com/maps']").forEach(function(el){
+                    el.addEventListener('click', function (event) {
+                        gtag('event', 'directions_click');
+                    });
+                });
+            }, false);
+        </script>
+
+</head>
+<body id="top"class=" home page page-id-137079 page-template-default ve-iframe beacon unknown">
+<div id="wrapper" class="tsW">
+    <header class="tsH expand">
+        <div class="tsH_wrp">
+            
+<div id='_the_logo' class='_is_plugin header-logo' slug='_the_logo' data-extra-args='{"section":"header"}'>
+<h2 class='logo logo-v2'>
+<div data-numslots="1" class="logo-variation logo-variation-header"><div  class="logo-slot pct100 slot_0 slot-type-text align-"></div></div><div data-numslots="1" class="logo-variation logo-variation-mobile"><div  class="logo-slot pct100 slot_0 slot-type-image align-center"><a class="ve_no_url" href="https://marysmountaincookies.com" title="Mary's Mountain Cookies" rel="home"><img  src="/files/2017/11/Marys-Mtn-Cookies-3.png" /></a></div></div>
+</h2></div>
+            <div id="access" class="original_access">
+                <div class="menu align-center">
+            <ul id="menu-primary-menu" rel="dennis" class="sf-menu sf-menu_bg"><li class="tsM_only menu-item menu-item-128109 menu-item-object-page menu-item-type-post_type current-menu-item current_page_item page_item page-item-137079" id="menu-item-128109"><a href="https://marysmountaincookies.com/">Home</a></li><li class=" menu-item menu-item-792645 menu-item-object-page menu-item-type-post_type " id="menu-item-792645"><a href="https://marysmountaincookies.com/locations/">Locations</a></li><li class="home-logo menu-item menu-item-128112 menu-item-object-page menu-item-type-post_type current-menu-item current_page_item page_item page-item-137079" id="menu-item-128112"><a href="https://marysmountaincookies.com/">Home</a></li><li class=" menu-item menu-item-128111 menu-item-object-page menu-item-type-post_type " id="menu-item-128111"><a href="https://marysmountaincookies.com/contact-us/">Contact Us</a></li><li class=" menu-item menu-item-has-children menu-item-128114 menu-item-object-custom menu-item-type-custom " id="menu-item-128114"><a href="#">More Info</a><ul class="sub-menu"><li class=" menu-item menu-item-128115 menu-item-object-page menu-item-type-post_type " id="menu-item-128115"><a href="https://marysmountaincookies.com/faqs/">FAQs</a></li><li class=" menu-item menu-item-128116 menu-item-object-page menu-item-type-post_type " id="menu-item-128116"><a href="https://marysmountaincookies.com/nutritional-information/">Nutritional Information</a></li><li class=" menu-item menu-item-128117 menu-item-object-page menu-item-type-post_type " id="menu-item-128117"><a href="https://marysmountaincookies.com/franchise-opportunities/">Licensing System Opportunity</a></li><li class=" menu-item menu-item-128118 menu-item-object-page menu-item-type-post_type " id="menu-item-128118"><a href="https://marysmountaincookies.com/privacy-policy/">Privacy Policy</a></li><li class=" menu-item menu-item-128119 menu-item-object-page menu-item-type-post_type " id="menu-item-128119"><a href="https://marysmountaincookies.com/terms-of-use/">Terms and Conditions</a></li></ul>
+                        </li><li class="tsI_btn btn-sm tsD_p3_btn order menu-item menu-item-792672 menu-item-object-custom menu-item-type-custom " id="menu-item-792672"><a href="/order-location/">Order Now</a></li><li class="tsI_btn btn-sm signup menu-item menu-item-128120 menu-item-object-page menu-item-type-post_type " id="menu-item-128120"><a href="https://marysmountaincookies.com/newsletter-sign-up/">Email Sign-Up</a></li></ul>
+        </div>            </div>
+
+            <button type="button" class="tsC_open tsH_navTrig trigger" data-target="tsM" title="Open Menu"></button>
+        </div>
+
+        <div class="tsSC transition tsflex " >
+            <ul class="social-media-links"><li class="facebook"><a href="http://www.facebook.com/marysmtncookiessf" title="Facebook" target="_blank" ></a></li><li class="instagram"><a href="http://instagram.com/marysmtncookiessiouxfalls/" title="Instagram" target="_blank" ></a></li></ul>
+<aside class="tsCntct"><ul class="tsCntct_list transition"><li><button type="button" class="multi-contact-link tsC_open tsC_Btn transition trigger" data-target="contactsList" data-icon="M" title="Contact Us">Contact Us</button></li></ul></aside>
+            <div id="contactsList" class="tsCntct_mdl_wrp mdl_wrp">
+                <div class="tsCntct_mdl mdl">
+                    <button type="button" class="tsC_close trigger transition icon-close" data-target="contactsList" title="Close"></button>
+                    <h4 class="tsCntct_title mdl_title">Contact Info</h4>
+                    <div class="tsCntct_mdl_list mdl_list">
+                        <ul class="tsCntct_multi modal_list" id="mobile-location-0"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=2842 Council Tree Ave., Fort Collins, CO 80525" data-icon="M" title="https://maps.google.com/maps?daddr=2842 Council Tree Ave., Fort Collins, CO 80525" target="_blank" class=" tsHidden"><span>Headquarters </b></span></a></li><li class="tsPhone "><a href="tel:(970) 226-9091" data-icon="A" title="(970) 226-9091" class=" tsHidden"><span>Phone: </b>(970) 226-9091</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-1"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=6055 Sky Pond Dr., Loveland, CO 80538" data-icon="M" title="https://maps.google.com/maps?daddr=6055 Sky Pond Dr., Loveland, CO 80538" target="_blank" class=" tsHidden"><span>Loveland, CO </b></span></a></li><li class="tsPhone "><a href="tel:(970) 663-2500" data-icon="A" title="(970) 663-2500" class=" tsHidden"><span>Phone: </b>(970) 663-2500</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-2"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=123 N. College Ave., Fort Collins, CO 80424" data-icon="M" title="https://maps.google.com/maps?daddr=123 N. College Ave., Fort Collins, CO 80424" target="_blank" class=" tsHidden"><span>Old Town, CO </b></span></a></li><li class="tsPhone "><a href="tel:(970) 482-5655" data-icon="A" title="(970) 482-5655" class=" tsHidden"><span>Phone: </b>(970) 482-5655</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-3"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=1 W. Flatiron Crossing, Broomfield, CO 80021" data-icon="M" title="https://maps.google.com/maps?daddr=1 W. Flatiron Crossing, Broomfield, CO 80021" target="_blank" class=" tsHidden"><span>Flatiron Crossing Mall, CO </b></span></a></li><li class="tsPhone "><a href="tel:(303) 469-3958" data-icon="A" title="(303) 469-3958" class=" tsHidden"><span>Phone: </b>(303) 469-3958</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-4"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=420 Main St., Belton, MO 64012" data-icon="M" title="https://maps.google.com/maps?daddr=420 Main St., Belton, MO 64012" target="_blank" class=" tsHidden"><span>Belton, MO </b></span></a></li><li class="tsPhone "><a href="tel:(816) 425-4927" data-icon="A" title="(816) 425-4927" class=" tsHidden"><span>Phone: </b>(816) 425-4927</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-5"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=101 S. Higgins St., Missoula, MT 59802" data-icon="M" title="https://maps.google.com/maps?daddr=101 S. Higgins St., Missoula, MT 59802" target="_blank" class=" tsHidden"><span>Missoula, MT </b></span></a></li><li class="tsPhone "><a href="tel:(406) 926-2992" data-icon="A" title="(406) 926-2992" class=" tsHidden"><span>Phone: </b>(406) 926-2992</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-6"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=526 6th Street, Rapid City, SD 57701" data-icon="M" title="https://maps.google.com/maps?daddr=526 6th Street, Rapid City, SD 57701" target="_blank" class=" tsHidden"><span>Mary's Local Store </b></span></a></li><li class="tsPhone "><a href="tel:(605) 791-0463" data-icon="A" title="(605) 791-0463" class=" tsHidden"><span>Phone: </b>(605) 791-0463</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-7"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=248 E. 4th Street, Loveland, CO 80537" data-icon="M" title="https://maps.google.com/maps?daddr=248 E. 4th Street, Loveland, CO 80537" target="_blank" class=" tsHidden"><span>Downtown Loveland, CO </b></span></a></li><li class="tsPhone "><a href="tel:(970) 619-8169" data-icon="A" title="(970) 619-8169" class=" tsHidden"><span>Phone: </b>(970) 619-8169</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-8"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=315 W Lincolnway, Cheyenne, WY 82001" data-icon="M" title="https://maps.google.com/maps?daddr=315 W Lincolnway, Cheyenne, WY 82001" target="_blank" class=" tsHidden"><span>Old Town Cheyenne, WY </b></span></a></li><li class="tsPhone "><a href="tel:(307) 514-0404" data-icon="A" title="(307) 514-0404" class=" tsHidden"><span> </b>(307) 514-0404</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-9"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=526 6th Street, Rapid City, SD 57701" data-icon="M" title="https://maps.google.com/maps?daddr=526 6th Street, Rapid City, SD 57701" target="_blank" class=" tsHidden"><span>Rapid City, SD </b></span></a></li><li class="tsPhone "><a href="tel:(605) 791-0463" data-icon="A" title="(605) 791-0463" class=" tsHidden"><span> </b>(605) 791-0463</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-10"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=701 N Phillips Ave, Sioux Falls, SD 57104" data-icon="M" title="https://maps.google.com/maps?daddr=701 N Phillips Ave, Sioux Falls, SD 57104" target="_blank" class=" tsHidden"><span>Sioux Falls, SD </b></span></a></li><li class="tsPhone "><a href="tel:(605) 275-0060" data-icon="A" title="(605) 275-0060" class=" tsHidden"><span> </b>(605) 275-0060</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-11"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=10 Broadway St., Asheville, NC 28801" data-icon="M" title="https://maps.google.com/maps?daddr=10 Broadway St., Asheville, NC 28801" target="_blank" class=" tsHidden"><span>Meaghan's Local Store </b></span></a></li><li class="tsPhone "><a href="tel:(317) 663-7271" data-icon="A" title="(317) 663-7271" class=" tsHidden"><span> </b>(317) 663-7271</span></a></li></ul><ul class="tsCntct_multi modal_list" id="mobile-location-12"><li class="tsAddress tsi-address "><a href="https://maps.google.com/maps?daddr=7 S. Tejon Street, Colorado Springs, CO 80903" data-icon="M" title="https://maps.google.com/maps?daddr=7 S. Tejon Street, Colorado Springs, CO 80903" target="_blank" class=" tsHidden"><span>Colorado Springs, CO </b></span></a></li><li class="tsPhone "><a href="tel:(719) 394-4267" data-icon="A" title="(719) 394-4267" class=" tsHidden"><span>Phone: </b>(719) 394-4267</span></a></li><li class="tsEmail "><a href="mailto:mmcookiescosprings@gmail.com" data-icon="L" title="mmcookiescosprings@gmail.com" class=" tsHidden"><span> </b>mmcookiescosprings@gmail.com</span></a></li></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    </header>
+
+    <main class="tsC  ">
+<div class='full_width_content section_content content_bg wrp_color_bg'><div class='section w1060'><!-- Start block charlotte_video_1b -->
+<!-- charlotte_video_1b new RENDER -->
+<section id='section_1'
+            class='tsB tsT_gallery g1 vg1 promo_colors large widescreen_2-4_1 tsD_cptn_off not_well'>
+<div class='slick-wrap' data-settings='[]'>
+                <div class='slick-slides' id='slick-slides-'>
+<article class='tsI vid_ctl item_1 txt_center nHero yImg yHds nDsc yHd nShd' ><div class='tsI_wrp bkgtag' style="background-image:url('/files/2019/08/dl.jpg?1:.42&a=t');">
+                            <div class='tsI_cptn transition'><div class='tsI_txt'>
+<header class='tsI_hds '>
+<H1 class='tsI_hd'>Welcome to Mary&#39;s Mountain Cookies</H1>
+</header></div></div>
+                <figure class='tsI_img theframe emptytag no-lazy-load' data-image='https://marysmountaincookies.com/wp-content/themes/beacon-easton/img/transparent.png?1:.42&a=t'></figure><video preload='auto' autoplay loop muted name='media' class='tsI_vl'><source src='https://tsi.s3.amazonaws.com/clients/marys-mountain-cookies/marys-clip-1440.m4v' type='video/x-m4v'></video></div></article></div></div></section>
+<!-- end of charlotte_video_1b new RENDER --><!-- End block --><!-- Start block charlotte_article_1 -->
+<!-- charlotte_article_1 new RENDER -->
+<section id='section_2'
+            class='tsB tsT_article a1 tsflex col_1 square_1_1 large not_well '>
+<div class='tsR'>
+
+<article class='tsI item_1 center nHero nImg yHds yDsc yHd yShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'>About Us</h2>
+<h2 class='tsI_sh'>Multiple Locations and Nationwide Shipping</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>Mary&#39;s Mountain Cookies has been serving freshly baked cookies nationwide and shipping them all around the world since 1986. Our flagship store is located in Fort Collins, Colorado at Front Range Village Shopping Center.<br><br>You won&#39;t want to resist the delicious aroma pulling you down the street to one of our cookie stores. Staffed with cookie lovers, all eleven of our locations are ready to brighten your day. Enjoy any of a variety of tasty treats, including edible cookie dough and scrumptious quarter-pound cookies and brownies, or create your very own ice cream-filled cookie!<br><br>Let us be a part of your next event. Our giant cookies, cookie gift baskets, and cookie trays will make your wedding, fundraiser or small get-together a success!</p></div></div></div></div></article></div></section>
+<!-- end of charlotte_article_1 new RENDER --><!-- End block --><!-- Start block charlotte_article_1 -->
+<!-- charlotte_article_1 new RENDER -->
+<section id='section_3'
+            class='tsB tsT_article a1 tsflex col_3 landscape_4_3 small well tsD_font_lg tsD_p_items tsD_hero_b_sec'>
+<div class='tsR'>
+<h2 class='tsB_hd section_title ' data-title='Our Menu'><span>Our Menu</span></h2>
+<article class='tsI item_1 center nHero yImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><figure class='tsI_img theframe imgtag imgbase ' data-image='/files/2017/11/6N2A8629.jpg?1:.75&a=t' data-alt='Traditional'></figure><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Traditional</h4>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>Chocolate Chip<br>Snickerdoodle<br>Sugar Cutout<br>M&M<br>Oatmeal Raisin<br>Snickers Chocolate Chip<br>Peanut Butter <br>Edible Cookie Dough</p></div></div></div></div></article>
+<article class='tsI item_2 center nHero yImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><figure class='tsI_img theframe imgtag imgbase ' data-image='/files/2017/11/6N2A8630.jpg?1:.75&a=t' data-alt='Gourmet'></figure><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Gourmet</h4>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>Frosted Glazed Sugar Cutout<br>Avalanche<br>Brownie<br>Monster Cookie<br>Orange Doodle<br>Fudge Fantasy<br>S&#39;mores<br>Seasonal Favorites</p></div></div></div></div></article>
+<article class='tsI item_3 center nHero yImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><figure class='tsI_img theframe imgtag imgbase ' data-image='/wp-content/blogs.dir/28278/files/2017/11/cookie-sandwhiches-with-ice-cream-1j6.jpg?1:.75&a=t' data-alt='Ice Cream Filled Cookies'></figure><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Ice Cream Filled Cookies</h4>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>Vanilla<br>Chocolate<br>Cookie Dough<br>Cookies and Cream<br>Mint Chocolate Chip<br>Mocha Chip<br>Strawberry Cheesecake<br>Strawberry</p></div></div></div></div></article></div></section>
+<!-- end of charlotte_article_1 new RENDER --><!-- End block --><!-- Start block charlotte_social_banners_1 -->
+<!-- charlotte_social_banners_1 new RENDER -->
+<section id='section_4'
+            class='tsB tsT_social_promos  tsflex col_3 widescreen_2-4_1 small well '>
+<div class='tsR'>
+
+<article class='tsI item_1  center nHero nImg yHds nDsc yHd nShd yLbl yLk' data-aos='fade-up' data-aos-once='true' ><a class='tsI_wrp' href='https://www.facebook.com/Marys-Mountain-Cookies-DWTN-Loveland-882921322051423/' target='_blank'><figure class='tsI_img theframe imgtag imgbase no-lazy-load' data-image='https://marysmountaincookies.com/wp-content/themes/beacon-easton/img/transparent.png?1:.42&a=t'><span class='tsI_scl_icn transition'></span></figure><div class='tsI_txt_wrp'>
+                    <div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Friend Us on Facebook</h4>
+</header></div><div class='tsI_btn btn_1 btn_w btn_sm transition'> Visit Us</div></div></a></article>
+<article class='tsI item_2  center nHero nImg yHds nDsc yHd nShd yLbl yLk' data-aos='fade-up' data-aos-once='true' ><a class='tsI_wrp' href='https://www.instagram.com/marysmountaincookies/' target='_blank'><figure class='tsI_img theframe imgtag imgbase no-lazy-load' data-image='https://marysmountaincookies.com/wp-content/themes/beacon-easton/img/transparent.png?1:.42&a=t'><span class='tsI_scl_icn transition'></span></figure><div class='tsI_txt_wrp'>
+                    <div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Follow Us on Instagram</h4>
+</header></div><div class='tsI_btn btn_1 btn_w btn_sm transition'> View Our Photos</div></div></a></article>
+<article class='tsI item_3  center nHero nImg yHds nDsc yHd nShd yLbl yLk' data-aos='fade-up' data-aos-once='true' ><a class='tsI_wrp' href='/order-location/' target='_self'><figure class='tsI_img theframe imgtag imgbase no-lazy-load' data-image='https://marysmountaincookies.com/wp-content/themes/beacon-easton/img/transparent.png?1:.42&a=t'><span class='tsI_scl_icn transition'></span></figure><div class='tsI_txt_wrp'>
+                    <div class='tsI_txt'>
+<header class='tsI_hds '>
+<h4 class='tsI_hd'>Order Online</h4>
+</header></div><div class='tsI_btn btn_1 btn_w btn_sm transition'> Order Now!</div></div></a></article></div></section>
+<!-- end of charlotte_social_banners_1 new RENDER --><!-- End block --><!-- Start block charlotte_card_2 -->
+<!-- charlotte_card_2 new RENDER -->
+<section id='section_5'
+            class='tsB tsT_card c2 tsflex col_1 large landscape_4_3 well tsD_hero_b_sec'>
+<div class='tsR'>
+
+<article class='tsI item_1 img_center nHero yImg yHds yDsc yHd yShd yLk' data-aos='fade-up' data-aos-once='true' ><a class='tsI_wrp' href='/marys-story/' target='_self' ><figure class='tsI_img theframe notie bkgtag ' data-image='/files/2017/11/1N8B5182.jpg?1:.75&a=t' data-alt='Mary&#39;s Story'><div class='theframe emptytag no-lazy-load' data-image='https://marysmountaincookies.com/wp-content/themes/beacon-easton/img/transparent.png?1:.75&a=t'></div></figure><div class='tsI_txt_wrp'>
+                 <div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'>Mary&#39;s Story</h2>
+<h2 class='tsI_sh'>Order Mary&#39;s Story and Cookbook</h2>
+</header>
+<div class='tsI_dsc '><p>From dude ranch cook to CEO. Mary&#39;s story of faith and bravery and choosing happiness for her children will inspire and entertain you. Throughout her tale, she demonstrates her tenacity, faith and business savvy as a female entrepreneur.</p></div></div><div class='tsI_btn btn_1 btn_w btn_md transition'> Read More and Order the Book</div></div></a></article></div></section>
+<!-- end of charlotte_card_2 new RENDER --><!-- End block --><!-- Start block charlotte_sec_start -->
+<!-- charlotte_sec_start new RENDER --><div id='sec_6' class='tsB tsT_sec   dBkg yPara'><div class='tsXa' style=' background-image:url("");' data-jarallax data-speed='0.2' data-img-size='cover' data-img-position='50% 50%'>
+                    </div>
+                    <div class='tsXb' style='background-color: #D674AA;'></div><!-- End block --><!-- Start block charlotte_article_2 -->
+<!-- charlotte_article_2 new RENDER -->
+<section id='section_7'
+            class='tsB tsT_article a2 tsflex col_1 square_1_1 large not_well tsD_franchise'>
+<div class='tsR'>
+
+<article class='tsI item_1 center nHero nImg yHds nDsc yHd yShd yLk' data-aos='fade-up' data-aos-once='true' ><a class='tsI_wrp' href='/franchise-opportunities/' target='_self' >
+<header class='tsI_hds '>
+<h2 class='tsI_hd'>Interested In Owning a Store?</h2>
+<h2 class='tsI_sh'>View Our Licensee Opportunities and Stores Available For Purchase</h2>
+</header><div class='tsI_txt'></div><div class='tsI_btn btn_1  btn_md transition'> Learn More</div></a></article></div></section>
+<!-- end of charlotte_article_2 new RENDER --><!-- End block --><!-- Start block charlotte_sec_end -->
+<!-- charlotte_sec_end new RENDER -->
+</div>
+<!-- end of charlotte_sec_end new RENDER --><!-- End block --><!-- Start block charlotte_sec_start -->
+<!-- charlotte_sec_start new RENDER --><div id='sec_8' class='tsB tsT_sec   dBkg yPara'><div class='tsXa' style='opacity:0.22; background-image:url("/files/2020/01/1579039142399_arizona_1_.jpg");' data-jarallax data-speed='0.2' data-img-size='cover' data-img-position='50% 50%'>
+                    </div>
+                    <div class='tsXb' style='background-color: #a9233e;'></div><!-- End block --><!-- Start block charlotte_article_1 -->
+<!-- charlotte_article_1 new RENDER -->
+<section id='section_9'
+            class='tsB tsT_article a1 tsflex col_1 square_1_1 large not_well tsD_quote tsD_white'>
+<div class='tsR'>
+
+<article class='tsI item_1 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"Fresh and soft cookies from heaven, yes please. Tons of different flavors, all are splendid!"</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2> Tami B.</h2></p></div></div></div></div></article>
+<article class='tsI item_2 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"Some of the best cookies I have eaten and very fresh...plus a great variety available."</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2>Pam S.</h2></p></div></div></div></div></article>
+<article class='tsI item_3 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"I was never a cookie lover but now I know it&#39;s because I had never eaten cookies this amazing!!! I haven&#39;t had a Mary&#39;s Mountain Cookie that I didn&#39;t like. The staff is so friendly and their variety is incredible."</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2>Sandy H.</h2></p></div></div></div></div></article>
+<article class='tsI item_4 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"If you are fortunate enough to travel or live in the Fort Collins area, Mary&#39;s Mountain Cookies is a must-try. Their avalanche cookies are literally my favorite cookies in the world. Try any of their fun varieties, and they will quickly become your go-to cookie place!"</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2>Jenna K.</h2></p></div></div></div></div></article>
+<article class='tsI item_5 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"These cookies are seriously the best. And the employees are always super enthusiastic about helping you!"</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2>Elizabeth H.</h2></p></div></div></div></div></article>
+<article class='tsI item_6 center nHero nImg yHds yDsc yHd nShd nLk' data-aos='fade-up' data-aos-once='true' ><div class='tsI_wrp' ><div class='tsI_txt'>
+<header class='tsI_hds '>
+<h2 class='tsI_hd'><br>"Some of the best cookies I&#39;ve ever had! I love coming here every time I&#39;m in town!"</h2>
+</header>
+<div class='tsI_dsc_wrp '><div class='tsI_dsc'><p>★★★★★<br><center><h2>Sean N.</h2></p></div></div></div></div></article></div></section>
+<!-- end of charlotte_article_1 new RENDER --><!-- End block --><!-- Start block charlotte_sec_end -->
+<!-- charlotte_sec_end new RENDER -->
+</div>
+<!-- end of charlotte_sec_end new RENDER --><!-- End block --></div></div></main>
+
+<footer class="tsF" rel="footer">
+    <section class="tsF_section section_content tsflex">
+        <div class="section w1060">
+            <div class="tsB tsT_plugin tsT_article tsT_footer tsflex col_3 small not_well">
+                <div class="tsR">
+                    <!-- Start of composite --><article class='tsI tsI_footer_tmpl_cls'><div class='tsI_wrp'><div class='tsI_txt'><h4 class="tsI_hd">Quick Links</h4>
+<div class="menu-footer-menu-container">
+            <ul id="menu-footer-2" rel="dennis" class="menu"><li class=" menu-item menu-item-128130 menu-item-object-page menu-item-type-post_type " id="menu-item-128130"><a href="https://marysmountaincookies.com/contact-us/">Contact Us</a></li><li class=" menu-item menu-item-128131 menu-item-object-page menu-item-type-post_type " id="menu-item-128131"><a href="https://marysmountaincookies.com/menu-services/">Menu & Services</a></li><li class=" menu-item menu-item-128132 menu-item-object-page menu-item-type-post_type " id="menu-item-128132"><a href="https://marysmountaincookies.com/faqs/">FAQs</a></li><li class=" menu-item menu-item-128133 menu-item-object-page menu-item-type-post_type " id="menu-item-128133"><a href="https://marysmountaincookies.com/nutritional-information/">Nutritional Information</a></li><li class=" menu-item menu-item-128134 menu-item-object-page menu-item-type-post_type " id="menu-item-128134"><a href="https://marysmountaincookies.com/privacy-policy/">Privacy Policy</a></li><li class=" menu-item menu-item-128135 menu-item-object-page menu-item-type-post_type " id="menu-item-128135"><a href="https://marysmountaincookies.com/terms-of-use/">Terms and Conditions</a></li></ul>
+        </div></div></div></article>
+<!-- End of composite -->                </div>
+            </div>
+        </div>
+    </section>
+    <section class="tsF_section brand tsflex">
+        <div class="tsR">
+            
+<div id='_the_logo' class='_is_plugin footer-logo' slug='_the_logo' data-extra-args='{"section":"footer"}'>
+<h2 class='logo logo-v2'>
+<div data-numslots="1" class="logo-variation logo-variation-footer"><div  class="logo-slot pct100 slot_0 slot-type-image align-center"><a class="ve_no_url" href="https://marysmountaincookies.com" title="Mary's Mountain Cookies" rel="home"><img  src="/files/2017/11/Marys-Mtn-Cookies-3.png" /></a></div></div>
+</h2></div>        </div>
+    </section>
+    <hr>
+    <section class="tsF_section copyright tsflex">
+        <div class="tsR">
+            
+<address class="tsF_copyright">
+	Copyright &copy; 2024 Mary's Mountain Cookies, all rights reserved.
+	<br><span class='footer-street-address footer-address'>2842 Council Tree Avenue, &nbsp;</span><span class='footer-city-state-zip-address footer-address'><span>Fort Collins</span>,&nbsp;<span>CO</span>&nbsp;<span>80525</span>&nbsp;&nbsp;</span>
+            <span class='footer-phone-address footer-address'>
+                (970) 226-9091
+            </span>
+            
+</address>
+        </div>
+    </section>
+    <section class="tsF_section bottom social tsflex">
+        <div class="tsR">
+            <div class="tsF_col">
+                <ul class="social-media-links"><li class="facebook"><a href="http://www.facebook.com/marysmtncookiessf" title="Facebook" target="_blank" ></a></li><li class="instagram"><a href="http://instagram.com/marysmtncookiessiouxfalls/" title="Instagram" target="_blank" ></a></li></ul>            </div>
+            <div class="tsF_col">
+                <button type="button" class="tsC_open tsC_Btn tsF_navTrig trigger transition" data-target="tsM" title="Open Menu"> Menu</button>
+            </div>
+        </div>
+    </section>
+
+    </footer>
+</div>
+
+
+<a class="tsC_Btn to-top scrollBtn" href="#top"></a>
+
+<nav id="tsM" class="tsM transition triggered">
+    <div class="tsM_wrp">
+        <button type="button" class="tsC_close trigger transition icon-close" data-target="tsM" title="Close Menu"></button>
+        <div class="tsM_bdy">
+            <section class="tsM_sec social">
+                <ul class="social-media-links"><li class="facebook"><a href="http://www.facebook.com/marysmtncookiessf" title="Facebook" target="_blank" ></a></li><li class="instagram"><a href="http://instagram.com/marysmtncookiessiouxfalls/" title="Instagram" target="_blank" ></a></li></ul>            </section>
+            <!--             <h6 class="tsB_hd"><span>Menu</span></h6> -->
+            <section class="tsM_sec">
+                <div id="access" class="original_access">
+                    <div class="menu align-center">
+            <ul id="menu-primary-menu" rel="dennis" class="sf-menu sf-menu_bg"><li class="tsM_only menu-item menu-item-128109 menu-item-object-page menu-item-type-post_type current-menu-item current_page_item page_item page-item-137079" id="menu-item-128109"><a href="https://marysmountaincookies.com/">Home</a></li><li class=" menu-item menu-item-792645 menu-item-object-page menu-item-type-post_type " id="menu-item-792645"><a href="https://marysmountaincookies.com/locations/">Locations</a></li><li class="home-logo menu-item menu-item-128112 menu-item-object-page menu-item-type-post_type current-menu-item current_page_item page_item page-item-137079" id="menu-item-128112"><a href="https://marysmountaincookies.com/">Home</a></li><li class=" menu-item menu-item-128111 menu-item-object-page menu-item-type-post_type " id="menu-item-128111"><a href="https://marysmountaincookies.com/contact-us/">Contact Us</a></li><li class=" menu-item menu-item-has-children menu-item-128114 menu-item-object-custom menu-item-type-custom " id="menu-item-128114"><a href="#">More Info</a><ul class="sub-menu"><li class=" menu-item menu-item-128115 menu-item-object-page menu-item-type-post_type " id="menu-item-128115"><a href="https://marysmountaincookies.com/faqs/">FAQs</a></li><li class=" menu-item menu-item-128116 menu-item-object-page menu-item-type-post_type " id="menu-item-128116"><a href="https://marysmountaincookies.com/nutritional-information/">Nutritional Information</a></li><li class=" menu-item menu-item-128117 menu-item-object-page menu-item-type-post_type " id="menu-item-128117"><a href="https://marysmountaincookies.com/franchise-opportunities/">Licensing System Opportunity</a></li><li class=" menu-item menu-item-128118 menu-item-object-page menu-item-type-post_type " id="menu-item-128118"><a href="https://marysmountaincookies.com/privacy-policy/">Privacy Policy</a></li><li class=" menu-item menu-item-128119 menu-item-object-page menu-item-type-post_type " id="menu-item-128119"><a href="https://marysmountaincookies.com/terms-of-use/">Terms and Conditions</a></li></ul>
+                        </li><li class="tsI_btn btn-sm tsD_p3_btn order menu-item menu-item-792672 menu-item-object-custom menu-item-type-custom " id="menu-item-792672"><a href="/order-location/">Order Now</a></li><li class="tsI_btn btn-sm signup menu-item menu-item-128120 menu-item-object-page menu-item-type-post_type " id="menu-item-128120"><a href="https://marysmountaincookies.com/newsletter-sign-up/">Email Sign-Up</a></li></ul>
+        </div>                </div>
+            </section>
+        </div>
+    </div>
+</nav>
+<div id="_the_embeded_below_mods" slug="">
+                <div id="_the_embeded_below_mods_wrapper"></div>
+                <div id="_the_embeded_below_mods_btn" class="_is_embeded"></div>
+            </div>
+<script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/js/dist/shared/underscore.min.js?ver=1.8.3"></script>
+<script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/js/dist/beacon-theme_charlotte/theme-min.js"></script>
+<script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/js/dist/beacon-theme_charlotte/fontawesome/all.min.js"></script>
+
+<script type="text/javascript" src="https://marysmountaincookies.com/cms_websites/tools/GAEventTracking/js/scripts.min.js"></script><script>
+  let phoneBtn = document.querySelectorAll('#mobile-location-0 > li.tsPhone > a')[0];
+  phoneBtn.onclick = function() { gtag('event', 'call_click', {'count': 1}); } 
+</script>
+
+</body></html>

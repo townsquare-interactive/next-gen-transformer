@@ -24,6 +24,8 @@ for FILE in $(git diff-index --name-status --cached HEAD -- | cut -c3-); do
     # Skip files in the .husky directory and specific directories
     if [ "${FILE#*.husky/}" != "$FILE" ]; then
         echo "\nSkipping evaluation of files in the .husky directory..."
+    elif [ "${FILE#*node_modules/}" != "$FILE" ]; then
+        echo "\nSkipping evaluation of files in the node_modules directory..."
     elif [ "${FILE#*public/}" != "$FILE" ]; then
         echo "\nSkipping evaluation of public file..."
     elif [ "${FILE#\*vendor/}" != "$FILE" ]; then

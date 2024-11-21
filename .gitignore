@@ -1,3 +1,9 @@
 .vercel
 
 .env
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+src/scrapers/scraped-images

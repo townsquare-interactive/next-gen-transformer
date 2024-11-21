@@ -29,6 +29,13 @@ interface TransformErrorType extends ErrorClass {
     } & ErrorState
 }
 
+interface ScrapingErrorType extends ErrorClass {
+    domain: string
+    state: {
+        scrapeStatus: string
+    } & ErrorState
+}
+
 interface ValidationErrorType extends ErrorClass {
     state: {
         erroredFields: ErroredFields[]
@@ -91,6 +98,25 @@ export class DataUploadError extends BaseError {
     }
 }
 
+//Error custom classes
+export class ScrapingError extends BaseError {
+    public domain: string
+
+    constructor({ message, domain, errorType, state }: ScrapingErrorType) {
+        super({ message, errorType, state })
+        this.domain = domain
+    }
+}
+
+export class MegError extends BaseError {
+    public domain: string
+
+    constructor({ message, domain, errorType, state }: DataUploadErrorType) {
+        super({ message, errorType, state })
+        this.domain = domain
+    }
+}
+
 const errorStatus = 'Error'
 
 // Handles all types of errors and calls the specified error class
@@ -138,6 +164,15 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             id: errorID,
             errorType: err.errorType,
             message: 'Error uploading to S3: ' + err.message + errorIDMessage,
+            domain: err.domain,
+            state: err.state,
+            status: errorStatus,
+        })
+    } else if (err instanceof ScrapingError) {
+        res.status(400).json({
+            id: errorID,
+            errorType: err.errorType,
+            message: 'Error scraping URL ' + err.message + errorIDMessage,
             domain: err.domain,
             state: err.state,
             status: errorStatus,

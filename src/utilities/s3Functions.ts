@@ -99,6 +99,17 @@ export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
     console.log('File Placed')
 }
 
+export const addImageToS3 = async (file: any, key: string) => {
+    console.log('uploading image', file, key)
+    s3.putObject({
+        Body: file,
+        Key: key,
+        Bucket: tsiBucket,
+    }).catch((error) => {
+        console.error(error)
+    })
+}
+
 //add file to s3 bucket
 export const addFolderS3 = async (file: any, key: string) => {
     await s3
