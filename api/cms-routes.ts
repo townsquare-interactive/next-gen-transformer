@@ -4,6 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
+import { saveScrapedImages } from '../src/output/save-scraped-images.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema } from '../src/schema/input-zod.js'
@@ -14,7 +15,8 @@ import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
-import { scrapeImagesFromSite } from './scrapers/image-scrape.js'
+import { FileMethod, scrapeImagesFromSite } from './scrapers/image-scrape.js'
+
 const router = express.Router()
 
 //save from luna cms
@@ -319,8 +321,11 @@ router.post('/migrate', async (req, res) => {
 router.get('/scrape-images', async (req, res) => {
     const url = typeof req.query.url === 'string' ? req.query.url : ''
     try {
-        const response = await scrapeImagesFromSite({ url: url, storagePath: 's3', method: 's3Upload' })
-        res.json(response)
+        const method: FileMethod = 's3Upload' //what to do with image files
+        const scrapeSettings = { url: url, method: method }
+        const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
+        await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
+        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url })
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)

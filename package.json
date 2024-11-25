@@ -35,7 +35,6 @@
         "mongoose": "^6.5.2",
         "node-sass": "^9.0.0",
         "playwright": "^1.49.0",
-        "playwright-aws-lambda": "^0.11.0",
         "playwright-core": "^1.49.0",
         "psl": "^1.13.0",
         "request": "^2.88.2",
