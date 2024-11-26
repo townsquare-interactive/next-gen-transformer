@@ -5,12 +5,11 @@ import { ScrapingError } from '../../src/utilities/errors.js'
 import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
-
-export type FileMethod = 'writeFolder' | 's3Upload' | 'test'
+import { SaveFileMethodType } from '../../src/schema/input-zod.js'
 
 export interface Settings {
     url: string
-    method?: FileMethod
+    saveMethod?: SaveFileMethodType
     timeoutLength?: number
     retries?: number
     scrapeFunction?: (settings: Settings) => ScrapeResult

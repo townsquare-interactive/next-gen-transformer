@@ -12,7 +12,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: { hashed
         const __dirname = path.dirname(__filename)
         for (let i = 0; i < imageFiles.length; i++) {
             // Write the file to the local folder if specified
-            if (settings.method === 'writeFolder') {
+            if (settings.saveMethod === 'writeFolder') {
                 const dirName = convertUrlToApexId(settings.url)
                 const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
                 fs.mkdirSync(storagePath, { recursive: true })
@@ -22,7 +22,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: { hashed
             }
 
             // Upload the image to S3 if specified
-            if (settings.method === 's3Upload') {
+            if (settings.saveMethod === 's3Upload') {
                 const basePath = convertUrlToApexId(settings.url) + '/scraped'
                 console.log('uploading image to s3', imageFiles[i].hashedFileName)
                 await addImageToS3(imageFiles[i].fileContents, `${basePath}/${imageFiles[i].hashedFileName}`)

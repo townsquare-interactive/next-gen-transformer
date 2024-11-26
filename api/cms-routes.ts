@@ -7,7 +7,7 @@ import { saveToS3 } from '../src/output/save-to-s3.js'
 import { saveScrapedImages } from '../src/output/save-scraped-images.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
-import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema } from '../src/schema/input-zod.js'
+import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema, ScrapeImageSchema } from '../src/schema/input-zod.js'
 import express from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { handleError } from '../src/utilities/errors.js'
@@ -15,7 +15,7 @@ import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
-import { FileMethod, scrapeImagesFromSite } from './scrapers/image-scrape.js'
+import { scrapeImagesFromSite } from './scrapers/image-scrape.js'
 
 const router = express.Router()
 
@@ -318,11 +318,12 @@ router.post('/migrate', async (req, res) => {
     }
 })
 
-router.get('/scrape-images', async (req, res) => {
-    const url = typeof req.query.url === 'string' ? req.query.url : ''
+router.post('/scrape-images', async (req, res) => {
     try {
-        const method: FileMethod = 's3Upload' //what to do with image files
-        const scrapeSettings = { url: url, method: method }
+        //check input data for correct structure
+        const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
+
+        const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod }
         const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
         await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
         res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url })

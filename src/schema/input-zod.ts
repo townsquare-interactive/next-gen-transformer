@@ -366,6 +366,16 @@ export const LandingInputSchema = z.object({
     customOptions: CustomOptions,
 })
 
+export type FileMethod = 'writeFolder' | 's3Upload' | 'test'
+
+const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.literal('test')))
+
+//request body coming from AI tool
+export const ScrapeImageSchema = z.object({
+    url: z.string(),
+    savingMethod: SaveFileMethod.optional(),
+})
+
 export const RequestDataSchema = z.object({
     domain: z.string().refine((domain) => domain.includes('/'), {
         message: "The domain must include a '/'",
@@ -381,3 +391,4 @@ export type Sections = z.infer<typeof PageSectionSchema>
 export type LandingColors = z.infer<typeof LandingColorsSchema>
 export type RemoveLandingPageReq = z.infer<typeof RemoveLandingPageSchema>
 export type RemoveLandingProjectReq = z.infer<typeof RemoveLandingProjectSchema>
+export type SaveFileMethodType = z.infer<typeof SaveFileMethod>
