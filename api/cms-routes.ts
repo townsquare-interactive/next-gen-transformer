@@ -16,6 +16,7 @@ import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
 import { scrapeImagesFromSite } from './scrapers/image-scrape.js'
+/* import { batchUploadToDuda } from '../src/services/save-to-duda.js' */
 
 const router = express.Router()
 
@@ -323,10 +324,16 @@ router.post('/scrape-images', async (req, res) => {
         //check input data for correct structure
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
 
-        const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod }
+        const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod, uploadLocation: validatedRequest.uploadLocation }
         const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
         await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
-        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url })
+
+        const imageFileUrls = []
+        for (let i = 0; i < scrapedImages.imageFiles.length; i++) {
+            imageFileUrls.push(scrapedImages.imageFiles[i].url)
+        }
+
+        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url, imgUrls: imageFileUrls })
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)

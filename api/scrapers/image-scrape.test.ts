@@ -9,7 +9,7 @@ describe('Scrape Images For Duda', () => {
 
     it('should return an array with the scraped image strings with a valid url', async () => {
         const url = 'https://www.townsquareignite.com/landing/tacobell/home'
-        const result = await scrapeImagesFromSite({ url: url, method: 'test' })
+        const result = await scrapeImagesFromSite({ url: url, saveMethod: 'test' })
         expect(result.imageNames.length).toBeGreaterThan(0)
         expect(result.imageFiles.length).toBeGreaterThan(0)
     }, 25000)
@@ -30,7 +30,7 @@ describe('Scrape Images For Duda', () => {
 
         const result = await scrapeImagesFromSite({
             url,
-            method: 'test',
+            saveMethod: 'test',
             retries: 2,
             scrapeFunction: mockScrapeFunction, // Pass the mock function
         })
@@ -49,7 +49,7 @@ describe('Scrape Images For Duda', () => {
         try {
             await scrapeImagesFromSite({
                 url,
-                method: 'test',
+                saveMethod: 'test',
                 retries: 3,
                 scrapeFunction: mockScrapeFunction,
             })

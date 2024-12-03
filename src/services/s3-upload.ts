@@ -1,9 +1,9 @@
-import { Settings } from '../../api/scrapers/image-scrape.js'
+import type { ImageFiles, Settings } from '../../api/scrapers/image-scrape.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { addImageToS3 } from '../utilities/s3Functions.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 
-export async function save(settings: Settings, imageFiles: { hashedFileName: string; fileContents: string }[]) {
+export async function save(settings: Settings, imageFiles: ImageFiles[]) {
     try {
         for (let i = 0; i < imageFiles.length; i++) {
             const basePath = convertUrlToApexId(settings.url) + '/scraped'

@@ -1,33 +1,35 @@
-import { Settings } from '../../api/scrapers/image-scrape.js'
+import type { ImageFiles, Settings } from '../../api/scrapers/image-scrape.js'
 import { ScrapingError } from '../utilities/errors.js'
-import { addImageToS3 } from '../utilities/s3Functions.js'
-import { convertUrlToApexId } from '../utilities/utils.js'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { save as WriteToFile } from '../services/write-to-folder.js'
+import { save as s3FileUpload } from '../services/s3-upload.js'
+import { save as batchUploadToDuda } from '../services/save-to-duda.js'
 
-export async function saveScrapedImages(settings: Settings, imageFiles: { hashedFileName: string; fileContents: string }[]) {
+export async function saveScrapedImages(settings: Settings, imageFiles: ImageFiles[]) {
     try {
-        const __filename = fileURLToPath(import.meta.url)
-        const __dirname = path.dirname(__filename)
-        for (let i = 0; i < imageFiles.length; i++) {
-            // Write the file to the local folder if specified
-            if (settings.saveMethod === 'writeFolder') {
-                const dirName = convertUrlToApexId(settings.url)
-                const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
-                fs.mkdirSync(storagePath, { recursive: true })
-                const filePath = path.resolve(storagePath, imageFiles[i].hashedFileName)
-                const writeStream = fs.createWriteStream(filePath)
-                writeStream.write(imageFiles[i].fileContents)
-            }
+        console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
 
-            // Upload the image to S3 if specified
-            if (settings.saveMethod === 's3Upload') {
-                const basePath = convertUrlToApexId(settings.url) + '/scraped'
-                console.log('uploading image to s3', imageFiles[i].hashedFileName)
-                await addImageToS3(imageFiles[i].fileContents, `${basePath}/${imageFiles[i].hashedFileName}`)
-            }
+        let save
+        switch (settings.saveMethod) {
+            case 'writeFolder':
+                save = WriteToFile
+                break
+
+            case 's3Upload':
+                save = s3FileUpload
+                break
+            case 'dudaUpload':
+                save = batchUploadToDuda
+                break
+
+            case undefined:
+                save = batchUploadToDuda
+                break
+            default:
+                save = batchUploadToDuda
+                break
         }
+
+        await save(settings, imageFiles)
     } catch (err) {
         throw new ScrapingError({
             domain: settings.url,

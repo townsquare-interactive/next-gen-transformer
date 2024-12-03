@@ -6,6 +6,7 @@ import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
 import { SaveFileMethodType } from '../../src/schema/input-zod.js'
+import { fileURLToPath } from 'url'
 
 export interface Settings {
     url: string
@@ -13,11 +14,18 @@ export interface Settings {
     timeoutLength?: number
     retries?: number
     scrapeFunction?: (settings: Settings) => ScrapeResult
+    uploadLocation?: string
 }
 
 interface ScrapeResult {
     imageList: string[]
-    imageFiles: { hashedFilename: string; fileContents: any }[]
+    imageFiles: ImageFiles[]
+}
+
+export interface ImageFiles {
+    hashedFileName: string
+    fileContents: any
+    url: string
 }
 
 export async function scrapeImagesFromSite(settings: Settings) {
@@ -94,11 +102,29 @@ export async function scrape(settings: Settings) {
             response.body().then(async (fileContents) => {
                 const hashedFileName = hashUrl(response.url()) // Hash the image URL to create a unique name
                 const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                const fileName = `${hashedFileName}${fileExtension}`
-                //console.debug(`url = ${url}, filePath = ${filePath}`)
+                //const fileName = `${hashedFileName}${fileExtension}`
+
+                //file logging stuff
+                const __filename = fileURLToPath(import.meta.url)
+                //const __dirname = path.dirname(__filename)
+                const fileName = url.pathname.split('/').pop()
+                if (!fileName) {
+                    console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
+                    return
+                }
+                //const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
+                //const filePath = path.resolve(settings.storagePath, fileName)
+                /* console.debug(`url = ${url}, filePath = ${filePath}`) */
+                //const filePath = path.resolve(settings.storagePath, fileName)
+                //const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
+                //const filePath = path.resolve(storagePath, hashedFileName)
+                //const writeStream = fs.createWriteStream(filePath)
+
+                console.debug(`url = ${url}, filePath = ${fileName}`)
+
                 const nonHashFileName = url.pathname.split('/').pop()?.toString() || ''
                 imageList.push(nonHashFileName) // Add the non-hashed file name to the list of images
-                imageFiles.push({ hashedFileName: fileName, fileContents: fileContents })
+                imageFiles.push({ hashedFileName: fileName, fileContents: fileContents, url: url })
             })
         }
     })

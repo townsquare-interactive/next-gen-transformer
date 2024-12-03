@@ -366,14 +366,13 @@ export const LandingInputSchema = z.object({
     customOptions: CustomOptions,
 })
 
-export type FileMethod = 'writeFolder' | 's3Upload' | 'test'
-
-const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.literal('test')))
+const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.literal('test').or(z.literal('dudaUpload'))))
 
 //request body coming from AI tool
 export const ScrapeImageSchema = z.object({
     url: z.string(),
     savingMethod: SaveFileMethod.optional(),
+    uploadLocation: z.string().optional(),
 })
 
 export const RequestDataSchema = z.object({
