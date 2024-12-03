@@ -112,13 +112,7 @@ export async function scrape(settings: Settings) {
                     console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
                     return
                 }
-                //const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
-                //const filePath = path.resolve(settings.storagePath, fileName)
-                /* console.debug(`url = ${url}, filePath = ${filePath}`) */
-                //const filePath = path.resolve(settings.storagePath, fileName)
-                //const storagePath = path.resolve(__dirname, 'scraped-images', dirName)
-                //const filePath = path.resolve(storagePath, hashedFileName)
-                //const writeStream = fs.createWriteStream(filePath)
+
 
                 console.debug(`url = ${url}, filePath = ${fileName}`)
 

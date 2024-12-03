@@ -1,4 +1,3 @@
-/* import fetch from 'node-fetch' */
 import type { Settings, ImageFiles } from '../../api/scrapers/image-scrape.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
