@@ -7,13 +7,14 @@ import { chromium as playwrightChromium } from 'playwright'
 import chromium from '@sparticuz/chromium'
 import { SaveFileMethodType } from '../../src/schema/input-zod.js'
 import { fileURLToPath } from 'url'
+import { findPages } from './page-list-scrape.js'
 
 export interface Settings {
     url: string
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
     retries?: number
-    scrapeFunction?: (settings: Settings) => ScrapeResult
+    functions?: { scrapeFunction?: (settings: Settings) => Promise<ScrapeResult>; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
     uploadLocation?: string
 }
 
@@ -33,13 +34,16 @@ export async function scrapeImagesFromSite(settings: Settings) {
     let attempt = 0
     let retries = settings.retries || 3
     let imageData
-    const scrapeFunction = settings.scrapeFunction || scrape
+    const scrapeFunction = settings.functions?.scrapeFunction || scrape
+    const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
     console.log('retry count', retries)
+
     while (attempt < retries) {
         try {
-            imageData = await scrapeFunction({
-                ...settings,
-            })
+            const pages = await scrapePagesFunction(settings)
+            imageData = await scrapeAllPages(pages, settings, scrapeFunction)
+            console.log('what is all images', imageData)
+            return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles }
             break
         } catch (error) {
             console.error(`Attempt ${attempt + 1} failed. Retrying...`)
@@ -55,7 +59,14 @@ export async function scrapeImagesFromSite(settings: Settings) {
             }
         }
     }
-    return { imageNames: imageData?.imageList, url: siteName, imageFiles: imageData?.imageFiles }
+
+    throw new ScrapingError({
+        domain: settings.url,
+        message: 'Unable to scrape site after multiple attempts',
+        state: { scrapeStatus: 'URL not able to be scraped' },
+        errorType: 'SCR-011',
+    })
+    //return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles }
 }
 
 export async function scrape(settings: Settings) {
@@ -113,7 +124,6 @@ export async function scrape(settings: Settings) {
                     return
                 }
 
-
                 console.debug(`url = ${url}, filePath = ${fileName}`)
 
                 const nonHashFileName = url.pathname.split('/').pop()?.toString() || ''
@@ -164,4 +174,27 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
 
 function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
+}
+
+export const scrapeAllPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
+    //now time to scrape
+    const imageFiles = []
+    console.log('pages', pages)
+    for (let n = 0; n < pages.length; n++) {
+        try {
+            console.log('scrape func 1')
+            const imageData = await scrapeFunction({ ...settings, url: pages[n] })
+
+            for (let i = 0; i < imageData.imageFiles.length; i++) {
+                imageFiles.push(imageData.imageFiles[i])
+            }
+        } catch (err) {
+            console.log('scrape func fail 1')
+            throw err
+        }
+    }
+
+    console.log('here is im files', imageFiles)
+
+    return { imageFiles: imageFiles }
 }

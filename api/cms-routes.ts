@@ -326,14 +326,18 @@ router.post('/scrape-images', async (req, res) => {
 
         const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod, uploadLocation: validatedRequest.uploadLocation }
         const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
-        await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
+        const savedInfo = await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
 
-        const imageFileUrls = []
+        //const pages = await findPages(scrapeSettings)
+
+        /* const imageFileUrls = []
         for (let i = 0; i < scrapedImages.imageFiles.length; i++) {
             imageFileUrls.push(scrapedImages.imageFiles[i].url)
-        }
+        } 
 
-        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url, imgUrls: imageFileUrls })
+        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url, imgUrls: imageFileUrls })*/
+        //res.json({ savedInfo })
+        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url })
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)

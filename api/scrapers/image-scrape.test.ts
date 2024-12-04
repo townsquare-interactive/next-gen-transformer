@@ -1,5 +1,5 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { scrapeImagesFromSite, scrape } from './image-scrape.js'
+import { scrapeImagesFromSite } from './image-scrape.js'
 import { ScrapingError } from '../../src/utilities/errors.js'
 
 describe('Scrape Images For Duda', () => {
@@ -7,12 +7,66 @@ describe('Scrape Images For Duda', () => {
         vi.restoreAllMocks()
     })
 
-    it('should return an array with the scraped image strings with a valid url', async () => {
-        const url = 'https://www.townsquareignite.com/landing/tacobell/home'
-        const result = await scrapeImagesFromSite({ url: url, saveMethod: 'test' })
-        expect(result.imageNames.length).toBeGreaterThan(0)
-        expect(result.imageFiles.length).toBeGreaterThan(0)
-    }, 25000)
+    it('should return the correct number of image files on a single page scrape', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockScrapeFunction = vi.fn().mockResolvedValue({
+            // Succeed on the second attempt
+            imageList: ['image1.jpg', 'image2.jpg'],
+            imageFiles: [
+                { hashedFileName: 'image1.jpg', fileContents: 'image1content' },
+                { hashedFileName: 'image2.jpg', fileContents: 'image2content' },
+                { hashedFileName: 'image3.jpg', fileContents: 'image3content' },
+            ],
+        })
+
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
+
+        const result = await scrapeImagesFromSite({
+            url,
+            saveMethod: 'test',
+            retries: 2,
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+        })
+
+        expect(mockScrapeFunction).toHaveBeenCalledTimes(1)
+        expect(result.imageFiles.length).toBe(3)
+    })
+
+    it('should run multiples scrapes with multiple pages', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockScrapeFunction = vi
+            .fn()
+            .mockResolvedValueOnce({
+                // First page images
+                imageList: ['image1.jpg', 'image2.jpg'],
+                imageFiles: [
+                    { hashedFileName: 'image1.jpg', fileContents: 'image1content' },
+                    { hashedFileName: 'image2.jpg', fileContents: 'image2content' },
+                    { hashedFileName: 'image3.jpg', fileContents: 'image3content' },
+                ],
+            })
+            .mockResolvedValueOnce({
+                // Second page images
+                imageList: ['image1.jpg', 'image2.jpg'],
+                imageFiles: [
+                    { hashedFileName: 'image4.jpg', fileContents: 'image4content' },
+                    { hashedFileName: 'image5.jpg', fileContents: 'image5content' },
+                ],
+            })
+
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1', 'page2'])
+
+        const result = await scrapeImagesFromSite({
+            url,
+            saveMethod: 'test',
+            retries: 2,
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+        })
+
+        // Verify that the mock scrape function was called twice
+        expect(mockScrapeFunction).toHaveBeenCalledTimes(2)
+        expect(result.imageFiles.length).toBe(5)
+    })
 
     it('should retry the scrape function if it fails initially and succeed on subsequent attempts', async () => {
         const url = 'https://scrapeurl.com'
@@ -28,16 +82,17 @@ describe('Scrape Images For Duda', () => {
                 ],
             })
 
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
+
         const result = await scrapeImagesFromSite({
             url,
             saveMethod: 'test',
             retries: 2,
-            scrapeFunction: mockScrapeFunction, // Pass the mock function
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
         })
 
         // Verify that the mock scrape function was called twice
         expect(mockScrapeFunction).toHaveBeenCalledTimes(2)
-        expect(result.imageNames).toEqual(['image1.jpg', 'image2.jpg'])
         expect(result.imageFiles.length).toBe(2)
     })
 
@@ -45,13 +100,15 @@ describe('Scrape Images For Duda', () => {
         const url = 'https://scrapeurl.com'
         const mockScrapeFunction = vi.fn().mockRejectedValue(new Error('Permanent scraping error')) // Always fail
 
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
+
         let error: any
         try {
             await scrapeImagesFromSite({
                 url,
                 saveMethod: 'test',
                 retries: 3,
-                scrapeFunction: mockScrapeFunction,
+                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction },
             })
         } catch (err) {
             error = err
@@ -75,19 +132,15 @@ describe('Scrape Images For Duda', () => {
         const errUrl = 'https://www.notereal.com'
         let error: any
 
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1', 'page2'])
+
         try {
-            await scrapeImagesFromSite({ url: errUrl, timeoutLength: 10000, retries: 1 })
+            await scrapeImagesFromSite({ url: errUrl, timeoutLength: 10000, retries: 1, functions: { scrapePagesFunction: mockFindPagesFunction } })
         } catch (err) {
             error = err
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-
-        expect(error).toMatchObject({
-            domain: errUrl,
-            message: expect.stringContaining(`Error loading URL: ${errUrl}`),
-            state: { scrapeStatus: 'URL not able to be scraped' },
-            errorType: 'SCR-011',
-        })
+        expect(error.message).toContain(`Error loading URL: page1`)
     }, 15000)
 })

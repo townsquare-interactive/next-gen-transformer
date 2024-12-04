@@ -1,0 +1,43 @@
+import { chromium as playwrightChromium } from 'playwright';
+//sparticuz/chromium package needed to get playwright working correctly on vercel
+import chromium from '@sparticuz/chromium';
+//const seenImages = new Set<string>()
+export async function findPages(settings) {
+    const foundUrls = new Set();
+    const browser = await playwrightChromium.launch({
+        headless: false,
+        executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
+        args: [...chromium.args, '--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+    console.log(`Loading main page: ${settings.url}`);
+    const response = await page.goto(settings.url, {
+        timeout: settings.timeoutLength || 60000,
+    });
+    if (!response || !response.ok()) {
+        console.error(`Failed to load the page: ${settings.url}`);
+        await browser.close();
+        throw new Error(`Failed to load the page: ${settings.url}`);
+    }
+    console.log(`Main page loaded successfully: ${settings.url}`);
+    // Logic to find links to other pages
+    const pageUrls = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('a[href]'));
+        return links.map((link) => link.href).filter((href) => href.startsWith('http'));
+    });
+    for (let x = 0; x < pageUrls.length; x++) {
+        const currentUrl = pageUrls[x];
+        //remove duplicates
+        if (!foundUrls.has(currentUrl) && currentUrl.includes(settings.url)) {
+            if (!currentUrl.includes('#')) {
+                foundUrls.add(currentUrl);
+            }
+        }
+    }
+    console.log(foundUrls);
+    const urlArray = Array.from(foundUrls);
+    console.log(`Found ${urlArray.length} pages:`, urlArray);
+    await browser.close();
+    return urlArray;
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFnZS1saXN0LXNjcmFwZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2FwaS9zY3JhcGVycy9wYWdlLWxpc3Qtc2NyYXBlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxRQUFRLElBQUksa0JBQWtCLEVBQUUsTUFBTSxZQUFZLENBQUE7QUFDM0QsaUZBQWlGO0FBQ2pGLE9BQU8sUUFBUSxNQUFNLHFCQUFxQixDQUFBO0FBSTFDLHNDQUFzQztBQUN0QyxNQUFNLENBQUMsS0FBSyxVQUFVLFNBQVMsQ0FBQyxRQUFrQjtJQUM5QyxNQUFNLFNBQVMsR0FBRyxJQUFJLEdBQUcsRUFBVSxDQUFBO0lBQ25DLE1BQU0sT0FBTyxHQUFHLE1BQU0sa0JBQWtCLENBQUMsTUFBTSxDQUFDO1FBQzVDLFFBQVEsRUFBRSxLQUFLO1FBQ2YsY0FBYyxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLE1BQU0sUUFBUSxDQUFDLGNBQWMsRUFBRSxDQUFDLENBQUMsQ0FBQyxTQUFTO1FBQzNGLElBQUksRUFBRSxDQUFDLEdBQUcsUUFBUSxDQUFDLElBQUksRUFBRSxjQUFjLEVBQUUsZUFBZSxFQUFFLDBCQUEwQixDQUFDO0tBQ3hGLENBQUMsQ0FBQTtJQUVGLE1BQU0sSUFBSSxHQUFHLE1BQU0sT0FBTyxDQUFDLE9BQU8sRUFBRSxDQUFBO0lBQ3BDLE9BQU8sQ0FBQyxHQUFHLENBQUMsc0JBQXNCLFFBQVEsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxDQUFBO0lBRWpELE1BQU0sUUFBUSxHQUFHLE1BQU0sSUFBSSxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsR0FBRyxFQUFFO1FBQzNDLE9BQU8sRUFBRSxRQUFRLENBQUMsYUFBYSxJQUFJLEtBQUs7S0FDM0MsQ0FBQyxDQUFBO0lBRUYsSUFBSSxDQUFDLFFBQVEsSUFBSSxDQUFDLFFBQVEsQ0FBQyxFQUFFLEVBQUUsRUFBRSxDQUFDO1FBQzlCLE9BQU8sQ0FBQyxLQUFLLENBQUMsNEJBQTRCLFFBQVEsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxDQUFBO1FBQ3pELE1BQU0sT0FBTyxDQUFDLEtBQUssRUFBRSxDQUFBO1FBQ3JCLE1BQU0sSUFBSSxLQUFLLENBQUMsNEJBQTRCLFFBQVEsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxDQUFBO0lBQy9ELENBQUM7SUFFRCxPQUFPLENBQUMsR0FBRyxDQUFDLGtDQUFrQyxRQUFRLENBQUMsR0FBRyxFQUFFLENBQUMsQ0FBQTtJQUU3RCxxQ0FBcUM7SUFDckMsTUFBTSxRQUFRLEdBQUcsTUFBTSxJQUFJLENBQUMsUUFBUSxDQUFDLEdBQUcsRUFBRTtRQUN0QyxNQUFNLEtBQUssR0FBRyxLQUFLLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxnQkFBZ0IsQ0FBQyxTQUFTLENBQUMsQ0FBQyxDQUFBO1FBQzlELE9BQU8sS0FBSyxDQUFDLEdBQUcsQ0FBQyxDQUFDLElBQVMsRUFBRSxFQUFFLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLE1BQU0sQ0FBQyxDQUFDLElBQUksRUFBRSxFQUFFLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFBO0lBQ3hGLENBQUMsQ0FBQyxDQUFBO0lBRUYsS0FBSyxJQUFJLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQyxHQUFHLFFBQVEsQ0FBQyxNQUFNLEVBQUUsQ0FBQyxFQUFFLEVBQUUsQ0FBQztRQUN2QyxNQUFNLFVBQVUsR0FBRyxRQUFRLENBQUMsQ0FBQyxDQUFDLENBQUE7UUFDOUIsbUJBQW1CO1FBQ25CLElBQUksQ0FBQyxTQUFTLENBQUMsR0FBRyxDQUFDLFVBQVUsQ0FBQyxJQUFJLFVBQVUsQ0FBQyxRQUFRLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUM7WUFDbEUsSUFBSSxDQUFDLFVBQVUsQ0FBQyxRQUFRLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQztnQkFDNUIsU0FBUyxDQUFDLEdBQUcsQ0FBQyxVQUFVLENBQUMsQ0FBQTtZQUM3QixDQUFDO1FBQ0wsQ0FBQztJQUNMLENBQUM7SUFDRCxPQUFPLENBQUMsR0FBRyxDQUFDLFNBQVMsQ0FBQyxDQUFBO0lBRXRCLE1BQU0sUUFBUSxHQUFHLEtBQUssQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUE7SUFFdEMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxTQUFTLFFBQVEsQ0FBQyxNQUFNLFNBQVMsRUFBRSxRQUFRLENBQUMsQ0FBQTtJQUN4RCxNQUFNLE9BQU8sQ0FBQyxLQUFLLEVBQUUsQ0FBQTtJQUVyQixPQUFPLFFBQVEsQ0FBQTtBQUNuQixDQUFDIn0=

@@ -1,0 +1,15 @@
+import { addImageToS3 } from '../utilities/s3Functions.js';
+import { convertUrlToApexId } from '../utilities/utils.js';
+export async function save(settings, imageFiles) {
+    try {
+        for (let i = 0; i < imageFiles.length; i++) {
+            const basePath = convertUrlToApexId(settings.url) + '/scraped';
+            console.log('uploading image to s3', imageFiles[i].hashedFileName);
+            await addImageToS3(imageFiles[i].fileContents, `${basePath}/${imageFiles[i].hashedFileName}`);
+        }
+    }
+    catch (err) {
+        throw 'Error saving to s3: ' + err.message;
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiczMtdXBsb2FkLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3NlcnZpY2VzL3MzLXVwbG9hZC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQSxPQUFPLEVBQUUsWUFBWSxFQUFFLE1BQU0sNkJBQTZCLENBQUE7QUFDMUQsT0FBTyxFQUFFLGtCQUFrQixFQUFFLE1BQU0sdUJBQXVCLENBQUE7QUFFMUQsTUFBTSxDQUFDLEtBQUssVUFBVSxJQUFJLENBQUMsUUFBa0IsRUFBRSxVQUF3QjtJQUNuRSxJQUFJLENBQUM7UUFDRCxLQUFLLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLEdBQUcsVUFBVSxDQUFDLE1BQU0sRUFBRSxDQUFDLEVBQUUsRUFBRSxDQUFDO1lBQ3pDLE1BQU0sUUFBUSxHQUFHLGtCQUFrQixDQUFDLFFBQVEsQ0FBQyxHQUFHLENBQUMsR0FBRyxVQUFVLENBQUE7WUFDOUQsT0FBTyxDQUFDLEdBQUcsQ0FBQyx1QkFBdUIsRUFBRSxVQUFVLENBQUMsQ0FBQyxDQUFDLENBQUMsY0FBYyxDQUFDLENBQUE7WUFDbEUsTUFBTSxZQUFZLENBQUMsVUFBVSxDQUFDLENBQUMsQ0FBQyxDQUFDLFlBQVksRUFBRSxHQUFHLFFBQVEsSUFBSSxVQUFVLENBQUMsQ0FBQyxDQUFDLENBQUMsY0FBYyxFQUFFLENBQUMsQ0FBQTtRQUNqRyxDQUFDO0lBQ0wsQ0FBQztJQUFDLE9BQU8sR0FBRyxFQUFFLENBQUM7UUFDWCxNQUFNLHNCQUFzQixHQUFHLEdBQUcsQ0FBQyxPQUFPLENBQUE7SUFDOUMsQ0FBQztBQUNMLENBQUMifQ==
