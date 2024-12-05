@@ -26,20 +26,18 @@ export const checkPageListForDeployements = async (apexID: string, pageUri: stri
     if (typeof pageListFile != 'string') {
         for (let i = 0; i < pageListFile.pages.length; i++) {
             if (!(pageListFile.pages[i].slug === pageUri)) {
-                console.log('we have found an alt page')
+                console.log('we have found an alt page', pageListFile.pages[i].slug)
 
                 //check that domain is the same?
-                const altPageFile = await getFileS3(`${apexID}/pages/${pageListFile.pages[i].slug}.json`, 'not found')
-                const isPubbedDomainTheSame = altPageFile.publishedDomains.filter((pubDomain: string) => pubDomain === domainName)
-
-                if (isPubbedDomainTheSame.length > 1) {
+                const altPageFile: ApexPageType = await getFileS3(`${apexID}/pages/${pageListFile.pages[i].slug}.json`, 'not found')
+                const isPubbedDomainTheSame = altPageFile.siteLayout.publishedDomains.filter((pubDomain: string) => pubDomain === domainName)
+                if (isPubbedDomainTheSame.length >= 1) {
                     return true
                 }
             }
         }
     }
-    console.log('alt page does not contain same domain', domainName)
-
+    console.log('alt page does not contain same domain ', domainName)
     return false
 }
 
