@@ -30,9 +30,11 @@ export const checkPageListForDeployements = async (apexID: string, pageUri: stri
 
                 //check that domain is the same?
                 const altPageFile: ApexPageType = await getFileS3(`${apexID}/pages/${pageListFile.pages[i].slug}.json`, 'not found')
-                const isPubbedDomainTheSame = altPageFile.siteLayout.publishedDomains.filter((pubDomain: string) => pubDomain === domainName)
-                if (isPubbedDomainTheSame.length >= 1) {
-                    return true
+                if (altPageFile.siteLayout?.publishedDomains && typeof altPageFile != 'string') {
+                    const isPubbedDomainTheSame = altPageFile.siteLayout.publishedDomains?.filter((pubDomain: string) => pubDomain === domainName)
+                    if (isPubbedDomainTheSame.length >= 1) {
+                        return true
+                    }
                 }
             }
         }
