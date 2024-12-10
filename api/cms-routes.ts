@@ -323,21 +323,18 @@ router.post('/scrape-images', async (req, res) => {
     try {
         //check input data for correct structure
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
-
         const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod, uploadLocation: validatedRequest.uploadLocation }
         const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
         const savedInfo = await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
 
-        //const pages = await findPages(scrapeSettings)
-
-        /* const imageFileUrls = []
-        for (let i = 0; i < scrapedImages.imageFiles.length; i++) {
-            imageFileUrls.push(scrapedImages.imageFiles[i].url)
-        } 
-
-        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url, imgUrls: imageFileUrls })*/
-        //res.json({ savedInfo })
-        res.json({ imageFileNames: scrapedImages.imageNames, url: scrapedImages.url })
+        res.json({
+            imageUploadTotal: savedInfo.imageUploadTotal || 0,
+            failedImageCount: savedInfo.failedImageList.length,
+            uploadedResources: savedInfo.uploadedResources || [],
+            failedImages: savedInfo.failedImageList,
+            scrapedPages: scrapedImages.pages,
+            url: scrapedImages.url,
+        })
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)

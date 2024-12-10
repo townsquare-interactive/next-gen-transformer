@@ -1,6 +1,7 @@
 import type { Settings, ImageFiles } from '../../api/scrapers/image-scrape.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
+import type { SaveOutput } from '../../src/output/save-scraped-images.js'
 
 interface UploadPayload {
     resource_type: 'IMAGE'
@@ -8,21 +9,26 @@ interface UploadPayload {
     folder: string
 }
 
+export interface UploadedResourcesObj {
+    id: string
+    src: string
+    original_url: string
+    new_url?: string
+    status?: 'UPLOADED' | 'NOT_FOUND'
+}
+
+//type UploadedResources = UploadedResourcesObj[]
+
 interface DudaResponse {
     success: boolean
     message?: string
-    uploaded_resources?: {
-        id: string
-        src: string
-        original_url?: string
-        new_url?: string
-        status?: 'UPLOADED' | 'NOT_FOUND'
-    }[]
+    uploaded_resources: UploadedResourcesObj[]
 }
 
 export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload[] {
     const seenUrls = new Set<string>()
     const processedUrls: UploadPayload[] = []
+    const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
         const processedUrl = preprocessImageUrl(file.url)
@@ -41,7 +47,7 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload
         processedUrls.push({
             resource_type: 'IMAGE',
             src: processedUrl,
-            folder: 'Imported',
+            folder: dudaImageFolder,
         })
     })
 
@@ -56,7 +62,7 @@ export function processBatch(payload: UploadPayload[], batchSize: number): Uploa
     return batches
 }
 
-export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFunction?: (payload: UploadPayload[]) => DudaResponse): Promise<DudaResponse[]> {
+export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFunction?: (payload: UploadPayload[]) => DudaResponse): Promise<SaveOutput> {
     const dudaFetchFunction = fetchFunction || dudaFetch
 
     const preprocessedPayload = processImageUrlsForDuda(imageFiles)
@@ -84,7 +90,23 @@ export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFu
     console.log('Batch upload results:', batchResults[0]?.uploaded_resources)
     console.log(`Total batches uploaded: ${batchResults.length}`)
 
-    return batchResults
+    const allUploads: UploadedResourcesObj[] = []
+    let succesfulImageCount = 0
+    let failedImageList: string[] = []
+    batchResults.forEach((result) => {
+        result.uploaded_resources.forEach((batch) => {
+            if (batch.status === 'UPLOADED') {
+                succesfulImageCount += 1
+            }
+            if (batch.status === 'NOT_FOUND') {
+                failedImageList.push(batch.original_url)
+            }
+
+            allUploads.push(batch)
+        })
+    })
+
+    return { uploadedImages: allUploads, imageUploadCount: succesfulImageCount, failedImageList: failedImageList }
 }
 
 async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
@@ -116,13 +138,14 @@ async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
         })
 
         if (!response.ok) {
-            console.error(`${response.statusText}`)
-            throw 'failed to upload batch images'
+            console.error(`status text: ${response.statusText}`)
+            throw 'failed to receive 200 response from image upload'
         }
 
         const responseData: DudaResponse = await response.json()
         return responseData
     } catch (error) {
+        console.error('duda upload error', error)
         throw 'failed to upload batch images'
     }
 }

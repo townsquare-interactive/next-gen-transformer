@@ -5,11 +5,15 @@ import { convertUrlToApexId } from '../utilities/utils.js'
 
 export async function save(settings: Settings, imageFiles: ImageFiles[]) {
     try {
+        let uploadedImages = 0
         for (let i = 0; i < imageFiles.length; i++) {
             const basePath = convertUrlToApexId(settings.url) + '/scraped'
             console.log('uploading image to s3', imageFiles[i].hashedFileName)
             await addImageToS3(imageFiles[i].fileContents, `${basePath}/${imageFiles[i].hashedFileName}`)
+            uploadedImages += 1
         }
+
+        return { uploadedImages: [], imageUploadCount: uploadedImages, failedImageList: [] }
     } catch (err) {
         throw 'Error saving to s3: ' + err.message
     }

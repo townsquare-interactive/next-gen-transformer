@@ -43,7 +43,7 @@ export async function scrapeImagesFromSite(settings: Settings) {
             const pages = await scrapePagesFunction(settings)
             imageData = await scrapeAllPages(pages, settings, scrapeFunction)
             console.log('what is all images', imageData)
-            return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles }
+            return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles, pages: pages }
             break
         } catch (error) {
             console.error(`Attempt ${attempt + 1} failed. Retrying...`)
@@ -179,7 +179,6 @@ function hashUrl(url: string): string {
 export const scrapeAllPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
     //now time to scrape
     const imageFiles = []
-    console.log('pages', pages)
     for (let n = 0; n < pages.length; n++) {
         try {
             console.log('scrape func 1')

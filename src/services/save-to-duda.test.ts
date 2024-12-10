@@ -9,21 +9,12 @@ describe('save function', () => {
     })
 
     afterEach(() => {
-        mockSaveFunction.mockReset()
+        vi.resetAllMocks()
     })
 
-    const mockResponse = {
-        uploaded_resources: [
-            { url: 'https://example.com/image1.png', id: '12345' },
-            { url: 'https://example.com/image2.png', id: '67890' },
-        ],
-    }
-
-    const mockSaveFunction: any = vi.fn(async () => mockResponse)
-
-    it('should call the fetch correctly', async () => {
+    it('should return the correct image upload details and call the functions correctly', async () => {
         const settings = { url: 'scrapedsite.com' } // Mocked settings object
-        const imageFiles2: any = [
+        const imageFiles: any = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -70,9 +61,35 @@ describe('save function', () => {
             },
         ]
 
+        const mockResponse = {
+            uploaded_resources: [
+                {
+                    url: 'https://example.com/image1.png',
+                    id: '12345',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+                {
+                    url: 'https://example.com/image2.png',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+            ],
+        }
+
+        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+
         console.log('Starting test...')
-        const result = await save(settings, imageFiles2, mockSaveFunction)
+        const result = await save(settings, imageFiles, mockSaveFunction)
         console.log('Result:', result)
+
+        expect(result.failedImageList.length).toBe(0)
+        expect(result.imageUploadCount).toBe(2)
+        expect(result.uploadedImages).toEqual(mockResponse.uploaded_resources)
 
         // Check fetch calls
         expect(mockSaveFunction).toHaveBeenCalledTimes(1)
@@ -96,7 +113,7 @@ describe('save function', () => {
 
     it('should remove duplicates before uploading images', async () => {
         const settings = { url: 'scrapedsite.com' } // Mocked settings object
-        const imageFiles2: any = [
+        const imageFiles: any = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -163,9 +180,30 @@ describe('save function', () => {
                 fileContents: {},
             },
         ]
+        const mockResponse = {
+            uploaded_resources: [
+                {
+                    url: 'https://example.com/image1.png',
+                    id: '12345',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+                {
+                    url: 'https://example.com/image2.png',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+            ],
+        }
+
+        const mockSaveFunction: any = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
-        const result = await save(settings, imageFiles2, mockSaveFunction)
+        const result = await save(settings, imageFiles, mockSaveFunction)
         console.log('Result:', result)
 
         // Check fetch calls
@@ -190,6 +228,27 @@ describe('save function', () => {
     })
 
     it('should handle fetch errors gracefully', async () => {
+        const mockResponse = {
+            uploaded_resources: [
+                {
+                    url: 'https://example.com/image1.png',
+                    id: '12345',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+                {
+                    url: 'https://example.com/image2.png',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+            ],
+        }
+
+        const mockSaveFunction: any = vi.fn(async () => mockResponse)
         const settings = { url: 'scrapedsite.com' } // Mocked settings object
         const errMessage = 'Network error'
         mockSaveFunction.mockRejectedValueOnce(new Error(errMessage))
@@ -273,5 +332,86 @@ describe('save function', () => {
         expect(mockSaveFunction).toHaveBeenCalledTimes(1)
         expect(error).toBeInstanceOf(ScrapingError)
         expect(error.message).toEqual(`Failed to upload batch images: ${errMessage}`)
+    })
+
+    //it should handle failed uploads
+    it('should return failed upload list correctly', async () => {
+        const settings = { url: 'scrapedsite.com' } // Mocked settings object
+        const imageFiles: any = [
+            {
+                url: {
+                    href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
+                    origin: 'https://www.townsquareignite.com',
+                    protocol: 'https:',
+                    username: '',
+                    password: '',
+                    host: 'www.townsquareignite.com',
+                    hostname: 'www.townsquareignite.com',
+                    port: '',
+                    pathname: '/_next/image',
+                    search: '?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
+                    searchParams: new URLSearchParams({
+                        url: 'https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/tacobell.com/images/selected/purpleButtonLogo.jpg',
+                        w: '1920',
+                        q: '80',
+                    }),
+                    hash: '',
+                },
+                hashedFileName: 'hashedname.jpg',
+                fileContents: {},
+            },
+            {
+                url: {
+                    href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FTacobell.comLogo.png&w=1920&q=80',
+                    origin: 'https://www.townsquareignite.com',
+                    protocol: 'https:',
+                    username: '',
+                    password: '',
+                    host: 'www.townsquareignite.com',
+                    hostname: 'www.townsquareignite.com',
+                    port: '',
+                    pathname: '/_next/image',
+                    search: '?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FTacobell.comLogo.png&w=1920&q=80',
+                    searchParams: new URLSearchParams({
+                        url: 'https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/tacobell.com/images/selected/Tacobell.comLogo.png',
+                        w: '1920',
+                        q: '80',
+                    }),
+                    hash: '',
+                },
+                hashedFileName: 'hashedname.jpg',
+                fileContents: {},
+            },
+        ]
+
+        const mockResponse = {
+            uploaded_resources: [
+                {
+                    url: 'https://example.com/image1.png',
+                    id: '12345',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'UPLOADED',
+                },
+                {
+                    url: 'https://example.com/image2.png',
+                    original_url:
+                        'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+                    new_url: 'https://irt-cdn.multiscreensite.com/c914d96aac4548c2985917d2af88827d/dms3rep/multi/Toy-Mania-Logo-600-be90657b.png',
+                    status: 'NOT_FOUND',
+                },
+            ],
+        }
+
+        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+        const result = await save(settings, imageFiles, mockSaveFunction)
+
+        expect(result.failedImageList.length).toBe(1)
+        expect(result.failedImageList).toContainEqual(
+            'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png'
+        )
+        expect(result.imageUploadCount).toBe(1)
+        expect(result.uploadedImages).toEqual(mockResponse.uploaded_resources)
     })
 })
