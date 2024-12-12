@@ -1,7 +1,8 @@
-import type { Settings, ImageFiles } from '../../api/scrapers/image-scrape.js'
+import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
+import type { Settings } from '../../src/controllers/scrape-controller.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
-import type { SaveOutput } from '../../src/output/save-scraped-images.js'
+import type { SaveOutput } from '../output/save-scraped-data.js'
 
 interface UploadPayload {
     resource_type: 'IMAGE'

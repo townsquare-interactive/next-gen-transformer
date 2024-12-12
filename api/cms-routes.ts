@@ -4,7 +4,8 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
-import { saveScrapedImages } from '../src/output/save-scraped-images.js'
+import { saveScrapedData } from '../src/output/save-scraped-data.js'
+import { getScrapeSettings, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema, ScrapeImageSchema } from '../src/schema/input-zod.js'
@@ -15,7 +16,7 @@ import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
-import { scrapeImagesFromSite } from './scrapers/image-scrape.js'
+
 /* import { batchUploadToDuda } from '../src/services/save-to-duda.js' */
 
 const router = express.Router()
@@ -319,21 +320,21 @@ router.post('/migrate', async (req, res) => {
     }
 })
 
-router.post('/scrape-images', async (req, res) => {
+router.post('/scrape-site', async (req, res) => {
     try {
         //check input data for correct structure
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
-        const scrapeSettings = { url: validatedRequest.url, savingMethod: validatedRequest.savingMethod, uploadLocation: validatedRequest.uploadLocation }
-        const scrapedImages = await scrapeImagesFromSite(scrapeSettings)
-        const savedInfo = await saveScrapedImages(scrapeSettings, scrapedImages.imageFiles)
+        const scrapeSettings = getScrapeSettings(validatedRequest)
+        const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
+        const savedInfo = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
 
         res.json({
-            imageUploadTotal: savedInfo.imageUploadTotal || 0,
-            failedImageCount: savedInfo.failedImageList.length,
-            uploadedResources: savedInfo.uploadedResources || [],
-            failedImages: savedInfo.failedImageList,
-            scrapedPages: scrapedImages.pages,
-            url: scrapedImages.url,
+            imageUploadTotal: savedInfo.imageData.imageUploadTotal || 0,
+            failedImageCount: savedInfo.imageData.failedImageList.length,
+            uploadedResources: savedInfo.imageData.uploadedResources || [],
+            failedImages: savedInfo.imageData.failedImageList,
+            scrapedPages: scrapedData.siteData.pages,
+            url: scrapedData.url,
         })
     } catch (err) {
         err.state = { ...err.state, req: req.body }

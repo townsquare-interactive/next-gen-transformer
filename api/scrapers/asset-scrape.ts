@@ -1,75 +1,28 @@
 import { Page, Response } from 'playwright'
 import path from 'path'
 import crypto from 'crypto'
-import { ScrapingError } from '../../src/utilities/errors.js'
+//import { ScrapingError } from '../../src/utilities/errors.js'
 import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
-import { SaveFileMethodType } from '../../src/schema/input-zod.js'
 import { fileURLToPath } from 'url'
-import { findPages } from './page-list-scrape.js'
-
-export interface Settings {
-    url: string
-    saveMethod?: SaveFileMethodType
-    timeoutLength?: number
-    retries?: number
-    functions?: { scrapeFunction?: (settings: Settings) => Promise<ScrapeResult>; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
-    uploadLocation?: string
-}
-
-interface ScrapeResult {
-    imageList: string[]
-    imageFiles: ImageFiles[]
-}
+import type { ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
 
 export interface ImageFiles {
-    hashedFileName: string
+    imageFileName: string
     fileContents: any
     url: string
 }
 
-export async function scrapeImagesFromSite(settings: Settings) {
-    const siteName = settings.url
-    let attempt = 0
-    let retries = settings.retries || 3
-    let imageData
-    const scrapeFunction = settings.functions?.scrapeFunction || scrape
-    const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
-    console.log('retry count', retries)
-
-    while (attempt < retries) {
-        try {
-            const pages = await scrapePagesFunction(settings)
-            imageData = await scrapeAllPages(pages, settings, scrapeFunction)
-            console.log('what is all images', imageData)
-            return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles, pages: pages }
-            break
-        } catch (error) {
-            console.error(`Attempt ${attempt + 1} failed. Retrying...`)
-            attempt++
-            if (attempt === retries) {
-                console.error(`Failed to scrape after ${retries} attempts.`)
-                throw new ScrapingError({
-                    domain: settings.url,
-                    message: error.message,
-                    state: { scrapeStatus: 'URL not able to be scraped' },
-                    errorType: 'SCR-011',
-                })
-            }
-        }
-    }
-
-    throw new ScrapingError({
-        domain: settings.url,
-        message: 'Unable to scrape site after multiple attempts',
-        state: { scrapeStatus: 'URL not able to be scraped' },
-        errorType: 'SCR-011',
-    })
-    //return { imageNames: [], url: siteName, imageFiles: imageData.imageFiles }
+export interface ScrapeSiteData {
+    baseUrl: string
+    pages: string[]
+    seolist?: ScrapedPageSeo[]
+    dudaUploadLocation?: string
 }
 
 export async function scrape(settings: Settings) {
+    console.log('scrape settings', settings)
     // Launch Chromium with the appropriate arguments
     const browser = await playwrightChromium
         .launch({
@@ -111,13 +64,13 @@ export async function scrape(settings: Settings) {
 
             // Get the image content
             response.body().then(async (fileContents) => {
-                const hashedFileName = hashUrl(response.url()) // Hash the image URL to create a unique name
+                const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
                 const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                //const fileName = `${hashedFileName}${fileExtension}`
+                const hashedFileName = `${hashedName}${fileExtension}`
 
                 //file logging stuff
                 const __filename = fileURLToPath(import.meta.url)
-                //const __dirname = path.dirname(__filename)
+                const __dirname = path.dirname(__filename)
                 const fileName = url.pathname.split('/').pop()
                 if (!fileName) {
                     console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
@@ -126,9 +79,9 @@ export async function scrape(settings: Settings) {
 
                 console.debug(`url = ${url}, filePath = ${fileName}`)
 
-                const nonHashFileName = url.pathname.split('/').pop()?.toString() || ''
-                imageList.push(nonHashFileName) // Add the non-hashed file name to the list of images
-                imageFiles.push({ hashedFileName: fileName, fileContents: fileContents, url: url })
+                //const nonHashFileName = url.pathname.split('/').pop()?.toString() || ''
+                imageList.push(fileName) // Add the non-hashed file name to the list of images
+                imageFiles.push({ imageFileName: fileName, fileContents: fileContents, url: url, hashedFileName: hashedFileName })
             })
         }
     })
@@ -144,12 +97,25 @@ export async function scrape(settings: Settings) {
         }
         console.log(`Page loaded successfully: ${settings.url}`)
 
+        // Extract SEO-related data
+        let seoData = await page.evaluate(() => {
+            return {
+                title: document.title || '',
+                metaDescription: document.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+                metaKeywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
+                ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '',
+                ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '',
+            }
+        })
+
+        console.log('SEO data extracted:', seoData)
+
         // Scroll to load lazy-loaded images if necessary
         await scrollToLazyLoadImages(page, 1000)
         await browser.close()
 
         // Return the list of image names after all images are scraped
-        return { imageList: imageList, imageFiles: imageFiles }
+        return { imageList: imageList, imageFiles: imageFiles, pageSeo: { ...seoData, pageUrl: settings.url } }
     } catch (error) {
         console.error(`Error loading URL: ${settings.url}. Details: ${error.message}`)
         throw new Error(`Error loading URL: ${settings.url}. Details: ${error.message}`)
@@ -174,26 +140,4 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
 
 function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
-}
-
-export const scrapeAllPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
-    //now time to scrape
-    const imageFiles = []
-    for (let n = 0; n < pages.length; n++) {
-        try {
-            console.log('scrape func 1')
-            const imageData = await scrapeFunction({ ...settings, url: pages[n] })
-
-            for (let i = 0; i < imageData.imageFiles.length; i++) {
-                imageFiles.push(imageData.imageFiles[i])
-            }
-        } catch (err) {
-            console.log('scrape func fail 1')
-            throw err
-        }
-    }
-
-    console.log('here is im files', imageFiles)
-
-    return { imageFiles: imageFiles }
 }

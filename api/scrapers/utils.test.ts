@@ -23,7 +23,7 @@ describe('preprocessImageUrl', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -45,7 +45,7 @@ describe('preprocessImageUrl', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
         ]

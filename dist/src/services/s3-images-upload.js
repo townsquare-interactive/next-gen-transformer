@@ -1,0 +1,17 @@
+import { addImageToS3 } from '../utilities/s3Functions.js';
+export async function save(settings, imageFiles) {
+    try {
+        let uploadedImages = 0;
+        for (let i = 0; i < imageFiles.length; i++) {
+            const basePath = settings.basePath + '/scraped';
+            console.log('uploading image to s3', imageFiles[i].imageFileName);
+            await addImageToS3(imageFiles[i].fileContents, `${basePath}/${imageFiles[i].imageFileName}`);
+            uploadedImages += 1;
+        }
+        return { uploadedImages: [], imageUploadCount: uploadedImages, failedImageList: [] };
+    }
+    catch (err) {
+        throw 'Error saving to s3: ' + err.message;
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiczMtaW1hZ2VzLXVwbG9hZC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9zZXJ2aWNlcy9zMy1pbWFnZXMtdXBsb2FkLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBLE9BQU8sRUFBRSxZQUFZLEVBQUUsTUFBTSw2QkFBNkIsQ0FBQTtBQUUxRCxNQUFNLENBQUMsS0FBSyxVQUFVLElBQUksQ0FBQyxRQUFrQixFQUFFLFVBQXdCO0lBQ25FLElBQUksQ0FBQztRQUNELElBQUksY0FBYyxHQUFHLENBQUMsQ0FBQTtRQUN0QixLQUFLLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRSxDQUFDLEdBQUcsVUFBVSxDQUFDLE1BQU0sRUFBRSxDQUFDLEVBQUUsRUFBRSxDQUFDO1lBQ3pDLE1BQU0sUUFBUSxHQUFHLFFBQVEsQ0FBQyxRQUFRLEdBQUcsVUFBVSxDQUFBO1lBQy9DLE9BQU8sQ0FBQyxHQUFHLENBQUMsdUJBQXVCLEVBQUUsVUFBVSxDQUFDLENBQUMsQ0FBQyxDQUFDLGFBQWEsQ0FBQyxDQUFBO1lBQ2pFLE1BQU0sWUFBWSxDQUFDLFVBQVUsQ0FBQyxDQUFDLENBQUMsQ0FBQyxZQUFZLEVBQUUsR0FBRyxRQUFRLElBQUksVUFBVSxDQUFDLENBQUMsQ0FBQyxDQUFDLGFBQWEsRUFBRSxDQUFDLENBQUE7WUFDNUYsY0FBYyxJQUFJLENBQUMsQ0FBQTtRQUN2QixDQUFDO1FBRUQsT0FBTyxFQUFFLGNBQWMsRUFBRSxFQUFFLEVBQUUsZ0JBQWdCLEVBQUUsY0FBYyxFQUFFLGVBQWUsRUFBRSxFQUFFLEVBQUUsQ0FBQTtJQUN4RixDQUFDO0lBQUMsT0FBTyxHQUFHLEVBQUUsQ0FBQztRQUNYLE1BQU0sc0JBQXNCLEdBQUcsR0FBRyxDQUFDLE9BQU8sQ0FBQTtJQUM5QyxDQUFDO0FBQ0wsQ0FBQyJ9

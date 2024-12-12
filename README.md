@@ -11,6 +11,7 @@ This project uses node.js to create and edit JSON files for the purpose of rende
 -   /api/cms-routes/create-site (POST): Create an Apex site with a default template, adds domain using ApexID
 -   /publish (PATCH): Set an already created Apex site to render with site data (on by default)
 -   /unpublish (PATCH): Set an already created Apex site to redirect to the townsquare main website
+-   /scrape-site (POST): Scrape a website to retrieve image assets and SEO data
 
 Take a look at the zod input and output files in the schema directory to have an idea of the JSON data needed for these requests.
 
@@ -78,6 +79,6 @@ Listed below are the common error types that can be seen in the API response aft
 | DMN-009 | Error when checking domains config setup in Vercel |
 | AMS-010 | Unable to find requestData saved in page file, likely older page |
 | SCR-011 | Unable to load URL when scraping site |
-| SCR-012 | Unable to upload scraoed images |
+| SCR-012 | Unable to upload scraped images |
 
 <!-- ERROR_TABLE_END -->

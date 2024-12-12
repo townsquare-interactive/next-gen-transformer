@@ -13,7 +13,7 @@ describe('save function', () => {
     })
 
     it('should return the correct image upload details and call the functions correctly', async () => {
-        const settings = { url: 'scrapedsite.com' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
         const imageFiles: any = [
             {
                 url: {
@@ -34,7 +34,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -56,7 +56,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
         ]
@@ -112,7 +112,7 @@ describe('save function', () => {
     })
 
     it('should remove duplicates before uploading images', async () => {
-        const settings = { url: 'scrapedsite.com' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
         const imageFiles: any = [
             {
                 url: {
@@ -133,7 +133,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -154,7 +154,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -176,7 +176,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
         ]
@@ -249,7 +249,7 @@ describe('save function', () => {
         }
 
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
-        const settings = { url: 'scrapedsite.com' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
         const errMessage = 'Network error'
         mockSaveFunction.mockRejectedValueOnce(new Error(errMessage))
 
@@ -273,7 +273,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -295,7 +295,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -317,7 +317,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
         ]
@@ -336,7 +336,7 @@ describe('save function', () => {
 
     //it should handle failed uploads
     it('should return failed upload list correctly', async () => {
-        const settings = { url: 'scrapedsite.com' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
         const imageFiles: any = [
             {
                 url: {
@@ -357,7 +357,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
             {
@@ -379,7 +379,7 @@ describe('save function', () => {
                     }),
                     hash: '',
                 },
-                hashedFileName: 'hashedname.jpg',
+                imageFileName: 'hashedname.jpg',
                 fileContents: {},
             },
         ]

@@ -1,6 +1,6 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { scrapeImagesFromSite } from './image-scrape.js'
 import { ScrapingError } from '../../src/utilities/errors.js'
+import { scrapeAssetsFromSite } from '../../src/controllers/scrape-controller.js'
 
 describe('Scrape Images For Duda', () => {
     beforeEach(() => {
@@ -13,19 +13,20 @@ describe('Scrape Images For Duda', () => {
             // Succeed on the second attempt
             imageList: ['image1.jpg', 'image2.jpg'],
             imageFiles: [
-                { hashedFileName: 'image1.jpg', fileContents: 'image1content' },
-                { hashedFileName: 'image2.jpg', fileContents: 'image2content' },
-                { hashedFileName: 'image3.jpg', fileContents: 'image3content' },
+                { imageFileName: 'image1.jpg', fileContents: 'image1content' },
+                { imageFileName: 'image2.jpg', fileContents: 'image2content' },
+                { imageFileName: 'image3.jpg', fileContents: 'image3content' },
             ],
         })
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
 
-        const result = await scrapeImagesFromSite({
+        const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
             retries: 2,
             functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+            basePath: 'scrapeurl',
         })
 
         expect(mockScrapeFunction).toHaveBeenCalledTimes(1)
@@ -40,27 +41,28 @@ describe('Scrape Images For Duda', () => {
                 // First page images
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { hashedFileName: 'image1.jpg', fileContents: 'image1content' },
-                    { hashedFileName: 'image2.jpg', fileContents: 'image2content' },
-                    { hashedFileName: 'image3.jpg', fileContents: 'image3content' },
+                    { imageFileName: 'image1.jpg', fileContents: 'image1content' },
+                    { imageFileName: 'image2.jpg', fileContents: 'image2content' },
+                    { imageFileName: 'image3.jpg', fileContents: 'image3content' },
                 ],
             })
             .mockResolvedValueOnce({
                 // Second page images
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { hashedFileName: 'image4.jpg', fileContents: 'image4content' },
-                    { hashedFileName: 'image5.jpg', fileContents: 'image5content' },
+                    { imageFileName: 'image4.jpg', fileContents: 'image4content' },
+                    { imageFileName: 'image5.jpg', fileContents: 'image5content' },
                 ],
             })
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1', 'page2'])
 
-        const result = await scrapeImagesFromSite({
+        const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
             retries: 2,
             functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+            basePath: 'scrapeurl',
         })
 
         // Verify that the mock scrape function was called twice
@@ -77,18 +79,19 @@ describe('Scrape Images For Duda', () => {
                 // Succeed on the second attempt
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { hashedFileName: 'image1.jpg', fileContents: 'image1content' },
-                    { hashedFileName: 'image2.jpg', fileContents: 'image2content' },
+                    { imageFileName: 'image1.jpg', fileContents: 'image1content' },
+                    { imageFileName: 'image2.jpg', fileContents: 'image2content' },
                 ],
             })
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
 
-        const result = await scrapeImagesFromSite({
+        const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
             retries: 2,
             functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+            basePath: 'scrapeurl',
         })
 
         // Verify that the mock scrape function was called twice
@@ -104,11 +107,12 @@ describe('Scrape Images For Duda', () => {
 
         let error: any
         try {
-            await scrapeImagesFromSite({
+            await scrapeAssetsFromSite({
                 url,
                 saveMethod: 'test',
                 retries: 3,
                 functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction },
+                basePath: 'scrapeurl',
             })
         } catch (err) {
             error = err
@@ -135,7 +139,13 @@ describe('Scrape Images For Duda', () => {
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1', 'page2'])
 
         try {
-            await scrapeImagesFromSite({ url: errUrl, timeoutLength: 10000, retries: 1, functions: { scrapePagesFunction: mockFindPagesFunction } })
+            await scrapeAssetsFromSite({
+                url: errUrl,
+                timeoutLength: 10000,
+                retries: 1,
+                functions: { scrapePagesFunction: mockFindPagesFunction },
+                basePath: 'scrapeurl',
+            })
         } catch (err) {
             error = err
         }

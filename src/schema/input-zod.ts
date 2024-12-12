@@ -382,6 +382,7 @@ export const RequestDataSchema = z.object({
 })
 
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
+export type ScrapeImageReq = z.infer<typeof ScrapeImageSchema>
 export type LandingReq = z.infer<typeof LandingInputSchema>
 export type RequestDataReq = z.infer<typeof RequestDataSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
