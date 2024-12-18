@@ -326,13 +326,22 @@ router.post('/scrape-site', async (req, res) => {
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
-        const savedInfo = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
+
+        //save to s3 by default (backupImagesSave defaults to true if not in params)
+        let s3SavedRes
+        if (scrapeSettings.backupImagesSave) {
+            s3SavedRes = await saveScrapedData({ ...scrapeSettings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
+        }
+
+        const saveServiceRes = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
+        const savedInfoResponse = saveServiceRes || s3SavedRes
 
         res.json({
-            imageUploadTotal: savedInfo.imageData.imageUploadTotal || 0,
-            failedImageCount: savedInfo.imageData.failedImageList.length,
-            uploadedResources: savedInfo.imageData.uploadedResources || [],
-            failedImages: savedInfo.imageData.failedImageList,
+            imageUploadTotal: savedInfoResponse.imageData.imageUploadTotal,
+            failedImageCount: savedInfoResponse.imageData.failedImageList.length,
+            uploadedResources: savedInfoResponse.imageData.uploadedResources,
+            s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
+            failedImages: savedInfoResponse.imageData.failedImageList,
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
         })

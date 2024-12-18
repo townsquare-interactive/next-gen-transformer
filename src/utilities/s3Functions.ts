@@ -108,6 +108,9 @@ export const addImageToS3 = async (file: any, key: string) => {
     }).catch((error) => {
         console.error(error)
     })
+
+    const s3ImageUrl = `https://${tsiBucket}.s3.us-east-1.amazonaws.com/${encodeURIComponent(key)}`
+    return s3ImageUrl
 }
 
 //add file to s3 bucket

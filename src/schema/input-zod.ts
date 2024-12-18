@@ -373,6 +373,7 @@ export const ScrapeImageSchema = z.object({
     url: z.string(),
     savingMethod: SaveFileMethod.optional(),
     uploadLocation: z.string().optional(),
+    backupImagesSave: z.boolean().optional(),
 })
 
 export const RequestDataSchema = z.object({

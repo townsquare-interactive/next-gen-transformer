@@ -65,7 +65,6 @@ export function processBatch(payload: UploadPayload[], batchSize: number): Uploa
 
 export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFunction?: (payload: UploadPayload[]) => DudaResponse): Promise<SaveOutput> {
     const dudaFetchFunction = fetchFunction || dudaFetch
-
     const preprocessedPayload = processImageUrlsForDuda(imageFiles)
 
     // Slice preprocessed payload into batches of 10

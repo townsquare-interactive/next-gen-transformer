@@ -7,6 +7,7 @@ import { chromium as playwrightChromium } from 'playwright'
 import chromium from '@sparticuz/chromium'
 import { fileURLToPath } from 'url'
 import type { ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
+import { preprocessImageUrl } from './utils.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -62,26 +63,43 @@ export async function scrape(settings: Settings) {
                 return
             }
 
+            const contentType = response.headers()['content-type']
+            console.log('content type', contentType)
+            if (!contentType || !contentType.startsWith('image/')) {
+                console.log(`Skipping non-image URL: ${url.href}`)
+                return
+            }
+
             // Get the image content
             response.body().then(async (fileContents) => {
                 const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
                 const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
                 const hashedFileName = `${hashedName}${fileExtension}`
+                console.log('file ext', fileExtension)
+                console.log('hash name', hashedFileName)
 
-                //file logging stuff
-                const __filename = fileURLToPath(import.meta.url)
-                const __dirname = path.dirname(__filename)
-                const fileName = url.pathname.split('/').pop()
+                const processedImageUrl = preprocessImageUrl(url) || ''
+                const fileName = processedImageUrl.split('/').pop()
+
                 if (!fileName) {
                     console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
                     return
                 }
 
-                console.debug(`url = ${url}, filePath = ${fileName}`)
+                //filter out requests for tracking
+                if (fileName?.endsWith('=FGET')) {
+                    console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                    return
+                }
 
-                //const nonHashFileName = url.pathname.split('/').pop()?.toString() || ''
-                imageList.push(fileName) // Add the non-hashed file name to the list of images
-                imageFiles.push({ imageFileName: fileName, fileContents: fileContents, url: url, hashedFileName: hashedFileName })
+                //make sure file extension is at the end
+                let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
+                console.log('og filename', fileName)
+                console.log('new filename', fileNameWithExt)
+
+                console.debug(`url = ${url}, filePath = ${fileName}`)
+                imageList.push(fileName)
+                imageFiles.push({ imageFileName: fileNameWithExt, fileContents: fileContents, url: url, hashedFileName: hashedFileName })
             })
         }
     })

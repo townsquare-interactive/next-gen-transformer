@@ -1,8 +1,8 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ScrapingError } from '../../src/utilities/errors.js'
-import { scrapeAssetsFromSite } from '../../src/controllers/scrape-controller.js'
+import { ScrapingError } from '../utilities/errors.js'
+import { scrapeAssetsFromSite } from './scrape-controller.js'
 
-describe('Scrape Images For Duda', () => {
+describe('scrapeAssetsFromSite', () => {
     beforeEach(() => {
         vi.restoreAllMocks()
     })
@@ -13,9 +13,9 @@ describe('Scrape Images For Duda', () => {
             // Succeed on the second attempt
             imageList: ['image1.jpg', 'image2.jpg'],
             imageFiles: [
-                { imageFileName: 'image1.jpg', fileContents: 'image1content' },
-                { imageFileName: 'image2.jpg', fileContents: 'image2content' },
-                { imageFileName: 'image3.jpg', fileContents: 'image3content' },
+                { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
+                { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
+                { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
             ],
         })
 
@@ -41,17 +41,17 @@ describe('Scrape Images For Duda', () => {
                 // First page images
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { imageFileName: 'image1.jpg', fileContents: 'image1content' },
-                    { imageFileName: 'image2.jpg', fileContents: 'image2content' },
-                    { imageFileName: 'image3.jpg', fileContents: 'image3content' },
+                    { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
+                    { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
+                    { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
                 ],
             })
             .mockResolvedValueOnce({
                 // Second page images
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { imageFileName: 'image4.jpg', fileContents: 'image4content' },
-                    { imageFileName: 'image5.jpg', fileContents: 'image5content' },
+                    { imageFileName: 'image4.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image4content' } },
+                    { imageFileName: 'image5.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image5content' } },
                 ],
             })
 
@@ -79,8 +79,8 @@ describe('Scrape Images For Duda', () => {
                 // Succeed on the second attempt
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { imageFileName: 'image1.jpg', fileContents: 'image1content' },
-                    { imageFileName: 'image2.jpg', fileContents: 'image2content' },
+                    { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
+                    { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
                 ],
             })
 

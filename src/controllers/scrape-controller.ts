@@ -3,6 +3,7 @@ import { findPages } from '../../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeImageReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
+import { removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
 
 export interface ScrapedPageSeo {
     pageUrl: string
@@ -35,6 +36,7 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
         savingMethod: validatedRequest.savingMethod,
         uploadLocation: validatedRequest.uploadLocation,
         basePath: convertUrlToApexId(validatedRequest.url),
+        backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
     }
 
     return scrapeSettings
@@ -44,7 +46,6 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     const siteName = settings.url
     let attempt = 0
     let retries = settings.retries || 3
-    let scrapeData
     const scrapeFunction = settings.functions?.scrapeFunction || scrape
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
     console.log('retry count', retries)
@@ -52,7 +53,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     while (attempt < retries) {
         try {
             const pages = await scrapePagesFunction(settings)
-            scrapeData = await scrapeAllPages(pages, settings, scrapeFunction)
+            const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
 
             //create s3 scrape data
             const siteData = {
@@ -87,13 +88,12 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     })
 }
 
-export const scrapeAllPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
+export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
     //now time to scrape
     const imageFiles = []
     const seoList = []
     for (let n = 0; n < pages.length; n++) {
         try {
-            console.log('scrape func 1')
             const imageData = await scrapeFunction({ ...settings, url: pages[n] })
 
             seoList.push(imageData.pageSeo) //push seo data for each page
@@ -108,7 +108,12 @@ export const scrapeAllPages = async (pages: string[], settings: Settings, scrape
         }
     }
 
-    console.log('all seo', seoList)
+    //remove duplicates in imageFiles
+    console.log('before img files', imageFiles.length)
 
-    return { imageFiles: imageFiles, seoList: seoList }
+    const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
+    const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
+    console.log('renamed 2', renamedDupes)
+
+    return { imageFiles: renamedDupes, seoList: seoList }
 }

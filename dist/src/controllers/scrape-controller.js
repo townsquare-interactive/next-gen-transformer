@@ -13,7 +13,7 @@ export async function scrapeAssetsFromSite(settings) {
     while (attempt < retries) {
         try {
             const pages = await scrapePagesFunction(settings)
-            scrapeData = await scrapeAllPages(pages, settings, scrapeFunction)
+            scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
             //create s3 scrape data
             const siteData = {
                 baseUrl: settings.url,
@@ -53,7 +53,7 @@ export function getScrapeSettings(validatedRequest) {
     }
     return scrapeSettings
 }
-export const scrapeAllPages = async (pages, settings, scrapeFunction) => {
+export const scrapeDataFromPages = async (pages, settings, scrapeFunction) => {
     //now time to scrape
     const imageFiles = []
     const seoList = []

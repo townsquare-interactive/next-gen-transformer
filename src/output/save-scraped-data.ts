@@ -14,6 +14,7 @@ export interface SaveOutput {
 
 export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData) => {
     try {
+        console.log(`attempting to save images to ${settings.saveMethod}`)
         const savedImages = await saveScrapedImages(settings, imageFiles)
         await savePageDataToS3(settings, siteData)
 
