@@ -5,7 +5,7 @@ import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
 import { saveScrapedData } from '../src/output/save-scraped-data.js'
-import { getScrapeSettings, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
+import { getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema, ScrapeImageSchema } from '../src/schema/input-zod.js'
@@ -348,6 +348,16 @@ router.post('/scrape-site', async (req, res) => {
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)
+    }
+})
+
+router.delete('/scrape-site/:url', async (req, res) => {
+    try {
+        const response = await removeScrapedFolder(req.params.url)
+        res.json(response)
+    } catch (err) {
+        err.state = { ...err.state, req: req.params }
+        handleError(err, res, req.params.url)
     }
 })
 

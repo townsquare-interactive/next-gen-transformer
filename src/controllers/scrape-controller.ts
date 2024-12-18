@@ -4,6 +4,7 @@ import { SaveFileMethodType, ScrapeImageReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
+import { deleteFolderS3 } from '../utilities/s3Functions.js'
 
 export interface ScrapedPageSeo {
     pageUrl: string
@@ -116,4 +117,16 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     console.log('renamed 2', renamedDupes)
 
     return { imageFiles: renamedDupes, seoList: seoList }
+}
+
+export const removeScrapedFolder = async (url: string) => {
+    try {
+        const siteFolderName = convertUrlToApexId(url)
+        const scrapedFolder = `${siteFolderName}/scraped`
+        const deleteStatus = await deleteFolderS3(scrapedFolder)
+        console.log(deleteStatus)
+        return deleteStatus
+    } catch (err) {
+        throw 'error deleting folder'
+    }
 }

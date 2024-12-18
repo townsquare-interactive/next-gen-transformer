@@ -182,7 +182,7 @@ export const deleteFolderS3 = async (folderKey: string) => {
 
     if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
         console.log('Folder is empty or does not exist')
-        return
+        return 'Folder is empty or does not exist, ' + folderKey
     }
 
     // Delete all files within the folder
@@ -197,6 +197,8 @@ export const deleteFolderS3 = async (folderKey: string) => {
     await s3.send(new DeleteObjectsCommand(deleteParams))
 
     console.log('S3 Folder Deleted', folderKey)
+
+    return 'S3 Folder Deleted ' + folderKey
 }
 
 export const deleteFileS3 = async (key: string) => {
