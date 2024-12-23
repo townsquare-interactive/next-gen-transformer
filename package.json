@@ -34,6 +34,7 @@
         "mongodb": "^4.8.1",
         "mongoose": "^6.5.2",
         "node-sass": "^9.0.0",
+        "openai": "^4.77.0",
         "playwright": "^1.49.0",
         "playwright-core": "^1.49.0",
         "psl": "^1.13.0",

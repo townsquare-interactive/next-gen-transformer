@@ -4,7 +4,7 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
-import { saveScrapedData } from '../src/output/save-scraped-data.js'
+import { save, saveScrapedData } from '../src/output/save-scraped-data.js'
 import { getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
@@ -231,7 +231,7 @@ router.patch('/update-domain', async (req, res) => {
 })
 
 //save from strapi webhook
-router.post('/site-data/strapi', async (req, res) => {
+/* router.post('/site-data/strapi', async (req, res) => {
     try {
         const data = await transformStrapi(req.body)
         console.log(data.pages)
@@ -242,7 +242,7 @@ router.post('/site-data/strapi', async (req, res) => {
         console.log(err)
         res.status(500).json({ err: 'Something went wrong' })
     }
-})
+}) */
 
 //save all of site data in one file to s3
 router.post('/cms', async (req, res) => {
@@ -327,24 +327,31 @@ router.post('/scrape-site', async (req, res) => {
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
 
-        //save to s3 by default (backupImagesSave defaults to true if not in params)
-        let s3SavedRes
-        if (scrapeSettings.backupImagesSave) {
-            s3SavedRes = await saveScrapedData({ ...scrapeSettings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
-        }
+        //toggle for uploading images (default true)
+        /* if (scrapeSettings.saveImages) {
+            let s3SavedRes
+            //save to s3 by default (backupImagesSave defaults to true if not in params)
+            if (scrapeSettings.backupImagesSave) {
+                s3SavedRes = await saveScrapedData({ ...scrapeSettings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
+            }
 
-        const saveServiceRes = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
-        const savedInfoResponse = saveServiceRes || s3SavedRes
+            const saveServiceRes = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
+            const savedInfoResponse = saveServiceRes || s3SavedRes
 
-        res.json({
-            imageUploadTotal: savedInfoResponse.imageData.imageUploadTotal,
-            failedImageCount: savedInfoResponse.imageData.failedImageList.length,
-            uploadedResources: savedInfoResponse.imageData.uploadedResources,
-            s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
-            failedImages: savedInfoResponse.imageData.failedImageList,
-            scrapedPages: scrapedData.siteData.pages,
-            url: scrapedData.url,
-        })
+            res.json({
+                imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal,
+                failedImageCount: savedInfoResponse.imageData.failedImageList.length,
+                uploadedResources: savedInfoResponse.imageData.uploadedResources,
+                s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
+                failedImages: savedInfoResponse.imageData.failedImageList,
+                scrapedPages: scrapedData.siteData.pages,
+                url: scrapedData.url,
+            })
+        } else {
+            res.json({ message: 'Scrape complete: no images uploaded', scrapedPages: scrapedData.siteData.pages, url: scrapedData.url })
+        } */
+        const saveResponse = await save(scrapeSettings, scrapedData)
+        res.json(saveResponse)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res)

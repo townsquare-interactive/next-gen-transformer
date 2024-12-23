@@ -100,7 +100,6 @@ export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
 }
 
 export const addImageToS3 = async (file: any, key: string) => {
-    console.log('uploading image', file, key)
     s3.putObject({
         Body: file,
         Key: key,

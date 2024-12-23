@@ -21,14 +21,19 @@ interface ScrapeResult {
     pageSeo?: ScrapedPageSeo
 }
 
+type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
+
 export interface Settings {
     url: string
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
     retries?: number
-    functions?: { scrapeFunction?: (settings: Settings) => Promise<ScrapeResult>; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
+    functions?: { scrapeFunction?: ScrapeFunctionType; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
     uploadLocation?: string
     basePath: string
+    saveImages?: boolean
+    backupImagesSave?: boolean
+    useAi?: boolean
 }
 
 export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
@@ -38,6 +43,8 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
         uploadLocation: validatedRequest.uploadLocation,
         basePath: convertUrlToApexId(validatedRequest.url),
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
+        saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
+        useAi: validatedRequest.useAi || false,
     }
 
     return scrapeSettings
@@ -64,7 +71,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
                 dudaUploadLocation: settings.uploadLocation,
             }
 
-            console.log('scrape data result', scrapeData)
+            //console.log('scrape data result', scrapeData)
             return { imageNames: [], url: siteName, imageFiles: scrapeData.imageFiles, siteData: siteData }
         } catch (error) {
             console.error(`Attempt ${attempt + 1} failed. Retrying...`)
@@ -89,14 +96,16 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     })
 }
 
-export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: (settings: Settings) => Promise<ScrapeResult>) => {
+export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {
     //now time to scrape
     const imageFiles = []
     const seoList = []
+    //pages.length
+
     for (let n = 0; n < pages.length; n++) {
         try {
-            const imageData = await scrapeFunction({ ...settings, url: pages[n] })
-
+            console.log('scraping page ', pages[n], '.......')
+            const imageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
             seoList.push(imageData.pageSeo) //push seo data for each page
 
             //push imagefiles for each page
@@ -110,11 +119,8 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     }
 
     //remove duplicates in imageFiles
-    console.log('before img files', imageFiles.length)
-
     const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
     const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
-    console.log('renamed 2', renamedDupes)
 
     return { imageFiles: renamedDupes, seoList: seoList }
 }

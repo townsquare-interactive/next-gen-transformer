@@ -5,14 +5,17 @@ import crypto from 'crypto'
 import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
-import { fileURLToPath } from 'url'
 import type { ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
 import { preprocessImageUrl } from './utils.js'
+import { analyzeHeaderForLogo, captureScreenshotAndAnalyze } from '../openai/api.js'
 
 export interface ImageFiles {
     imageFileName: string
     fileContents: any
-    url: string
+    url: any
+    hashedFileName: string
+    originalImageLink: string
+    type?: 'logo'
 }
 
 export interface ScrapeSiteData {
@@ -22,8 +25,7 @@ export interface ScrapeSiteData {
     dudaUploadLocation?: string
 }
 
-export async function scrape(settings: Settings) {
-    console.log('scrape settings', settings)
+export async function scrape(settings: Settings, n: number) {
     // Launch Chromium with the appropriate arguments
     const browser = await playwrightChromium
         .launch({
@@ -53,7 +55,7 @@ export async function scrape(settings: Settings) {
     console.log('New page created.')
 
     const imageList: string[] = [] // names of scraped images
-    const imageFiles: any = [] //actual scraped image file contents
+    let imageFiles: ImageFiles[] = [] //actual scraped image file contents
     page.on('response', async (response: Response) => {
         const url = new URL(response.url())
         if (response.request().resourceType() === 'image') {
@@ -64,7 +66,6 @@ export async function scrape(settings: Settings) {
             }
 
             const contentType = response.headers()['content-type']
-            console.log('content type', contentType)
             if (!contentType || !contentType.startsWith('image/')) {
                 console.log(`Skipping non-image URL: ${url.href}`)
                 return
@@ -75,8 +76,8 @@ export async function scrape(settings: Settings) {
                 const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
                 const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
                 const hashedFileName = `${hashedName}${fileExtension}`
-                console.log('file ext', fileExtension)
-                console.log('hash name', hashedFileName)
+                // console.log('file ext', fileExtension)
+                //console.log('hash name', hashedFileName)
 
                 const processedImageUrl = preprocessImageUrl(url) || ''
                 const fileName = processedImageUrl.split('/').pop()
@@ -94,12 +95,16 @@ export async function scrape(settings: Settings) {
 
                 //make sure file extension is at the end
                 let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
-                console.log('og filename', fileName)
-                console.log('new filename', fileNameWithExt)
 
-                console.debug(`url = ${url}, filePath = ${fileName}`)
+                // console.debug(`url = ${url}, filePath = ${fileName}`)
                 imageList.push(fileName)
-                imageFiles.push({ imageFileName: fileNameWithExt, fileContents: fileContents, url: url, hashedFileName: hashedFileName })
+                imageFiles.push({
+                    imageFileName: fileNameWithExt,
+                    fileContents: fileContents,
+                    url: url,
+                    hashedFileName: hashedFileName,
+                    originalImageLink: processedImageUrl,
+                })
             })
         }
     })
@@ -109,6 +114,12 @@ export async function scrape(settings: Settings) {
         const response = await page.goto(settings.url, {
             timeout: settings.timeoutLength || 60000,
         })
+
+        console.log('we using ai?', settings.useAi)
+        if (settings.useAi) {
+            const analysisResult = await captureScreenshotAndAnalyze(page)
+            console.log('Final Result:', analysisResult)
+        }
 
         if (!response || !response.ok()) {
             throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
@@ -127,6 +138,21 @@ export async function scrape(settings: Settings) {
         })
 
         console.log('SEO data extracted:', seoData)
+
+        //header logo stuff
+        // Extract the `<header>` tag content
+        if (n === 0 && settings.useAi) {
+            console.log('page count', n)
+            const headerHtml = await page.evaluate(() => {
+                const header = document.querySelector('header')
+                return header ? header.outerHTML : ''
+            })
+
+            //console.log('Header HTML extracted:', headerHtml)
+
+            // Send the header HTML to OpenAI
+            imageFiles = await updateImageFilesWithLogo(headerHtml, imageFiles)
+        }
 
         // Scroll to load lazy-loaded images if necessary
         await scrollToLazyLoadImages(page, 1000)
@@ -158,4 +184,32 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
 
 function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
+}
+
+async function updateImageFilesWithLogo(headerHtml: string, imageFiles: ImageFiles[]) {
+    // Send the header HTML to OpenAI
+    const logoAnalysis = await analyzeHeaderForLogo(headerHtml)
+    console.log('Logo analysis index result:', logoAnalysis)
+
+    let logoImage
+
+    if (logoAnalysis) {
+        // Update the type to 'logo' for all matching objects in the imageFiles array
+        imageFiles.forEach((imageFile) => {
+            if (imageFile.originalImageLink.includes(logoAnalysis)) {
+                imageFile.type = 'logo'
+                logoImage = imageFile
+
+                //convert and pass buffer
+                //const encodedImg = base64EncodeImageFromBuffer(imageFile.fileContents)
+            }
+        })
+
+        //  await sendImgToGPT(logoImage?.fileContents || 'no file')
+    } else {
+        console.log('No logo analysis result, imageFiles remain unchanged.')
+    }
+
+    // Return the updated array
+    return imageFiles
 }

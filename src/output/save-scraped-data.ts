@@ -4,12 +4,49 @@ import { save as WriteToFile } from '../services/write-to-folder.js'
 import { save as s3FileUpload } from '../services/s3-images-upload.js'
 import { save as batchUploadToDuda } from '../services/save-to-duda.js'
 import { addFileS3 } from '../utilities/s3Functions.js'
-import type { Settings } from '../controllers/scrape-controller.js'
+import type { ScrapedPageSeo, Settings } from '../controllers/scrape-controller.js'
 
 export interface SaveOutput {
     uploadedImages: any[]
     imageUploadCount: number
     failedImageList: string[]
+}
+
+interface ScrapedData {
+    imageNames: never[]
+    url: string
+    imageFiles: any[]
+    siteData: {
+        baseUrl: string
+        pages: string[]
+        seoList: (ScrapedPageSeo | undefined)[]
+        dudaUploadLocation: string | undefined
+    }
+}
+
+export const save = async (settings: Settings, scrapedData: ScrapedData) => {
+    if (settings.saveImages) {
+        let s3SavedRes
+        //save to s3 by default (backupImagesSave defaults to true if not in params)
+        if (settings.backupImagesSave) {
+            s3SavedRes = await saveScrapedData({ ...settings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
+        }
+
+        const saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData)
+        const savedInfoResponse = saveServiceRes || s3SavedRes
+
+        return {
+            imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal,
+            failedImageCount: savedInfoResponse.imageData.failedImageList.length,
+            uploadedResources: savedInfoResponse.imageData.uploadedResources,
+            s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
+            failedImages: savedInfoResponse.imageData.failedImageList,
+            scrapedPages: scrapedData.siteData.pages,
+            url: scrapedData.url,
+        }
+    } else {
+        return { message: 'Scrape complete: no images uploaded', scrapedPages: scrapedData.siteData.pages, url: scrapedData.url }
+    }
 }
 
 export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData) => {

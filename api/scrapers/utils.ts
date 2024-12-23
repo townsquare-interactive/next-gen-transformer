@@ -1,8 +1,6 @@
 import { createRandomFiveCharString } from '../../src/utilities/utils.js'
 
 export function preprocessImageUrl(itemUrl: any): string | null {
-    console.log('Processing item URL:', itemUrl)
-
     if (!itemUrl) {
         console.error('URL is null or undefined:', itemUrl)
         throw new Error('Invalid URL: Cannot process')
@@ -14,7 +12,6 @@ export function preprocessImageUrl(itemUrl: any): string | null {
     const s3Url = url.searchParams.get('url')
     const finalUrl = s3Url ? decodeURIComponent(s3Url) : url.href
 
-    console.log('Processed final URL:', finalUrl)
     return finalUrl
 }
 
@@ -57,19 +54,27 @@ export const removeDupeImages = async (imageFiles: any[]) => {
     for (const item of imageFiles) {
         const uniqueIdentifier = `${item.url.origin}${item.url.pathname}`
 
-        // Get the current largest file stored for this unique identifier
-        const existingItem = seen.get(uniqueIdentifier)
-
-        if (!existingItem) {
-            // If no file exists yet for this uniqueIdentifier, add the current item
+        //logos should take precedence with duplicate filenames
+        if (item.type === 'logo') {
             seen.set(uniqueIdentifier, item)
         } else {
-            // Compare sizes and keep the larger file
-            const existingSize = await getFileSize(existingItem.fileContents)
-            const currentSize = await getFileSize(item.fileContents)
+            // Get the current largest file stored for this unique identifier
+            const existingItem = seen.get(uniqueIdentifier)
 
-            if (currentSize > existingSize) {
-                seen.set(uniqueIdentifier, item) // Replace with the larger file
+            if (!existingItem) {
+                // If no file exists yet for this uniqueIdentifier, add the current item
+                seen.set(uniqueIdentifier, item)
+            } else {
+                // Compare sizes and keep the larger file
+
+                if (existingItem.type != 'logo') {
+                    const existingSize = await getFileSize(existingItem.fileContents)
+                    const currentSize = await getFileSize(item.fileContents)
+
+                    if (currentSize > existingSize) {
+                        seen.set(uniqueIdentifier, item) // Replace with the larger file
+                    }
+                }
             }
         }
     }
