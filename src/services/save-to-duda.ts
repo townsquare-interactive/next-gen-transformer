@@ -18,8 +18,6 @@ export interface UploadedResourcesObj {
     status?: 'UPLOADED' | 'NOT_FOUND'
 }
 
-//type UploadedResources = UploadedResourcesObj[]
-
 interface DudaResponse {
     success: boolean
     message?: string
@@ -139,13 +137,19 @@ async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
 
         if (!response.ok) {
             console.error(`status text: ${response.statusText}`)
-            throw 'failed to receive 200 response from image upload'
+            throw response.statusText
         }
 
         const responseData: DudaResponse = await response.json()
         return responseData
     } catch (error) {
-        console.error('duda upload error', error)
-        throw 'failed to upload batch images'
+        /*         console.error('duda upload error', error)
+        throw 'failed to upload batch images' */
+        throw new ScrapingError({
+            domain: '',
+            message: 'Failed to upload batch images: ' + error.message,
+            state: { scrapeStatus: 'Images not uploaded' },
+            errorType: 'SCR-012',
+        })
     }
 }

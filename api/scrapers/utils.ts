@@ -1,4 +1,5 @@
 import { createRandomFiveCharString } from '../../src/utilities/utils.js'
+import { ImageFiles } from './asset-scrape.js'
 
 export function preprocessImageUrl(itemUrl: any): string | null {
     if (!itemUrl) {
@@ -92,4 +93,22 @@ const getFileSize = async (fileContents: Buffer | Uint8Array | Blob): Promise<nu
         return fileContents.size
     }
     throw new Error('Unsupported file type')
+}
+
+export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: ImageFiles[]) => {
+    if (logoAnalysis) {
+        const srcMatch = logoAnalysis?.match(/<img\s[^>]*src="([^"]+)"/) //match the image tag src value
+        const logoSrc = srcMatch ? srcMatch[1] : null
+
+        // Update the type to 'logo' for all matching objects in the imageFiles array
+        imageFiles.forEach((imageFile) => {
+            if (imageFile.originalImageLink.includes(logoSrc || '')) {
+                imageFile.type = 'logo'
+            }
+        })
+    } else {
+        console.log('No logo analysis result, imageFiles remain unchanged.')
+    }
+
+    return imageFiles
 }

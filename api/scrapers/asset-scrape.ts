@@ -5,9 +5,9 @@ import crypto from 'crypto'
 import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
-import type { ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
-import { preprocessImageUrl } from './utils.js'
-import { analyzeHeaderForLogo, captureScreenshotAndAnalyze } from '../openai/api.js'
+import type { ScrapeResult, ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
+import { preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { capturePageAndAnalyze } from '../openai/api.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -25,7 +25,7 @@ export interface ScrapeSiteData {
     dudaUploadLocation?: string
 }
 
-export async function scrape(settings: Settings, n: number) {
+export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {
     // Launch Chromium with the appropriate arguments
     const browser = await playwrightChromium
         .launch({
@@ -44,7 +44,6 @@ export async function scrape(settings: Settings, n: number) {
             console.error('Failed to launch Chromium:', error)
             throw error
         })
-    console.log('Chromium executable path:', playwrightChromium.executablePath())
 
     if (!browser) {
         throw new Error('Chromium browser instance could not be created.')
@@ -56,70 +55,68 @@ export async function scrape(settings: Settings, n: number) {
 
     const imageList: string[] = [] // names of scraped images
     let imageFiles: ImageFiles[] = [] //actual scraped image file contents
-    page.on('response', async (response: Response) => {
-        const url = new URL(response.url())
-        if (response.request().resourceType() === 'image') {
-            const status = response.status()
-            if (status >= 300 && status <= 399) {
-                console.info(`Redirect from ${url} to ${response.headers()['location']}`)
-                return
-            }
 
-            const contentType = response.headers()['content-type']
-            if (!contentType || !contentType.startsWith('image/')) {
-                console.log(`Skipping non-image URL: ${url.href}`)
-                return
-            }
-
-            // Get the image content
-            response.body().then(async (fileContents) => {
-                const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
-                const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                const hashedFileName = `${hashedName}${fileExtension}`
-                // console.log('file ext', fileExtension)
-                //console.log('hash name', hashedFileName)
-
-                const processedImageUrl = preprocessImageUrl(url) || ''
-                const fileName = processedImageUrl.split('/').pop()
-
-                if (!fileName) {
-                    console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
+    console.log(`${settings.scrapeImages ? 'scraping images.....' : 'skipping image scrape'}`)
+    if (settings.scrapeImages) {
+        page.on('response', async (response: Response) => {
+            const url = new URL(response.url())
+            if (response.request().resourceType() === 'image') {
+                const status = response.status()
+                if (status >= 300 && status <= 399) {
+                    console.info(`Redirect from ${url} to ${response.headers()['location']}`)
                     return
                 }
 
-                //filter out requests for tracking
-                if (fileName?.endsWith('=FGET')) {
-                    console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                const contentType = response.headers()['content-type']
+                if (!contentType || !contentType.startsWith('image/')) {
+                    console.log(`Skipping non-image URL: ${url.href}`)
                     return
                 }
 
-                //make sure file extension is at the end
-                let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
+                // Get the image content
+                response.body().then(async (fileContents) => {
+                    const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
+                    const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
+                    const hashedFileName = `${hashedName}${fileExtension}`
+                    // console.log('file ext', fileExtension)
+                    //console.log('hash name', hashedFileName)
 
-                // console.debug(`url = ${url}, filePath = ${fileName}`)
-                imageList.push(fileName)
-                imageFiles.push({
-                    imageFileName: fileNameWithExt,
-                    fileContents: fileContents,
-                    url: url,
-                    hashedFileName: hashedFileName,
-                    originalImageLink: processedImageUrl,
+                    const processedImageUrl = preprocessImageUrl(url) || ''
+                    const fileName = processedImageUrl.split('/').pop()
+
+                    if (!fileName) {
+                        console.warn(`Unexpected parsing of url ${url}, fileName is empty!`)
+                        return
+                    }
+
+                    //filter out requests for tracking
+                    if (fileName?.endsWith('=FGET')) {
+                        console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                        return
+                    }
+
+                    //make sure file extension is at the end
+                    let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
+
+                    // console.debug(`url = ${url}, filePath = ${fileName}`)
+                    imageList.push(fileName)
+                    imageFiles.push({
+                        imageFileName: fileNameWithExt,
+                        fileContents: fileContents,
+                        url: url,
+                        hashedFileName: hashedFileName,
+                        originalImageLink: processedImageUrl,
+                    })
                 })
-            })
-        }
-    })
+            }
+        })
+    }
 
     try {
-        console.log(`Attempting to load URL: ${settings.url}`)
+        console.log(`Attempting to load URL: ${settings.url} .....`)
         const response = await page.goto(settings.url, {
             timeout: settings.timeoutLength || 60000,
         })
-
-        console.log('we using ai?', settings.useAi)
-        if (settings.useAi) {
-            const analysisResult = await captureScreenshotAndAnalyze(page)
-            console.log('Final Result:', analysisResult)
-        }
 
         if (!response || !response.ok()) {
             throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
@@ -137,21 +134,16 @@ export async function scrape(settings: Settings, n: number) {
             }
         })
 
-        console.log('SEO data extracted:', seoData)
-
-        //header logo stuff
-        // Extract the `<header>` tag content
+        //analyzing the homepage
+        let scrapeAnalysisResult
         if (n === 0 && settings.useAi) {
-            console.log('page count', n)
-            const headerHtml = await page.evaluate(() => {
-                const header = document.querySelector('header')
-                return header ? header.outerHTML : ''
-            })
+            //screenshot the homepage and analyze the content
+            scrapeAnalysisResult = await capturePageAndAnalyze(page)
 
-            //console.log('Header HTML extracted:', headerHtml)
-
-            // Send the header HTML to OpenAI
-            imageFiles = await updateImageFilesWithLogo(headerHtml, imageFiles)
+            if (scrapeAnalysisResult.logoTag) {
+                console.log('found a logo src obj', scrapeAnalysisResult.logoTag)
+                imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
+            }
         }
 
         // Scroll to load lazy-loaded images if necessary
@@ -159,10 +151,15 @@ export async function scrape(settings: Settings, n: number) {
         await browser.close()
 
         // Return the list of image names after all images are scraped
-        return { imageList: imageList, imageFiles: imageFiles, pageSeo: { ...seoData, pageUrl: settings.url } }
+        return {
+            imageList: imageList,
+            imageFiles: imageFiles,
+            pageSeo: { ...seoData, pageUrl: settings.url },
+            screenshotAnalysis: scrapeAnalysisResult,
+        }
     } catch (error) {
-        console.error(`Error loading URL: ${settings.url}. Details: ${error.message}`)
-        throw new Error(`Error loading URL: ${settings.url}. Details: ${error.message}`)
+        console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
+        throw new Error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
     }
 }
 
@@ -184,32 +181,4 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
 
 function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
-}
-
-async function updateImageFilesWithLogo(headerHtml: string, imageFiles: ImageFiles[]) {
-    // Send the header HTML to OpenAI
-    const logoAnalysis = await analyzeHeaderForLogo(headerHtml)
-    console.log('Logo analysis index result:', logoAnalysis)
-
-    let logoImage
-
-    if (logoAnalysis) {
-        // Update the type to 'logo' for all matching objects in the imageFiles array
-        imageFiles.forEach((imageFile) => {
-            if (imageFile.originalImageLink.includes(logoAnalysis)) {
-                imageFile.type = 'logo'
-                logoImage = imageFile
-
-                //convert and pass buffer
-                //const encodedImg = base64EncodeImageFromBuffer(imageFile.fileContents)
-            }
-        })
-
-        //  await sendImgToGPT(logoImage?.fileContents || 'no file')
-    } else {
-        console.log('No logo analysis result, imageFiles remain unchanged.')
-    }
-
-    // Return the updated array
-    return imageFiles
 }

@@ -376,6 +376,7 @@ export const ScrapeImageSchema = z.object({
     backupImagesSave: z.boolean().optional(),
     saveImages: z.boolean().optional(),
     useAi: z.boolean().optional(),
+    scrapeImages: z.boolean().optional(),
 })
 
 export const RequestDataSchema = z.object({

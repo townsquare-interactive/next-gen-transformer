@@ -12,28 +12,36 @@ export interface ScrapedPageSeo {
     metaDescription?: string
     metaKeywords?: string
     ogTitle?: string
-    ogDescription?: string
 }
 
-interface ScrapeResult {
+export interface ScreenshotData {
+    logoTag?: string
+    companyName?: string
+    address?: string
+    phoneNumber?: string
+    hours?: string
+}
+
+export interface ScrapeResult {
     imageList: string[]
     imageFiles: ImageFiles[]
     pageSeo?: ScrapedPageSeo
+    screenshotAnalysis?: ScreenshotData
 }
 
 type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
 
-export interface Settings {
-    url: string
+export interface Settings extends ScrapeImageReq {
+    //url: string
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
     retries?: number
     functions?: { scrapeFunction?: ScrapeFunctionType; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
-    uploadLocation?: string
+    // uploadLocation?: string
     basePath: string
-    saveImages?: boolean
-    backupImagesSave?: boolean
-    useAi?: boolean
+    //saveImages?: boolean
+    //backupImagesSave?: boolean
+    //useAi?: boolean
 }
 
 export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
@@ -45,6 +53,7 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
         useAi: validatedRequest.useAi || false,
+        scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
     }
 
     return scrapeSettings
@@ -69,6 +78,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
                 pages: pages,
                 seoList: scrapeData.seoList,
                 dudaUploadLocation: settings.uploadLocation,
+                screenshotAnalysis: scrapeData.screenshotAnalysis,
             }
 
             //console.log('scrape data result', scrapeData)
@@ -100,13 +110,19 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     //now time to scrape
     const imageFiles = []
     const seoList = []
-    //pages.length
+    let screenshotPageData
 
     for (let n = 0; n < pages.length; n++) {
         try {
             console.log('scraping page ', pages[n], '.......')
+
             const imageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
             seoList.push(imageData.pageSeo) //push seo data for each page
+
+            if (imageData.screenshotAnalysis) {
+                console.log('res sound')
+                screenshotPageData = imageData.screenshotAnalysis
+            }
 
             //push imagefiles for each page
             for (let i = 0; i < imageData.imageFiles.length; i++) {
@@ -122,7 +138,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
     const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
 
-    return { imageFiles: renamedDupes, seoList: seoList }
+    return { imageFiles: renamedDupes, seoList: seoList, screenshotAnalysis: screenshotPageData }
 }
 
 export const removeScrapedFolder = async (url: string) => {

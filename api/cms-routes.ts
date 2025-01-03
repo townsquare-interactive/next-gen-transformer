@@ -322,34 +322,9 @@ router.post('/migrate', async (req, res) => {
 
 router.post('/scrape-site', async (req, res) => {
     try {
-        //check input data for correct structure
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
-
-        //toggle for uploading images (default true)
-        /* if (scrapeSettings.saveImages) {
-            let s3SavedRes
-            //save to s3 by default (backupImagesSave defaults to true if not in params)
-            if (scrapeSettings.backupImagesSave) {
-                s3SavedRes = await saveScrapedData({ ...scrapeSettings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
-            }
-
-            const saveServiceRes = await saveScrapedData(scrapeSettings, scrapedData.imageFiles, scrapedData.siteData)
-            const savedInfoResponse = saveServiceRes || s3SavedRes
-
-            res.json({
-                imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal,
-                failedImageCount: savedInfoResponse.imageData.failedImageList.length,
-                uploadedResources: savedInfoResponse.imageData.uploadedResources,
-                s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
-                failedImages: savedInfoResponse.imageData.failedImageList,
-                scrapedPages: scrapedData.siteData.pages,
-                url: scrapedData.url,
-            })
-        } else {
-            res.json({ message: 'Scrape complete: no images uploaded', scrapedPages: scrapedData.siteData.pages, url: scrapedData.url })
-        } */
         const saveResponse = await save(scrapeSettings, scrapedData)
         res.json(saveResponse)
     } catch (err) {

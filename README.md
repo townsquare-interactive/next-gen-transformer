@@ -80,5 +80,6 @@ Listed below are the common error types that can be seen in the API response aft
 | AMS-010 | Unable to find requestData saved in page file, likely older page |
 | SCR-011 | Unable to load URL when scraping site |
 | SCR-012 | Unable to upload scraped images |
+| SCR-013 | Unable to analyze scraped data with openai |
 
 <!-- ERROR_TABLE_END -->

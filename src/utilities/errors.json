@@ -34,5 +34,8 @@
     },
     "SCR-012": {
         "description": "Unable to upload scraped images"
+    },
+    "SCR-013": {
+        "description": "Unable to analyze scraped data with openai"
     }
 }

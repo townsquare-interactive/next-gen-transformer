@@ -172,7 +172,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
         res.status(400).json({
             id: errorID,
             errorType: err.errorType,
-            message: 'Error scraping URL ' + err.message + errorIDMessage,
+            message: 'Error scraping URL: ' + err.message + errorIDMessage,
             domain: err.domain,
             state: err.state,
             status: errorStatus,

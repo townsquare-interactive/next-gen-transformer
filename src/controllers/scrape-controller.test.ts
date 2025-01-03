@@ -151,6 +151,6 @@ describe('scrapeAssetsFromSite', () => {
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-        expect(error.message).toContain(`Error loading URL: page1`)
+        expect(error.message).toContain(`Error scraping URL: page1`)
     }, 15000)
 })

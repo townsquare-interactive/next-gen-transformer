@@ -4,7 +4,7 @@ import { save as WriteToFile } from '../services/write-to-folder.js'
 import { save as s3FileUpload } from '../services/s3-images-upload.js'
 import { save as batchUploadToDuda } from '../services/save-to-duda.js'
 import { addFileS3 } from '../utilities/s3Functions.js'
-import type { ScrapedPageSeo, Settings } from '../controllers/scrape-controller.js'
+import type { ScrapedPageSeo, ScreenshotData, Settings } from '../controllers/scrape-controller.js'
 
 export interface SaveOutput {
     uploadedImages: any[]
@@ -12,7 +12,7 @@ export interface SaveOutput {
     failedImageList: string[]
 }
 
-interface ScrapedData {
+interface ScrapedDataToSave {
     imageNames: never[]
     url: string
     imageFiles: any[]
@@ -21,10 +21,11 @@ interface ScrapedData {
         pages: string[]
         seoList: (ScrapedPageSeo | undefined)[]
         dudaUploadLocation: string | undefined
+        screenshotAnalysis?: ScreenshotData
     }
 }
 
-export const save = async (settings: Settings, scrapedData: ScrapedData) => {
+export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) => {
     if (settings.saveImages) {
         let s3SavedRes
         //save to s3 by default (backupImagesSave defaults to true if not in params)
@@ -43,6 +44,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedData) => {
             failedImages: savedInfoResponse.imageData.failedImageList,
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
+            siteData: scrapedData.siteData,
         }
     } else {
         return { message: 'Scrape complete: no images uploaded', scrapedPages: scrapedData.siteData.pages, url: scrapedData.url }
@@ -51,7 +53,6 @@ export const save = async (settings: Settings, scrapedData: ScrapedData) => {
 
 export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData) => {
     try {
-        console.log(`attempting to save images to ${settings.saveMethod}`)
         const savedImages = await saveScrapedImages(settings, imageFiles)
         await savePageDataToS3(settings, siteData)
 
@@ -63,54 +64,55 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
             },
         }
     } catch (err) {
-        throw new ScrapingError({
+        /*         throw new ScrapingError({
             domain: settings.url,
             message: `Failed to save scraped data: ` + err.message,
             state: { scrapeStatus: 'Scraped images not saved' },
             errorType: 'SCR-012',
-        })
+        }) */
+        throw err
     }
 }
 
 export async function saveScrapedImages(settings: Settings, imageFiles: ImageFiles[]) {
-    try {
-        console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
+    // try {
+    console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
 
-        let save: (settings: Settings, imageFiles: ImageFiles[]) => Promise<SaveOutput>
-        switch (settings.saveMethod) {
-            case 'writeFolder':
-                save = WriteToFile
-                break
+    let save: (settings: Settings, imageFiles: ImageFiles[]) => Promise<SaveOutput>
+    switch (settings.saveMethod) {
+        case 'writeFolder':
+            save = WriteToFile
+            break
 
-            case 's3Upload':
-                save = s3FileUpload
-                break
-            case 'dudaUpload':
-                save = batchUploadToDuda
-                break
+        case 's3Upload':
+            save = s3FileUpload
+            break
+        case 'dudaUpload':
+            save = batchUploadToDuda
+            break
 
-            case undefined:
-                save = batchUploadToDuda
-                break
-            default:
-                save = batchUploadToDuda
-                break
-        }
+        case undefined:
+            save = batchUploadToDuda
+            break
+        default:
+            save = batchUploadToDuda
+            break
+    }
 
-        const savedInfo = await save(settings, imageFiles)
-        return {
-            uploadedImages: savedInfo.uploadedImages || [],
-            imageUploadCount: savedInfo.imageUploadCount || 0,
-            failedImageList: savedInfo.failedImageList,
-        }
-    } catch (err) {
+    const savedInfo = await save(settings, imageFiles)
+    return {
+        uploadedImages: savedInfo.uploadedImages || [],
+        imageUploadCount: savedInfo.imageUploadCount || 0,
+        failedImageList: savedInfo.failedImageList,
+    }
+    /*  } catch (err) {
         throw new ScrapingError({
             domain: settings.url,
             message: `Failed to save scraped images: ` + err.message,
             state: { scrapeStatus: 'Scraped images not saved' },
             errorType: 'SCR-012',
         })
-    }
+    } */
 }
 
 export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapeSiteData) => {
