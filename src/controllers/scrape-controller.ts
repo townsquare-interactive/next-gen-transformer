@@ -88,10 +88,11 @@ export async function scrapeAssetsFromSite(settings: Settings) {
             attempt++
             if (attempt === retries) {
                 console.error(`Failed to scrape after ${retries} attempts.`)
+
                 throw new ScrapingError({
                     domain: settings.url,
                     message: error.message,
-                    state: { scrapeStatus: 'URL not able to be scraped' },
+                    state: { scrapeStatus: 'Site not scraped' },
                     errorType: 'SCR-011',
                 })
             }

@@ -64,18 +64,11 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
             },
         }
     } catch (err) {
-        /*         throw new ScrapingError({
-            domain: settings.url,
-            message: `Failed to save scraped data: ` + err.message,
-            state: { scrapeStatus: 'Scraped images not saved' },
-            errorType: 'SCR-012',
-        }) */
         throw err
     }
 }
 
 export async function saveScrapedImages(settings: Settings, imageFiles: ImageFiles[]) {
-    // try {
     console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
 
     let save: (settings: Settings, imageFiles: ImageFiles[]) => Promise<SaveOutput>
@@ -105,14 +98,6 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
         imageUploadCount: savedInfo.imageUploadCount || 0,
         failedImageList: savedInfo.failedImageList,
     }
-    /*  } catch (err) {
-        throw new ScrapingError({
-            domain: settings.url,
-            message: `Failed to save scraped images: ` + err.message,
-            state: { scrapeStatus: 'Scraped images not saved' },
-            errorType: 'SCR-012',
-        })
-    } */
 }
 
 export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapeSiteData) => {
@@ -121,6 +106,11 @@ export const savePageDataToS3 = async (settings: Settings, scrapedPageData: Scra
         await addFileS3(scrapedPageData, folderPath)
         console.log('scraped page data uploaded to ', folderPath)
     } catch (err) {
-        throw err.message
+        throw new ScrapingError({
+            domain: settings.url,
+            message: `Failed to save scraped site data: ` + err.message,
+            state: { scrapeStatus: 'Scraped site data not saved', method: settings.saveMethod },
+            errorType: 'SCR-012',
+        })
     }
 }

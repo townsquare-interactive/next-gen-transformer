@@ -331,7 +331,7 @@ describe('save function', () => {
 
         expect(mockSaveFunction).toHaveBeenCalledTimes(1)
         expect(error).toBeInstanceOf(ScrapingError)
-        expect(error.message).toEqual(`Failed to upload batch images: ${errMessage}`)
+        expect(error.message).toEqual(`Failed to upload batch images: Error: ${errMessage}`)
     })
 
     //it should handle failed uploads

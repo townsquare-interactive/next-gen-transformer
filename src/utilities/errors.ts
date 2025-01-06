@@ -33,6 +33,7 @@ interface ScrapingErrorType extends ErrorClass {
     domain: string
     state: {
         scrapeStatus: string
+        method?: string
     } & ErrorState
 }
 
@@ -173,7 +174,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             id: errorID,
             errorType: err.errorType,
             message: 'Error scraping URL: ' + err.message + errorIDMessage,
-            domain: err.domain,
+            domain: url,
             state: err.state,
             status: errorStatus,
         })

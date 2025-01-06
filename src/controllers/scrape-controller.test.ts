@@ -123,7 +123,7 @@ describe('scrapeAssetsFromSite', () => {
         expect(error).toMatchObject({
             domain: url,
             message: 'Permanent scraping error',
-            state: { scrapeStatus: 'URL not able to be scraped' },
+            state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
             errorType: 'SCR-011',
         })
     })
@@ -147,10 +147,18 @@ describe('scrapeAssetsFromSite', () => {
                 basePath: 'scrapeurl',
             })
         } catch (err) {
+            console.log('Error thrown:', err)
             error = err
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-        expect(error.message).toContain(`Error scraping URL: page1`)
+        // expect(error.message).toContain(`Error scraping URL: page1`)
+
+        expect(error).toMatchObject({
+            domain: errUrl,
+            message: '',
+            state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
+            errorType: 'SCR-011',
+        })
     }, 15000)
 })

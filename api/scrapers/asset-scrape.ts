@@ -1,9 +1,7 @@
 import { Page, Response } from 'playwright'
 import path from 'path'
 import crypto from 'crypto'
-//import { ScrapingError } from '../../src/utilities/errors.js'
 import { chromium as playwrightChromium } from 'playwright'
-//sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
 import type { ScrapeResult, ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
 import { preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
@@ -78,9 +76,6 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                     const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
                     const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
                     const hashedFileName = `${hashedName}${fileExtension}`
-                    // console.log('file ext', fileExtension)
-                    //console.log('hash name', hashedFileName)
-
                     const processedImageUrl = preprocessImageUrl(url) || ''
                     const fileName = processedImageUrl.split('/').pop()
 
@@ -98,7 +93,6 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                     //make sure file extension is at the end
                     let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
 
-                    // console.debug(`url = ${url}, filePath = ${fileName}`)
                     imageList.push(fileName)
                     imageFiles.push({
                         imageFileName: fileNameWithExt,
@@ -159,7 +153,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
-        throw new Error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
+        throw error.message
     }
 }
 

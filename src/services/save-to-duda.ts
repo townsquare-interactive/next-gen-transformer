@@ -78,8 +78,8 @@ export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFu
             console.error(`Error uploading batch: ${error}`)
             throw new ScrapingError({
                 domain: settings.url,
-                message: 'Failed to upload batch images: ' + error.message,
-                state: { scrapeStatus: 'Images not uploaded' },
+                message: 'Failed to upload batch images: ' + error,
+                state: { scrapeStatus: 'Images not uploaded', method: settings.savingMethod },
                 errorType: 'SCR-012',
             })
         }
@@ -143,13 +143,6 @@ async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
         const responseData: DudaResponse = await response.json()
         return responseData
     } catch (error) {
-        /*         console.error('duda upload error', error)
-        throw 'failed to upload batch images' */
-        throw new ScrapingError({
-            domain: '',
-            message: 'Failed to upload batch images: ' + error.message,
-            state: { scrapeStatus: 'Images not uploaded' },
-            errorType: 'SCR-012',
-        })
+        throw error
     }
 }
