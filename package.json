@@ -9,9 +9,8 @@
         "test:once": "vitest --run",
         "start": "npx tsx index.js",
         "dev": "npx tsx index.js",
-        "generate-readme": "node generateReadme.js",
+        "generate-readme": "node generateReadme.js && cp README.md public/",
         "build": "node index.js",
-        "postbuild": "cp README.md public/",
         "prepare": "husky",
         "postinstall": "playwright install"
     },

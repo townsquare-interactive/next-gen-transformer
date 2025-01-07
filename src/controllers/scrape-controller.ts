@@ -47,7 +47,7 @@ export interface Settings extends ScrapeImageReq {
 export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
     const scrapeSettings = {
         url: validatedRequest.url,
-        savingMethod: validatedRequest.savingMethod,
+        saveMethod: validatedRequest.saveMethod,
         uploadLocation: validatedRequest.uploadLocation,
         basePath: convertUrlToApexId(validatedRequest.url),
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,

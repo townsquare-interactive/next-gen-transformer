@@ -9,8 +9,10 @@ This project uses node.js to create and edit JSON files for the purpose of rende
 -   api/cms-routes/landing-request-data?domain="your domain here" (GET): pass a landing domain with page name and it will return the request data saved from the LP creation tool
 -   api/cms-routes/check-domain-config?domain="your domain here" (GET): pass a domain and it will return the configuration status and DNS records needed
 -   /api/cms-routes/create-site (POST): Create an Apex site with a default template, adds domain using ApexID
--   /publish (PATCH): Set an already created Apex site to render with site data (on by default)
--   /unpublish (PATCH): Set an already created Apex site to redirect to the townsquare main website
+-   /api/cms-routes/publish (PATCH): Set an already created Apex site to render with site data (on by default)
+-   /api/cms-routes/unpublish (PATCH): Set an already created Apex site to redirect to the townsquare main website
+-   /api/cms-routes/scrape-site (POST): Scrape a website to retrieve image assets and SEO data
+-   /api/cms-routes/scrape-site (DELETE): Remove the S3 scraped folder from a site in S3
 
 Take a look at the zod input and output files in the schema directory to have an idea of the JSON data needed for these requests.
 
@@ -54,6 +56,10 @@ By default the landing page route will create a domain on the Apex Renderer Verc
 
 Listed below are the common error types that can be seen in the API response after an error occurs. Each error also has a unique ID that will appear in the response (ex. "2f26df77-56b6-42f8-94ca-e395658f85f4") that you can search in the project's Vercel logs to learn more about the incident [https://vercel.com/townsquare-interactive/apex-transformer/logs](https://vercel.com/townsquare-interactive/apex-transformer/logs).
 
+### Other Documentation
+
+-   [Scrape Controller Documentation](/src/controllers/scrape-controller.readme.md)
+
 ### Error response structure
 
 -   id: Generated random ID specific to this instance
@@ -77,5 +83,8 @@ Listed below are the common error types that can be seen in the API response aft
 | DMN-008 | Production domain not available, try a different domain. |
 | DMN-009 | Error when checking domains config setup in Vercel |
 | AMS-010 | Unable to find requestData saved in page file, likely older page |
+| SCR-011 | Unable to load URL when scraping site |
+| SCR-012 | Unable to upload scraped images |
+| SCR-013 | Unable to analyze scraped data with openai |
 
 <!-- ERROR_TABLE_END -->

@@ -371,7 +371,7 @@ const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.li
 //request body coming from AI tool
 export const ScrapeImageSchema = z.object({
     url: z.string(),
-    savingMethod: SaveFileMethod.optional(),
+    saveMethod: SaveFileMethod.optional(),
     uploadLocation: z.string().optional(),
     backupImagesSave: z.boolean().optional(),
     saveImages: z.boolean().optional(),

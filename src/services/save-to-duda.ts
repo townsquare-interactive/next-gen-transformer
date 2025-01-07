@@ -79,7 +79,7 @@ export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFu
             throw new ScrapingError({
                 domain: settings.url,
                 message: 'Failed to upload batch images: ' + error,
-                state: { scrapeStatus: 'Images not uploaded', method: settings.savingMethod },
+                state: { scrapeStatus: 'Images not uploaded', method: settings.saveMethod },
                 errorType: 'SCR-012',
             })
         }

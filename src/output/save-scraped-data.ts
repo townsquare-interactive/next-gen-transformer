@@ -29,19 +29,22 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
     if (settings.saveImages) {
         let s3SavedRes
         //save to s3 by default (backupImagesSave defaults to true if not in params)
-        if (settings.backupImagesSave) {
+        if (settings.backupImagesSave || settings.saveMethod === 's3Upload') {
             s3SavedRes = await saveScrapedData({ ...settings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
         }
 
-        const saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData)
+        let saveServiceRes
+        if (settings.saveMethod != 's3Upload') {
+            saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData)
+        }
         const savedInfoResponse = saveServiceRes || s3SavedRes
 
         return {
-            imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal,
-            failedImageCount: savedInfoResponse.imageData.failedImageList.length,
-            uploadedResources: savedInfoResponse.imageData.uploadedResources,
+            imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal || 0,
+            failedImageCount: savedInfoResponse?.imageData.failedImageList.length || 0,
+            uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
             s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
-            failedImages: savedInfoResponse.imageData.failedImageList,
+            failedImages: savedInfoResponse?.imageData.failedImageList || [],
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
             siteData: scrapedData.siteData,
