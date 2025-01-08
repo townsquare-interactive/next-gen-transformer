@@ -10,6 +10,7 @@ export interface SaveOutput {
     uploadedImages: any[]
     imageUploadCount: number
     failedImageList: string[]
+    logoUrl?: string
 }
 
 interface ScrapedDataToSave {
@@ -35,7 +36,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
 
         let saveServiceRes
         if (settings.saveMethod != 's3Upload') {
-            saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData)
+            saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData, s3SavedRes?.imageData?.logoUrl || '')
         }
         const savedInfoResponse = saveServiceRes || s3SavedRes
 
@@ -45,6 +46,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
             uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
             s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
             failedImages: savedInfoResponse?.imageData.failedImageList || [],
+            logoUrlS3: s3SavedRes?.imageData?.logoUrl || '',
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
             siteData: scrapedData.siteData,
@@ -54,16 +56,17 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
     }
 }
 
-export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData) => {
+export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData, logoUrl?: string) => {
     try {
-        const savedImages = await saveScrapedImages(settings, imageFiles)
-        await savePageDataToS3(settings, siteData)
+        const savedImages = await saveScrapedImages(settings, imageFiles, logoUrl)
+        await savePageDataToS3(settings, { ...siteData, logoUrlS3: savedImages.logoUrl || '' })
 
         return {
             imageData: {
                 uploadedResources: savedImages.uploadedImages,
                 imageUploadTotal: savedImages.imageUploadCount,
                 failedImageList: savedImages.failedImageList,
+                logoUrl: savedImages.logoUrl || '',
             },
         }
     } catch (err) {
@@ -71,10 +74,10 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
     }
 }
 
-export async function saveScrapedImages(settings: Settings, imageFiles: ImageFiles[]) {
+export async function saveScrapedImages(settings: Settings, imageFiles: ImageFiles[], logoUrl?: string) {
     console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
 
-    let save: (settings: Settings, imageFiles: ImageFiles[]) => Promise<SaveOutput>
+    let save: (settings: Settings, imageFiles: ImageFiles[], logoUrl?: string) => Promise<SaveOutput>
     switch (settings.saveMethod) {
         case 'writeFolder':
             save = WriteToFile
@@ -95,11 +98,12 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
             break
     }
 
-    const savedInfo = await save(settings, imageFiles)
+    const savedInfo = await save(settings, imageFiles, logoUrl)
     return {
         uploadedImages: savedInfo.uploadedImages || [],
         imageUploadCount: savedInfo.imageUploadCount || 0,
         failedImageList: savedInfo.failedImageList,
+        logoUrl: savedInfo.logoUrl || '',
     }
 }
 

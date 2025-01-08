@@ -24,7 +24,7 @@ interface DudaResponse {
     uploaded_resources: UploadedResourcesObj[]
 }
 
-export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload[] {
+export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: string): UploadPayload[] {
     const seenUrls = new Set<string>()
     const processedUrls: UploadPayload[] = []
     const dudaImageFolder = 'Imported'
@@ -50,6 +50,16 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload
         })
     })
 
+    //add logo src seperately from s3 url
+    if (logoUrl) {
+        processedUrls.push({
+            resource_type: 'IMAGE',
+            src: logoUrl,
+            //folder: 'logos',
+            folder: dudaImageFolder,
+        })
+    }
+
     return processedUrls
 }
 
@@ -61,9 +71,14 @@ export function processBatch(payload: UploadPayload[], batchSize: number): Uploa
     return batches
 }
 
-export async function save(settings: Settings, imageFiles: ImageFiles[], fetchFunction?: (payload: UploadPayload[]) => DudaResponse): Promise<SaveOutput> {
+export async function save(
+    settings: Settings,
+    imageFiles: ImageFiles[],
+    logoUrl?: string,
+    fetchFunction?: (payload: UploadPayload[]) => DudaResponse
+): Promise<SaveOutput> {
     const dudaFetchFunction = fetchFunction || dudaFetch
-    const preprocessedPayload = processImageUrlsForDuda(imageFiles)
+    const preprocessedPayload = processImageUrlsForDuda(imageFiles, logoUrl)
 
     // Slice preprocessed payload into batches of 10
     const batches = processBatch(preprocessedPayload, 10)

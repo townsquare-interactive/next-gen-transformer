@@ -84,7 +84,7 @@ describe('save function', () => {
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
-        const result = await save(settings, imageFiles, mockSaveFunction)
+        const result = await save(settings, imageFiles, '', mockSaveFunction)
         console.log('Result:', result)
 
         expect(result.failedImageList.length).toBe(0)
@@ -203,7 +203,7 @@ describe('save function', () => {
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
-        const result = await save(settings, imageFiles, mockSaveFunction)
+        const result = await save(settings, imageFiles, '', mockSaveFunction)
         console.log('Result:', result)
 
         // Check fetch calls
@@ -324,7 +324,7 @@ describe('save function', () => {
 
         let error
         try {
-            const result = await save(settings, imageFilesErr, mockSaveFunction)
+            const result = await save(settings, imageFilesErr, '', mockSaveFunction)
         } catch (err) {
             error = err
         }
@@ -405,7 +405,7 @@ describe('save function', () => {
         }
 
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
-        const result = await save(settings, imageFiles, mockSaveFunction)
+        const result = await save(settings, imageFiles, '', mockSaveFunction)
 
         expect(result.failedImageList.length).toBe(1)
         expect(result.failedImageList).toContainEqual(

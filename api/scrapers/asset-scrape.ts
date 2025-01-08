@@ -14,6 +14,7 @@ export interface ImageFiles {
     hashedFileName: string
     originalImageLink: string
     type?: 'logo'
+    fileExtension: string
 }
 
 export interface ScrapeSiteData {
@@ -21,6 +22,7 @@ export interface ScrapeSiteData {
     pages: string[]
     seolist?: ScrapedPageSeo[]
     dudaUploadLocation?: string
+    logoUrlS3?: string
 }
 
 export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {
@@ -100,6 +102,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                         url: url,
                         hashedFileName: hashedFileName,
                         originalImageLink: processedImageUrl,
+                        fileExtension: fileExtension,
                     })
                 })
             }

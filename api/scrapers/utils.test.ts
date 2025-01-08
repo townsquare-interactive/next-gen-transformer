@@ -69,6 +69,7 @@ describe('updateImageWithLogo', () => {
             hashedFileName: 'test',
             originalImageLink:
                 'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_241,h_86,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+            fileExtension: 'png',
         }
 
         const imageFileEx2 = { ...imageFileExample, originalImageLink: 'test' }
@@ -89,6 +90,7 @@ describe('updateImageWithLogo', () => {
             hashedFileName: 'test',
             originalImageLink:
                 'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_241,h_86,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+            fileExtension: 'png',
         }
         const imageFiles = [imageFileExample]
 
@@ -106,6 +108,7 @@ describe('updateImageWithLogo', () => {
             hashedFileName: 'test',
             originalImageLink:
                 'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_241,h_86,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
+            fileExtension: 'png',
         }
         const imageFiles = [imageFileExample]
 
