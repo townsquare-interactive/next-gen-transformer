@@ -29,19 +29,20 @@ export interface ScrapeResult {
     screenshotAnalysis?: ScreenshotData
 }
 
+interface DeleteScrapedFolderRes {
+    message: string
+    url: string
+    status: 'fail' | 'success'
+}
+
 type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
 
 export interface Settings extends ScrapeImageReq {
-    //url: string
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
     retries?: number
     functions?: { scrapeFunction?: ScrapeFunctionType; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
-    // uploadLocation?: string
     basePath: string
-    //saveImages?: boolean
-    //backupImagesSave?: boolean
-    //useAi?: boolean
 }
 
 export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
@@ -142,14 +143,19 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     return { imageFiles: renamedDupes, seoList: seoList, screenshotAnalysis: screenshotPageData }
 }
 
-export const removeScrapedFolder = async (url: string) => {
+export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {
     try {
         const siteFolderName = convertUrlToApexId(url)
         const scrapedFolder = `${siteFolderName}/scraped`
         const deleteStatus = await deleteFolderS3(scrapedFolder)
         console.log(deleteStatus)
-        return deleteStatus
+        return { ...deleteStatus, url: url }
     } catch (err) {
-        throw 'error deleting folder'
+        throw new ScrapingError({
+            domain: url,
+            message: err.message,
+            state: { fileStatus: 'site data not deleted from S3' },
+            errorType: 'SCR-014',
+        })
     }
 }

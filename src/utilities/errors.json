@@ -37,5 +37,8 @@
     },
     "SCR-013": {
         "description": "Unable to analyze scraped data with openai"
+    },
+    "SCR-014": {
+        "description": "Unable to delete scraped data folder"
     }
 }

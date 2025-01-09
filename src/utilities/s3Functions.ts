@@ -7,6 +7,11 @@ import { S3 } from '@aws-sdk/client-s3'
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
 
+interface DeleteFolderS3Res {
+    status: 'fail' | 'success'
+    message: string
+}
+
 const s3 = new S3({
     credentials: {
         accessKeyId: process.env.CMS_ACCESS_KEY_ID || '',
@@ -171,33 +176,37 @@ export const addMultipleS3 = async (data: any, pageList: { pages: [] }, basePath
     addFileS3(data, `${basePath}/siteData`)
 }
 
-export const deleteFolderS3 = async (folderKey: string) => {
-    const listParams = {
-        Bucket: tsiBucket,
-        Prefix: folderKey,
+export const deleteFolderS3 = async (folderKey: string): Promise<DeleteFolderS3Res> => {
+    try {
+        const listParams = {
+            Bucket: tsiBucket,
+            Prefix: folderKey,
+        }
+
+        const listedObjects = await s3.send(new ListObjectsV2Command(listParams))
+
+        if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
+            console.log('Folder is empty or does not exist')
+            return { status: 'fail', message: 'S3 Folder is empty or does not exist, ' + folderKey }
+        }
+
+        // Delete all files within the folder
+        const deleteParams = {
+            Bucket: tsiBucket,
+            Delete: {
+                Objects: listedObjects.Contents.map(({ Key }) => ({ Key })),
+                Quiet: true,
+            },
+        }
+
+        await s3.send(new DeleteObjectsCommand(deleteParams))
+
+        console.log('S3 Folder Deleted', folderKey)
+
+        return { status: 'success', message: 'S3 Folder Deleted ' + folderKey }
+    } catch (err) {
+        throw err
     }
-
-    const listedObjects = await s3.send(new ListObjectsV2Command(listParams))
-
-    if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
-        console.log('Folder is empty or does not exist')
-        return 'Folder is empty or does not exist, ' + folderKey
-    }
-
-    // Delete all files within the folder
-    const deleteParams = {
-        Bucket: tsiBucket,
-        Delete: {
-            Objects: listedObjects.Contents.map(({ Key }) => ({ Key })),
-            Quiet: true,
-        },
-    }
-
-    await s3.send(new DeleteObjectsCommand(deleteParams))
-
-    console.log('S3 Folder Deleted', folderKey)
-
-    return 'S3 Folder Deleted ' + folderKey
 }
 
 export const deleteFileS3 = async (key: string) => {

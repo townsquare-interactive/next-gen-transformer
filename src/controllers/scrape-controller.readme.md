@@ -44,8 +44,36 @@ See the project README for generic project env variable usage
 }
 ```
 
+Return object structure
+
+```json
+{
+    "imageUploadTotal": "number of images uploaded",
+    "failedImageCount": "number of failed image uploads",
+    "uploadedResources": "array of uploaded resources statusses and info",
+    "s3UploadedImages": "array of s3 links for uploaded images",
+    "failedImages": "array of failed image upload URLs",
+    "logoUrlS3": "link for the logo uploaded to s3 if found",
+    "scrapedPages": "array of site pages scraped",
+    "url": "scraped url",
+    "siteData": "object of data scraped from site (see code for object details)"
+}
+```
+
 ### Scraped data cleanup
 
 This route can be used to remove the scraped folder created in s3 from a site.
-Simply pass the URL that you initially scraped in a DELETE request to the route
+Simply pass the URL that you initially scraped in a DELETE request to the route.
+A sta
+
 Route: /api/cms-routes/scrape-site (DELETE)
+
+Return object structure
+
+```json
+{
+    "status": "success or fail based off the process outcome",
+    "message": "status on the s3 folder for site",
+    "url": "url the request sent that was initially scraped"
+}
+```

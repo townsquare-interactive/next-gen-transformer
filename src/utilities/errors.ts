@@ -6,6 +6,7 @@ import { Dns } from '../../types'
 //Type declarations
 interface ErrorState {
     req?: LandingReq
+    fileStatus?: string
 }
 
 interface ErrorClass {
@@ -32,7 +33,7 @@ interface TransformErrorType extends ErrorClass {
 interface ScrapingErrorType extends ErrorClass {
     domain: string
     state: {
-        scrapeStatus: string
+        scrapeStatus?: string
         method?: string
     } & ErrorState
 }
@@ -173,7 +174,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
         res.status(400).json({
             id: errorID,
             errorType: err.errorType,
-            message: 'Error scraping URL: ' + err.message + errorIDMessage,
+            message: 'Scraping Error: ' + err.message + errorIDMessage,
             domain: url,
             state: err.state,
             status: errorStatus,
