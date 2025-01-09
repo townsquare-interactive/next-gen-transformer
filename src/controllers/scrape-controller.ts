@@ -52,7 +52,7 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
         basePath: convertUrlToApexId(validatedRequest.url),
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
-        useAi: validatedRequest.useAi || false,
+        useAi: validatedRequest.useAi === undefined ? true : validatedRequest.useAi,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
     }
 

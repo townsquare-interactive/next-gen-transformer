@@ -134,6 +134,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         //analyzing the homepage
         let scrapeAnalysisResult
         if (n === 0 && settings.useAi) {
+            console.log('using AI')
             //screenshot the homepage and analyze the content
             scrapeAnalysisResult = await capturePageAndAnalyze(page)
 
