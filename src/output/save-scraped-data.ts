@@ -46,7 +46,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
             uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
             s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
             failedImages: savedInfoResponse?.imageData.failedImageList || [],
-            logoUrlS3: s3SavedRes?.imageData?.logoUrl || '',
+            s3LogoUrl: s3SavedRes?.imageData?.logoUrl || '',
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
             siteData: scrapedData.siteData,
@@ -59,7 +59,10 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
 export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData, logoUrl?: string) => {
     try {
         const savedImages = await saveScrapedImages(settings, imageFiles, logoUrl)
-        await savePageDataToS3(settings, { ...siteData, logoUrlS3: savedImages.logoUrl || '' })
+
+        if (settings.saveMethod === 's3Upload') {
+            await savePageDataToS3(settings, { ...siteData, s3LogoUrl: savedImages.logoUrl || '' })
+        }
 
         return {
             imageData: {

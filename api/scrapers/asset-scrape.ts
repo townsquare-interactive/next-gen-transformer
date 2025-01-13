@@ -22,7 +22,7 @@ export interface ScrapeSiteData {
     pages: string[]
     seolist?: ScrapedPageSeo[]
     dudaUploadLocation?: string
-    logoUrlS3?: string
+    s3LogoUrl?: string
 }
 
 export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {

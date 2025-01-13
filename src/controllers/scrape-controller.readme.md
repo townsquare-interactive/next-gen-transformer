@@ -53,7 +53,7 @@ Return object structure
     "uploadedResources": "array of uploaded resources statusses and info",
     "s3UploadedImages": "array of s3 links for uploaded images",
     "failedImages": "array of failed image upload URLs",
-    "logoUrlS3": "link for the logo uploaded to s3 if found",
+    "s3LogoUrl": "link for the logo uploaded to s3 if found",
     "scrapedPages": "array of site pages scraped",
     "url": "scraped url",
     "siteData": "object of data scraped from site (see code for object details)"
