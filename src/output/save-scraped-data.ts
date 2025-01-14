@@ -22,7 +22,7 @@ interface ScrapedDataToSave {
         pages: string[]
         seoList: (ScrapedPageSeo | undefined)[]
         dudaUploadLocation: string | undefined
-        screenshotAnalysis?: ScreenshotData
+        aiAnalysis?: ScreenshotData
     }
 }
 

@@ -153,7 +153,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             imageList: imageList,
             imageFiles: imageFiles,
             pageSeo: { ...seoData, pageUrl: settings.url },
-            screenshotAnalysis: scrapeAnalysisResult,
+            aiAnalysis: scrapeAnalysisResult,
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)

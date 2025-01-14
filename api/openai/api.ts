@@ -12,10 +12,7 @@ export async function capturePageAndAnalyze(page: Page) {
         const base64Image = buffer.toString('base64')
         const base64ImageUrl = `data:image/jpeg;base64,${base64Image}`
 
-        const headerHtml = await page.evaluate(() => {
-            const header = document.querySelector('header')
-            return header ? header.outerHTML : ''
-        })
+        const pageHtml = await page.content() // Get the full HTML content of the page
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
@@ -28,7 +25,11 @@ export async function capturePageAndAnalyze(page: Page) {
                             text: `
                         Task 1: Please analyze the provided screenshot and extract the information in the JSON object below. 
 
-                        Task 2: Here is the HTML of the <header> tag: ${headerHtml}. Identify the logo from this HTML and then give me the <img> tag with the src value.
+                        Task 2: Here is the full HTML of the page: ${pageHtml}. Using this HTML and the screenshot provided, identify the colors used on the page and provide appropriate values for the JSON below in the colors object. Provide these colors in their hex values or as close approximations.
+
+                        Task 3: Analyze the fonts used for headers and body text in the HTML. Provide the font-family names or a description if the font cannot be identified precisely.
+
+                        Task 4: Identify the logo from the header section of the HTML (if available) and provide the <img> tag with the src value.
 
                         Respond in the following JSON format:
                         
@@ -38,6 +39,21 @@ export async function capturePageAndAnalyze(page: Page) {
                           "address": "string or null",
                           "phoneNumber": "string or null",
                           "hours": "string or null",
+                          "styles": {
+                            "colors": {
+                              "primaryColor": "hex or null",
+                              "secondaryColor": "hex or null",
+                              "tertiaryColor": "hex or null",
+                              "quaternary":"hex or null",
+                              "textColor":"hex or null",
+                              "mainContentBackgroundColor":"hex or null",
+
+                            },
+                            "fonts": {
+                              "headerFonts": ["array of fonts or null"],
+                              "bodyFonts": ["array of fonts or null"]
+                            }
+                          }
                         }
                         
                         If any information is not available, return it as null.
@@ -61,7 +77,7 @@ export async function capturePageAndAnalyze(page: Page) {
     } catch (err) {
         throw new ScrapingError({
             message: `Failed to analyze scraped data with openai: ` + err.message,
-            state: { scrapeStatus: 'Scraped images not saved' },
+            state: { scrapeStatus: 'Scraped data not saved' },
             errorType: 'SCR-013',
             domain: '',
         })

@@ -26,7 +26,7 @@ export interface ScrapeResult {
     imageList: string[]
     imageFiles: ImageFiles[]
     pageSeo?: ScrapedPageSeo
-    screenshotAnalysis?: ScreenshotData
+    aiAnalysis?: ScreenshotData
 }
 
 interface DeleteScrapedFolderRes {
@@ -79,7 +79,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
                 pages: pages,
                 seoList: scrapeData.seoList,
                 dudaUploadLocation: settings.uploadLocation,
-                screenshotAnalysis: scrapeData.screenshotAnalysis,
+                aiAnalysis: scrapeData.aiAnalysis,
             }
 
             //console.log('scrape data result', scrapeData)
@@ -121,9 +121,9 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
             const imageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
             seoList.push(imageData.pageSeo) //push seo data for each page
 
-            if (imageData.screenshotAnalysis) {
+            if (imageData.aiAnalysis) {
                 console.log('res sound')
-                screenshotPageData = imageData.screenshotAnalysis
+                screenshotPageData = imageData.aiAnalysis
             }
 
             //push imagefiles for each page
@@ -140,7 +140,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
     const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
 
-    return { imageFiles: renamedDupes, seoList: seoList, screenshotAnalysis: screenshotPageData }
+    return { imageFiles: renamedDupes, seoList: seoList, aiAnalysis: screenshotPageData }
 }
 
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {
