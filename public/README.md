@@ -22,13 +22,14 @@ If you are running locally, you need S3 credentials to be able to upload the nee
 
 ### Env variables Used:
 
--   CMS_ACCESS_KEY_ID: AWS access key,
--   CMS_SECRET_ACCESS_KEY_ID: AWS Secret access key
--   CMS_DEFAULT_REGION: AWS default Region
+-   TRANSFORMER_API_KEY: bearer token for accessing the API routes (required)
+-   CMS_ACCESS_KEY_ID: AWS access key (required)
+-   CMS_SECRET_ACCESS_KEY_ID: AWS Secret access key (required)
+-   CMS_DEFAULT_REGION: AWS default Region (required)
+-   NEXT_PUBLIC_VERCEL_TEAM_ID: Our Townsquare Vercel team ID (required)
+-   NEXT_PUBLIC_VERCEL_AUTH_TOKEN: Vercel auth token (required)
+-   VERCEL_PROJECT_ID: ID of the current vercel project (required)
 -   MAKE_URL: Make.com webhook url for sending form emails
--   NEXT_PUBLIC_VERCEL_TEAM_ID: Our Townsquare Vercel team ID
--   NEXT_PUBLIC_VERCEL_AUTH_TOKEN: Vercel auth token
--   VERCEL_PROJECT_ID: ID of the current vercel project
 -   CREATE_SITE_DOMAINS: Decides whether or not a domain is published when creating a landing page (default: 1)
 
 These env variables are also present in the .env.example file where you can see any default values and copy them to your .env file.
@@ -87,5 +88,6 @@ Listed below are the common error types that can be seen in the API response aft
 | SCR-012 | Unable to upload scraped images |
 | SCR-013 | Unable to analyze scraped data with openai |
 | SCR-014 | Unable to delete scraped data folder |
+| VAL-015 | Error validating Bearer token |
 
 <!-- ERROR_TABLE_END -->

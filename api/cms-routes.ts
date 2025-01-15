@@ -4,20 +4,18 @@ import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
-import { save, saveScrapedData } from '../src/output/save-scraped-data.js'
+import { save } from '../src/output/save-scraped-data.js'
 import { getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema, ScrapeImageSchema } from '../src/schema/input-zod.js'
-import express from 'express'
+import express, { Request } from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
-import { handleError } from '../src/utilities/errors.js'
+import { ValidationError, handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel, removeDomainFromVercel } from '../src/controllers/domain-controller.js'
-
-/* import { batchUploadToDuda } from '../src/services/save-to-duda.js' */
 
 const router = express.Router()
 
@@ -322,6 +320,11 @@ router.post('/migrate', async (req, res) => {
 
 router.post('/scrape-site', async (req, res) => {
     try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+        }
+
         const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
@@ -335,6 +338,11 @@ router.post('/scrape-site', async (req, res) => {
 
 router.delete('/scrape-site/:url', async (req, res) => {
     try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+        }
+
         const response = await removeScrapedFolder(req.params.url)
         res.json(response)
     } catch (err) {
@@ -342,5 +350,27 @@ router.delete('/scrape-site/:url', async (req, res) => {
         handleError(err, res, req.params.url)
     }
 })
+
+const checkAuthToken = (req: Request): boolean => {
+    try {
+        const authHeader = req.headers['authorization']
+        if (authHeader) {
+            const token = authHeader.split(' ')[1] // Extract the token (Bearer <token>)
+            if (token != process.env.TRANSFORMER_API_KEY) {
+                return false
+            }
+
+            return true
+        }
+
+        return false
+    } catch (err) {
+        throw new ValidationError({
+            message: 'Error attempting to validate Bearer token: ' + err.message,
+            errorType: 'VAL-015',
+            state: {},
+        })
+    }
+}
 
 export default router

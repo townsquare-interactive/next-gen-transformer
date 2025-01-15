@@ -40,7 +40,7 @@ interface ScrapingErrorType extends ErrorClass {
 
 interface ValidationErrorType extends ErrorClass {
     state: {
-        erroredFields: ErroredFields[]
+        erroredFields?: ErroredFields[]
     } & ErrorState
 }
 

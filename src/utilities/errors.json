@@ -40,5 +40,8 @@
     },
     "SCR-014": {
         "description": "Unable to delete scraped data folder"
+    },
+    "VAL-015": {
+        "description": "Error validating Bearer token"
     }
 }
