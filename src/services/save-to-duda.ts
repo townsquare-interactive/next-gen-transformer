@@ -77,12 +77,21 @@ export async function save(
     logoUrl?: string,
     fetchFunction?: (payload: UploadPayload[]) => DudaResponse
 ): Promise<SaveOutput> {
+    if (!settings.uploadLocation) {
+        console.log('no upload location for Duda')
+        throw new ScrapingError({
+            domain: settings.url,
+            message: 'Failed to upload images to Duda, no uploadLocation found',
+            state: { scrapeStatus: 'Images not uploaded', method: settings.saveMethod },
+            errorType: 'SCR-012',
+        })
+    }
+
     const dudaFetchFunction = fetchFunction || dudaFetch
     const preprocessedPayload = processImageUrlsForDuda(imageFiles, logoUrl)
 
     // Slice preprocessed payload into batches of 10
     const batches = processBatch(preprocessedPayload, 10)
-
     const batchResults: DudaResponse[] = []
 
     for (const batch of batches) {

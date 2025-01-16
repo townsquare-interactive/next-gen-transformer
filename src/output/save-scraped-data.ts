@@ -38,6 +38,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
         if (settings.saveMethod != 's3Upload') {
             saveServiceRes = await saveScrapedData(settings, scrapedData.imageFiles, scrapedData.siteData, s3SavedRes?.imageData?.logoUrl || '')
         }
+
         const savedInfoResponse = saveServiceRes || s3SavedRes
 
         return {
@@ -94,10 +95,10 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
             break
 
         case undefined:
-            save = batchUploadToDuda
+            save = s3FileUpload
             break
         default:
-            save = batchUploadToDuda
+            save = s3FileUpload
             break
     }
 
@@ -105,7 +106,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
     return {
         uploadedImages: savedInfo.uploadedImages || [],
         imageUploadCount: savedInfo.imageUploadCount || 0,
-        failedImageList: savedInfo.failedImageList,
+        failedImageList: savedInfo.failedImageList || [],
         logoUrl: savedInfo.logoUrl || '',
     }
 }

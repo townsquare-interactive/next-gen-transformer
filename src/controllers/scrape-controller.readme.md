@@ -6,20 +6,23 @@ These utilities have been created to scrape assets from a website and save them 
 
 ## Parameter Options
 
-| Parameter          | Type    | Description                                          | Default Value |
-| ------------------ | ------- | ---------------------------------------------------- | ------------- |
-| `url` (required)   | String  | The website URL to scrape.                           | N/A           |
-| `uploadLocation`   | String  | Duda website ID for uploading images.                | None          |
-| `saveMethod`       | String  | Determines where to save images.                     | `dudaUpload`  |
-|                    |         | - `dudaUpload`: Upload images to Duda                |               |
-|                    |         | - `writeFolder`: Save images to a local folder       |               |
-|                    |         | - `test`: Save images nowhere (for testing purposes) |               |
-| `saveImages`       | Boolean | Whether to save scraped images.                      | `true`        |
-| `scrapeImages`     | Boolean | Whether to scrape images at all.                     | `true`        |
-| `backupImagesSave` | Boolean | Whether to backup save the images to S3.             | `true`        |
-| `useAi`            | Boolean | Whether to use OpenAI to analyze the scrape.         | `true`        |
+| Parameter                       | Type    | Description                                                     | Default Value |
+| ------------------------------- | ------- | --------------------------------------------------------------- | ------------- |
+| `url` (required)                | String  | The website URL to scrape.                                      | N/A           |
+| `saveMethod`                    | String  | Determines where to save images.                                | `s3Upload`    |
+|                                 |         | - `dudaUpload`: Upload images to Duda (requires uploadLocation) |               |
+|                                 |         | - `writeFolder`: Save images to a local folder                  |               |
+|                                 |         | - `s3Upload`: Save images to s3 folder                          |               |
+|                                 |         | - `test`: Save images nowhere (for testing purposes)            |               |
+| `uploadLocation` (req for Duda) | String  | Duda website ID for uploading images                            | None          |
+| `saveImages`                    | Boolean | Whether to save scraped images.                                 | `true`        |
+| `scrapeImages`                  | Boolean | Whether to scrape images at all.                                | `true`        |
+| `backupImagesSave`              | Boolean | Whether to backup save the images to S3.                        | `true`        |
+| `useAi`                         | Boolean | Whether to use OpenAI to analyze the scrape.                    | `true`        |
 
 ---
+
+Note: Images and data backed up to S3 by default if saving to another additional location
 
 ## Duda Environment Variables
 

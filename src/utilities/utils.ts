@@ -1,6 +1,7 @@
 //import { z } from 'zod'
 import { SiteDataType } from '../schema/output-zod'
 import { CMSNavItem, CMSPage, Contact, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot, FontType, DomainOptions } from '../../types'
+import crypto from 'crypto'
 
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 const globalAssets = bucketUrl + '/global-assets'
@@ -1210,4 +1211,9 @@ export const getPageNameFromDomain = (domain: string) => {
     }
     const pageName = domainSplit[domainSplit.length - 1]
     return pageName
+}
+
+export function generateAccessToken(length = 16) {
+    //string will be double the length param
+    return crypto.randomBytes(length).toString('hex')
 }

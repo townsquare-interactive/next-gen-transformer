@@ -13,7 +13,7 @@ describe('save function', () => {
     })
 
     it('should return the correct image upload details and call the functions correctly', async () => {
-        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
         const imageFiles: any = [
             {
                 url: {
@@ -112,7 +112,7 @@ describe('save function', () => {
     })
 
     it('should remove duplicates before uploading images', async () => {
-        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
         const imageFiles: any = [
             {
                 url: {
@@ -249,7 +249,7 @@ describe('save function', () => {
         }
 
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
-        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
         const errMessage = 'Network error'
         mockSaveFunction.mockRejectedValueOnce(new Error(errMessage))
 
@@ -336,7 +336,7 @@ describe('save function', () => {
 
     //it should handle failed uploads
     it('should return failed upload list correctly', async () => {
-        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' } // Mocked settings object
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
         const imageFiles: any = [
             {
                 url: {
@@ -413,5 +413,47 @@ describe('save function', () => {
         )
         expect(result.imageUploadCount).toBe(1)
         expect(result.uploadedImages).toEqual(mockResponse.uploaded_resources)
+    })
+
+    it('should throw an error when no uploadLocation is not provided instantly', async () => {
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' }
+        const mockSaveFunction: any = vi.fn()
+
+        const imageFilesTest: any = [
+            {
+                url: {
+                    href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
+                    origin: 'https://www.townsquareignite.com',
+                    protocol: 'https:',
+                    username: '',
+                    password: '',
+                    host: 'www.townsquareignite.com',
+                    hostname: 'www.townsquareignite.com',
+                    port: '',
+                    pathname: '/_next/image',
+                    search: '?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
+                    searchParams: new URLSearchParams({
+                        url: 'https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/tacobell.com/images/selected/purpleButtonLogo.jpg',
+                        w: '1920',
+                        q: '80',
+                    }),
+                    hash: '',
+                },
+                imageFileName: 'hashedname.jpg',
+                fileContents: {},
+            },
+        ]
+
+        let error
+        try {
+            const result = await save(settings, imageFilesTest, '', mockSaveFunction)
+        } catch (err) {
+            error = err
+        }
+
+        expect(mockSaveFunction).toHaveBeenCalledTimes(0) //fetch function should not be called
+        expect(error).toBeInstanceOf(ScrapingError)
+        expect(error.message).toEqual(`Failed to upload images to Duda, no uploadLocation found`)
+        expect(error.errorType).toEqual(`SCR-012`)
     })
 })

@@ -1,5 +1,5 @@
 import { addFileS3, folderExistsInS3, getFileS3 } from '../src/utilities/s3Functions.js'
-import { convertUrlToApexId } from '../src/utilities/utils.js'
+import { convertUrlToApexId, generateAccessToken } from '../src/utilities/utils.js'
 import { transformStrapi } from '../src/translation-engines/strapi.js'
 import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
