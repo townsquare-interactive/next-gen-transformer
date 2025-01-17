@@ -53,6 +53,6 @@ export async function findPages(settings: Settings) {
 
         return urlArray
     } catch (error) {
-        throw error.message
+        throw error
     }
 }

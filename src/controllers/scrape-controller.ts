@@ -80,6 +80,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
         //console.log('scrape data result', scrapeData)
         return { imageNames: [], url: siteName, imageFiles: scrapeData.imageFiles, siteData: siteData }
     } catch (error) {
+        console.error(error)
         throw new ScrapingError({
             domain: settings.url,
             message: error.message,

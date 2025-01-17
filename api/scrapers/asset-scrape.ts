@@ -157,7 +157,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
-        throw error.message
+        throw error
     }
 }
 

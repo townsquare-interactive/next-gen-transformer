@@ -119,12 +119,12 @@ describe('scrapeAssetsFromSite', () => {
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-        // expect(error.message).toContain(`Error scraping URL: page1`)
+        console.log('tst error', error)
 
         expect(error).toMatchObject({
             domain: errUrl,
-            message: '',
-            state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
+            message: expect.stringContaining('Protocol error (Page.navigate): Cannot navigate to invalid URL'),
+            state: { scrapeStatus: 'Site not scraped' },
             errorType: 'SCR-011',
         })
     }, 15000)

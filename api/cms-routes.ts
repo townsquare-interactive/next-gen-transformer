@@ -332,7 +332,7 @@ router.post('/scrape-site', async (req, res) => {
         res.json(saveResponse)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res)
+        handleError(err, res, req.body.url)
     }
 })
 
