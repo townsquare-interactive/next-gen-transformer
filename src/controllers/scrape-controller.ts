@@ -40,7 +40,6 @@ type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResul
 export interface Settings extends ScrapeImageReq {
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
-    retries?: number
     functions?: { scrapeFunction?: ScrapeFunctionType; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
     basePath: string
 }
@@ -62,50 +61,32 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
 
 export async function scrapeAssetsFromSite(settings: Settings) {
     const siteName = settings.url
-    let attempt = 0
-    let retries = settings.retries || 3
     const scrapeFunction = settings.functions?.scrapeFunction || scrape
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
-    console.log('retry count', retries)
 
-    while (attempt < retries) {
-        try {
-            const pages = await scrapePagesFunction(settings)
-            const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
+    try {
+        const pages = await scrapePagesFunction(settings)
+        const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
 
-            //create s3 scrape data
-            const siteData = {
-                baseUrl: settings.url,
-                pages: pages,
-                seoList: scrapeData.seoList,
-                dudaUploadLocation: settings.uploadLocation,
-                aiAnalysis: scrapeData.aiAnalysis,
-            }
-
-            //console.log('scrape data result', scrapeData)
-            return { imageNames: [], url: siteName, imageFiles: scrapeData.imageFiles, siteData: siteData }
-        } catch (error) {
-            console.error(`Attempt ${attempt + 1} failed. Retrying...`)
-            attempt++
-            if (attempt === retries) {
-                console.error(`Failed to scrape after ${retries} attempts.`)
-
-                throw new ScrapingError({
-                    domain: settings.url,
-                    message: error.message,
-                    state: { scrapeStatus: 'Site not scraped' },
-                    errorType: 'SCR-011',
-                })
-            }
+        //create s3 scrape data
+        const siteData = {
+            baseUrl: settings.url,
+            pages: pages,
+            seoList: scrapeData.seoList,
+            dudaUploadLocation: settings.uploadLocation,
+            aiAnalysis: scrapeData.aiAnalysis,
         }
-    }
 
-    throw new ScrapingError({
-        domain: settings.url,
-        message: 'Unable to scrape site after multiple attempts',
-        state: { scrapeStatus: 'URL not able to be scraped' },
-        errorType: 'SCR-011',
-    })
+        //console.log('scrape data result', scrapeData)
+        return { imageNames: [], url: siteName, imageFiles: scrapeData.imageFiles, siteData: siteData }
+    } catch (error) {
+        throw new ScrapingError({
+            domain: settings.url,
+            message: error.message,
+            state: { scrapeStatus: 'Site not scraped' },
+            errorType: 'SCR-011',
+        })
+    }
 }
 
 export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {

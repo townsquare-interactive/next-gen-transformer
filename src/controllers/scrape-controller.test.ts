@@ -24,7 +24,6 @@ describe('scrapeAssetsFromSite', () => {
         const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
-            retries: 2,
             functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
             basePath: 'scrapeurl',
         })
@@ -60,7 +59,6 @@ describe('scrapeAssetsFromSite', () => {
         const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
-            retries: 2,
             functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
             basePath: 'scrapeurl',
         })
@@ -68,35 +66,6 @@ describe('scrapeAssetsFromSite', () => {
         // Verify that the mock scrape function was called twice
         expect(mockScrapeFunction).toHaveBeenCalledTimes(2)
         expect(result.imageFiles.length).toBe(5)
-    })
-
-    it('should retry the scrape function if it fails initially and succeed on subsequent attempts', async () => {
-        const url = 'https://scrapeurl.com'
-        const mockScrapeFunction = vi
-            .fn()
-            .mockRejectedValueOnce(new Error('Temporary scraping error')) // Fail on the first attempt
-            .mockResolvedValueOnce({
-                // Succeed on the second attempt
-                imageList: ['image1.jpg', 'image2.jpg'],
-                imageFiles: [
-                    { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
-                    { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
-                ],
-            })
-
-        const mockFindPagesFunction = vi.fn().mockResolvedValue(['page1'])
-
-        const result = await scrapeAssetsFromSite({
-            url,
-            saveMethod: 'test',
-            retries: 2,
-            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
-            basePath: 'scrapeurl',
-        })
-
-        // Verify that the mock scrape function was called twice
-        expect(mockScrapeFunction).toHaveBeenCalledTimes(2)
-        expect(result.imageFiles.length).toBe(2)
     })
 
     it('should fail after retrying the specified number of times', async () => {
@@ -110,7 +79,6 @@ describe('scrapeAssetsFromSite', () => {
             await scrapeAssetsFromSite({
                 url,
                 saveMethod: 'test',
-                retries: 3,
                 functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction },
                 basePath: 'scrapeurl',
             })
@@ -118,7 +86,7 @@ describe('scrapeAssetsFromSite', () => {
             error = err
         }
 
-        expect(mockScrapeFunction).toHaveBeenCalledTimes(3)
+        expect(mockScrapeFunction).toHaveBeenCalledTimes(1)
         expect(error).toBeInstanceOf(ScrapingError)
         expect(error).toMatchObject({
             domain: url,
@@ -142,7 +110,6 @@ describe('scrapeAssetsFromSite', () => {
             await scrapeAssetsFromSite({
                 url: errUrl,
                 timeoutLength: 10000,
-                retries: 1,
                 functions: { scrapePagesFunction: mockFindPagesFunction },
                 basePath: 'scrapeurl',
             })
