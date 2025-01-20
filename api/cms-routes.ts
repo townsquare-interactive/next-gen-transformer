@@ -44,6 +44,10 @@ router.post('/save', async (req, res) => {
 const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '0' ? false : true //publish new url for each client
 router.post('/landing', async (req, res) => {
     try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+        }
         const { apexID, siteData, domainOptions } = validateLandingRequestData(req)
         const data = await createLandingPageFiles(siteData, apexID)
         const s3Res = await saveToS3({ ...data })
