@@ -2,7 +2,6 @@ import { chromium as playwrightChromium } from 'playwright'
 //sparticuz/chromium package needed to get playwright working correctly on vercel
 import chromium from '@sparticuz/chromium'
 import type { Settings } from '../../src/controllers/scrape-controller.js'
-import { ScrapingError } from '../../src/utilities/errors.js'
 
 //const seenImages = new Set<string>()
 export async function findPages(settings: Settings) {

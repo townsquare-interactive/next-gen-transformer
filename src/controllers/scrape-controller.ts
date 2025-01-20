@@ -20,6 +20,7 @@ export interface ScreenshotData {
     address?: string
     phoneNumber?: string
     hours?: string
+    links: { socials: string[]; other: string[] }
 }
 
 export interface ScrapeResult {
@@ -27,6 +28,13 @@ export interface ScrapeResult {
     imageFiles: ImageFiles[]
     pageSeo?: ScrapedPageSeo
     aiAnalysis?: ScreenshotData
+}
+
+export interface ScrapeFullSiteResult {
+    imageFiles: ImageFiles[]
+    aiAnalysis?: ScreenshotData
+    pageSeo?: ScrapedPageSeo
+    seoList: (ScrapedPageSeo | undefined)[]
 }
 
 interface DeleteScrapedFolderRes {
@@ -67,18 +75,18 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     try {
         const pages = await scrapePagesFunction(settings)
         const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
+        const transformedScrapedData = transformScrapedData(scrapeData, siteName)
 
         //create s3 scrape data
         const siteData = {
             baseUrl: settings.url,
             pages: pages,
-            seoList: scrapeData.seoList,
+            seoList: transformedScrapedData.seoList,
             dudaUploadLocation: settings.uploadLocation,
-            aiAnalysis: scrapeData.aiAnalysis,
+            aiAnalysis: transformedScrapedData.aiAnalysis,
         }
 
-        //console.log('scrape data result', scrapeData)
-        return { imageNames: [], url: siteName, imageFiles: scrapeData.imageFiles, siteData: siteData }
+        return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
     } catch (error) {
         console.error(error)
         throw new ScrapingError({
@@ -88,6 +96,17 @@ export async function scrapeAssetsFromSite(settings: Settings) {
             errorType: 'SCR-011',
         })
     }
+}
+
+const transformScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
+    //remove links from same domain
+    if (scrapeData.aiAnalysis?.links.other) {
+        const extLinks = scrapeData.aiAnalysis.links.other.filter((link: string) => !link.includes(url))
+
+        scrapeData.aiAnalysis.links.other = extLinks
+    }
+
+    return scrapeData
 }
 
 export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {
@@ -104,7 +123,6 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
             seoList.push(imageData.pageSeo) //push seo data for each page
 
             if (imageData.aiAnalysis) {
-                console.log('res sound')
                 screenshotPageData = imageData.aiAnalysis
             }
 

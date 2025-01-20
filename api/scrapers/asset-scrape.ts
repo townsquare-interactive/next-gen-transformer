@@ -131,12 +131,12 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             }
         })
 
-        //analyzing the homepage
+        //analyzing the homepage with AI
         let scrapeAnalysisResult
         if (n === 0 && settings.useAi) {
             console.log('using AI')
             //screenshot the homepage and analyze the content
-            scrapeAnalysisResult = await capturePageAndAnalyze(page)
+            scrapeAnalysisResult = await capturePageAndAnalyze(page, settings.url)
 
             if (scrapeAnalysisResult.logoTag) {
                 console.log('found a logo src obj', scrapeAnalysisResult.logoTag)

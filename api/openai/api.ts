@@ -6,7 +6,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || '12',
 })
 
-export async function capturePageAndAnalyze(page: Page) {
+export async function capturePageAndAnalyze(page: Page, url: string) {
     try {
         const buffer = await page.screenshot({ fullPage: true })
         const base64Image = buffer.toString('base64')
@@ -31,6 +31,8 @@ export async function capturePageAndAnalyze(page: Page) {
 
                         Task 4: Identify the logo from the header section of the HTML (if available) and provide the <img> tag with the src value.
 
+                        Task 5: Identify the extrnal links in the sites code. Seperate them from social media links and other links. Remove duplicates of social media links if they seem to be going to the same pages. Do not include any links that link within the same domain of ${url}.
+
                         Respond in the following JSON format:
                         
                         {
@@ -53,6 +55,10 @@ export async function capturePageAndAnalyze(page: Page) {
                               "headerFonts": ["array of fonts or null"],
                               "bodyFonts": ["array of fonts or null"]
                             }
+                          },
+                          "links":{
+                            "socials":"[array of links or null],
+                            "other":[array of links or null]
                           }
                         }
                         
