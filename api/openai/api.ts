@@ -59,7 +59,7 @@ export async function capturePageAndAnalyze(page: Page, url: string) {
                           "links":{
                             "socials":"[array of links or null],
                             "other":[array of links or null]
-                          }
+                        }
                         }
                         
                         If any information is not available, return it as null.
@@ -72,20 +72,37 @@ export async function capturePageAndAnalyze(page: Page, url: string) {
             ],
         })
 
-        console.log('openai screenshot tests', response.choices[0])
-
         let rawContent = response.choices[0]?.message?.content || ''
-        rawContent = rawContent?.replace(/```json|```/g, '').trim()
-        const parsedJson = JSON.parse(rawContent)
+        console.log('openai anlysis raw result', rawContent)
+        const parsedJson = extractJsonFromRes(rawContent)
         console.log('parsed json', parsedJson)
 
         return parsedJson
     } catch (err) {
+        console.error(err)
         throw new ScrapingError({
             message: `Failed to analyze scraped data with openai: ` + err.message,
             state: { scrapeStatus: 'Scraped data not saved' },
             errorType: 'SCR-013',
             domain: '',
         })
+    }
+}
+
+export const extractJsonFromRes = (response: string) => {
+    try {
+        // Use a regex to find the JSON block
+        const jsonMatch = response.match(/\{[\s\S]*\}/)
+        if (!jsonMatch) {
+            throw new Error('No JSON object found in the response.')
+        }
+
+        // Parse the extracted JSON string
+        const jsonString = jsonMatch[0]
+        const parsedJson = JSON.parse(jsonString)
+        return parsedJson
+    } catch (error) {
+        console.error('Error extracting JSON:', error.message)
+        throw { ...error, message: 'Error extracting JSON: ' + error.message }
     }
 }
