@@ -91,16 +91,19 @@ export async function capturePageAndAnalyze(page: Page, url: string) {
 
 export const extractJsonFromRes = (response: string) => {
     try {
-        // Use a regex to find the JSON block
-        const jsonMatch = response.match(/\{[\s\S]*\}/)
+        // Use regex to extract the JSON block from the content
+        const jsonMatch = response.match(/```json([\s\S]*?)```/i) || response.match(/({[\s\S]*})/)
         if (!jsonMatch) {
-            throw new Error('No JSON object found in the response.')
+            throw new Error('Error extracting JSON: No JSON found in response.')
         }
 
-        // Parse the extracted JSON string
-        const jsonString = jsonMatch[0]
-        const parsedJson = JSON.parse(jsonString)
-        return parsedJson
+        let jsonString = jsonMatch[1].trim()
+
+        // Remove comments (only outside of string literals)
+        jsonString = jsonString.replace(/("(?:\\.|[^"\\])*")|\/\/.*|\/\*[\s\S]*?\*\//g, (match, stringLiteral) => (stringLiteral ? match : ''))
+
+        // Parse JSON string
+        return JSON.parse(jsonString)
     } catch (error) {
         console.error('Error extracting JSON:', error.message)
         throw { ...error, message: 'Error extracting JSON: ' + error.message }

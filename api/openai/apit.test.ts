@@ -59,4 +59,40 @@ describe('extractJsonFromRes', () => {
 
         expect(error.message).toContain('Error extracting JSON')
     })
+
+    it('should strip comments that are inside the JSON and handle correctly', async () => {
+        const contentWithComments = `{
+        "logoTag": "<img src=\\"/files/2023/11/water-drop-white.png\\">",
+        "companyName": "Aqua Pool & Spa",
+        "address": "Hannibal, OH 43931",
+        "phoneNumber": "(740) 312-7321",
+        "hours": "Mo, Tu, We, Th, Fr, Sa, Su 07:00-19:00",
+        "styles": {
+          "colors": {
+            "primaryColor": "#00BFFF", // Assumed based on screenshot
+            "secondaryColor": "#FFFFFF", // White for text/backgrounds
+            "tertiaryColor": "#333333", // Dark gray for text
+            "quaternary": "#eeeeee", // Light gray
+            "textColor": "#000000", // Black for main text
+            "mainContentBackgroundColor": "#f7f7f7" // Background color from content sections
+          },
+          "fonts": {
+            "headerFonts": ["Roboto", "IBM Plex Sans"],
+            "bodyFonts": ["Roboto", "IBM Plex Sans"]
+          }
+        },
+        "links": {
+          "socials": [],
+          "other": [
+            "https://maps.google.com/maps?daddr=, Hannibal, OH 43931",
+            "https://www.google.com/gtag/js?id=G-PF8RFHR03F",
+            "https://www.googletagmanager.com/gtag/js?id=G-TDG4C70DL9"
+          ]
+        }
+      }`
+
+        const parsedJson = extractJsonFromRes(contentWithComments)
+
+        expect(parsedJson.address).toBe('Hannibal, OH 43931')
+    })
 })
