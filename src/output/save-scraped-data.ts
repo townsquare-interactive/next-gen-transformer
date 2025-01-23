@@ -13,17 +13,25 @@ export interface SaveOutput {
     logoUrl?: string
 }
 
+export interface ScrapedPageData {
+    seo: ScrapedPageSeo | undefined
+    images: string[]
+    url: string
+}
+
+export interface ScrapedSiteDataToSave {
+    baseUrl: string
+    pages: ScrapedPageData[]
+    dudaUploadLocation: string | undefined
+    aiAnalysis?: ScreenshotData
+    s3LogoUrl?: string
+}
+
 interface ScrapedDataToSave {
     imageNames: never[]
     url: string
     imageFiles: any[]
-    siteData: {
-        baseUrl: string
-        pages: string[]
-        seoList: (ScrapedPageSeo | undefined)[]
-        dudaUploadLocation: string | undefined
-        aiAnalysis?: ScreenshotData
-    }
+    siteData: ScrapedSiteDataToSave
 }
 
 export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) => {
@@ -57,7 +65,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
     }
 }
 
-export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapeSiteData, logoUrl?: string) => {
+export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapedSiteDataToSave, logoUrl?: string) => {
     try {
         const savedImages = await saveScrapedImages(settings, imageFiles, logoUrl)
 
@@ -111,7 +119,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
     }
 }
 
-export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapeSiteData) => {
+export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapedSiteDataToSave) => {
     try {
         const folderPath = `${settings.basePath}/scraped/siteData`
         await addFileS3(scrapedPageData, folderPath)

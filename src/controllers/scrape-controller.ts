@@ -28,6 +28,7 @@ export interface ScrapeResult {
     imageFiles: ImageFiles[]
     pageSeo?: ScrapedPageSeo
     aiAnalysis?: ScreenshotData
+    content: string
 }
 
 export interface ScrapeFullSiteResult {
@@ -75,12 +76,12 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     try {
         const pages = await scrapePagesFunction(settings)
         const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
-        const transformedScrapedData = transformScrapedData(scrapeData, siteName)
+        const transformedScrapedData = transformSiteScrapedData(scrapeData, siteName)
 
         //create s3 scrape data
         const siteData = {
             baseUrl: settings.url,
-            pages: pages,
+            pages: scrapeData.pagesData,
             seoList: transformedScrapedData.seoList,
             dudaUploadLocation: settings.uploadLocation,
             aiAnalysis: transformedScrapedData.aiAnalysis,
@@ -98,7 +99,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     }
 }
 
-const transformScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
+const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
     //remove links from same domain
     if (scrapeData.aiAnalysis?.links.other) {
         const extLinks = scrapeData.aiAnalysis.links.other.filter((link: string) => !link.includes(url))
@@ -113,25 +114,34 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     //now time to scrape
     const imageFiles = []
     const seoList = []
+    const pagesData = []
     let screenshotPageData
 
+    //scrape each page in the found list
     for (let n = 0; n < pages.length; n++) {
         try {
             console.log('scraping page ', pages[n], '.......')
 
-            const imageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
-            seoList.push(imageData.pageSeo) //push seo data for each page
+            const scrapedPageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
+            seoList.push(scrapedPageData.pageSeo) //push seo data for each page
 
-            if (imageData.aiAnalysis) {
-                screenshotPageData = imageData.aiAnalysis
+            if (scrapedPageData.aiAnalysis) {
+                screenshotPageData = scrapedPageData.aiAnalysis
             }
 
             //push imagefiles for each page
-            for (let i = 0; i < imageData.imageFiles.length; i++) {
-                imageFiles.push(imageData.imageFiles[i])
+            for (let i = 0; i < scrapedPageData.imageFiles.length; i++) {
+                imageFiles.push(scrapedPageData.imageFiles[i])
             }
+
+            pagesData.push({
+                url: pages[n],
+                seo: scrapedPageData.pageSeo,
+                images: scrapedPageData.imageList,
+                content: scrapedPageData.content,
+            })
         } catch (err) {
-            console.log('scrape funcion fail page: ', pages[n])
+            console.log('scrape function fail page: ', pages[n])
             throw err
         }
     }
@@ -140,7 +150,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
     const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
 
-    return { imageFiles: renamedDupes, seoList: seoList, aiAnalysis: screenshotPageData }
+    return { imageFiles: renamedDupes, seoList: seoList, aiAnalysis: screenshotPageData, pagesData: pagesData }
 }
 
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {

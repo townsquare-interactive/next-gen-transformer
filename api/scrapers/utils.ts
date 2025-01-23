@@ -1,5 +1,6 @@
 import { createRandomFiveCharString } from '../../src/utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
+import crypto from 'crypto'
 
 export function preprocessImageUrl(itemUrl: any): string | null {
     if (!itemUrl) {
@@ -111,4 +112,8 @@ export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: 
     }
 
     return imageFiles
+}
+
+export function hashUrl(url: string): string {
+    return crypto.createHash('md5').update(url).digest('hex')
 }
