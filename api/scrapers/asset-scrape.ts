@@ -71,8 +71,6 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             }
         })
 
-        const pageTextContent = await extractPageContent(page)
-
         let scrapeAnalysisResult
         if (n === 0 && settings.useAi) {
             console.log('Using AI to analyze page...')
@@ -82,6 +80,9 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                 imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
             }
         }
+
+        //this step must be done last as it modies the DOM
+        const pageTextContent = await extractPageContent(page)
 
         await scrollToLazyLoadImages(page, 1000)
         await browser.close()
