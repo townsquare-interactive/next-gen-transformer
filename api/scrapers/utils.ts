@@ -161,7 +161,7 @@ export const extractPageContent = async (page: Page) => {
         })
         console.log('Extracted body text:', document.body)
         // Return visible text content
-        const bodyText = document.body?.innerText || '' // Safeguard against undefined
+        const bodyText = document.body?.textContent || '' // Safeguard against undefined
 
         return bodyText.trim() // Trim whitespace
     })

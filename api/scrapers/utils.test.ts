@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { extractFormData, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
 
 /**
  * @vitest-environment jsdom
@@ -191,5 +191,98 @@ describe('extractFormData', () => {
         expect(formData).toEqual([])
 
         expect(page.evaluate).toHaveBeenCalledOnce()
+    })
+})
+
+describe('extractPageContent', () => {
+    it('extracts content excluding unwanted tags', async () => {
+        const mockContentHTML = `
+            <body><nav>Navigation Menu</nav>
+            <header>
+                <h1>Main Title</h1>
+                <p>Some header text</p>
+            </header>
+            <article>
+                <h2>Subtitle</h2>
+                <p>Article content here.</p>
+            </article>
+            <footer>Footer Text</footer>
+            <script>console.log('script tag')</script></body>
+        `
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                document.body.innerHTML = mockContentHTML
+                console.log('Simulated body HTML:', document.body.innerHTML)
+
+                return fn()
+            }),
+        }
+
+        const content = await extractPageContent(page as any)
+
+        // Expected content: Header and visible text from <article>
+        expect(content).toContain(`Subtitle`)
+        expect(content).toContain(`Article content here.`)
+    })
+
+    it('returns empty string if the body has no content', async () => {
+        document.body.innerHTML = ``
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                return fn()
+            }),
+        }
+
+        const content = await extractPageContent(page as any)
+
+        expect(page.evaluate).toHaveBeenCalledOnce()
+        expect(content).toEqual('')
+    })
+
+    it('removes all unwanted tags and retains only visible text', async () => {
+        const mockContentHTML = `
+            <style>body { color: red; }</style>
+            <script>console.log('hidden')</script>
+            <article>
+                <p>Visible paragraph text.</p>
+            </article>
+        `
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                document.body.innerHTML = mockContentHTML
+                return fn()
+            }),
+        }
+
+        const content = await extractPageContent(page as any)
+
+        expect(page.evaluate).toHaveBeenCalledOnce()
+        expect(content).toEqual(`Visible paragraph text.`)
+    })
+
+    it('handles whitespace correctly in extracted content', async () => {
+        const mockContentHTML = `
+            <div>
+                <h1>   Main Title   </h1>
+                <p>    Paragraph with spaces    </p>
+            </div>
+        `
+
+        document.body.innerHTML = mockContentHTML
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                return fn()
+            }),
+        }
+
+        const content = await extractPageContent(page as any)
+
+        // expect(page.evaluate).toHaveBeenCalledOnce()
+        expect(content).toContain(`Main Title`)
+        expect(content).toContain(`Paragraph with spaces`)
     })
 })
