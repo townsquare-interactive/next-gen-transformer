@@ -493,6 +493,70 @@ export const PageListSchema = z.object({
     ),
 })
 
+/*----------------------------Scraping--------------------------*/
+
+// Schema for ScrapedPageSeo
+const ScrapedPageSeoSchema = z.object({
+    pageUrl: z.string(),
+    title: z.string().optional(),
+    metaDescription: z.string().optional(),
+    metaKeywords: z.string().optional(),
+    ogTitle: z.string().optional(),
+})
+
+const FormFieldSchema = z.object({
+    name: z.string(),
+    type: z.string(), // Type of input, e.g., text, textarea, etc.
+    label: z.string(),
+    placeholder: z.string().nullable(),
+    required: z.boolean().nullable(),
+})
+
+const FormSchema = z.object({
+    title: z.string().nullable(),
+    fields: z.array(FormFieldSchema),
+})
+
+// Schema for ScrapedPageData
+const ScrapedPageDataSchema = z.object({
+    seo: ScrapedPageSeoSchema.optional(), // `undefined` translates to `.optional()` in Zod
+    images: z.array(z.string()),
+    url: z.string(),
+    content: z.string().nullable(),
+    forms: z.array(FormSchema).nullable(),
+})
+
+// Schema for ScreenshotData
+const ScreenshotDataSchema = z.object({
+    logoTag: z.string().optional().nullable(),
+    companyName: z.string().nullable(),
+    address: z.string().nullable(),
+    phoneNumber: z.string().nullable(),
+    hours: z.string().nullable(),
+    links: z.object({
+        socials: z.array(z.string()),
+        other: z.array(z.string()),
+    }),
+})
+
+// Schema for ScrapedAndAnalyzedSiteData
+export const ScrapedAndAnalyzedSiteDataSchema = z.object({
+    baseUrl: z.string(),
+    pages: z.array(ScrapedPageDataSchema),
+    dudaUploadLocation: z.string().nullable(),
+    aiAnalysis: ScreenshotDataSchema.optional(),
+    s3LogoUrl: z.string().optional(),
+})
+
+//scraped data
+export type ScrapedPageSeo = z.infer<typeof ScrapedPageSeoSchema>
+export type ScrapedAndAnalyzedSiteData = z.infer<typeof ScrapedAndAnalyzedSiteDataSchema>
+export type ScrapedPageData = z.infer<typeof ScrapedPageDataSchema>
+export type ScreenshotData = z.infer<typeof ScreenshotDataSchema>
+export type ScrapedForm = z.infer<typeof FormSchema>
+
+/*---------------------------End of scraping------------------------------*/
+
 export type CompositeData = z.infer<typeof CompositeSchema>
 export type CMSPagesSchemaType = z.infer<typeof CMSPagesSchema>
 export type ApexPageType = z.infer<typeof ApexPageSchema>

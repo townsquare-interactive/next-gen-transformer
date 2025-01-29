@@ -4,7 +4,9 @@ import { save as WriteToFile } from '../services/write-to-folder.js'
 import { save as s3FileUpload } from '../services/s3-images-upload.js'
 import { save as batchUploadToDuda } from '../services/save-to-duda.js'
 import { addFileS3 } from '../utilities/s3Functions.js'
-import type { ScrapedPageSeo, ScreenshotData, Settings } from '../controllers/scrape-controller.js'
+import type { Settings } from '../controllers/scrape-controller.js'
+import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema, ScrapedPageData } from '../schema/output-zod.js'
+import { zodDataParse } from '../schema/utils-zod.js'
 
 export interface SaveOutput {
     uploadedImages: any[]
@@ -13,25 +15,11 @@ export interface SaveOutput {
     logoUrl?: string
 }
 
-export interface ScrapedPageData {
-    seo: ScrapedPageSeo | undefined
-    images: string[]
-    url: string
-}
-
-export interface ScrapedSiteDataToSave {
-    baseUrl: string
-    pages: ScrapedPageData[]
-    dudaUploadLocation: string | undefined
-    aiAnalysis?: ScreenshotData
-    s3LogoUrl?: string
-}
-
 interface ScrapedDataToSave {
     imageNames: never[]
     url: string
     imageFiles: any[]
-    siteData: ScrapedSiteDataToSave
+    siteData: ScrapedAndAnalyzedSiteData
 }
 
 export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) => {
@@ -65,12 +53,14 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
     }
 }
 
-export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapedSiteDataToSave, logoUrl?: string) => {
+export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles[], siteData: ScrapedAndAnalyzedSiteData, logoUrl?: string) => {
     try {
         const savedImages = await saveScrapedImages(settings, imageFiles, logoUrl)
+        const websiteData: ScrapedAndAnalyzedSiteData = { ...siteData, s3LogoUrl: savedImages.logoUrl || '' }
+        const validatedSiteData = zodDataParse(websiteData, ScrapedAndAnalyzedSiteDataSchema, 'scrapedOutput')
 
         if (settings.saveMethod === 's3Upload') {
-            await savePageDataToS3(settings, { ...siteData, s3LogoUrl: savedImages.logoUrl || '' })
+            await savePageDataToS3(settings, validatedSiteData)
         }
 
         return {
@@ -119,7 +109,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
     }
 }
 
-export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapedSiteDataToSave) => {
+export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData) => {
     try {
         const folderPath = `${settings.basePath}/scraped/siteData`
         await addFileS3(scrapedPageData, folderPath)

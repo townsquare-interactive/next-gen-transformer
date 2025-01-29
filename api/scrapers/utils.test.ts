@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest'
-import { preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { describe, it, expect, vi } from 'vitest'
+import { extractFormData, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+
+/**
+ * @vitest-environment jsdom
+ */
 
 describe('preprocessImageUrl', () => {
     it('should preprocess URLs correctly', () => {
@@ -116,5 +120,76 @@ describe('updateImageWithLogo', () => {
 
         const updatedFiles = updateImageObjWithLogo(altSrcFind, imageFiles)
         expect(updatedFiles).toStrictEqual(imageFiles)
+    })
+})
+
+describe('extractFormData', () => {
+    it('extracts form data from the HTML', async () => {
+        const mockFormsHTML = `
+      <form>
+        <legend>Contact Us</legend>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email">
+        <button type="submit">Submit</button>
+      </form>
+    `
+
+        document.body.innerHTML = mockFormsHTML
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                return fn()
+            }),
+        }
+
+        const formData = await extractFormData(page as any)
+
+        expect(formData).toEqual([
+            {
+                title: 'Contact Us',
+                fields: [
+                    {
+                        name: 'name',
+                        type: 'text',
+                        label: 'Name',
+                        placeholder: 'Enter your name',
+                        required: true,
+                    },
+                    {
+                        name: 'email',
+                        type: 'email',
+                        label: 'Email',
+                        placeholder: 'Enter your email',
+                        required: false,
+                    },
+                ],
+            },
+        ])
+
+        expect(page.evaluate).toHaveBeenCalledOnce()
+    })
+
+    it('extracts empty array from a mocked page', async () => {
+        const mockFormsHTML = `
+      <html>
+<label>test</label>
+      </html>
+    `
+
+        document.body.innerHTML = mockFormsHTML
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: () => any) => {
+                return fn()
+            }),
+        }
+
+        const formData = await extractFormData(page as any)
+
+        expect(formData).toEqual([])
+
+        expect(page.evaluate).toHaveBeenCalledOnce()
     })
 })

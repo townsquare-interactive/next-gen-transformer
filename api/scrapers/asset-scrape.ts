@@ -2,9 +2,10 @@ import { Page, Response } from 'playwright'
 import path from 'path'
 import { chromium as playwrightChromium } from 'playwright'
 import chromium from '@sparticuz/chromium'
-import type { ScrapeResult, ScrapedPageSeo, Settings } from '../../src/controllers/scrape-controller.js'
-import { hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import type { ScrapeResult, Settings } from '../../src/controllers/scrape-controller.js'
+import { extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
 import { capturePageAndAnalyze } from '../openai/api.js'
+import { ScrapedPageSeo } from '../../src/schema/output-zod.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -19,7 +20,7 @@ export interface ImageFiles {
 export interface ScrapeSiteData {
     baseUrl: string
     pages: string[]
-    seolist?: ScrapedPageSeo[]
+    seo?: ScrapedPageSeo[]
     dudaUploadLocation?: string
     s3LogoUrl?: string
 }
@@ -71,6 +72,11 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             }
         })
 
+        const formData = await extractFormData(page)
+        if (n === 0 || settings.url.includes('contact')) {
+            console.log('forms', formData[0]?.fields)
+        }
+
         let scrapeAnalysisResult
         if (n === 0 && settings.useAi) {
             console.log('Using AI to analyze page...')
@@ -93,6 +99,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             pageSeo: { ...seoData, pageUrl: settings.url },
             aiAnalysis: scrapeAnalysisResult,
             content: pageTextContent,
+            forms: formData,
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
@@ -171,25 +178,4 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
         await page.waitForTimeout(millisecondsBetweenScrolling)
         scrollsRemaining--
     }
-}
-
-const extractPageContent = async (page: Page) => {
-    const pageTextContent = await page.evaluate(() => {
-        // Unwanted tags for content scrape
-        const unwantedSelectors = ['nav', 'footer', 'script', 'style']
-
-        unwantedSelectors.forEach((selector) => {
-            document.querySelectorAll(selector).forEach((el) => el.remove())
-        })
-
-        // Remove <header> content without removing headline tags
-        document.querySelectorAll('header *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)').forEach((el) => {
-            el.remove()
-        })
-
-        // Return visible text content
-        return document.body.innerText.trim()
-    })
-
-    return pageTextContent
 }

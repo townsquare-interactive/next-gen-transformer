@@ -5,21 +5,14 @@ import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
 import { deleteFolderS3 } from '../utilities/s3Functions.js'
-
-export interface ScrapedPageSeo {
-    pageUrl: string
-    title?: string
-    metaDescription?: string
-    metaKeywords?: string
-    ogTitle?: string
-}
+import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
 
 export interface ScreenshotData {
-    logoTag?: string
-    companyName?: string
-    address?: string
-    phoneNumber?: string
-    hours?: string
+    logoTag: string | null
+    companyName: string | null
+    address: string | null
+    phoneNumber: string | null
+    hours: string | null
     links: { socials: string[]; other: string[] }
 }
 
@@ -29,13 +22,15 @@ export interface ScrapeResult {
     pageSeo?: ScrapedPageSeo
     aiAnalysis?: ScreenshotData
     content: string
+    forms: ScrapedForm[]
 }
 
 export interface ScrapeFullSiteResult {
     imageFiles: ImageFiles[]
     aiAnalysis?: ScreenshotData
     pageSeo?: ScrapedPageSeo
-    seoList: (ScrapedPageSeo | undefined)[]
+    seo: (ScrapedPageSeo | undefined)[]
+    pagesData: ScrapedPageData[]
 }
 
 interface DeleteScrapedFolderRes {
@@ -79,11 +74,10 @@ export async function scrapeAssetsFromSite(settings: Settings) {
         const transformedScrapedData = transformSiteScrapedData(scrapeData, siteName)
 
         //create s3 scrape data
-        const siteData = {
+        const siteData: ScrapedAndAnalyzedSiteData = {
             baseUrl: settings.url,
-            pages: scrapeData.pagesData,
-            seoList: transformedScrapedData.seoList,
-            dudaUploadLocation: settings.uploadLocation,
+            pages: transformedScrapedData.pagesData,
+            dudaUploadLocation: settings.uploadLocation || '',
             aiAnalysis: transformedScrapedData.aiAnalysis,
         }
 
@@ -113,7 +107,7 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
 export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {
     //now time to scrape
     const imageFiles = []
-    const seoList = []
+    const seo = []
     const pagesData = []
     let screenshotPageData
 
@@ -123,7 +117,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
             console.log('scraping page ', pages[n], '.......')
 
             const scrapedPageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
-            seoList.push(scrapedPageData.pageSeo) //push seo data for each page
+            seo.push(scrapedPageData.pageSeo) //push seo data for each page
 
             if (scrapedPageData.aiAnalysis) {
                 screenshotPageData = scrapedPageData.aiAnalysis
@@ -139,6 +133,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
                 seo: scrapedPageData.pageSeo,
                 images: scrapedPageData.imageList,
                 content: scrapedPageData.content,
+                forms: scrapedPageData.forms,
             })
         } catch (err) {
             console.log('scrape function fail page: ', pages[n])
@@ -150,7 +145,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
     const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
 
-    return { imageFiles: renamedDupes, seoList: seoList, aiAnalysis: screenshotPageData, pagesData: pagesData }
+    return { imageFiles: renamedDupes, seo: seo, aiAnalysis: screenshotPageData, pagesData: pagesData }
 }
 
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {

@@ -1,3 +1,4 @@
+import { Page } from 'playwright'
 import { createRandomFiveCharString } from '../../src/utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
@@ -114,6 +115,57 @@ export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: 
     return imageFiles
 }
 
+export const extractFormData = async (page: Page) => {
+    return await page.evaluate(() => {
+        // Define the structure for form data
+        const forms = Array.from(document.querySelectorAll('form')).map((form) => {
+            // Extract the form title (legend, h1, h2, etc.)
+            const titleElement = form.querySelector('legend, h1, h2, h3, h4, h5, h6')
+            const title = titleElement?.textContent?.trim() || null
+
+            // Extract form fields, but only include fields with a valid label
+            const fields = Array.from(form.querySelectorAll('input, select, textarea')).reduce((filteredFields, field) => {
+                const name = field.getAttribute('name') || ''
+                const type = field.getAttribute('type') || (field.tagName === 'TEXTAREA' ? 'textarea' : 'text')
+                const label = field.closest('label')?.textContent?.trim() || document.querySelector(`label[for="${field.id}"]`)?.textContent?.trim() || null
+                const placeholder = field.getAttribute('placeholder') || null
+                const required = field.hasAttribute('required')
+
+                // Only add the field to the array if it has a label
+                if (label) {
+                    filteredFields.push({ name, type, label, placeholder, required })
+                }
+
+                return filteredFields
+            }, [] as Array<{ name: string; type: string; label: string; placeholder: string | null; required: boolean }>)
+
+            return { title, fields }
+        })
+
+        return forms
+    })
+}
+
+export const extractPageContent = async (page: Page) => {
+    return await page.evaluate(() => {
+        // Unwanted tags for content scrape
+        const unwantedSelectors = ['nav', 'footer', 'script', 'style']
+
+        unwantedSelectors.forEach((selector) => {
+            document.querySelectorAll(selector).forEach((el) => el.remove())
+        })
+
+        // Remove <header> content without removing headline tags
+        document.querySelectorAll('header *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)').forEach((el) => {
+            el.remove()
+        })
+        console.log('Extracted body text:', document.body)
+        // Return visible text content
+        const bodyText = document.body?.innerText || '' // Safeguard against undefined
+
+        return bodyText.trim() // Trim whitespace
+    })
+}
 export function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
 }
