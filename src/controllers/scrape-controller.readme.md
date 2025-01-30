@@ -22,7 +22,7 @@ These utilities have been created to scrape assets from a website and save them 
 
 ---
 
-Note: Images and data backed up to S3 by default if saving to another additional location
+Note: Images and data are backed up to S3 by default if saving to another additional location or no saveMethod found
 
 ## Duda Environment Variables
 
@@ -40,10 +40,9 @@ See the project README for generic project env variable usage
 ```json
 {
     "url": "https://www.toymaniausa.com/",
-    "uploadLocation": "duda id",
+    "uploadLocation": "dudasiteid",
     "saveMethod": "dudaUpload",
-    "saveImages": true,
-    "useAi": true
+    "saveImages": true
 }
 ```
 
@@ -65,11 +64,10 @@ Return object structure
 
 ### Scraped data cleanup
 
-This route can be used to remove the scraped folder created in s3 from a site.
-Simply pass the URL that you initially scraped in a DELETE request to the route.
-A sta
+-   **DELETE**: `/api/cms-routes/scrape-site`
 
-Route: /api/cms-routes/scrape-site (DELETE)
+This route can be used to remove the scraped folder created in S3 from a site.
+Simply pass the URL that you initially scraped in a DELETE request to the route. Currently there is no way to automatically clean up images saved in Duda.
 
 Return object structure
 
