@@ -43,9 +43,10 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     }
 
     const page = await browser.newPage()
-    let imageFiles: ImageFiles[] = []
+    const isHomePage = n === 0
 
     //scraping site images
+    let imageFiles: ImageFiles[] = []
     if (settings.scrapeImages) {
         console.log('Scraping images...')
         imageFiles = await scrapeImagesFromPage(page)
@@ -62,6 +63,24 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
         }
 
+        //extract form data from pages
+        const formData = await extractFormData(page)
+
+        let screenshotBuffer
+        //home page or contact page
+        if (isHomePage) {
+            screenshotBuffer = await page.screenshot({ fullPage: true })
+
+            imageFiles.push({
+                imageFileName: 'home-screenshot.jpg',
+                fileContents: screenshotBuffer,
+                url: '',
+                hashedFileName: '',
+                originalImageLink: '',
+                fileExtension: '.jpg',
+            })
+        }
+
         const seoData = await page.evaluate(() => {
             return {
                 title: document.title || '',
@@ -72,15 +91,10 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             }
         })
 
-        const formData = await extractFormData(page)
-        if (n === 0 || settings.url.includes('contact')) {
-            console.log('forms', formData[0]?.fields)
-        }
-
         let scrapeAnalysisResult
-        if (n === 0 && settings.useAi) {
+        if (isHomePage && settings.useAi && screenshotBuffer) {
             console.log('Using AI to analyze page...')
-            scrapeAnalysisResult = await capturePageAndAnalyze(page, settings.url)
+            scrapeAnalysisResult = await capturePageAndAnalyze(page, settings.url, screenshotBuffer)
             if (scrapeAnalysisResult.logoTag) {
                 console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
                 imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
@@ -109,59 +123,65 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
 
 // Separate function to handle image scraping
 const scrapeImagesFromPage = async (page: Page): Promise<ImageFiles[]> => {
-    const imageFiles: ImageFiles[] = []
+    try {
+        const imageFiles: ImageFiles[] = []
 
-    page.on('response', async (response: Response) => {
-        const url = new URL(response.url())
-        if (response.request().resourceType() === 'image') {
-            //handle possible redirect
-            const status = response.status()
-            if (status >= 300 && status <= 399) {
-                console.info(`Redirect from ${url} to ${response.headers()['location']}`)
-                return
-            }
-
-            const contentType = response.headers()['content-type']
-            if (!contentType || !contentType.startsWith('image/')) {
-                console.log(`Skipping non-image URL: ${url.href}`)
-                return
-            }
-
-            // Get the image content
-            response.body().then(async (fileContents) => {
-                const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
-                const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                const hashedFileName = `${hashedName}${fileExtension}`
-                const processedImageUrl = preprocessImageUrl(url) || ''
-                const fileName = processedImageUrl.split('/').pop()
-
-                if (!fileName) {
-                    console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
+        page.on('response', async (response: Response) => {
+            if (response.request().resourceType() === 'image') {
+                const url = new URL(response.url())
+                //handle possible redirect
+                const status = response.status()
+                if (status >= 300 && status <= 399) {
+                    console.info(`Redirect from ${url} to ${response.headers()['location']}`)
                     return
                 }
 
-                // Filter out requests for tracking
-                if (fileName?.endsWith('=FGET')) {
-                    console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                const contentType = response.headers()['content-type']
+                if (!contentType || !contentType.startsWith('image/')) {
+                    console.log(`Skipping non-image URL: ${url.href}`)
                     return
                 }
 
-                // Make sure file extension is at the end
-                let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
+                // Get the image content
+                response.body().then(async (fileContents) => {
+                    const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
+                    const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
+                    const hashedFileName = `${hashedName}${fileExtension}`
+                    const processedImageUrl = preprocessImageUrl(url) || ''
+                    const fileName = processedImageUrl.split('/').pop()
 
-                imageFiles.push({
-                    imageFileName: fileNameWithExt,
-                    fileContents: fileContents,
-                    url: url,
-                    hashedFileName: hashedFileName,
-                    originalImageLink: processedImageUrl,
-                    fileExtension: fileExtension,
+                    if (!fileName) {
+                        console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
+                        return
+                    }
+
+                    // Filter out requests for tracking
+                    if (fileName?.endsWith('=FGET')) {
+                        console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                        return
+                    }
+
+                    // Make sure file extension is at the end
+                    let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
+
+                    imageFiles.push({
+                        imageFileName: fileNameWithExt,
+                        fileContents: fileContents,
+                        url: url,
+                        hashedFileName: hashedFileName,
+                        originalImageLink: processedImageUrl,
+                        fileExtension: fileExtension,
+                    })
                 })
-            })
-        }
-    })
+            }
+        })
 
-    return imageFiles
+        // Wait for all image processing to complete before returning
+        return imageFiles
+    } catch (error) {
+        console.error('error scraping images', error)
+        throw error
+    }
 }
 
 // This function needs tweaking, but conceptually this works...

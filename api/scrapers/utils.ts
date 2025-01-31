@@ -116,34 +116,39 @@ export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: 
 }
 
 export const extractFormData = async (page: Page) => {
-    return await page.evaluate(() => {
-        // Define the structure for form data
-        const forms = Array.from(document.querySelectorAll('form')).map((form) => {
-            // Extract the form title (legend, h1, h2, etc.)
-            const titleElement = form.querySelector('legend, h1, h2, h3, h4, h5, h6')
-            const title = titleElement?.textContent?.trim() || null
+    try {
+        return await page.evaluate(() => {
+            // Define the structure for form data
+            const forms = Array.from(document.querySelectorAll('form')).map((form) => {
+                // Extract the form title (legend, h1, h2, etc.)
+                const titleElement = form.querySelector('legend, h1, h2, h3, h4, h5, h6')
+                const title = titleElement?.textContent?.trim() || null
 
-            // Extract form fields, but only include fields with a valid label
-            const fields = Array.from(form.querySelectorAll('input, select, textarea')).reduce((filteredFields, field) => {
-                const name = field.getAttribute('name') || ''
-                const type = field.getAttribute('type') || (field.tagName === 'TEXTAREA' ? 'textarea' : 'text')
-                const label = field.closest('label')?.textContent?.trim() || document.querySelector(`label[for="${field.id}"]`)?.textContent?.trim() || null
-                const placeholder = field.getAttribute('placeholder') || null
-                const required = field.hasAttribute('required')
+                // Extract form fields, but only include fields with a valid label
+                const fields = Array.from(form.querySelectorAll('input, select, textarea')).reduce((filteredFields, field) => {
+                    const name = field.getAttribute('name') || ''
+                    const type = field.getAttribute('type') || (field.tagName === 'TEXTAREA' ? 'textarea' : 'text')
+                    const label = field.closest('label')?.textContent?.trim() || document.querySelector(`label[for="${field.id}"]`)?.textContent?.trim() || null
+                    const placeholder = field.getAttribute('placeholder') || null
+                    const required = field.hasAttribute('required')
 
-                // Only add the field to the array if it has a label
-                if (label) {
-                    filteredFields.push({ name, type, label, placeholder, required })
-                }
+                    // Only add the field to the array if it has a label
+                    if (label) {
+                        filteredFields.push({ name, type, label, placeholder, required })
+                    }
 
-                return filteredFields
-            }, [] as Array<{ name: string; type: string; label: string; placeholder: string | null; required: boolean }>)
+                    return filteredFields
+                }, [] as Array<{ name: string; type: string; label: string; placeholder: string | null; required: boolean }>)
 
-            return { title, fields }
+                return { title, fields }
+            })
+
+            return forms
         })
-
-        return forms
-    })
+    } catch (error) {
+        console.error('error extracting form data', error)
+        throw error
+    }
 }
 
 export const extractPageContent = async (page: Page) => {

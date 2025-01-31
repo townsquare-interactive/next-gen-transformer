@@ -6,10 +6,9 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || '12',
 })
 
-export async function capturePageAndAnalyze(page: Page, url: string) {
+export async function capturePageAndAnalyze(page: Page, url: string, screenshotBuffer: Buffer) {
     try {
-        const buffer = await page.screenshot({ fullPage: true })
-        const base64Image = buffer.toString('base64')
+        const base64Image = screenshotBuffer.toString('base64')
         const base64ImageUrl = `data:image/jpeg;base64,${base64Image}`
 
         const pageHtml = await page.content() // Get the full HTML content of the page
