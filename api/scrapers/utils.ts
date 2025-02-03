@@ -3,10 +3,10 @@ import { createRandomFiveCharString } from '../../src/utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 
-export function preprocessImageUrl(itemUrl: any): string | null {
+export function preprocessImageUrl(itemUrl: URL): string | null {
     if (!itemUrl) {
         console.error('URL is null or undefined:', itemUrl)
-        throw new Error('Invalid URL: Cannot process')
+        return null
     }
 
     let url = itemUrl

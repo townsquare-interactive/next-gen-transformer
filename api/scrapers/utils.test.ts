@@ -62,6 +62,17 @@ describe('preprocessImageUrl', () => {
             'https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/tacobell.com/images/selected/Tacobell.comLogo.png'
         ) // Duplicate detected
     })
+
+    it('should return null if the URL field is blank', () => {
+        const imageFiles: any = [
+            {
+                url: '',
+            },
+        ]
+
+        // Check preprocessImageUrl
+        expect(preprocessImageUrl(imageFiles[0].url)).toBe(null)
+    })
 })
 
 describe('updateImageWithLogo', () => {
