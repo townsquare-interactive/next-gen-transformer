@@ -37,7 +37,6 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             console.error('Failed to launch Chromium:', error)
             throw error
         })
-
     if (!browser) {
         throw new Error('Chromium browser instance could not be created.')
     }
@@ -47,11 +46,13 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
 
     //scraping site images
     let imageFiles: ImageFiles[] = []
-    if (settings.scrapeImages) {
+
+    //limit image scraping to the first 8 pages found
+    if (settings.scrapeImages && n < 9) {
         console.log('Scraping images...')
         imageFiles = await scrapeImagesFromPage(page)
     } else {
-        console.log('Skipping image scrape.')
+        console.log('Skipping image scrape.', settings.url)
     }
 
     try {
@@ -74,7 +75,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             imageFiles.push({
                 imageFileName: 'home-screenshot.jpg',
                 fileContents: screenshotBuffer,
-                url: '',
+                url: '', //setting this to undefined prevents Duda uploading
                 hashedFileName: '',
                 originalImageLink: '',
                 fileExtension: '.jpg',
@@ -104,7 +105,9 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         //this step must be done last as it modies the DOM
         const pageTextContent = await extractPageContent(page)
 
-        await scrollToLazyLoadImages(page, 1000)
+        if (settings.scrapeImages && n < 9) {
+            await scrollToLazyLoadImages(page, 1000)
+        }
         await browser.close()
 
         return {

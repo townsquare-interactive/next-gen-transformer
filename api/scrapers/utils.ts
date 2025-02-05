@@ -4,6 +4,7 @@ import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 
 export function preprocessImageUrl(itemUrl: URL): string | null {
+    //a null or undefined URL should not be processed for Duda uploading
     if (!itemUrl) {
         console.error('URL is null or undefined:', itemUrl)
         return null

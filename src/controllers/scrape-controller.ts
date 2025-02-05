@@ -103,6 +103,7 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
 
     return scrapeData
 }
+//ExtractedData
 
 export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {
     //now time to scrape
@@ -147,7 +148,6 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
 
     return { imageFiles: renamedDupes, seo: seo, aiAnalysis: screenshotPageData, pagesData: pagesData }
 }
-
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {
     try {
         const siteFolderName = convertUrlToApexId(url)
