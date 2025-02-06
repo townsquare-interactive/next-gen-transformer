@@ -369,7 +369,7 @@ export const LandingInputSchema = z.object({
 const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.literal('test').or(z.literal('dudaUpload'))))
 
 //request body coming from AI tool
-export const ScrapeImageSchema = z.object({
+export const ScrapeWebsiteSchema = z.object({
     url: z.string(),
     saveMethod: SaveFileMethod.optional(),
     uploadLocation: z.string().optional(),
@@ -379,6 +379,11 @@ export const ScrapeImageSchema = z.object({
     scrapeImages: z.boolean().optional(),
 })
 
+//request body coming from AI tool
+export const GetPagesSchema = z.object({
+    url: z.string(),
+})
+
 export const RequestDataSchema = z.object({
     domain: z.string().refine((domain) => domain.includes('/'), {
         message: "The domain must include a '/'",
@@ -386,7 +391,7 @@ export const RequestDataSchema = z.object({
 })
 
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
-export type ScrapeImageReq = z.infer<typeof ScrapeImageSchema>
+export type ScrapeImageReq = z.infer<typeof ScrapeWebsiteSchema>
 export type LandingReq = z.infer<typeof LandingInputSchema>
 export type RequestDataReq = z.infer<typeof RequestDataSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>

@@ -5,10 +5,18 @@ import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
 import { save } from '../src/output/save-scraped-data.js'
-import { getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
+import { getPageList, getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
-import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema, ScrapeImageSchema } from '../src/schema/input-zod.js'
+import {
+    saveInputSchema,
+    createSiteInputSchema,
+    SubdomainInputSchema,
+    RequestDataReq,
+    RequestDataSchema,
+    ScrapeWebsiteSchema,
+    GetPagesSchema,
+} from '../src/schema/input-zod.js'
 import express, { Request } from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
 import { ValidationError, handleError } from '../src/utilities/errors.js'
@@ -322,6 +330,23 @@ router.post('/migrate', async (req, res) => {
     }
 })
 
+router.post('/get-page-list', async (req, res) => {
+    try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+        }
+
+        const validatedRequest = zodDataParse(req.body, GetPagesSchema, 'getPagesInput')
+        const scrapeSettings = getScrapeSettings(validatedRequest)
+        const pages = await getPageList(scrapeSettings)
+        res.json(pages)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res, req.body.url)
+    }
+})
+
 router.post('/scrape-site', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
@@ -329,7 +354,7 @@ router.post('/scrape-site', async (req, res) => {
             return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
         }
 
-        const validatedRequest = zodDataParse(req.body, ScrapeImageSchema, 'scrapedInput')
+        const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
         const saveResponse = await save(scrapeSettings, scrapedData)

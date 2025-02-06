@@ -93,6 +93,24 @@ export async function scrapeAssetsFromSite(settings: Settings) {
     }
 }
 
+export async function getPageList(settings: Settings) {
+    const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
+
+    try {
+        const pages = await scrapePagesFunction(settings)
+
+        return { pages }
+    } catch (error) {
+        console.error(error)
+        throw new ScrapingError({
+            domain: settings.url,
+            message: error.message,
+            state: { scrapeStatus: 'Site not scraped' },
+            errorType: 'SCR-011',
+        })
+    }
+}
+
 const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
     //remove links from same domain
     if (scrapeData.aiAnalysis?.links.other) {
