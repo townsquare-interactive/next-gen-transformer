@@ -30,10 +30,11 @@ export async function findPages(settings: Settings) {
 
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {
-            const links = Array.from(document.querySelectorAll('a[href]'))
-            return links.map((link: any) => link.href).filter((href) => href.startsWith('http'))
+            const links: HTMLAnchorElement[] = Array.from(document.querySelectorAll('a[href]'))
+            return links.map((link) => link.href).filter((href) => href.startsWith('http'))
         })
 
+        foundUrls.add(settings.url)
         for (let x = 0; x < pageUrls.length; x++) {
             const currentUrl = pageUrls[x]
             //remove duplicates

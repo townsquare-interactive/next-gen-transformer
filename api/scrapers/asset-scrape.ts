@@ -9,8 +9,8 @@ import { ScrapedPageSeo } from '../../src/schema/output-zod.js'
 
 export interface ImageFiles {
     imageFileName: string
-    fileContents: any
-    url: any
+    fileContents: Buffer
+    url: URL | null
     hashedFileName: string
     originalImageLink: string
     type?: 'logo'
@@ -75,7 +75,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             imageFiles.push({
                 imageFileName: 'home-screenshot.jpg',
                 fileContents: screenshotBuffer,
-                url: '', //setting this to undefined prevents Duda uploading
+                url: null, //setting this to undefined prevents Duda uploading
                 hashedFileName: '',
                 originalImageLink: '',
                 fileExtension: '.jpg',

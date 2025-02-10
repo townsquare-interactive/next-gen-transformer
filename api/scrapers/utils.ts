@@ -52,31 +52,33 @@ export const appendSuffixToFileName = (fileName: string, suffix: string): string
     return `${baseName}-${suffix}${extension}` // Combine with suffix inserted
 }
 
-export const removeDupeImages = async (imageFiles: any[]) => {
+export const removeDupeImages = async (imageFiles: ImageFiles[]) => {
     const seen = new Map<string, any>() // Use a Map to store the largest file for each unique origin+pathname
 
     for (const item of imageFiles) {
-        const uniqueIdentifier = `${item.url.origin}${item.url.pathname}`
+        if (item.url) {
+            const uniqueIdentifier = `${item.url.origin}${item.url.pathname}`
 
-        //logos should take precedence with duplicate filenames
-        if (item.type === 'logo') {
-            seen.set(uniqueIdentifier, item)
-        } else {
-            // Get the current largest file stored for this unique identifier
-            const existingItem = seen.get(uniqueIdentifier)
-
-            if (!existingItem) {
-                // If no file exists yet for this uniqueIdentifier, add the current item
+            //logos should take precedence with duplicate filenames
+            if (item.type === 'logo') {
                 seen.set(uniqueIdentifier, item)
             } else {
-                // Compare sizes and keep the larger file
+                // Get the current largest file stored for this unique identifier
+                const existingItem = seen.get(uniqueIdentifier)
 
-                if (existingItem.type != 'logo') {
-                    const existingSize = await getFileSize(existingItem.fileContents)
-                    const currentSize = await getFileSize(item.fileContents)
+                if (!existingItem) {
+                    // If no file exists yet for this uniqueIdentifier, add the current item
+                    seen.set(uniqueIdentifier, item)
+                } else {
+                    // Compare sizes and keep the larger file
 
-                    if (currentSize > existingSize) {
-                        seen.set(uniqueIdentifier, item) // Replace with the larger file
+                    if (existingItem.type != 'logo') {
+                        const existingSize = await getFileSize(existingItem.fileContents)
+                        const currentSize = await getFileSize(item.fileContents)
+
+                        if (currentSize > existingSize) {
+                            seen.set(uniqueIdentifier, item) // Replace with the larger file
+                        }
                     }
                 }
             }
