@@ -6,6 +6,7 @@ import { convertUrlToApexId } from '../utilities/utils.js'
 import { removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
 import { deleteFolderS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
+import pLimit from 'p-limit'
 
 export interface ScreenshotData {
     logoTag: string | null
@@ -121,51 +122,87 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
 
     return scrapeData
 }
-//ExtractedData
 
 export const scrapeDataFromPages = async (pages: string[], settings: Settings, scrapeFunction: ScrapeFunctionType) => {
-    //now time to scrape
-    const imageFiles = []
-    const seo = []
-    const pagesData = []
-    let screenshotPageData
+    console.log('Starting scraping process...')
 
-    //scrape each page in the found list
-    for (let n = 0; n < pages.length; n++) {
-        try {
-            console.log('scraping page ', pages[n], '.......')
-
-            const scrapedPageData = await scrapeFunction({ ...settings, url: pages[n] }, n)
-            seo.push(scrapedPageData.pageSeo) //push seo data for each page
-
-            if (scrapedPageData.aiAnalysis) {
-                screenshotPageData = scrapedPageData.aiAnalysis
-            }
-
-            //push imagefiles for each page
-            for (let i = 0; i < scrapedPageData.imageFiles.length; i++) {
-                imageFiles.push(scrapedPageData.imageFiles[i])
-            }
-
-            pagesData.push({
-                url: pages[n],
-                seo: scrapedPageData.pageSeo,
-                images: scrapedPageData.imageList,
-                content: scrapedPageData.content,
-                forms: scrapedPageData.forms,
-            })
-        } catch (err) {
-            console.log('scrape function fail page: ', pages[n])
-            throw err
-        }
+    if (pages.length === 0) {
+        throw new Error('No pages to scrape.')
     }
 
-    //remove duplicates in imageFiles
-    const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
-    const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
+    const homepage = pages[0] // First page is always the homepage
+    const otherPages = pages.slice(1) // Remaining pages
+    const limit = pLimit(3) // Limit concurrency
 
-    return { imageFiles: renamedDupes, seo: seo, aiAnalysis: screenshotPageData, pagesData: pagesData }
+    try {
+        // **Step 1: Scrape the homepage first**
+        console.log('Scraping homepage:', homepage, 'individually...')
+        const homepageData = await scrapeFunction({ ...settings, url: homepage }, 0)
+
+        if (!homepageData) {
+            throw new Error(`Failed to scrape homepage: ${homepage}`)
+        }
+
+        // Extract AI analysis from homepage (if available)
+        const screenshotPageData = homepageData.aiAnalysis
+
+        // Initialize storage for results
+        const seo = [homepageData.pageSeo] // Start with homepage SEO data
+        const imageFiles = [...homepageData.imageFiles] // Start with homepage images
+        const pagesData = [
+            {
+                url: homepage,
+                seo: homepageData.pageSeo,
+                images: homepageData.imageList,
+                content: homepageData.content,
+                forms: homepageData.forms,
+            },
+        ]
+
+        // **Step 2: Scrape other pages in parallel with limit**
+        console.log('Starting limited parallel scraping for other pages...')
+        const scrapedPages = await Promise.allSettled(
+            otherPages.map((page, index) =>
+                limit(async () => {
+                    try {
+                        console.log('Scraping page:', page, '...')
+                        return await scrapeFunction({ ...settings, url: page }, index + 1)
+                    } catch (err) {
+                        console.error('Scrape function failed for page:', page, err)
+                        return null // Handle failures gracefully
+                        // throw err
+                    }
+                })
+            )
+        )
+
+        // Extract successful results
+        const validScrapedPages = scrapedPages.filter((res) => res.status === 'fulfilled' && res.value).map((res) => (res as PromiseFulfilledResult<any>).value)
+
+        // Push results from other pages
+        seo.push(...validScrapedPages.map((data) => data.pageSeo))
+        imageFiles.push(...validScrapedPages.flatMap((data) => data.imageFiles))
+        pagesData.push(
+            ...validScrapedPages.map((data, index) => ({
+                url: otherPages[index],
+                seo: data.pageSeo,
+                images: data.imageList,
+                content: data.content,
+                forms: data.forms,
+            }))
+        )
+
+        // Remove duplicate images
+        const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
+        const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
+
+        return { imageFiles: renamedDupes, seo, aiAnalysis: screenshotPageData, pagesData }
+    } catch (err) {
+        console.error('Error during scraping:', err)
+        throw err
+    }
 }
+
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {
     try {
         const siteFolderName = convertUrlToApexId(url)

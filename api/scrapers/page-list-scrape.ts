@@ -43,7 +43,6 @@ export async function findPages(settings: Settings) {
                 }
             }
         }
-        console.log(foundUrls)
 
         const urlArray = Array.from(foundUrls)
 

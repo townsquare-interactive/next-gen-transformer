@@ -1,4 +1,4 @@
-import { Page, Response } from 'playwright'
+import { Browser, Page, Response } from 'playwright'
 import path from 'path'
 import { chromium as playwrightChromium } from 'playwright'
 import chromium from '@sparticuz/chromium'
@@ -48,9 +48,9 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     let imageFiles: ImageFiles[] = []
 
     //limit image scraping to the first 8 pages found
-    if (settings.scrapeImages && n < 9) {
+    if (settings.scrapeImages) {
         console.log('Scraping images...')
-        imageFiles = await scrapeImagesFromPage(page)
+        imageFiles = await scrapeImagesFromPage(page, browser)
     } else {
         console.log('Skipping image scrape.', settings.url)
     }
@@ -105,7 +105,8 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         //this step must be done last as it modies the DOM
         const pageTextContent = await extractPageContent(page)
 
-        if (settings.scrapeImages && n < 9) {
+        //stop lazy load image processing after 10 pages for speed reasons
+        if (settings.scrapeImages && n < 11) {
             await scrollToLazyLoadImages(page, 1000)
         }
         await browser.close()
@@ -124,15 +125,16 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     }
 }
 
-// Separate function to handle image scraping
-const scrapeImagesFromPage = async (page: Page): Promise<ImageFiles[]> => {
+const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<ImageFiles[]> => {
     try {
         const imageFiles: ImageFiles[] = []
+        const imagePromises: Promise<void>[] = [] // Store all async image processing
 
         page.on('response', async (response: Response) => {
             if (response.request().resourceType() === 'image') {
                 const url = new URL(response.url())
-                //handle possible redirect
+
+                // Handle possible redirect
                 const status = response.status()
                 if (status >= 300 && status <= 399) {
                     console.info(`Redirect from ${url} to ${response.headers()['location']}`)
@@ -145,44 +147,59 @@ const scrapeImagesFromPage = async (page: Page): Promise<ImageFiles[]> => {
                     return
                 }
 
-                // Get the image content
-                response.body().then(async (fileContents) => {
-                    const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
-                    const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                    const hashedFileName = `${hashedName}${fileExtension}`
-                    const processedImageUrl = preprocessImageUrl(url) || ''
-                    const fileName = processedImageUrl.split('/').pop()
+                // Skip if page or browser is already closed
+                if (page.isClosed() || browser.isConnected() === false) {
+                    console.warn(`Skipping response.body() because the page or browser is closed: ${url.href}`)
+                    return
+                }
 
-                    if (!fileName) {
-                        console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
-                        return
+                // Process image response asynchronously and store the promise
+                const imageProcessingPromise = (async () => {
+                    try {
+                        const fileContents = await response.body()
+                        const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
+                        const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
+                        const hashedFileName = `${hashedName}${fileExtension}`
+                        const processedImageUrl = preprocessImageUrl(url) || ''
+                        const fileName = processedImageUrl.split('/').pop()
+
+                        if (!fileName) {
+                            console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
+                            return
+                        }
+
+                        // Filter out requests for tracking
+                        if (fileName.endsWith('=FGET')) {
+                            console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                            return
+                        }
+
+                        // Ensure file extension is properly formatted
+                        let fileNameWithExt = fileName.replaceAll(fileExtension, '') + fileExtension
+
+                        imageFiles.push({
+                            imageFileName: fileNameWithExt,
+                            fileContents: fileContents,
+                            url: url,
+                            hashedFileName: hashedFileName,
+                            originalImageLink: processedImageUrl,
+                            fileExtension: fileExtension,
+                        })
+                    } catch (err) {
+                        console.error(`Error processing image response from ${url.href}:`, err)
                     }
+                })()
 
-                    // Filter out requests for tracking
-                    if (fileName?.endsWith('=FGET')) {
-                        console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
-                        return
-                    }
-
-                    // Make sure file extension is at the end
-                    let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
-
-                    imageFiles.push({
-                        imageFileName: fileNameWithExt,
-                        fileContents: fileContents,
-                        url: url,
-                        hashedFileName: hashedFileName,
-                        originalImageLink: processedImageUrl,
-                        fileExtension: fileExtension,
-                    })
-                })
+                imagePromises.push(imageProcessingPromise) // Store the promise
             }
         })
 
         // Wait for all image processing to complete before returning
+        await page.waitForLoadState('networkidle')
+        await Promise.all(imagePromises)
         return imageFiles
     } catch (error) {
-        console.error('error scraping images', error)
+        console.error('Error scraping images:', error)
         throw error
     }
 }
@@ -193,7 +210,7 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
         return Math.min(window.innerHeight, document.documentElement.clientHeight)
     })
     let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
-    console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
+    //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
 
     // scroll until we're at the bottom...
     while (scrollsRemaining > 0) {
