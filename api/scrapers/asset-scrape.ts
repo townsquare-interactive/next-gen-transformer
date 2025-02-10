@@ -3,8 +3,8 @@ import path from 'path'
 import { chromium as playwrightChromium } from 'playwright'
 import chromium from '@sparticuz/chromium'
 import type { ScrapeResult, Settings } from '../../src/controllers/scrape-controller.js'
-import { extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
-import { capturePageAndAnalyze } from '../openai/api.js'
+import { cleanseHtml, extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../src/schema/output-zod.js'
 
 export interface ImageFiles {
@@ -95,7 +95,9 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         let scrapeAnalysisResult
         if (isHomePage && settings.useAi && screenshotBuffer) {
             console.log('Using AI to analyze page...')
-            scrapeAnalysisResult = await capturePageAndAnalyze(page, settings.url, screenshotBuffer)
+            const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
+            scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
+
             if (scrapeAnalysisResult.logoTag) {
                 console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
                 imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)

@@ -3,7 +3,7 @@ import { createRandomFiveCharString } from '../../src/utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 
-export function preprocessImageUrl(itemUrl: URL): string | null {
+export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
     if (!itemUrl) {
         console.error('URL is null or undefined:', itemUrl)
@@ -174,4 +174,19 @@ export const extractPageContent = async (page: Page) => {
 }
 export function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
+}
+
+//remove unecessary elements from HTML before analyzing
+export async function cleanseHtml(page: Page): Promise<string> {
+    const cleanedHtml = await page.evaluate(() => {
+        const elementsToRemove = ['script', 'meta', 'noscript', 'link', 'svg']
+        elementsToRemove.forEach((selector) => {
+            document.querySelectorAll(selector).forEach((el) => el.remove())
+        })
+
+        return document.body.innerHTML
+    })
+
+    // Ensure it's within token limits
+    return cleanedHtml.length > 100000 ? cleanedHtml.slice(0, 100000) : cleanedHtml
 }

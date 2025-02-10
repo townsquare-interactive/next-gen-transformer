@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { cleanseHtml, extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
 
 /**
  * @vitest-environment jsdom
@@ -77,10 +77,10 @@ describe('preprocessImageUrl', () => {
 
 describe('updateImageWithLogo', () => {
     it('should add the logo tpe to the correct image', () => {
-        const imageFileExample = {
+        const imageFileExample: any = {
             imageFileName: 'test',
-            fileContents: 'any',
-            url: 'image.com',
+            fileContents: null,
+            url: null,
             hashedFileName: 'test',
             originalImageLink:
                 'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_241,h_86,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
@@ -98,9 +98,9 @@ describe('updateImageWithLogo', () => {
     })
 
     it('should not change the imageFiles if no logo found', () => {
-        const imageFileExample = {
+        const imageFileExample: any = {
             imageFileName: 'test',
-            fileContents: 'any',
+            fileContents: null,
             url: 'image.com',
             hashedFileName: 'test',
             originalImageLink:
@@ -116,10 +116,10 @@ describe('updateImageWithLogo', () => {
     })
 
     it('should not change the imageFiles if the logo src does not match', () => {
-        const imageFileExample = {
+        const imageFileExample: any = {
             imageFileName: 'test',
-            fileContents: 'any',
-            url: 'image.com',
+            fileContents: null,
+            url: null,
             hashedFileName: 'test',
             originalImageLink:
                 'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_241,h_86,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Toy-Mania-Logo-600.png',
@@ -295,5 +295,44 @@ describe('extractPageContent', () => {
         // expect(page.evaluate).toHaveBeenCalledOnce()
         expect(content).toContain(`Main Title`)
         expect(content).toContain(`Paragraph with spaces`)
+    })
+})
+
+describe('cleanseHtml', () => {
+    it('should remove script, meta, noscript, link, and svg elements from the page', async () => {
+        document.body.innerHTML = `
+            <div>
+                <p>Keep this text</p>
+                <script>console.log("Remove this script")</script>
+                <meta charset="UTF-8">
+                <noscript>This should be removed</noscript>
+                <link rel="stylesheet" href="styles.css">
+                <svg><circle cx="50" cy="50" r="40" /></svg>
+            </div>
+        `
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn) => fn()),
+        }
+
+        const cleanedHtml = await cleanseHtml(page as any)
+        expect(cleanedHtml).toContain('<p>Keep this text</p>')
+        expect(cleanedHtml).not.toContain('<script>')
+        expect(cleanedHtml).not.toContain('<meta')
+        expect(cleanedHtml).not.toContain('<noscript>')
+        expect(cleanedHtml).not.toContain('<link')
+        expect(cleanedHtml).not.toContain('<svg')
+    })
+
+    it('should truncate HTML if it exceeds 100000 characters', async () => {
+        const longHtml = '<div>' + 'a'.repeat(100050) + '</div>'
+        document.body.innerHTML = longHtml
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn) => fn()),
+        }
+
+        const cleanedHtml = await cleanseHtml(page as any)
+        expect(cleanedHtml.length).toBe(100000)
     })
 })

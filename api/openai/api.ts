@@ -1,17 +1,14 @@
 import OpenAI from 'openai'
-import { Page } from 'playwright'
 import { ScrapingError } from '../../src/utilities/errors.js'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || '12',
 })
 
-export async function capturePageAndAnalyze(page: Page, url: string, screenshotBuffer: Buffer) {
+export async function analyzePageData(url: string, screenshotBuffer: Buffer, pageHtml: string) {
     try {
         const base64Image = screenshotBuffer.toString('base64')
         const base64ImageUrl = `data:image/jpeg;base64,${base64Image}`
-
-        const pageHtml = await page.content() // Get the full HTML content of the page
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
