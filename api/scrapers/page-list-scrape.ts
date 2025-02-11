@@ -42,16 +42,20 @@ export async function findPages(settings: Settings) {
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {
             const links: HTMLAnchorElement[] = Array.from(document.querySelectorAll('a[href]'))
-            return links.map((link) => link.href).filter((href) => href.startsWith('http'))
+            return links
+                .map((link) => link.href)
+                .filter((href) => {
+                    return (
+                        href.startsWith('http') && !href.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) // Exclude image links
+                    )
+                })
         })
 
-        const normalizedSettingsUrl = normalizeUrl(settings.url)
-
+        foundUrls.add(settings.url)
         for (let x = 0; x < pageUrls.length; x++) {
             const currentUrl = pageUrls[x]
-            const normalizedCurrentUrl = normalizeUrl(currentUrl)
-            //remove duplicates
-            if (!foundUrls.has(currentUrl) && normalizedCurrentUrl.includes(normalizedSettingsUrl)) {
+
+            if (!foundUrls.has(currentUrl) && urlsMatch(settings.url, currentUrl)) {
                 if (!currentUrl.includes('#')) {
                     foundUrls.add(currentUrl)
                 }
@@ -69,7 +73,10 @@ export async function findPages(settings: Settings) {
     }
 }
 
-function normalizeUrl(url: string): string {
-    const parsedUrl = new URL(url)
-    return parsedUrl.hostname.replace(/^www\./, '') // Remove 'www.' if present
+//make sure the URLs are not the same with www. or without
+function urlsMatch(baseUrl: string, testUrl: string): boolean {
+    const base = new URL(baseUrl)
+    const test = new URL(testUrl)
+
+    return base.hostname === test.hostname || base.hostname.replace(/^www\./, '') === test.hostname.replace(/^www\./, '')
 }
