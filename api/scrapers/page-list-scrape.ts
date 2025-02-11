@@ -14,6 +14,10 @@ export async function findPages(settings: Settings) {
         })
 
         const page = await browser.newPage()
+        await page.setExtraHTTPHeaders({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+        })
         console.log(`Loading main page: ${settings.url}`)
 
         const response = await page.goto(settings.url, {
@@ -22,6 +26,13 @@ export async function findPages(settings: Settings) {
 
         if (!response || !response.ok()) {
             console.error(`Failed to load the page: ${settings.url}`)
+            if (response) {
+                console.error(`Response status: ${response.status()}`)
+                console.error(`Response headers:`, response.headers())
+                console.error(`Response body:`, await response.text().catch(() => '[Unable to read body]'))
+            } else {
+                console.error(`Response object is null/undefined`)
+            }
             await browser.close()
             throw new Error(`Failed to load the page: ${settings.url}`)
         }

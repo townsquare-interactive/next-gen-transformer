@@ -42,6 +42,12 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     }
 
     const page = await browser.newPage()
+
+    await page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    })
+
     const isHomePage = n === 0
 
     //scraping site images
@@ -61,6 +67,13 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         })
 
         if (!response || !response.ok()) {
+            if (response) {
+                console.error(`Response status: ${response.status()}`)
+                console.error(`Response headers:`, response.headers())
+                console.error(`Response body:`, await response.text().catch(() => '[Unable to read body]'))
+            } else {
+                console.error(`Response object is null/undefined`)
+            }
             throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
         }
 
