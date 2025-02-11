@@ -34,11 +34,13 @@ export async function findPages(settings: Settings) {
             return links.map((link) => link.href).filter((href) => href.startsWith('http'))
         })
 
-        foundUrls.add(settings.url)
+        const normalizedSettingsUrl = normalizeUrl(settings.url)
+
         for (let x = 0; x < pageUrls.length; x++) {
             const currentUrl = pageUrls[x]
+            const normalizedCurrentUrl = normalizeUrl(currentUrl)
             //remove duplicates
-            if (!foundUrls.has(currentUrl) && currentUrl.includes(settings.url)) {
+            if (!foundUrls.has(currentUrl) && normalizedCurrentUrl.includes(normalizedSettingsUrl)) {
                 if (!currentUrl.includes('#')) {
                     foundUrls.add(currentUrl)
                 }
@@ -54,4 +56,9 @@ export async function findPages(settings: Settings) {
     } catch (error) {
         throw error
     }
+}
+
+function normalizeUrl(url: string): string {
+    const parsedUrl = new URL(url)
+    return parsedUrl.hostname.replace(/^www\./, '') // Remove 'www.' if present
 }
