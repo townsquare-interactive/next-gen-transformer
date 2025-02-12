@@ -43,5 +43,8 @@
     },
     "VAL-015": {
         "description": "Error validating Bearer token"
+    },
+    "SCR-016": {
+        "description": "List of pages to scrape are not all on the same domain"
     }
 }

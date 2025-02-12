@@ -49,7 +49,7 @@ export async function scrape(settings, n) {
             console.log('forms', formData[0]?.fields)
         }
         let scrapeAnalysisResult
-        if (n === 0 && settings.useAi) {
+        if (n === 0 && settings.analyzeHomepageData) {
             console.log('Using AI to analyze page...')
             scrapeAnalysisResult = await analyzePageData(page, settings.url)
             if (scrapeAnalysisResult.logoTag) {

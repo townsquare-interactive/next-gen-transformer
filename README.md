@@ -89,5 +89,6 @@ Listed below are the common error types that can be seen in the API response aft
 | SCR-013 | Unable to analyze scraped data with openai |
 | SCR-014 | Unable to delete scraped data folder |
 | VAL-015 | Error validating Bearer token |
+| SCR-016 | List of pages to scrape are not all on the same domain |
 
 <!-- ERROR_TABLE_END -->

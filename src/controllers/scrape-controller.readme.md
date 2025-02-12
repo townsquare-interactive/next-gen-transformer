@@ -15,10 +15,10 @@ These utilities have been created to scrape assets from a website and save them 
 |                                 |         | - `s3Upload`: Save images to s3 folder                          |               |
 |                                 |         | - `test`: Save images nowhere (for testing purposes)            |               |
 | `uploadLocation` (req for Duda) | String  | Duda website ID for uploading images                            | None          |
-| `saveImages`                    | Boolean | Whether to save scraped images.                                 | `true`        |
-| `scrapeImages`                  | Boolean | Whether to scrape images at all.                                | `true`        |
-| `backupImagesSave`              | Boolean | Whether to backup save the images to S3.                        | `true`        |
-| `useAi`                         | Boolean | Whether to use OpenAI to analyze the scrape.                    | `true`        |
+| `saveImages`                    | Boolean | Save scraped images.                                            | `true`        |
+| `scrapeImages`                  | Boolean | Scrape images at all.                                           | `true`        |
+| `backupImagesSave`              | Boolean | Backup save the images to S3.                                   | `true`        |
+| `analyzeHomepageData`           | Boolean | Analyze the homepage with AI and save siteData file.            | `true`        |
 
 ---
 

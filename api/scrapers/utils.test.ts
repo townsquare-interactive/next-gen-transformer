@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import { cleanseHtml, extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { checkPagesAreOnSameDomain, cleanseHtml, extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import { ScrapingError } from '../../src/utilities/errors.js'
 
 /**
  * @vitest-environment jsdom
@@ -334,5 +335,35 @@ describe('cleanseHtml', () => {
 
         const cleanedHtml = await cleanseHtml(page as any)
         expect(cleanedHtml.length).toBe(100000)
+    })
+})
+
+describe('checkPagesAreOnSameDomain', () => {
+    it('should confirm pages on the same domain returns true', async () => {
+        const pages = ['https://www.donerighttv.com/', 'https://www.donerighttv.com/live-streaming']
+
+        const result = checkPagesAreOnSameDomain('https://www.donerighttv.com/', pages)
+
+        expect(result).toEqual(true)
+    })
+
+    it('should fail when pages are not on the same domain', async () => {
+        const url = 'https://www.donerighttv.com/'
+        const invalidPages = ['https://www.donerighttv.com/', 'https://www.othersite.com/live-streaming']
+        let error
+
+        try {
+            checkPagesAreOnSameDomain('https://www.donerighttv.com/', invalidPages)
+        } catch (err) {
+            error = err
+        }
+
+        expect(error).toBeInstanceOf(ScrapingError)
+        expect(error).toMatchObject({
+            domain: url,
+            message: expect.stringContaining('Found pages to scrape are not all on the same domain'),
+            state: { scrapeStatus: 'Site not scraped', pages: invalidPages },
+            errorType: 'SCR-016',
+        })
     })
 })

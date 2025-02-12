@@ -16,6 +16,7 @@ import {
     RequestDataSchema,
     ScrapeWebsiteSchema,
     GetPagesSchema,
+    ScrapePagesSchema,
 } from '../src/schema/input-zod.js'
 import express, { Request } from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
@@ -357,6 +358,24 @@ router.post('/scrape-site', async (req, res) => {
         const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
+        const saveResponse = await save(scrapeSettings, scrapedData)
+        res.json(saveResponse)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res, req.body.url)
+    }
+})
+
+router.post('/scrape-pages', async (req, res) => {
+    try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+        }
+
+        const validatedRequest = zodDataParse(req.body, ScrapePagesSchema, 'scrapedPagesInput')
+        const scrapeSettings = getScrapeSettings(validatedRequest)
+        const scrapedData = await scrapeAssetsFromSite(scrapeSettings, validatedRequest.pages)
         const saveResponse = await save(scrapeSettings, scrapedData)
         res.json(saveResponse)
     } catch (err) {

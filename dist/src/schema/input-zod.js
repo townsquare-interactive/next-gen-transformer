@@ -343,7 +343,7 @@ export const ScrapeWebsiteSchema = z.object({
     uploadLocation: z.string().optional(),
     backupImagesSave: z.boolean().optional(),
     saveImages: z.boolean().optional(),
-    useAi: z.boolean().optional(),
+    analyzeHomepageData: z.boolean().optional(),
     scrapeImages: z.boolean().optional(),
 })
 export const RequestDataSchema = z.object({

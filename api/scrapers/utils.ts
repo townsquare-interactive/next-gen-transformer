@@ -1,7 +1,8 @@
 import { Page } from 'playwright'
-import { createRandomFiveCharString } from '../../src/utilities/utils.js'
+import { convertUrlToApexId, createRandomFiveCharString } from '../../src/utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
+import { ScrapingError } from '../../src/utilities/errors.js'
 
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
@@ -191,4 +192,27 @@ export async function cleanseHtml(page: Page): Promise<string> {
 
     // Ensure it's within token limits
     return cleanedHtml.length > 100000 ? cleanedHtml.slice(0, 100000) : cleanedHtml
+}
+
+export const checkPagesAreSameDomain = (basePath: string, domainToCheck: string): boolean => {
+    if (basePath === convertUrlToApexId(domainToCheck)) {
+        return true
+    } else {
+        return false
+    }
+}
+
+export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) => {
+    const basePath = convertUrlToApexId(baseDomain)
+    for (let x = 0; x < pages.length; x++) {
+        if (!checkPagesAreSameDomain(basePath, pages[x])) {
+            throw new ScrapingError({
+                domain: baseDomain,
+                message: 'Found pages to scrape are not all on the same domain',
+                state: { scrapeStatus: 'Site not scraped', pages: pages },
+                errorType: 'SCR-016',
+            })
+        }
+    }
+    return true
 }

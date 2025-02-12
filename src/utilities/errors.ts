@@ -35,6 +35,7 @@ interface ScrapingErrorType extends ErrorClass {
     state: {
         scrapeStatus?: string
         method?: string
+        pages?: string[]
     } & ErrorState
 }
 

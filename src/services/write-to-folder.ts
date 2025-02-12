@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-export async function save(settings: Settings, imageFiles: { imageFileName: string; fileContents: string }[], logoUrl?: string) {
+export async function save(settings: Settings, imageFiles: { imageFileName: string; fileContents: Buffer }[], logoUrl?: string) {
     try {
         const __filename = fileURLToPath(import.meta.url)
         const __dirname = path.dirname(__filename)

@@ -59,8 +59,8 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
         const websiteData: ScrapedAndAnalyzedSiteData = { ...siteData, s3LogoUrl: savedImages.logoUrl || '' }
         const validatedSiteData = zodDataParse(websiteData, ScrapedAndAnalyzedSiteDataSchema, 'scrapedOutput')
 
-        if (settings.saveMethod === 's3Upload') {
-            await savePageDataToS3(settings, validatedSiteData)
+        if (settings.saveMethod === 's3Upload' && settings.analyzeHomepageData) {
+            await saveSiteDataToS3(settings, validatedSiteData)
         }
 
         return {
@@ -109,7 +109,7 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
     }
 }
 
-export const savePageDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData) => {
+export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData) => {
     try {
         const folderPath = `${settings.basePath}/scraped/siteData`
         await addFileS3(scrapedPageData, folderPath)

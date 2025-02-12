@@ -3,7 +3,7 @@ import { findPages } from '../../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeImageReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
-import { removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
+import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
 import { deleteFolderS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
@@ -57,22 +57,27 @@ export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
         basePath: convertUrlToApexId(validatedRequest.url),
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
-        useAi: validatedRequest.useAi === undefined ? true : validatedRequest.useAi,
+        analyzeHomepageData: validatedRequest.analyzeHomepageData === undefined ? true : validatedRequest.analyzeHomepageData,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
     }
 
     return scrapeSettings
 }
 
-export async function scrapeAssetsFromSite(settings: Settings) {
+export async function scrapeAssetsFromSite(settings: Settings, pages?: string[]) {
     const siteName = settings.url
     const scrapeFunction = settings.functions?.scrapeFunction || scrape
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
 
     try {
-        const pages = await scrapePagesFunction(settings)
-        const scrapeData = await scrapeDataFromPages(pages, settings, scrapeFunction)
+        const pagesToScrape = pages ? pages : await scrapePagesFunction(settings)
+        checkPagesAreOnSameDomain(settings.url, pagesToScrape)
+        const scrapeData = await scrapeDataFromPages(pagesToScrape, settings, scrapeFunction)
         const transformedScrapedData = transformSiteScrapedData(scrapeData, siteName)
+
+        if (!settings.analyzeHomepageData) {
+            console.log('analyzeHomepageData is false so siteData file will not be overwritten')
+        }
 
         //create s3 scrape data
         const siteData: ScrapedAndAnalyzedSiteData = {
@@ -89,7 +94,7 @@ export async function scrapeAssetsFromSite(settings: Settings) {
             domain: settings.url,
             message: error.message,
             state: { scrapeStatus: 'Site not scraped' },
-            errorType: 'SCR-011',
+            errorType: error.errorType || 'SCR-011',
         })
     }
 }

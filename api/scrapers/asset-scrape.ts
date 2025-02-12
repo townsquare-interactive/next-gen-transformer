@@ -106,7 +106,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         })
 
         let scrapeAnalysisResult
-        if (isHomePage && settings.useAi && screenshotBuffer) {
+        if (isHomePage && settings.analyzeHomepageData && screenshotBuffer) {
             console.log('Using AI to analyze page...')
             const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
             scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
@@ -122,7 +122,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
 
         //stop lazy load image processing after 10 pages for speed reasons
         if (settings.scrapeImages && n < 11) {
-            await scrollToLazyLoadImages(page, 1000)
+            await scrollToLazyLoadImages(page, 1000, settings.url)
         }
         await browser.close()
 
@@ -220,17 +220,21 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
 }
 
 // This function needs tweaking, but conceptually this works...
-async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: number) {
-    const visibleHeight = await page.evaluate(() => {
-        return Math.min(window.innerHeight, document.documentElement.clientHeight)
-    })
-    let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
-    //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
+async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: number, url: string) {
+    try {
+        const visibleHeight = await page.evaluate(() => {
+            return Math.min(window.innerHeight, document.documentElement.clientHeight)
+        })
+        let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
+        //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
 
-    // scroll until we're at the bottom...
-    while (scrollsRemaining > 0) {
-        await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight)
-        await page.waitForTimeout(millisecondsBetweenScrolling)
-        scrollsRemaining--
+        // scroll until we're at the bottom...
+        while (scrollsRemaining > 0) {
+            await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight)
+            await page.waitForTimeout(millisecondsBetweenScrolling)
+            scrollsRemaining--
+        }
+    } catch (err) {
+        console.error(`unable to lazy load page ${url}: `, err)
     }
 }

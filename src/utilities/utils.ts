@@ -156,7 +156,6 @@ export const convertUrlToApexId = (url: string, changeHyphens = true) => {
     if (domainParts.length > 1) {
         domainParts.pop() // Remove the last part (TLD)
     }
-    console.log('domain after convert func', domain)
     return domainParts.join('.')
 }
 

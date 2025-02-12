@@ -375,8 +375,13 @@ export const ScrapeWebsiteSchema = z.object({
     uploadLocation: z.string().optional(),
     backupImagesSave: z.boolean().optional(),
     saveImages: z.boolean().optional(),
-    useAi: z.boolean().optional(),
+    analyzeHomepageData: z.boolean().optional(),
     scrapeImages: z.boolean().optional(),
+})
+
+//request body coming from AI tool
+export const ScrapePagesSchema = ScrapeWebsiteSchema.extend({
+    pages: z.array(z.string()),
 })
 
 //request body coming from AI tool
