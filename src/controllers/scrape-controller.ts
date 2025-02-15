@@ -45,7 +45,11 @@ type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResul
 export interface Settings extends ScrapeImageReq {
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
-    functions?: { scrapeFunction?: ScrapeFunctionType; scrapePagesFunction?: (settings: Settings) => Promise<string[]> }
+    functions?: {
+        scrapeFunction?: ScrapeFunctionType
+        scrapePagesFunction?: (settings: Settings) => Promise<string[]>
+        isValidateUrl?: (url: string) => Promise<boolean>
+    }
     basePath: string
 }
 
@@ -68,8 +72,14 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
     const siteName = settings.url
     const scrapeFunction = settings.functions?.scrapeFunction || scrape
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
+    const isValidateUrl = settings.functions?.isValidateUrl || isValidHtmlPage
 
     try {
+        //confirm base URL returns HTML
+        if (!(await isValidateUrl(settings.url))) {
+            throw { message: `Invalid or non-HTML page: ${settings.url}`, errorType: 'SCR-011' }
+        }
+
         const pagesToScrape = pages ? pages : await scrapePagesFunction(settings)
         checkPagesAreOnSameDomain(settings.url, pagesToScrape)
         const scrapeData = await scrapeDataFromPages(pagesToScrape, settings, scrapeFunction)
@@ -222,5 +232,18 @@ export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFol
             state: { fileStatus: 'site data not deleted from S3' },
             errorType: 'SCR-014',
         })
+    }
+}
+
+async function isValidHtmlPage(url: string): Promise<boolean> {
+    console.log('confirming  URL is valid: ' + url)
+    try {
+        const response = await fetch(url, { method: 'HEAD' })
+        if (!response.ok) return false
+        const contentType = response.headers.get('content-type')
+        return contentType?.includes('text/html') ?? false
+    } catch (error) {
+        console.error(`Failed to fetch ${url}:`, error)
+        return false
     }
 }

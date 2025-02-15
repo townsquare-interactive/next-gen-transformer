@@ -1,6 +1,6 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ScrapingError } from '../utilities/errors.js'
 import { scrapeAssetsFromSite } from './scrape-controller.js'
+import { ScrapingError } from '../utilities/errors.js'
 
 describe('scrapeAssetsFromSite', () => {
     beforeEach(() => {
@@ -9,6 +9,7 @@ describe('scrapeAssetsFromSite', () => {
 
     it('should return the correct number of image files on a single page scrape', async () => {
         const url = 'https://scrapeurl.com'
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
         const mockScrapeFunction = vi.fn().mockResolvedValue({
             // Succeed on the second attempt
             imageList: ['image1.jpg', 'image2.jpg'],
@@ -24,7 +25,7 @@ describe('scrapeAssetsFromSite', () => {
         const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
-            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
             basePath: 'scrapeurl',
         })
 
@@ -34,13 +35,18 @@ describe('scrapeAssetsFromSite', () => {
 
     it('should run multiples scrapes with multiple pages', async () => {
         const url = 'https://scrapeurl.com'
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
         const mockScrapeFunction = vi
             .fn()
             .mockResolvedValueOnce({
                 // First page images
                 imageList: ['image1.jpg', 'image2.jpg'],
                 imageFiles: [
-                    { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
+                    {
+                        imageFileName: 'image1.jpg',
+                        fileContents: 'turn the correct number of image files on a single page scrapeimage1content',
+                        url: { origin: 'scrapeurl.com', pathname: 'image1content' },
+                    },
                     { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
                     { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
                 ],
@@ -59,7 +65,7 @@ describe('scrapeAssetsFromSite', () => {
         const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
-            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
             basePath: 'scrapeurl',
         })
 
@@ -93,13 +99,14 @@ describe('scrapeAssetsFromSite', () => {
         const pages = ['https://scrapeurl.com/page1', 'https://otherurl.com/page2']
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(pages)
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
 
         let error
         try {
             const result = await scrapeAssetsFromSite({
                 url,
                 saveMethod: 'test',
-                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction }, // Pass the mock function
+                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
                 basePath: 'scrapeurl',
             })
         } catch (err) {
@@ -122,12 +129,14 @@ describe('scrapeAssetsFromSite', () => {
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['https://scrapeurl.com/page1'])
 
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
+
         let error: any
         try {
             await scrapeAssetsFromSite({
                 url,
                 saveMethod: 'test',
-                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction },
+                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl },
                 basePath: 'scrapeurl',
             })
         } catch (err) {
@@ -142,10 +151,6 @@ describe('scrapeAssetsFromSite', () => {
             state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
             errorType: 'SCR-011',
         })
-    })
-
-    afterEach(() => {
-        vi.restoreAllMocks()
     })
 
     it('should fail when the URL is not a valid site', async () => {
@@ -167,13 +172,21 @@ describe('scrapeAssetsFromSite', () => {
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-        console.log('tst error', error)
+
+        /*        expect(error.domain).toEqual(errUrl)
+        expect(error.state).toEqual({ scrapeStatus: 'Site not scraped' })
+        expect(error.message).toEqual('ScrapingError: Invalid or non-HTML page: https://www.notereal.com')
+        expect(error.errorType).toEqual('SCR-011') */
 
         expect(error).toMatchObject({
             domain: errUrl,
-            message: expect.stringContaining('page.goto: Timeout 10000ms exceeded'),
+            message: expect.stringContaining('Invalid or non-HTML page: https://www.notereal.com'),
             state: { scrapeStatus: 'Site not scraped' },
             errorType: 'SCR-011',
         })
     }, 15000)
+
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
 })

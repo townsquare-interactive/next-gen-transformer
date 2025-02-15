@@ -346,10 +346,14 @@ const ContactData = z.object({
     email: z.union([z.string().email(), z.literal('')]),
 })
 
+const URL = z.string().regex(/^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/, {
+    message: 'Invalid URL format: Must start with http:// or https:// and contain a valid domain with a TLD.',
+})
+
 //request body coming from AI tool
 export const LandingInputSchema = z.object({
     siteName: z.string(),
-    url: z.string(),
+    url: URL,
     productionDomain: z.string().optional(),
     subdomainOverride: z.string().optional(),
     s3Folder: z.string(),
@@ -370,7 +374,7 @@ const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.li
 
 //request body coming from AI tool
 export const ScrapeWebsiteSchema = z.object({
-    url: z.string(),
+    url: URL,
     saveMethod: SaveFileMethod.optional(),
     uploadLocation: z.string().optional(),
     backupImagesSave: z.boolean().optional(),
@@ -381,7 +385,7 @@ export const ScrapeWebsiteSchema = z.object({
 
 //request body coming from AI tool
 export const ScrapePagesSchema = ScrapeWebsiteSchema.extend({
-    pages: z.array(z.string()),
+    pages: z.array(URL),
 })
 
 //request body coming from AI tool
@@ -395,6 +399,7 @@ export const RequestDataSchema = z.object({
     }),
 })
 
+export type Url = z.infer<typeof URL>
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type ScrapeImageReq = z.infer<typeof ScrapeWebsiteSchema>
 export type LandingReq = z.infer<typeof LandingInputSchema>
