@@ -5,6 +5,8 @@ import router from './api/cms-routes.js'
 import path from 'path'
 import { marked } from 'marked'
 import * as fs from 'fs'
+import swaggerUi from 'swagger-ui-express'
+import { openApiSpec } from './openapi.js'
 
 const app = express()
 const routes = router
@@ -27,6 +29,17 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '80mb' }))
 app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000000 }))
 app.use('/api/cms-routes', routes)
+
+// Serve Swagger UI
+const swaggerCssFile = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css'
+app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openApiSpec, {
+        customCss: '.swagger-ui .topbar .download-url-wrapper {display:flex;}', //show search bar
+        customCssUrl: swaggerCssFile,
+    })
+)
 
 const PORT = 8080
 

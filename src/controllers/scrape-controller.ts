@@ -1,6 +1,6 @@
 import { ImageFiles, scrape } from '../../api/scrapers/asset-scrape.js'
 import { findPages } from '../../api/scrapers/page-list-scrape.js'
-import { SaveFileMethodType, ScrapeImageReq } from '../schema/input-zod.js'
+import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
@@ -42,7 +42,7 @@ interface DeleteScrapedFolderRes {
 
 type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
 
-export interface Settings extends ScrapeImageReq {
+export interface Settings extends ScrapeWebsiteReq {
     saveMethod?: SaveFileMethodType
     timeoutLength?: number
     functions?: {
@@ -53,7 +53,7 @@ export interface Settings extends ScrapeImageReq {
     basePath: string
 }
 
-export function getScrapeSettings(validatedRequest: ScrapeImageReq) {
+export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
     const scrapeSettings = {
         url: validatedRequest.url,
         saveMethod: validatedRequest.saveMethod || 's3Upload',
