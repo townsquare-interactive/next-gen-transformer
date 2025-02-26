@@ -46,5 +46,8 @@
     },
     "SCR-016": {
         "description": "List of pages to scrape are not all on the same domain"
+    },
+    "AUT-017": {
+        "description": "Invalid authentication Bearer token"
     }
 }

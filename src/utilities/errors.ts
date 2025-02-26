@@ -57,6 +57,10 @@ interface DataUploadErrorType extends ErrorClass {
     } & ErrorState
 }
 
+interface AuthorizationErrorType extends ErrorClass {
+    state: ErrorState
+}
+
 abstract class BaseError extends Error {
     public errorType: string
     public state: ErrorState
@@ -120,6 +124,12 @@ export class MegError extends BaseError {
     }
 }
 
+export class AuthorizationError extends BaseError {
+    constructor({ message, errorType, state }: AuthorizationErrorType) {
+        super({ message, errorType, state })
+    }
+}
+
 const errorStatus = 'Error'
 
 // Handles all types of errors and calls the specified error class
@@ -177,6 +187,14 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             errorType: err.errorType,
             message: 'Scraping Error: ' + err.message + errorIDMessage,
             domain: url,
+            state: err.state,
+            status: errorStatus,
+        })
+    } else if (err instanceof AuthorizationError) {
+        res.status(401).json({
+            id: errorID,
+            errorType: err.errorType,
+            message: err.message + errorIDMessage,
             state: err.state,
             status: errorStatus,
         })

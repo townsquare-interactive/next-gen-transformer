@@ -90,5 +90,6 @@ Listed below are the common error types that can be seen in the API response aft
 | SCR-014 | Unable to delete scraped data folder |
 | VAL-015 | Error validating Bearer token |
 | SCR-016 | List of pages to scrape are not all on the same domain |
+| AUT-017 | Invalid authentication Bearer token |
 
 <!-- ERROR_TABLE_END -->

@@ -20,7 +20,7 @@ import {
 } from '../src/schema/input-zod.js'
 import express, { Request } from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
-import { ValidationError, handleError } from '../src/utilities/errors.js'
+import { AuthorizationError, ValidationError, handleError } from '../src/utilities/errors.js'
 import { createLandingPageFiles } from '../src/translation-engines/landing.js'
 import { DomainRes } from '../types.js'
 import { removeLandingProject, removeLandingSite } from '../src/controllers/remove-landing-controller.js'
@@ -55,7 +55,11 @@ router.post('/landing', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
-            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
         }
         const { apexID, siteData, domainOptions } = validateLandingRequestData(req)
         const data = await createLandingPageFiles(siteData, apexID)
@@ -335,7 +339,11 @@ router.post('/get-page-list', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
-            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
         }
 
         const validatedRequest = zodDataParse(req.body, GetPagesSchema, 'getPagesInput')
@@ -352,7 +360,11 @@ router.post('/scrape-site', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
-            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
         }
 
         const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
@@ -370,7 +382,11 @@ router.post('/scrape-pages', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
-            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
         }
 
         const validatedRequest = zodDataParse(req.body, ScrapePagesSchema, 'scrapedPagesInput')
@@ -388,7 +404,11 @@ router.delete('/scrape-site/:url', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
-            return res.status(401).json({ error: 'Missing Authorization header', status: 'Fail' })
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
         }
 
         const response = await removeScrapedFolder(req.params.url)
