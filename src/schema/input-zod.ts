@@ -362,7 +362,10 @@ const URL = z
     .regex(/^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/, {
         message: 'Invalid URL format',
     })
-    .openapi({ description: 'Website URL' }) // ✅ Now this works!
+    .openapi({
+        description: 'Website URL',
+        example: 'https://example.com',
+    })
 
 const landingExample = {
     siteName: 'Joes Burgers',
@@ -541,7 +544,7 @@ const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.li
 
 const scrapeExample = {
     url: 'https://siteexample.com',
-    saveMethod: 'dudaUpload',
+    saveMethod: 's3Upload',
     uploadLocation: '234kj324lk32jl3klllk3',
     backupImagesSave: true,
     saveImages: true,
@@ -585,12 +588,27 @@ export const ScrapeWebsiteSchema = z
 
 //request body coming from AI tool
 export const ScrapePagesSchema = ScrapeWebsiteSchema.extend({
-    pages: z.array(URL),
+    pages: z.array(URL).openapi({
+        example: ['https://example.com', 'https://examples.com/test'],
+        description: 'List of pages to scrape',
+    }),
+}).openapi({
+    // Add OpenAPI metadata to the entire schema
+    description: 'Schema for scraping multiple pages from a website',
+    example: {
+        url: 'https://example.com',
+        pages: ['https://example.com/page1', 'https://example.com/page2'],
+        saveMethod: 's3Upload',
+        backupImagesSave: true,
+        saveImages: true,
+        analyzeHomepageData: true,
+        scrapeImages: true,
+    },
 })
 
 //request body coming from AI tool
-export const GetPagesSchema = z.object({
-    url: z.string(),
+export const GetPageListSchema = z.object({
+    url: URL,
 })
 
 export const RequestDataSchema = z.object({
@@ -613,4 +631,6 @@ export type RemoveLandingProjectReq = z.infer<typeof RemoveLandingProjectSchema>
 export type SaveFileMethodType = z.infer<typeof SaveFileMethod>
 
 ScrapeWebsiteSchema.openapi({ ref: 'scrape-site' })
-LandingInputSchema.openapi({ ref: 'scrape-site' })
+LandingInputSchema.openapi({ ref: 'landing' })
+GetPageListSchema.openapi({ ref: 'get-page-list' })
+ScrapePagesSchema.openapi({ ref: 'scrape-pages' })

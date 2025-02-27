@@ -15,7 +15,7 @@ import {
     RequestDataReq,
     RequestDataSchema,
     ScrapeWebsiteSchema,
-    GetPagesSchema,
+    GetPageListSchema,
     ScrapePagesSchema,
 } from '../src/schema/input-zod.js'
 import express, { Request } from 'express'
@@ -346,32 +346,10 @@ router.post('/get-page-list', async (req, res) => {
             })
         }
 
-        const validatedRequest = zodDataParse(req.body, GetPagesSchema, 'getPagesInput')
+        const validatedRequest = zodDataParse(req.body, GetPageListSchema, 'getPagesInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const pages = await getPageList(scrapeSettings)
         res.json(pages)
-    } catch (err) {
-        err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
-    }
-})
-
-router.post('/scrape-site', async (req, res) => {
-    try {
-        const correctBearerToken = checkAuthToken(req)
-        if (!correctBearerToken) {
-            throw new AuthorizationError({
-                message: 'Incorrect authorization bearer token',
-                errorType: 'AUT-017',
-                state: {},
-            })
-        }
-
-        const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
-        const scrapeSettings = getScrapeSettings(validatedRequest)
-        const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
-        const saveResponse = await save(scrapeSettings, scrapedData)
-        res.json(saveResponse)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
@@ -392,6 +370,28 @@ router.post('/scrape-pages', async (req, res) => {
         const validatedRequest = zodDataParse(req.body, ScrapePagesSchema, 'scrapedPagesInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
         const scrapedData = await scrapeAssetsFromSite(scrapeSettings, validatedRequest.pages)
+        const saveResponse = await save(scrapeSettings, scrapedData)
+        res.json(saveResponse)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res, req.body.url)
+    }
+})
+
+router.post('/scrape-site', async (req, res) => {
+    try {
+        const correctBearerToken = checkAuthToken(req)
+        if (!correctBearerToken) {
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
+        }
+
+        const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
+        const scrapeSettings = getScrapeSettings(validatedRequest)
+        const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
         const saveResponse = await save(scrapeSettings, scrapedData)
         res.json(saveResponse)
     } catch (err) {

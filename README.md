@@ -1,5 +1,7 @@
 This project uses node.js to create and edit JSON files for the purpose of rendering websites on the Apex platform. The endpoints are available on the Vercel deployed website at [cms-routes.vercel.app](cms-routes.vercel.app). The develop branch version is live at [https://cms-routes-develop.vercel.app/](https://cms-routes-develop.vercel.app)
 
+OpenAPI documentation is available at [https://cms-routes.vercel.app/api-docs](https://cms-routes.vercel.app/api-docs)
+
 ## API Routes
 
 -   /api/cms-routes/save (POST): save Luna CMS data to create Apex sites

@@ -40,6 +40,10 @@ app.use(
         customCssUrl: swaggerCssFile,
     })
 )
+//serve spec json file
+app.get('/openapi.json', (req, res) => {
+    res.json(openApiSpec)
+})
 
 const PORT = 8080
 

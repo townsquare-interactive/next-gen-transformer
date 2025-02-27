@@ -13,7 +13,8 @@
         "useUnknownInCatchVariables": false,
         "inlineSourceMap": true,
         "allowJs": true,
-        "types": ["vitest", "node"]
+        "types": ["vitest", "node"],
+        "resolveJsonModule": true
     },
     "include": ["*.ts"],
     "exclude": ["node_modules"],
