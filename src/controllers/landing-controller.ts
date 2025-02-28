@@ -39,9 +39,9 @@ export const validateLandingRequestData = (req: { body: LandingReq }, type = 'in
 }
 
 export const createLayoutFile = async (siteData: LandingReq, apexID: string) => {
-    const headerLogo = siteData.logos.header || ''
-    const footerLogo = siteData.logos.footer || headerLogo
-    const mobileLogo = siteData.logos.mobile || headerLogo
+    const headerLogo = siteData.logos?.header || ''
+    const footerLogo = siteData.logos?.footer || headerLogo
+    const mobileLogo = siteData.logos?.mobile || headerLogo
     const socials = siteData.socials
     const address = siteData.contactData.address
     const siteName = siteData.siteName
@@ -251,7 +251,7 @@ const createModules = (modules: AiPageModules, phoneNumber: string) => {
                             newwindow2: '1',
                             promoColor: 'var(--promo)',
                             links: {
-                                weblink: currentMod.weblink || `tel:${phoneNumber}` || `tel:${phoneNumber}`,
+                                weblink: currentMod.weblink || `tel:${phoneNumber}`,
                                 dataLayerEventWrap: dlImgDataLayerEvent,
                             },
                             imageType: 'crop',

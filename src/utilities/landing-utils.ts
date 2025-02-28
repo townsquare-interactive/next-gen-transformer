@@ -17,6 +17,13 @@ export const transformSocial = (socials: string[]) => {
     return newSocials
 }
 
+export const checkLinkForEmail = (link: string) => {
+    if (link.includes('@') && !link.includes('mailto:')) {
+        return `mailto:${link}`
+    }
+    return link
+}
+
 export const addGuarnSpan = (text: string) => {
     if (text) {
         return `<span class='guarntext'>` + text + '</span>'
@@ -56,7 +63,7 @@ export const createModulesWithSections = (sections: Sections) => {
                 image: section.image,
                 subheader: section.subheader,
                 type: 'dl',
-                weblink: section.ctaLink,
+                weblink: checkLinkForEmail(section.ctaLink || ''),
                 dataLayerEventBtn: section.dataLayerEventBtn || '',
                 dataLayerEventWrap: section.dataLayerEventWrap || '',
             })
@@ -67,7 +74,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     type: 'banner',
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
-                    weblink: section.ctaLink,
+                    weblink: checkLinkForEmail(section.ctaLink || ''),
                     dataLayerEventBtn: section.dataLayerEventBtn || '',
                     dataLayerEventWrap: section.dataLayerEventWrap || '',
                 })
@@ -99,7 +106,7 @@ export const createModulesWithSections = (sections: Sections) => {
                     type: 'banner',
                     headline: section.headline,
                     actionlbl: section.ctaText || 'CALL US NOW',
-                    weblink: section.ctaLink,
+                    weblink: checkLinkForEmail(section.ctaLink || ''),
                     dataLayerEventBtn: section.dataLayerEventBtn || '',
                     dataLayerEventWrap: section.dataLayerEventWrap || '',
                 })
@@ -437,7 +444,7 @@ export const customizeWidgets = (
         }
 
         const getButtonLink = (phoneNumber: string, email: string, headerButtonData: HeaderButtons) => {
-            if (headerButtonData?.button1?.link) return headerButtonData.button1.link
+            if (headerButtonData?.button1?.link) return checkLinkForEmail(headerButtonData.button1.link)
             if (hasEngage) return ''
             return phoneNumber ? `tel:${phoneNumber}` : email ? `mailto:${email}` : ''
         }
@@ -482,7 +489,7 @@ export const customizeWidgets = (
         //add schedule button if using widgets
         if (scheduleEngineWidgetActive || hasEngage || headerButtonData?.button2?.link || headerButtonData?.button2?.label) {
             const scheduleButton = {
-                link: headerButtonData?.button2?.link ? headerButtonData?.button2?.link : ``,
+                link: headerButtonData?.button2?.link ? checkLinkForEmail(headerButtonData?.button2?.link) : ``,
                 active: true,
                 opensModal: -1,
                 window: 1,

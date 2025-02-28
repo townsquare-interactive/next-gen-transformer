@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createFontData, transformFonts } from './landing-utils'
+import { checkLinkForEmail, createFontData } from './landing-utils'
 
 describe('fontTransformation', () => {
     const fontRequest = [
@@ -38,5 +38,19 @@ describe('fontTransformation', () => {
         const { fonts, fontImport } = createFontData(unknownFontRequest)
         expect(fonts.sections.hdrs.value).toBe('Oswald')
         expect(fontImport).toContain('Oswald')
+    })
+})
+
+describe('checkLinkForEmail', () => {
+    it('should return the link with mailto: when the link is an email', () => {
+        const link = 'test@test.com'
+        const result = checkLinkForEmail(link)
+        expect(result).toBe('mailto:test@test.com')
+    })
+
+    it('should return the link unchanged when the link is not an email', () => {
+        const link = 'https://www.test.com'
+        const result = checkLinkForEmail(link)
+        expect(result).toBe('https://www.test.com')
     })
 })
