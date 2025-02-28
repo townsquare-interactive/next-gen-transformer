@@ -335,7 +335,7 @@ router.post('/migrate', async (req, res) => {
     }
 })
 
-router.post('/get-page-list', async (req, res) => {
+router.get('/page-list', async (req, res) => {
     try {
         const correctBearerToken = checkAuthToken(req)
         if (!correctBearerToken) {
@@ -346,13 +346,14 @@ router.post('/get-page-list', async (req, res) => {
             })
         }
 
-        const validatedRequest = zodDataParse(req.body, GetPageListSchema, 'getPagesInput')
-        const scrapeSettings = getScrapeSettings(validatedRequest)
+        const validatedRequest = zodDataParse(req.query, GetPageListSchema, 'getPagesInput')
+        const url = validatedRequest.url as string
+        const scrapeSettings = getScrapeSettings({ url: url })
         const pages = await getPageList(scrapeSettings)
         res.json(pages)
     } catch (err) {
-        err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        err.state = { ...err.state, req: req.query }
+        handleError(err, res, req.query.url as string)
     }
 })
 

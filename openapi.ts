@@ -568,19 +568,20 @@ export const openApiSpec = createDocument({
             },
         },
         '/api/cms-routes/get-page-list': {
-            post: {
+            get: {
                 summary: 'Get list of pages from a website',
                 description: 'Retrieves a list of pages from the specified website URL.',
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/schemas/GetPageListSchema',
-                            },
+                parameters: [
+                    {
+                        name: 'url',
+                        in: 'query',
+                        required: true,
+                        description: 'URL of the website to scan for pages',
+                        schema: {
+                            type: 'string',
                         },
                     },
-                },
+                ],
                 responses: {
                     '200': {
                         description: 'Successfully retrieved page list',
