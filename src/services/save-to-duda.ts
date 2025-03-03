@@ -134,6 +134,7 @@ export async function save(
 async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
     const siteName = settings?.uploadLocation || 'c914d96aac4548c2985917d2af88827d'
     const BASE_URL = 'https://api-sandbox.duda.co'
+    //https://developer.duda.co/reference/site-content-upload-resources
     const dudaApiUrl = `${BASE_URL}/api/sites/multiscreen/resources/${siteName}/upload`
     const DUDA_USERNAME = process.env.DUDA_USERNAME
     const DUDA_PASSWORD = process.env.DUDA_PASSWORD
