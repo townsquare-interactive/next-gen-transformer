@@ -1,27 +1,15 @@
-import { chromium as playwrightChromium } from 'playwright'
-//sparticuz/chromium package needed to get playwright working correctly on vercel
-import chromium from '@sparticuz/chromium'
 import type { Settings } from '../../src/controllers/scrape-controller.js'
+import { setupBrowser } from './playwright-setup.js'
 
-//const seenImages = new Set<string>()
 export async function findPages(settings: Settings) {
     try {
         const foundUrls = new Set<string>()
-        const browser = await playwrightChromium.launch({
-            headless: false,
-            executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
-            args: [...chromium.args, '--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
-        })
-
-        const page = await browser.newPage()
-        await page.setExtraHTTPHeaders({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.9',
-        })
+        const { browser, page } = await setupBrowser()
         console.log(`Loading main page: ${settings.url}`)
 
         const response = await page.goto(settings.url, {
             timeout: settings.timeoutLength || 60000,
+            //waitUntil: 'networkidle', // Wait until network is idle
         })
 
         if (!response || !response.ok()) {
@@ -37,7 +25,17 @@ export async function findPages(settings: Settings) {
             throw new Error(`Failed to load the page: ${settings.url}`)
         }
 
-        console.log(`Main page loaded successfully: ${settings.url}`)
+        // Wait a moment for any security challenges to complete
+        await page.waitForTimeout(5000)
+
+        // Check if we're still on a challenge page
+        const pageTitle = await page.title()
+        if (pageTitle.includes('Just a moment')) {
+            console.log('Detected Cloudflare challenge page, waiting longer...')
+            await page.waitForTimeout(10000)
+        }
+
+        console.log('Page loaded, proceeding with scrape...')
 
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {

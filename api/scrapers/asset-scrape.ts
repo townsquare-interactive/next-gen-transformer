@@ -1,11 +1,11 @@
 import { Browser, Page, Response } from 'playwright'
 import path from 'path'
-import { chromium as playwrightChromium } from 'playwright'
-import chromium from '@sparticuz/chromium'
 import type { ScrapeResult, Settings } from '../../src/controllers/scrape-controller.js'
 import { cleanseHtml, extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../src/schema/output-zod.js'
+
+import { setupBrowser } from './playwright-setup.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -25,36 +25,36 @@ export interface ScrapeSiteData {
     s3LogoUrl?: string
 }
 
+// This function needs tweaking, but conceptually this works...
+async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: number, url: string) {
+    try {
+        const visibleHeight = await page.evaluate(() => {
+            return Math.min(window.innerHeight, document.documentElement.clientHeight)
+        })
+        let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
+        //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
+
+        // scroll until we're at the bottom...
+        while (scrollsRemaining > 0) {
+            await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight)
+            await page.waitForTimeout(millisecondsBetweenScrolling)
+            scrollsRemaining--
+        }
+    } catch (err) {
+        console.error(`unable to lazy load page ${url}: `, err)
+    }
+}
+
 // Main scrape function
 export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {
-    const browser = await playwrightChromium
-        .launch({
-            headless: false,
-            executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
-            args: [...chromium.args, '--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
-        })
-        .catch((error) => {
-            console.error('Failed to launch Chromium:', error)
-            throw error
-        })
-    if (!browser) {
-        throw new Error('Chromium browser instance could not be created.')
-    }
-
-    const page = await browser.newPage()
-
-    await page.setExtraHTTPHeaders({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-    })
-
+    const { browser, page } = await setupBrowser()
     const isHomePage = n === 0
 
     //scraping site images
     let imageFiles: ImageFiles[] = []
 
-    //limit image scraping to the first 8 pages found
-    if (settings.scrapeImages) {
+    //limit image scraping to the first 22 pages found
+    if (settings.scrapeImages && n < 23) {
         console.log('Scraping images...')
         imageFiles = await scrapeImagesFromPage(page, browser)
     } else {
@@ -64,7 +64,20 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     try {
         const response = await page.goto(settings.url, {
             timeout: settings.timeoutLength || 60000,
+            waitUntil: 'domcontentloaded',
         })
+
+        if (isHomePage) {
+            await page.waitForTimeout(4000)
+        }
+        // Check if we're still on a challenge page
+        const pageTitle = await page.title()
+        if (pageTitle.includes('Just a moment')) {
+            console.log('Detected Cloudflare challenge page, waiting longer...', settings.url)
+            await page.waitForTimeout(10000)
+        }
+
+        console.log('Page loaded, proceeding with scrape...')
 
         if (!response || !response.ok()) {
             if (response) {
@@ -152,13 +165,13 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                 // Handle possible redirect
                 const status = response.status()
                 if (status >= 300 && status <= 399) {
-                    console.info(`Redirect from ${url} to ${response.headers()['location']}`)
+                    //console.info(`Redirect from ${url} to ${response.headers()['location']}`)
                     return
                 }
 
                 const contentType = response.headers()['content-type']
                 if (!contentType || !contentType.startsWith('image/')) {
-                    console.log(`Skipping non-image URL: ${url.href}`)
+                    //console.log(`Skipping non-image URL: ${url.href}`)
                     return
                 }
 
@@ -185,7 +198,7 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
 
                         // Filter out requests for tracking
                         if (fileName.endsWith('=FGET')) {
-                            console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                            //console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
                             return
                         }
 
@@ -216,25 +229,5 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
     } catch (error) {
         console.error('Error scraping images:', error)
         throw error
-    }
-}
-
-// This function needs tweaking, but conceptually this works...
-async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: number, url: string) {
-    try {
-        const visibleHeight = await page.evaluate(() => {
-            return Math.min(window.innerHeight, document.documentElement.clientHeight)
-        })
-        let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
-        //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
-
-        // scroll until we're at the bottom...
-        while (scrollsRemaining > 0) {
-            await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight)
-            await page.waitForTimeout(millisecondsBetweenScrolling)
-            scrollsRemaining--
-        }
-    } catch (err) {
-        console.error(`unable to lazy load page ${url}: `, err)
     }
 }

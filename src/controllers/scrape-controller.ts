@@ -111,8 +111,13 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
 
 export async function getPageList(settings: Settings) {
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
+    const isValidateUrl = settings.functions?.isValidateUrl || isValidHtmlPage
 
     try {
+        if (!(await isValidateUrl(settings.url))) {
+            throw { message: `Invalid or non-HTML page: ${settings.url}`, errorType: 'SCR-011' }
+        }
+
         const pages = await scrapePagesFunction(settings)
 
         return { pages }
@@ -236,12 +241,27 @@ export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFol
 }
 
 async function isValidHtmlPage(url: string): Promise<boolean> {
-    console.log('confirming  URL is valid: ' + url)
+    console.log('confirming URL is valid:', url)
     try {
-        const response = await fetch(url, { method: 'HEAD' })
-        if (!response.ok) return false
+        const response = await fetch(url, {
+            method: 'HEAD',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            },
+        })
+        console.log('Response status:', response.status)
+        console.log('Response headers:', Object.fromEntries(response.headers))
+
+        // Consider both 200 OK and 403 Cloudflare responses as valid if they return HTML
         const contentType = response.headers.get('content-type')
-        return contentType?.includes('text/html') ?? false
+        console.log('Content-Type:', contentType)
+
+        if (contentType?.includes('text/html')) {
+            return true
+        }
+
+        // If not HTML or no content type, then it's not valid
+        return false
     } catch (error) {
         console.error(`Failed to fetch ${url}:`, error)
         return false
