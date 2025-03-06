@@ -39,7 +39,8 @@ export async function findPages(settings: Settings) {
 
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {
-            const links: HTMLAnchorElement[] = Array.from(document.querySelectorAll('a[href]'))
+            const navExists = document.querySelector('nav') !== null
+            const links: HTMLAnchorElement[] = Array.from(navExists ? document.querySelectorAll('nav a[href]') : document.querySelectorAll('a[href]'))
             return links
                 .map((link) => link.href)
                 .filter((href) => {
@@ -61,6 +62,17 @@ export async function findPages(settings: Settings) {
         }
 
         const urlArray = Array.from(foundUrls)
+
+        //filter out Urls with multiple paths to avoid product pages
+        /*  let filteredUrlArray = urlArray
+        if (urlArray.length > 30) {
+            filteredUrlArray = urlArray.filter((url) => {
+                const urlPath = new URL(url).pathname
+                // Keep URLs with no path or just one path segment
+                return urlPath === '/' || urlPath.split('/').filter(Boolean).length <= 1
+            })
+        } */
+        //console.log(`Found ${filteredUrlArray.length} filteredpages:`, filteredUrlArray)
 
         console.log(`Found ${urlArray.length} pages:`, urlArray)
         await browser.close()
