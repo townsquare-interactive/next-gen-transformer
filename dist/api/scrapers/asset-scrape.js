@@ -1,38 +1,80 @@
-import path from 'path'
-import { chromium as playwrightChromium } from 'playwright'
-import chromium from '@sparticuz/chromium'
-import { hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
-import { analyzePageData } from '../openai/api.js'
+import path from 'path';
+import { cleanseHtml, extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js';
+import { analyzePageData } from '../openai/api.js';
+import { setupBrowser } from './playwright-setup.js';
+// This function needs tweaking, but conceptually this works...
+async function scrollToLazyLoadImages(page, millisecondsBetweenScrolling, url) {
+    try {
+        const visibleHeight = await page.evaluate(() => {
+            return Math.min(window.innerHeight, document.documentElement.clientHeight);
+        });
+        let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight));
+        //console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
+        // scroll until we're at the bottom...
+        while (scrollsRemaining > 0) {
+            await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight);
+            await page.waitForTimeout(millisecondsBetweenScrolling);
+            scrollsRemaining--;
+        }
+    }
+    catch (err) {
+        console.error(`unable to lazy load page ${url}: `, err);
+    }
+}
 // Main scrape function
 export async function scrape(settings, n) {
-    const browser = await playwrightChromium
-        .launch({
-            headless: false,
-            executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
-            args: [...chromium.args, '--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
-        })
-        .catch((error) => {
-            console.error('Failed to launch Chromium:', error)
-            throw error
-        })
-    if (!browser) {
-        throw new Error('Chromium browser instance could not be created.')
-    }
-    const page = await browser.newPage()
-    let imageFiles = []
+    const { browser, page } = await setupBrowser();
+    const isHomePage = n === 0;
     //scraping site images
-    if (settings.scrapeImages) {
-        console.log('Scraping images...')
-        imageFiles = await scrapeImagesFromPage(page)
-    } else {
-        console.log('Skipping image scrape.')
+    let imageFiles = [];
+    //limit image scraping to the first 22 pages found
+    if (settings.scrapeImages && n < 23) {
+        console.log('Scraping images...');
+        imageFiles = await scrapeImagesFromPage(page, browser);
+    }
+    else {
+        console.log('Skipping image scrape.', settings.url);
     }
     try {
         const response = await page.goto(settings.url, {
             timeout: settings.timeoutLength || 60000,
-        })
+            waitUntil: 'domcontentloaded',
+        });
+        if (isHomePage) {
+            await page.waitForTimeout(4000);
+        }
+        // Check if we're still on a challenge page
+        const pageTitle = await page.title();
+        if (pageTitle.includes('Just a moment')) {
+            console.log('Detected Cloudflare challenge page, waiting longer...', settings.url);
+            await page.waitForTimeout(10000);
+        }
+        console.log('Page loaded, proceeding with scrape...');
         if (!response || !response.ok()) {
-            throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
+            if (response) {
+                console.error(`Response status: ${response.status()}`);
+                console.error(`Response headers:`, response.headers());
+                console.error(`Response body:`, await response.text().catch(() => '[Unable to read body]'));
+            }
+            else {
+                console.error(`Response object is null/undefined`);
+            }
+            throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`);
+        }
+        //extract form data from pages
+        const formData = await extractFormData(page);
+        let screenshotBuffer;
+        //home page or contact page
+        if (isHomePage) {
+            screenshotBuffer = await page.screenshot({ fullPage: true });
+            imageFiles.push({
+                imageFileName: 'home-screenshot.jpg',
+                fileContents: screenshotBuffer,
+                url: null, //setting this to undefined prevents Duda uploading
+                hashedFileName: '',
+                originalImageLink: '',
+                fileExtension: '.jpg',
+            });
         }
         const seoData = await page.evaluate(() => {
             return {
@@ -41,133 +83,106 @@ export async function scrape(settings, n) {
                 metaKeywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
                 ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '',
                 ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '',
-            }
-        })
-        const pageTextContent = await extractPageContent(page)
-        const formData = await extractFormData(page)
-        if (n === 0 || settings.url.includes('contact')) {
-            console.log('forms', formData[0]?.fields)
-        }
-        let scrapeAnalysisResult
-        if (n === 0 && settings.analyzeHomepageData) {
-            console.log('Using AI to analyze page...')
-            scrapeAnalysisResult = await analyzePageData(page, settings.url)
+            };
+        });
+        let scrapeAnalysisResult;
+        if (isHomePage && settings.analyzeHomepageData && screenshotBuffer) {
+            console.log('Using AI to analyze page...');
+            const cleanedHtml = await cleanseHtml(page); //remove unwanted elements
+            scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml);
             if (scrapeAnalysisResult.logoTag) {
-                console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
-                imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
+                console.log('Found a logo src object', scrapeAnalysisResult.logoTag);
+                imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles);
             }
         }
-        await scrollToLazyLoadImages(page, 1000)
-        await browser.close()
+        //this step must be done last as it modies the DOM
+        const pageTextContent = await extractPageContent(page);
+        //stop lazy load image processing after 10 pages for speed reasons
+        if (settings.scrapeImages && n < 11) {
+            await scrollToLazyLoadImages(page, 1000, settings.url);
+        }
+        await browser.close();
         return {
             imageList: imageFiles.map((file) => file.originalImageLink),
             imageFiles,
             pageSeo: { ...seoData, pageUrl: settings.url },
-            aiAnalysis: scrapeAnalysisResult,
+            businessInfo: scrapeAnalysisResult,
             content: pageTextContent,
-        }
-    } catch (error) {
-        console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
-        throw error
+            forms: formData,
+        };
+    }
+    catch (error) {
+        console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`);
+        throw error;
     }
 }
-// Separate function to handle image scraping
-const scrapeImagesFromPage = async (page) => {
-    const imageFiles = []
-    page.on('response', async (response) => {
-        const url = new URL(response.url())
-        if (response.request().resourceType() === 'image') {
-            //handle possible redirect
-            const status = response.status()
-            if (status >= 300 && status <= 399) {
-                console.info(`Redirect from ${url} to ${response.headers()['location']}`)
-                return
-            }
-            const contentType = response.headers()['content-type']
-            if (!contentType || !contentType.startsWith('image/')) {
-                console.log(`Skipping non-image URL: ${url.href}`)
-                return
-            }
-            // Get the image content
-            response.body().then(async (fileContents) => {
-                const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
-                const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
-                const hashedFileName = `${hashedName}${fileExtension}`
-                const processedImageUrl = preprocessImageUrl(url) || ''
-                const fileName = processedImageUrl.split('/').pop()
-                if (!fileName) {
-                    console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
-                    return
+const scrapeImagesFromPage = async (page, browser) => {
+    try {
+        const imageFiles = [];
+        const imagePromises = []; // Store all async image processing
+        page.on('response', async (response) => {
+            if (response.request().resourceType() === 'image') {
+                const url = new URL(response.url());
+                // Handle possible redirect
+                const status = response.status();
+                if (status >= 300 && status <= 399) {
+                    //console.info(`Redirect from ${url} to ${response.headers()['location']}`)
+                    return;
                 }
-                // Filter out requests for tracking
-                if (fileName?.endsWith('=FGET')) {
-                    console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
-                    return
+                const contentType = response.headers()['content-type'];
+                if (!contentType || !contentType.startsWith('image/')) {
+                    //console.log(`Skipping non-image URL: ${url.href}`)
+                    return;
                 }
-                // Make sure file extension is at the end
-                let fileNameWithExt = fileName?.replaceAll(fileExtension, '') + fileExtension
-                imageFiles.push({
-                    imageFileName: fileNameWithExt,
-                    fileContents: fileContents,
-                    url: url,
-                    hashedFileName: hashedFileName,
-                    originalImageLink: processedImageUrl,
-                    fileExtension: fileExtension,
-                })
-            })
-        }
-    })
-    return imageFiles
-}
-// This function needs tweaking, but conceptually this works...
-async function scrollToLazyLoadImages(page, millisecondsBetweenScrolling) {
-    const visibleHeight = await page.evaluate(() => {
-        return Math.min(window.innerHeight, document.documentElement.clientHeight)
-    })
-    let scrollsRemaining = Math.ceil(await page.evaluate((inc) => document.body.scrollHeight / inc, visibleHeight))
-    console.debug(`visibleHeight = ${visibleHeight}, scrollsRemaining = ${scrollsRemaining}`)
-    // scroll until we're at the bottom...
-    while (scrollsRemaining > 0) {
-        await page.evaluate((amount) => window.scrollBy(0, amount), visibleHeight)
-        await page.waitForTimeout(millisecondsBetweenScrolling)
-        scrollsRemaining--
+                // Skip if page or browser is already closed
+                if (page.isClosed() || browser.isConnected() === false) {
+                    console.warn(`Skipping response.body() because the page or browser is closed: ${url.href}`);
+                    return;
+                }
+                // Process image response asynchronously and store the promise
+                const imageProcessingPromise = (async () => {
+                    try {
+                        const fileContents = await response.body();
+                        const hashedName = hashUrl(response.url()); // Hash the image URL to create a unique name
+                        const fileExtension = path.extname(url.pathname) || '.jpg'; // Default to .jpg if no extension
+                        const hashedFileName = `${hashedName}${fileExtension}`;
+                        const processedImageUrl = preprocessImageUrl(url) || '';
+                        const fileName = processedImageUrl.split('/').pop();
+                        if (!fileName) {
+                            console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`);
+                            return;
+                        }
+                        // Filter out requests for tracking
+                        if (fileName.endsWith('=FGET')) {
+                            //console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
+                            return;
+                        }
+                        // Ensure file extension is properly formatted
+                        let fileNameWithExt = fileName.replaceAll(fileExtension, '') + fileExtension;
+                        imageFiles.push({
+                            imageFileName: fileNameWithExt,
+                            fileContents: fileContents,
+                            url: url,
+                            hashedFileName: hashedFileName,
+                            originalImageLink: processedImageUrl,
+                            fileExtension: fileExtension,
+                        });
+                    }
+                    catch (err) {
+                        console.error(`Error processing image response from ${url.href}:`, err);
+                    }
+                })();
+                imagePromises.push(imageProcessingPromise); // Store the promise
+            }
+        });
+        // Wait for all image processing to complete before returning
+        await page.waitForLoadState('networkidle');
+        await Promise.all(imagePromises);
+        return imageFiles;
     }
-}
-const extractPageContent = async (page) => {
-    const pageTextContent = await page.evaluate(() => {
-        // Unwanted tags for content scrape
-        const unwantedSelectors = ['nav', 'footer', 'script', 'style']
-        unwantedSelectors.forEach((selector) => {
-            document.querySelectorAll(selector).forEach((el) => el.remove())
-        })
-        // Remove <header> content without removing headline tags
-        document.querySelectorAll('header *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)').forEach((el) => {
-            el.remove()
-        })
-        // Return visible text content
-        return document.body.innerText.trim()
-    })
-    return pageTextContent
-}
-const extractFormData = async (page) => {
-    return await page.evaluate(() => {
-        // Define the structure for form data
-        const forms = Array.from(document.querySelectorAll('form')).map((form) => {
-            // Extract the form title (legend, h1, h2, etc.)
-            const titleElement = form.querySelector('legend, h1, h2, h3, h4, h5, h6')
-            const title = titleElement?.textContent?.trim() || null
-            // Extract form fields
-            const fields = Array.from(form.querySelectorAll('input, select, textarea')).map((field) => {
-                const name = field.getAttribute('name') || ''
-                const type = field.getAttribute('type') || (field.tagName === 'TEXTAREA' ? 'textarea' : 'text')
-                const label = field.closest('label')?.textContent?.trim() || document.querySelector(`label[for="${field.id}"]`)?.textContent?.trim() || null
-                const placeholder = field.getAttribute('placeholder') || null
-                const required = field.hasAttribute('required')
-                return { name, type, label, placeholder, required }
-            })
-            return { title, fields }
-        })
-        return forms
-    })
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXNzZXQtc2NyYXBlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vYXBpL3NjcmFwZXJzL2Fzc2V0LXNjcmFwZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFDQSxPQUFPLElBQUksTUFBTSxNQUFNLENBQUE7QUFDdkIsT0FBTyxFQUFFLFFBQVEsSUFBSSxrQkFBa0IsRUFBRSxNQUFNLFlBQVksQ0FBQTtBQUMzRCxPQUFPLFFBQVEsTUFBTSxxQkFBcUIsQ0FBQTtBQUUxQyxPQUFPLEVBQUUsT0FBTyxFQUFFLGtCQUFrQixFQUFFLHNCQUFzQixFQUFFLE1BQU0sWUFBWSxDQUFBO0FBQ2hGLE9BQU8sRUFBRSxxQkFBcUIsRUFBRSxNQUFNLGtCQUFrQixDQUFBO0FBcUJ4RCx1QkFBdUI7QUFDdkIsTUFBTSxDQUFDLEtBQUssVUFBVSxNQUFNLENBQUMsUUFBa0IsRUFBRSxDQUFTO0lBQ3RELE1BQU0sT0FBTyxHQUFHLE1BQU0sa0JBQWtCO1NBQ25DLE1BQU0sQ0FBQztRQUNKLFFBQVEsRUFBRSxLQUFLO1FBQ2YsY0FBYyxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLE1BQU0sUUFBUSxDQUFDLGNBQWMsRUFBRSxDQUFDLENBQUMsQ0FBQyxTQUFTO1FBQzNGLElBQUksRUFBRSxDQUFDLEdBQUcsUUFBUSxDQUFDLElBQUksRUFBRSxjQUFjLEVBQUUsZUFBZSxFQUFFLDBCQUEwQixDQUFDO0tBQ3hGLENBQUM7U0FDRCxLQUFLLENBQUMsQ0FBQyxLQUFLLEVBQUUsRUFBRTtRQUNiLE9BQU8sQ0FBQyxLQUFLLENBQUMsNEJBQTRCLEVBQUUsS0FBSyxDQUFDLENBQUE7UUFDbEQsTUFBTSxLQUFLLENBQUE7SUFDZixDQUFDLENBQUMsQ0FBQTtJQUVOLElBQUksQ0FBQyxPQUFPLEVBQUUsQ0FBQztRQUNYLE1BQU0sSUFBSSxLQUFLLENBQUMsaURBQWlELENBQUMsQ0FBQTtJQUN0RSxDQUFDO0lBRUQsTUFB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
+    catch (error) {
+        console.error('Error scraping images:', error);
+        throw error;
+    }
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXNzZXQtc2NyYXBlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vYXBpL3NjcmFwZXJzL2Fzc2V0LXNjcmFwZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFDQSxPQUFPLElBQUksTUFBTSxNQUFNLENBQUE7QUFFdkIsT0FBTyxFQUFFLFdBQVcsRUFBRSxlQUFlLEVBQUUsa0JBQWtCLEVBQUUsT0FBTyxFQUFFLGtCQUFrQixFQUFFLHNCQUFzQixFQUFFLE1BQU0sWUFBWSxDQUFBO0FBQ2xJLE9BQU8sRUFBRSxlQUFlLEVBQUUsTUFBTSxrQkFBa0IsQ0FBQTtBQUdsRCxPQUFPLEVBQUUsWUFBWSxFQUFFLE1BQU0sdUJBQXVCLENBQUE7QUFvQnBELCtEQUErRDtBQUMvRCxLQUFLLFVBQVUsc0JBQXNCLENBQUMsSUFBVSxFQUFFLDRCQUFvQyxFQUFFLEdBQVc7SUFDL0YsSUFBSSxDQUFDO1FBQ0QsTUFBTSxhQUFhLEdBQUcsTUFBTSxJQUFJLENBQUMsUUFBUSxDQUFDLEdBQUcsRUFBRTtZQUMzQyxPQUFPLElBQUksQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLFdBQVcsRUFBRSxRQUFRLENBQUMsZUFBZSxDQUFDLFlBQVksQ0FBQyxDQUFBO1FBQzlFLENBQUMsQ0FBQyxDQUFBO1FBQ0YsSUFBSSxnQkFBZ0IsR0FBRyxJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDLEdBQUcsRUFBRSxFQUFFLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxZQUFZLEdBQUcsR0FBRyxFQUFFLGFBQWEsQ0FBQyxDQUFDLENBQUE7UUFDL0csMkZBQTJGO1FBRTNGLHNDQUFzQztRQUN0QyxPQUFPLGdCQUFnQixHQUFHLENBQUMsRUFBRSxDQUFDO1lBQzFCLE1BQU0sSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDLE1BQU0sRUFBRSxFQUFFLENBQUMsTUFBTSxDQUFDLFFBQVEsQ0FBQyxDQUFDLEVBQUUsTUFBTSxDQUFD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

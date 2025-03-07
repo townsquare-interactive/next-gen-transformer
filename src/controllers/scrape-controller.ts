@@ -21,14 +21,14 @@ export interface ScrapeResult {
     imageList: string[]
     imageFiles: ImageFiles[]
     pageSeo?: ScrapedPageSeo
-    aiAnalysis?: ScreenshotData
+    businessInfo?: ScreenshotData
     content: string
     forms: ScrapedForm[]
 }
 
 export interface ScrapeFullSiteResult {
     imageFiles: ImageFiles[]
-    aiAnalysis?: ScreenshotData
+    businessInfo?: ScreenshotData
     pageSeo?: ScrapedPageSeo
     seo: (ScrapedPageSeo | undefined)[]
     pagesData: ScrapedPageData[]
@@ -94,7 +94,7 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
             baseUrl: settings.url,
             pages: transformedScrapedData.pagesData,
             dudaUploadLocation: settings.uploadLocation || '',
-            aiAnalysis: transformedScrapedData.aiAnalysis,
+            businessInfo: transformedScrapedData.businessInfo,
         }
 
         return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
@@ -134,10 +134,10 @@ export async function getPageList(settings: Settings) {
 
 const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
     //remove links from same domain
-    if (scrapeData.aiAnalysis?.links.other) {
-        const extLinks = scrapeData.aiAnalysis.links.other.filter((link: string) => !link.includes(url))
+    if (scrapeData.businessInfo?.links.other) {
+        const extLinks = scrapeData.businessInfo.links.other.filter((link: string) => !link.includes(url))
 
-        scrapeData.aiAnalysis.links.other = extLinks
+        scrapeData.businessInfo.links.other = extLinks
     }
 
     return scrapeData
@@ -164,7 +164,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
         }
 
         // Extract AI analysis from homepage (if available)
-        const screenshotPageData = homepageData.aiAnalysis
+        const screenshotPageData = homepageData.businessInfo
 
         // Initialize storage for results
         const seo = [homepageData.pageSeo] // Start with homepage SEO data
@@ -216,7 +216,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
         const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
         const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
 
-        return { imageFiles: renamedDupes, seo, aiAnalysis: screenshotPageData, pagesData }
+        return { imageFiles: renamedDupes, seo, businessInfo: screenshotPageData, pagesData }
     } catch (err) {
         console.error('Error during scraping:', err)
         throw err

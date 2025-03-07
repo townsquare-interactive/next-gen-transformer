@@ -143,7 +143,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             imageList: imageFiles.map((file) => file.originalImageLink),
             imageFiles,
             pageSeo: { ...seoData, pageUrl: settings.url },
-            aiAnalysis: scrapeAnalysisResult,
+            businessInfo: scrapeAnalysisResult,
             content: pageTextContent,
             forms: formData,
         }

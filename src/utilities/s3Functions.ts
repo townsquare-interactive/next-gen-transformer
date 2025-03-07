@@ -102,6 +102,8 @@ export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
         })
 
     console.log('File Placed')
+    const fileUrl = `https://${tsiBucket}.s3.us-east-1.amazonaws.com/${encodeURIComponent(key + `.${fileType}`)}`
+    return fileUrl
 }
 
 export const addImageToS3 = async (file: any, key: string) => {

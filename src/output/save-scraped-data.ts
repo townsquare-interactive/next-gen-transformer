@@ -5,7 +5,7 @@ import { save as s3FileUpload } from '../services/s3-images-upload.js'
 import { save as batchUploadToDuda } from '../services/save-to-duda.js'
 import { addFileS3 } from '../utilities/s3Functions.js'
 import type { Settings } from '../controllers/scrape-controller.js'
-import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema, ScrapedPageData } from '../schema/output-zod.js'
+import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema } from '../schema/output-zod.js'
 import { zodDataParse } from '../schema/utils-zod.js'
 
 export interface SaveOutput {
@@ -25,9 +25,11 @@ interface ScrapedDataToSave {
 export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) => {
     if (settings.saveImages) {
         let s3SavedRes
+        let siteDataFileUrl
         //save to s3 by default (backupImagesSave defaults to true if not in params)
         if (settings.backupImagesSave || settings.saveMethod === 's3Upload') {
             s3SavedRes = await saveScrapedData({ ...settings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData)
+            siteDataFileUrl = s3SavedRes?.siteDataUrl
         }
 
         let saveServiceRes
@@ -38,11 +40,14 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave) =
         const savedInfoResponse = saveServiceRes || s3SavedRes
 
         return {
-            imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal || 0,
-            failedImageCount: savedInfoResponse?.imageData.failedImageList.length || 0,
-            uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
-            s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
-            failedImages: savedInfoResponse?.imageData.failedImageList || [],
+            dataUploadDetails: {
+                imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal || 0,
+                failedImageCount: savedInfoResponse?.imageData.failedImageList.length || 0,
+                uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
+                s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
+                failedImages: savedInfoResponse?.imageData.failedImageList || [],
+                siteDataFileUrl: siteDataFileUrl || '',
+            },
             s3LogoUrl: s3SavedRes?.imageData?.logoUrl || '',
             scrapedPages: scrapedData.siteData.pages,
             url: scrapedData.url,
@@ -58,9 +63,9 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
         const savedImages = await saveScrapedImages(settings, imageFiles, logoUrl)
         const websiteData: ScrapedAndAnalyzedSiteData = { ...siteData, s3LogoUrl: savedImages.logoUrl || '' }
         const validatedSiteData = zodDataParse(websiteData, ScrapedAndAnalyzedSiteDataSchema, 'scrapedOutput')
-
+        let siteDataUrl
         if (settings.saveMethod === 's3Upload' && settings.analyzeHomepageData) {
-            await saveSiteDataToS3(settings, validatedSiteData)
+            siteDataUrl = await saveSiteDataToS3(settings, validatedSiteData)
         }
 
         return {
@@ -70,6 +75,7 @@ export const saveScrapedData = async (settings: Settings, imageFiles: ImageFiles
                 failedImageList: savedImages.failedImageList,
                 logoUrl: savedImages.logoUrl || '',
             },
+            siteDataUrl: siteDataUrl || '',
         }
     } catch (err) {
         throw err
@@ -112,8 +118,8 @@ export async function saveScrapedImages(settings: Settings, imageFiles: ImageFil
 export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData) => {
     try {
         const folderPath = `${settings.basePath}/scraped/siteData`
-        await addFileS3(scrapedPageData, folderPath)
-        console.log('scraped page data uploaded to ', folderPath)
+        const siteDataFileUrl = await addFileS3(scrapedPageData, folderPath)
+        return siteDataFileUrl
     } catch (err) {
         throw new ScrapingError({
             domain: settings.url,

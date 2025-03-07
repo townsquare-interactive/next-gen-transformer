@@ -544,7 +544,7 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
     baseUrl: z.string(),
     pages: z.array(ScrapedPageDataSchema),
     dudaUploadLocation: z.string().nullable(),
-    aiAnalysis: ScreenshotDataSchema.optional(),
+    businessInfo: ScreenshotDataSchema.optional(),
     s3LogoUrl: z.string().optional(),
 })
 

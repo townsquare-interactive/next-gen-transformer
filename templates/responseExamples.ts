@@ -72,7 +72,7 @@ export const scrapeResponseExample = {
             },
         ],
         dudaUploadLocation: '',
-        aiAnalysis: {
+        businessInfo: {
             logoTag: '<img src="/files/2023/11/water-drop-white.png">',
             companyName: 'Aqua Pool & Spa',
             address: 'Hannibal, OH 43931',
