@@ -6,6 +6,8 @@ const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 import { S3 } from '@aws-sdk/client-s3'
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'stream'
+import { NodeHttpHandler } from '@smithy/node-http-handler'
+import { Agent as HttpAgent } from 'http'
 
 interface DeleteFolderS3Res {
     status: 'fail' | 'success'
@@ -19,6 +21,11 @@ const s3 = new S3({
         secretAccessKey: process.env.CMS_SECRET_ACCESS_KEY_ID || '',
     },
     region: process.env.CMS_DEFAULT_REGION,
+    requestHandler: new NodeHttpHandler({
+        socketTimeout: 3000,
+        httpAgent: new HttpAgent({ keepAlive: true, maxSockets: 300 }),
+        // socketAcquisitionTimeoutMs: 10000
+    }),
 })
 
 // Utility function to convert a Readable Stream to a string (needed for sdk v3)
