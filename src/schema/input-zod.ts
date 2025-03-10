@@ -540,7 +540,7 @@ export const LandingInputSchema = z
         example: landingExample,
     })
 
-const SaveFileMethod = z.literal('writeFolder').or(z.literal('s3Upload').or(z.literal('test').or(z.literal('dudaUpload'))))
+const SaveFileMethod = z.literal('s3Upload').or(z.literal('test').or(z.literal('dudaUpload')))
 
 const scrapeExample = {
     url: 'https://siteexample.com',

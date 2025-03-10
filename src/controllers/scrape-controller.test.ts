@@ -11,7 +11,6 @@ describe('scrapeAssetsFromSite', () => {
         const url = 'https://scrapeurl.com'
         const mockValidateURl = vi.fn().mockResolvedValue(true)
         const mockScrapeFunction = vi.fn().mockResolvedValue({
-            // Succeed on the second attempt
             imageList: ['image1.jpg', 'image2.jpg'],
             imageFiles: [
                 { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
@@ -25,7 +24,7 @@ describe('scrapeAssetsFromSite', () => {
         const result = await scrapeAssetsFromSite({
             url,
             saveMethod: 'test',
-            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl },
             basePath: 'scrapeurl',
         })
 

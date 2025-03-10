@@ -11,7 +11,6 @@ These utilities have been created to scrape assets from a website and save them 
 | `url` (required)                | String  | The website URL to scrape.                                      | N/A           |
 | `saveMethod`                    | String  | Determines where to save images.                                | `s3Upload`    |
 |                                 |         | - `dudaUpload`: Upload images to Duda (requires uploadLocation) |               |
-|                                 |         | - `writeFolder`: Save images to a local folder                  |               |
 |                                 |         | - `s3Upload`: Save images to s3 folder                          |               |
 |                                 |         | - `test`: Save images nowhere (for testing purposes)            |               |
 | `uploadLocation` (req for Duda) | String  | Duda website ID for uploading images                            | None          |

@@ -2,7 +2,7 @@ import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
 import type { Settings } from '../../src/controllers/scrape-controller.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
-import type { SaveOutput } from '../output/save-scraped-data.js'
+import type { SaveOutput, SavingScrapedData } from '../output/save-scraped-data.js'
 
 interface UploadPayload {
     resource_type: 'IMAGE'
@@ -11,9 +11,9 @@ interface UploadPayload {
 }
 
 export interface UploadedResourcesObj {
-    id: string
+    id?: string
     src: string
-    original_url: string
+    original_url?: string
     new_url?: string
     status?: 'UPLOADED' | 'NOT_FOUND'
 }
@@ -24,54 +24,18 @@ interface DudaResponse {
     uploaded_resources: UploadedResourcesObj[]
 }
 
-export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: string): UploadPayload[] {
-    const seenUrls = new Set<string>()
-    const processedUrls: UploadPayload[] = []
-    const dudaImageFolder = 'Imported'
+export async function save(saveData: SavingScrapedData) {
+    console.log('saving to duda')
+    const settings = saveData.settings
+    const imageFiles = saveData.imageFiles
+    const logoUrl = saveData.logoUrl
+    const fetchFunction = saveData.functions?.imageUploadFunction
+    const imageData = await saveImages(settings, imageFiles, logoUrl, fetchFunction)
 
-    imageFiles.forEach((file) => {
-        const processedUrl = preprocessImageUrl(file.url)
-
-        if (!processedUrl) {
-            console.warn(`Invalid URL skipped: ${file.url}`)
-            return
-        }
-
-        if (seenUrls.has(processedUrl)) {
-            console.warn(`Duplicate URL skipped: ${processedUrl}`)
-            return
-        }
-
-        seenUrls.add(processedUrl)
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: processedUrl,
-            folder: dudaImageFolder,
-        })
-    })
-
-    //add logo src seperately from s3 url
-    if (logoUrl) {
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: logoUrl,
-            //folder: 'logos',
-            folder: dudaImageFolder,
-        })
-    }
-
-    return processedUrls
+    return imageData
 }
 
-export function processBatch(payload: UploadPayload[], batchSize: number): UploadPayload[][] {
-    const batches: UploadPayload[][] = []
-    for (let i = 0; i < payload.length; i += batchSize) {
-        batches.push(payload.slice(i, i + batchSize))
-    }
-    return batches
-}
-
-export async function save(
+export async function saveImages(
     settings: Settings,
     imageFiles: ImageFiles[],
     logoUrl?: string,
@@ -121,7 +85,7 @@ export async function save(
                 succesfulImageCount += 1
             }
             if (batch.status === 'NOT_FOUND') {
-                failedImageList.push(batch.original_url)
+                failedImageList.push(batch.original_url || '')
             }
 
             allUploads.push(batch)
@@ -170,4 +134,51 @@ async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
     } catch (error) {
         throw error
     }
+}
+
+export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: string): UploadPayload[] {
+    const seenUrls = new Set<string>()
+    const processedUrls: UploadPayload[] = []
+    const dudaImageFolder = 'Imported'
+
+    imageFiles.forEach((file) => {
+        const processedUrl = preprocessImageUrl(file.url)
+
+        if (!processedUrl) {
+            console.warn(`Invalid URL skipped: ${file.url}`)
+            return
+        }
+
+        if (seenUrls.has(processedUrl)) {
+            console.warn(`Duplicate URL skipped: ${processedUrl}`)
+            return
+        }
+
+        seenUrls.add(processedUrl)
+        processedUrls.push({
+            resource_type: 'IMAGE',
+            src: processedUrl,
+            folder: dudaImageFolder,
+        })
+    })
+
+    //add logo src seperately from s3 url
+    if (logoUrl) {
+        processedUrls.push({
+            resource_type: 'IMAGE',
+            src: logoUrl,
+            //folder: 'logos',
+            folder: dudaImageFolder,
+        })
+    }
+
+    return processedUrls
+}
+
+export function processBatch(payload: UploadPayload[], batchSize: number): UploadPayload[][] {
+    const batches: UploadPayload[][] = []
+    for (let i = 0; i < payload.length; i += batchSize) {
+        batches.push(payload.slice(i, i + batchSize))
+    }
+    return batches
 }
