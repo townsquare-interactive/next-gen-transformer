@@ -4,7 +4,7 @@ import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
-import { deleteFolderS3 } from '../utilities/s3Functions.js'
+import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
 
@@ -266,4 +266,13 @@ async function isValidHtmlPage(url: string): Promise<boolean> {
         console.error(`Failed to fetch ${url}:`, error)
         return false
     }
+}
+
+export const getScrapedDataFromS3 = async (url: string) => {
+    const siteFolderName = convertUrlToApexId(url)
+    const scrapedFolder = `${siteFolderName}/scraped`
+    const siteDataPath = scrapedFolder + '/siteData.json'
+    const scrapedData = await getFileS3(siteDataPath, 'scraped data not found in s3')
+    console.log('siteData', scrapedData)
+    return scrapedData
 }

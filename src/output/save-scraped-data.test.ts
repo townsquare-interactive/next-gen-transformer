@@ -21,6 +21,10 @@ describe('save', () => {
             pages: [],
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '',
+            assetData: {
+                s3UploadedImages: ['https://s3.example.com/image.jpg'],
+                s3LogoUrl: '',
+            },
         }
 
         const mockScrapedData = {
@@ -30,9 +34,7 @@ describe('save', () => {
             siteData: mockSiteData,
         }
 
-        const mockImageUpload = vi.fn().mockResolvedValue({
-            url: 'https://s3.example.com/image.jpg',
-        })
+        const mockImageUpload = vi.fn().mockResolvedValue('https://s3.example.com/image.jpg')
 
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
 
@@ -44,13 +46,11 @@ describe('save', () => {
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
         }
-
+        //
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
         })
-
-        console.log('ressy', result)
 
         expect(result).toHaveProperty('dataUploadDetails')
         expect(result.dataUploadDetails?.imageUploadTotal).toBe(1)
@@ -60,7 +60,7 @@ describe('save', () => {
         expect(result.dataUploadDetails?.s3UploadedImages).toHaveLength(1)
         expect(result.dataUploadDetails?.siteDataUrl).toBe('https://s3.example.com/site-data.json')
         expect(result.url).toBe('http://example.com')
-        expect(result.siteData).toBe(mockSiteData)
+        expect(result.siteData).toStrictEqual(mockSiteData)
     })
 
     it('should skip image upload when saveImages is false', async () => {
@@ -193,10 +193,11 @@ describe('save', () => {
             siteData: mockSiteData,
         }
 
+        const mockS3ImageResponse = 'https://example.com/image1.png'
         const mockDudaResponse = {
             uploaded_resources: [
                 {
-                    url: 'https://example.com/image1.png',
+                    src: 'https://example.com/image1.png',
                     status: 'UPLOADED',
                 },
             ],
@@ -206,7 +207,10 @@ describe('save', () => {
             url: 'https://s3.example.com/image.jpg',
         }
 
-        const mockDudaUpload = vi.fn().mockResolvedValue(mockDudaResponse)
+        const mockImageUpload = vi
+            .fn()
+            .mockImplementationOnce(() => mockS3ImageResponse)
+            .mockImplementationOnce(() => mockDudaResponse)
         const mockS3Upload = vi.fn().mockResolvedValue(mockS3Response)
 
         const settings: Settings = {
@@ -220,13 +224,13 @@ describe('save', () => {
         }
 
         const result = await save(settings, mockScrapedData, {
-            imageUploadFunction: mockDudaUpload,
+            imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockS3Upload,
         })
 
         expect(result.dataUploadDetails?.s3UploadedImages).toBeDefined()
         expect(result.dataUploadDetails?.uploadedResources).toEqual(mockDudaResponse.uploaded_resources)
-        expect(mockDudaUpload).toHaveBeenCalled()
+        expect(mockImageUpload).toHaveBeenCalledTimes(2)
         expect(mockS3Upload).toHaveBeenCalled()
     })
 })

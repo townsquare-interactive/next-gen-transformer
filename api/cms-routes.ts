@@ -5,7 +5,7 @@ import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
 import { save } from '../src/output/save-scraped-data.js'
-import { getPageList, getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
+import { getPageList, getScrapedDataFromS3, getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import {
@@ -418,6 +418,11 @@ router.delete('/scrape-site/:url', async (req, res) => {
         err.state = { ...err.state, req: req.params }
         handleError(err, res, req.params.url)
     }
+})
+
+router.get('/scraped-data', async (req, res) => {
+    const scrapedData = await getScrapedDataFromS3(req.query.url as string)
+    res.json(scrapedData)
 })
 
 const checkAuthToken = (req: Request): boolean => {

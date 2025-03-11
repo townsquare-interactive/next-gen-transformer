@@ -10,6 +10,7 @@ export interface SaveOutput {
     failedImageList: string[]
     logoUrl?: string
     siteDataUrl?: string
+    siteData?: ScrapedAndAnalyzedSiteData
 }
 
 interface ScrapedDataToSave {
@@ -58,13 +59,13 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
                 imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal || 0,
                 failedImageCount: savedInfoResponse?.imageData.failedImageList.length || 0,
                 uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
-                s3UploadedImages: s3SavedRes?.imageData.uploadedResources || [],
+                s3UploadedImages: s3SavedRes?.siteData.assetData?.s3UploadedImages || [],
                 failedImages: savedInfoResponse?.imageData.failedImageList || [],
                 siteDataUrl: siteDataUrl || '',
             },
             s3LogoUrl: s3SavedRes?.imageData?.logoUrl || '',
             url: scrapedData.url,
-            siteData: scrapedData.siteData,
+            siteData: s3SavedRes?.siteData || scrapedData.siteData,
         }
     } else {
         return { message: 'Scrape complete: no images uploaded', scrapedPages: scrapedData.siteData.pages, url: scrapedData.url }
@@ -107,6 +108,7 @@ export async function saveToService(
                 logoUrl: savedData.logoUrl || '',
             },
             siteDataUrl: savedData.siteDataUrl || '',
+            siteData: savedData.siteData || siteData,
         }
     } catch (err) {
         throw err

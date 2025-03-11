@@ -14,15 +14,24 @@ export async function saveData(saveData: SavingScrapedData) {
 
     const imageData = await saveImages(saveData.settings, saveData.imageFiles, saveData.logoUrl, fetchFunction)
 
-    console.log('sd:', saveData.siteData, saveData.settings.analyzeHomepageData)
     let siteDataUrl
+    let siteData
     if (saveData.siteData && saveData.settings.analyzeHomepageData) {
-        const websiteData: ScrapedAndAnalyzedSiteData = { ...saveData.siteData, s3LogoUrl: imageData.logoUrl || '' }
+        //modify siteData based off S3 saved data
+        siteData = {
+            ...saveData.siteData,
+            assetData: {
+                s3UploadedImages: imageData.uploadedImages.map((img) => img.src),
+                s3LogoUrl: imageData.logoUrl || '',
+            },
+        }
+
+        const websiteData: ScrapedAndAnalyzedSiteData = siteData
         const validatedSiteData = zodDataParse(websiteData, ScrapedAndAnalyzedSiteDataSchema, 'scrapedOutput')
         siteDataUrl = await saveSiteDataToS3(saveData.settings, validatedSiteData, siteDataUploadFunction)
     }
 
-    return { ...imageData, siteDataUrl }
+    return { ...imageData, siteDataUrl, siteData }
 }
 
 export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData, siteDataUploadFunction?: siteDataUploadFunction) => {
