@@ -1,7 +1,14 @@
 import { createDocument } from 'zod-openapi'
-import { GetPageListSchema, LandingInputSchema, ScrapePagesSchema, ScrapeWebsiteSchema } from './src/schema/input-zod.js'
+import {
+    GetPageListSchema,
+    GetScrapeDataSchema,
+    LandingInputSchema,
+    MoveS3DataToDudaSchema,
+    ScrapePagesSchema,
+    ScrapeWebsiteSchema,
+} from './src/schema/input-zod.js'
 import * as errorTypes from './src/utilities/errors.json' assert { type: 'json' }
-import { scrapeResponseExample, landing200ResponseExample, unauthorizedResponseExample } from './templates/responseExamples.js'
+import { scrapeResponseExample, landing200ResponseExample, unauthorizedResponseExample, siteDataResponseExample } from './templates/responseExamples.js'
 
 export const openApiSpec = createDocument({
     openapi: '3.1.0',
@@ -402,6 +409,70 @@ export const openApiSpec = createDocument({
                 },
             },
         },
+        '/api/cms-routes/scraped-data': {
+            get: {
+                summary: 'Get scraped data from S3',
+                description: 'Retrieves scraped data from S3 for a given URL.',
+                parameters: [
+                    {
+                        name: 'url',
+                        in: 'query',
+                        required: true,
+                        description: 'URL of the website previously scraped',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Successfully retrieved scraped data',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        data: { type: 'string' },
+                                    },
+                                    example: siteDataResponseExample,
+                                },
+                            },
+                        },
+                    },
+                    '401': unauthorizedResponseExample,
+                },
+            },
+        },
+        '/api/cms-routes/move-s3-data-to-duda': {
+            post: {
+                summary: 'Move S3 data to Duda',
+                description: 'Moves S3 data to Duda for a given URL.',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/MoveS3DataToDudaSchema',
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    '200': {
+                        description: 'Successfully moved S3 data to Duda',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                },
+                                example: scrapeResponseExample,
+                            },
+                        },
+                    },
+                    '401': unauthorizedResponseExample,
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -417,6 +488,8 @@ export const openApiSpec = createDocument({
             LandingInputSchema,
             GetPageListSchema,
             ScrapePagesSchema,
+            GetScrapeDataSchema,
+            MoveS3DataToDudaSchema,
             ErrorTypes: {
                 type: 'string',
                 enum: Object.keys(errorTypes),

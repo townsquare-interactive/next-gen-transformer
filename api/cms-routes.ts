@@ -5,7 +5,14 @@ import { transformLuna } from '../src/translation-engines/luna.js'
 import { transformCreateSite } from '../src/translation-engines/create-site.js'
 import { saveToS3 } from '../src/output/save-to-s3.js'
 import { save } from '../src/output/save-scraped-data.js'
-import { getPageList, getScrapedDataFromS3, getScrapeSettings, removeScrapedFolder, scrapeAssetsFromSite } from '../src/controllers/scrape-controller.js'
+import {
+    getPageList,
+    getScrapedDataFromS3,
+    getScrapeSettings,
+    moveS3DataToDuda,
+    removeScrapedFolder,
+    scrapeAssetsFromSite,
+} from '../src/controllers/scrape-controller.js'
 import { changePublishStatusInSiteData, getDomainList, checkIfSiteExistsPostgres } from '../src/controllers/create-site-controller.js'
 import { logZodDataParse, zodDataParse } from '../src/schema/utils-zod.js'
 import {
@@ -17,6 +24,8 @@ import {
     ScrapeWebsiteSchema,
     GetPageListSchema,
     ScrapePagesSchema,
+    GetScrapeDataSchema,
+    MoveS3DataToDudaSchema,
 } from '../src/schema/input-zod.js'
 import express, { Request } from 'express'
 import { getRequestData, validateLandingRequestData } from '../src/controllers/landing-controller.js'
@@ -421,8 +430,37 @@ router.delete('/scrape-site/:url', async (req, res) => {
 })
 
 router.get('/scraped-data', async (req, res) => {
-    const scrapedData = await getScrapedDataFromS3(req.query.url as string)
+    const correctBearerToken = checkAuthToken(req)
+    if (!correctBearerToken) {
+        throw new AuthorizationError({
+            message: 'Incorrect authorization bearer token',
+            errorType: 'AUT-017',
+            state: {},
+        })
+    }
+
+    const validatedRequest = zodDataParse(req.query, GetScrapeDataSchema, 'getScrapedData')
+    const url = validatedRequest.url as string
+
+    const scrapedData = await getScrapedDataFromS3(url)
     res.json(scrapedData)
+})
+
+//moveS3DataToDuda
+router.post('/move-s3-data-to-duda', async (req, res) => {
+    const correctBearerToken = checkAuthToken(req)
+    if (!correctBearerToken) {
+        throw new AuthorizationError({
+            message: 'Incorrect authorization bearer token',
+            errorType: 'AUT-017',
+            state: {},
+        })
+    }
+
+    const validatedRequest = zodDataParse(req.body, MoveS3DataToDudaSchema, 'moveS3DataToDuda')
+    const scrapedData = await getScrapedDataFromS3(validatedRequest.url)
+    const moveResponse = await moveS3DataToDuda(scrapedData, validatedRequest.uploadLocation)
+    res.json(moveResponse)
 })
 
 const checkAuthToken = (req: Request): boolean => {

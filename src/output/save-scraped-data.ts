@@ -5,18 +5,19 @@ import type { Settings } from '../controllers/scrape-controller.js'
 import { ScrapedAndAnalyzedSiteData } from '../schema/output-zod.js'
 
 export interface SaveOutput {
-    uploadedImages: UploadedResourcesObj[]
-    imageUploadCount: number
-    failedImageList: string[]
+    uploadedImages?: UploadedResourcesObj[]
+    imageUploadCount?: number
+    failedImageList?: string[]
     logoUrl?: string
     siteDataUrl?: string
     siteData?: ScrapedAndAnalyzedSiteData
 }
 
-interface ScrapedDataToSave {
+export interface ScrapedDataToSave {
     imageNames: never[]
     url: string
-    imageFiles: ImageFiles[]
+    imageFiles?: ImageFiles[]
+    imageList?: string[]
     siteData: ScrapedAndAnalyzedSiteData
 }
 
@@ -29,7 +30,8 @@ type utilityFunctions = {
 
 export interface SavingScrapedData {
     settings: Settings
-    imageFiles: ImageFiles[]
+    imageFiles?: ImageFiles[]
+    imageList?: string[]
     siteData?: ScrapedAndAnalyzedSiteData
     logoUrl?: string
     functions?: utilityFunctions
@@ -42,14 +44,28 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
 
         //save/backup data to s3 by default
         if (settings.backupImagesSave || settings.saveMethod === 's3Upload') {
-            s3SavedRes = await saveToService({ ...settings, saveMethod: 's3Upload' }, scrapedData.imageFiles, scrapedData.siteData, '', functions)
+            s3SavedRes = await saveToService(
+                { ...settings, saveMethod: 's3Upload' },
+                scrapedData.siteData,
+                scrapedData.imageFiles,
+                scrapedData.imageList,
+                '',
+                functions
+            )
             siteDataUrl = s3SavedRes?.siteDataUrl
         }
 
         //save to alternative service
         let saveServiceRes
         if (settings.saveMethod != 's3Upload') {
-            saveServiceRes = await saveToService(settings, scrapedData.imageFiles, scrapedData.siteData, s3SavedRes?.imageData?.logoUrl || '', functions)
+            saveServiceRes = await saveToService(
+                settings,
+                scrapedData.siteData,
+                scrapedData.imageFiles,
+                scrapedData.imageList,
+                s3SavedRes?.imageData?.logoUrl || '',
+                functions
+            )
         }
 
         const savedInfoResponse = saveServiceRes || s3SavedRes
@@ -57,7 +73,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
         return {
             dataUploadDetails: {
                 imageUploadTotal: savedInfoResponse?.imageData.imageUploadTotal || 0,
-                failedImageCount: savedInfoResponse?.imageData.failedImageList.length || 0,
+                failedImageCount: savedInfoResponse?.imageData.failedImageList?.length || 0,
                 uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
                 s3UploadedImages: s3SavedRes?.siteData.assetData?.s3UploadedImages || [],
                 failedImages: savedInfoResponse?.imageData.failedImageList || [],
@@ -74,8 +90,9 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
 
 export async function saveToService(
     settings: Settings,
-    imageFiles: ImageFiles[],
     siteData: ScrapedAndAnalyzedSiteData,
+    imageFiles?: ImageFiles[],
+    imageList?: string[],
     logoUrl?: string,
     functions?: utilityFunctions
 ) {
@@ -98,7 +115,7 @@ export async function saveToService(
                 break
         }
 
-        const savedData = await save({ settings, imageFiles, siteData, logoUrl, functions })
+        const savedData = await save({ settings, imageFiles, imageList, siteData, logoUrl, functions })
 
         return {
             imageData: {

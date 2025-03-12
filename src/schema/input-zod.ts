@@ -611,6 +611,17 @@ export const GetPageListSchema = z.object({
     url: URL,
 })
 
+//request body coming from AI tool
+export const GetScrapeDataSchema = z.object({
+    url: URL,
+})
+
+//request body coming from AI tool
+export const MoveS3DataToDudaSchema = z.object({
+    url: URL,
+    uploadLocation: z.string(),
+})
+
 export const RequestDataSchema = z.object({
     domain: z.string().refine((domain) => domain.includes('/'), {
         message: "The domain must include a '/'",
@@ -634,3 +645,5 @@ ScrapeWebsiteSchema.openapi({ ref: 'scrape-site' })
 LandingInputSchema.openapi({ ref: 'landing' })
 GetPageListSchema.openapi({ ref: 'get-page-list' })
 ScrapePagesSchema.openapi({ ref: 'scrape-pages' })
+GetScrapeDataSchema.openapi({ ref: 'get-scraped-data' })
+MoveS3DataToDudaSchema.openapi({ ref: 'move-s3-data-to-duda' })

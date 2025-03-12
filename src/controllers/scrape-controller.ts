@@ -7,6 +7,7 @@ import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } fro
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
+import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
 
 export interface ScreenshotData {
     logoTag: string | null
@@ -275,4 +276,27 @@ export const getScrapedDataFromS3 = async (url: string) => {
     const scrapedData = await getFileS3(siteDataPath, 'scraped data not found in s3')
     console.log('siteData', scrapedData)
     return scrapedData
+}
+
+export const moveS3DataToDuda = async (siteData: ScrapedAndAnalyzedSiteData, uploadLocation: string) => {
+    const scrapedData: ScrapedDataToSave = {
+        imageNames: [],
+        url: siteData.baseUrl,
+        imageFiles: [],
+        imageList: siteData.assetData?.s3UploadedImages,
+        siteData: siteData,
+    }
+
+    const settings: Settings = {
+        url: siteData.baseUrl,
+        saveMethod: 'dudaUpload',
+        uploadLocation: uploadLocation,
+        basePath: siteData.baseUrl,
+        backupImagesSave: false,
+        saveImages: true,
+    }
+
+    const savedData = await save(settings, scrapedData)
+
+    return savedData
 }

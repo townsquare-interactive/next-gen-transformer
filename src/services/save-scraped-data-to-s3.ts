@@ -12,7 +12,10 @@ export async function saveData(saveData: SavingScrapedData) {
     const fetchFunction = saveData.functions?.imageUploadFunction
     const siteDataUploadFunction = saveData.functions?.siteDataUploadFunction
 
-    const imageData = await saveImages(saveData.settings, saveData.imageFiles, saveData.logoUrl, fetchFunction)
+    let imageData
+    if (saveData.imageFiles && saveData.imageFiles.length >= 0) {
+        imageData = await saveImages(saveData.settings, saveData.imageFiles, saveData.logoUrl, fetchFunction)
+    }
 
     let siteDataUrl
     let siteData
@@ -21,8 +24,8 @@ export async function saveData(saveData: SavingScrapedData) {
         siteData = {
             ...saveData.siteData,
             assetData: {
-                s3UploadedImages: imageData.uploadedImages.map((img) => img.src),
-                s3LogoUrl: imageData.logoUrl || '',
+                s3UploadedImages: imageData?.uploadedImages.map((img) => img.src),
+                s3LogoUrl: imageData?.logoUrl || '',
             },
         }
 

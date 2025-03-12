@@ -15,6 +15,14 @@ describe('save', () => {
                 originalImageLink: 'http://example.com/image.jpg',
                 fileExtension: 'jpg',
             },
+            {
+                url: new URL('http://example.com/image2.jpg'),
+                imageFileName: 'test-image2.jpg',
+                fileContents: Buffer.from('mock-image-data'),
+                hashedFileName: 'test-image2.jpg',
+                originalImageLink: 'http://example.com/image2.jpg',
+                fileExtension: 'jpg',
+            },
         ]
 
         const mockSiteData: ScrapedAndAnalyzedSiteData = {
@@ -22,7 +30,7 @@ describe('save', () => {
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '',
             assetData: {
-                s3UploadedImages: ['https://s3.example.com/image.jpg'],
+                s3UploadedImages: ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg'],
                 s3LogoUrl: '',
             },
         }
@@ -34,7 +42,10 @@ describe('save', () => {
             siteData: mockSiteData,
         }
 
-        const mockImageUpload = vi.fn().mockResolvedValue('https://s3.example.com/image.jpg')
+        const mockImageUpload = vi
+            .fn()
+            .mockImplementationOnce(() => 'https://s3.example.com/image.jpg')
+            .mockImplementationOnce(() => 'https://s3.example.com/image2.jpg')
 
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
 
@@ -53,11 +64,11 @@ describe('save', () => {
         })
 
         expect(result).toHaveProperty('dataUploadDetails')
-        expect(result.dataUploadDetails?.imageUploadTotal).toBe(1)
+        expect(result.dataUploadDetails?.imageUploadTotal).toBe(2)
         expect(result.dataUploadDetails?.failedImageCount).toBe(0)
-        expect(result.dataUploadDetails?.uploadedResources).toHaveLength(1)
+        expect(result.dataUploadDetails?.uploadedResources).toHaveLength(2)
         expect(result.dataUploadDetails?.failedImages).toHaveLength(0)
-        expect(result.dataUploadDetails?.s3UploadedImages).toHaveLength(1)
+        expect(result.dataUploadDetails?.s3UploadedImages).toHaveLength(2)
         expect(result.dataUploadDetails?.siteDataUrl).toBe('https://s3.example.com/site-data.json')
         expect(result.url).toBe('http://example.com')
         expect(result.siteData).toStrictEqual(mockSiteData)
@@ -232,5 +243,71 @@ describe('save', () => {
         expect(result.dataUploadDetails?.uploadedResources).toEqual(mockDudaResponse.uploaded_resources)
         expect(mockImageUpload).toHaveBeenCalledTimes(2)
         expect(mockS3Upload).toHaveBeenCalled()
+    })
+    it('should handle Duda upload with imageList instead of imageFiles', async () => {
+        const mockImageList = ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg']
+
+        const mockSiteData: ScrapedAndAnalyzedSiteData = {
+            pages: [],
+            baseUrl: 'http://example.com/image.jpg',
+            dudaUploadLocation: '',
+            assetData: {
+                s3UploadedImages: ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg'],
+                s3LogoUrl: '',
+            },
+        }
+
+        const mockScrapedData = {
+            imageNames: [],
+            url: 'http://example.com',
+            imageList: mockImageList,
+            siteData: mockSiteData,
+        }
+
+        const mockDudaResponse = {
+            uploaded_resources: [
+                {
+                    url: 'https://s3.example.com/image.jpg',
+                    id: '12345',
+                    original_url: 'http://example.com/image.jpg',
+                    new_url: 'https://irt-cdn.multiscreensite.com/image1.png',
+                    status: 'UPLOADED',
+                },
+                {
+                    url: 'https://s3.example.com/image2.jpg',
+                    id: '12345',
+                    original_url: 'http://example.com/image.jpg',
+                    new_url: 'https://irt-cdn.multiscreensite.com/image1.png',
+                    status: 'UPLOADED',
+                },
+            ],
+        }
+        const mockImageUpload = vi.fn().mockResolvedValue(mockDudaResponse)
+
+        const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
+
+        const settings: Settings = {
+            saveImages: true,
+            saveMethod: 'dudaUpload',
+            backupImagesSave: false,
+            uploadLocation: '12321',
+            basePath: 'http://example.com',
+            url: 'http://example.com/image.jpg',
+            analyzeHomepageData: true,
+        }
+        //
+        const result = await save(settings, mockScrapedData, {
+            imageUploadFunction: mockImageUpload,
+            siteDataUploadFunction: mockSiteDataUpload,
+        })
+
+        expect(result).toHaveProperty('dataUploadDetails')
+        expect(result.dataUploadDetails?.imageUploadTotal).toBe(2)
+        expect(result.dataUploadDetails?.failedImageCount).toBe(0)
+        expect(result.dataUploadDetails?.uploadedResources).toHaveLength(2)
+        expect(result.dataUploadDetails?.failedImages).toHaveLength(0)
+        expect(result.dataUploadDetails?.s3UploadedImages).toHaveLength(0)
+        expect(result.url).toBe('http://example.com')
+        expect(result.siteData).toStrictEqual(mockSiteData)
     })
 })

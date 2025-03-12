@@ -84,10 +84,10 @@ describe('saveImages', () => {
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
-        const result = await saveImages(settings, imageFiles, '', mockSaveFunction)
+        const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
         console.log('Result:', result)
 
-        expect(result.failedImageList.length).toBe(0)
+        expect(result.failedImageList?.length).toBe(0)
         expect(result.imageUploadCount).toBe(2)
         expect(result.uploadedImages).toEqual(mockResponse.uploaded_resources)
 
@@ -203,7 +203,7 @@ describe('saveImages', () => {
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
-        const result = await saveImages(settings, imageFiles, '', mockSaveFunction)
+        const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
         console.log('Result:', result)
 
         // Check fetch calls
@@ -324,7 +324,7 @@ describe('saveImages', () => {
 
         let error
         try {
-            const result = await saveImages(settings, imageFilesErr, '', mockSaveFunction)
+            const result = await saveImages(settings, imageFilesErr, [], '', mockSaveFunction)
         } catch (err) {
             error = err
         }
@@ -405,9 +405,9 @@ describe('saveImages', () => {
         }
 
         const mockSaveFunction: any = vi.fn(async () => mockResponse)
-        const result = await saveImages(settings, imageFiles, '', mockSaveFunction)
+        const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
 
-        expect(result.failedImageList.length).toBe(1)
+        expect(result.failedImageList?.length).toBe(1)
         expect(result.failedImageList).toContainEqual(
             'https://static.wixstatic.com/media/3a7531_18aad6c061b74caea4beff1d77ab4460~mv2.png/v1/fill/w_60,h_21,al_c,q_85,usm_0.66_1.00_0.01,blur_2,enc_avif,quality_auto/Toy-Mania-Logo-600.png'
         )
@@ -446,7 +446,7 @@ describe('saveImages', () => {
 
         let error
         try {
-            const result = await saveImages(settings, imageFilesTest, '', mockSaveFunction)
+            const result = await saveImages(settings, imageFilesTest, [], '', mockSaveFunction)
         } catch (err) {
             error = err
         }
