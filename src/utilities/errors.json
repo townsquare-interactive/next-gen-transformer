@@ -15,7 +15,7 @@
         "description": "Error validating transformed data being sent to S3."
     },
     "AMS-006": {
-        "description": "Site files not found in s3, domain cannot be updated."
+        "description": "Site files not found in s3"
     },
     "AMS-007": {
         "description": "Error when trying to upload site files to S3."

@@ -81,7 +81,7 @@ Listed below are the common error types that can be seen in the API response aft
 | GEN-003 | General JavaScript error when going through site deployment tasks. |
 | VAL-004 | Error validating incoming request data. |
 | VAL-005 | Error validating transformed data being sent to S3. |
-| AMS-006 | Site files not found in s3, domain cannot be updated. |
+| AMS-006 | Site files not found in s3 |
 | AMS-007 | Error when trying to upload site files to S3. |
 | DMN-008 | Production domain not available, try a different domain. |
 | DMN-009 | Error when checking domains config setup in Vercel |

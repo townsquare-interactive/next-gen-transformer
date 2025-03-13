@@ -1,5 +1,5 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { scrapeAssetsFromSite } from './scrape-controller.js'
+import { getScrapedDataFromS3, scrapeAssetsFromSite } from './scrape-controller.js'
 import { ScrapingError } from '../utilities/errors.js'
 
 describe('scrapeAssetsFromSite', () => {
@@ -187,5 +187,42 @@ describe('scrapeAssetsFromSite', () => {
 
     afterEach(() => {
         vi.restoreAllMocks()
+    })
+})
+
+describe('getScrapedDataFromS3', () => {
+    beforeEach(() => {
+        vi.restoreAllMocks()
+    })
+
+    it('get and return scraped data from s3', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockScrapeFunction = vi.fn().mockResolvedValue({
+            imageList: ['image1.jpg', 'image2.jpg'],
+            imageFiles: [{ imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } }],
+        })
+
+        const result = await getScrapedDataFromS3(url, mockScrapeFunction)
+
+        expect(result).toEqual({
+            imageList: ['image1.jpg', 'image2.jpg'],
+            imageFiles: [{ imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } }],
+        })
+    })
+
+    it('throw error if no data found in s3', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockScrapeFunction = vi.fn().mockResolvedValue(null)
+
+        try {
+            const result = await getScrapedDataFromS3(url, mockScrapeFunction)
+        } catch (err) {
+            expect(err).toBeInstanceOf(ScrapingError)
+            expect(err).toMatchObject({
+                domain: url,
+                message: 'Scraped data not found in S3',
+                errorType: 'AMS-006',
+            })
+        }
     })
 })

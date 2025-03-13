@@ -269,12 +269,21 @@ async function isValidHtmlPage(url: string): Promise<boolean> {
     }
 }
 
-export const getScrapedDataFromS3 = async (url: string) => {
+export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: string) => Promise<ScrapedAndAnalyzedSiteData>) => {
+    const getFile = getFileFunction || getFileS3
     const siteFolderName = convertUrlToApexId(url)
     const scrapedFolder = `${siteFolderName}/scraped`
     const siteDataPath = scrapedFolder + '/siteData.json'
-    const scrapedData = await getFileS3(siteDataPath, 'scraped data not found in s3')
+    const scrapedData = await getFile(siteDataPath, null)
     console.log('siteData', scrapedData)
+    if (!scrapedData) {
+        throw new ScrapingError({
+            domain: url,
+            message: 'Scraped data not found in S3',
+            errorType: 'AMS-006',
+            state: { scrapeStatus: 'Scraped data not found in S3' },
+        })
+    }
     return scrapedData
 }
 

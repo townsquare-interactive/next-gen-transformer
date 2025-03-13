@@ -430,6 +430,7 @@ router.delete('/scrape-site/:url', async (req, res) => {
 })
 
 router.get('/scraped-data', async (req, res) => {
+    try {
     const correctBearerToken = checkAuthToken(req)
     if (!correctBearerToken) {
         throw new AuthorizationError({
@@ -444,10 +445,15 @@ router.get('/scraped-data', async (req, res) => {
 
     const scrapedData = await getScrapedDataFromS3(url)
     res.json(scrapedData)
+    } catch (err) {
+        err.state = { ...err.state, req: req.query }
+        handleError(err, res, req.query.url as string)
+    }
 })
 
 //moveS3DataToDuda
 router.post('/move-s3-data-to-duda', async (req, res) => {
+    try {
     const correctBearerToken = checkAuthToken(req)
     if (!correctBearerToken) {
         throw new AuthorizationError({
@@ -461,6 +467,11 @@ router.post('/move-s3-data-to-duda', async (req, res) => {
     const scrapedData = await getScrapedDataFromS3(validatedRequest.url)
     const moveResponse = await moveS3DataToDuda(scrapedData, validatedRequest.uploadLocation)
     res.json(moveResponse)
+    } catch (err) {
+        err.state = { ...err.state, req: req.body }
+        handleError(err, res, req.body.url)
+    }
+})
 })
 
 const checkAuthToken = (req: Request): boolean => {
