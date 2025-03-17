@@ -218,7 +218,7 @@ export const openApiSpec = createDocument({
                 ],
                 responses: {
                     '200': {
-                        description: 'Operation completed - folder either deleted successfully or not found',
+                        description: 'Operation completed - folder deleted successfully',
                         content: {
                             'application/json': {
                                 schema: {
@@ -253,17 +253,24 @@ export const openApiSpec = createDocument({
                                         },
                                         summary: 'Successful deletion',
                                     },
-                                    notFound: {
-                                        value: {
-                                            status: 'fail',
-                                            message: 'S3 Folder does not exist, example-folder',
-                                        },
-                                        summary: 'Folder not found',
-                                    },
                                 },
                             },
                         },
                     },
+                    '404': {
+                        description: 'Folder not found',
+                        content: {
+                            'application/json': {
+                                schema: { type: 'string' },
+                                example: {
+                                    status: 'fail',
+                                    message: 'S3 Folder does not exist, mertscharlotte/scraped',
+                                    url: 'mertscharlotte.com',
+                                },
+                            },
+                        },
+                    },
+
                     '401': unauthorizedResponseExample,
                 },
             },

@@ -146,8 +146,14 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
     // Log the error with the unique ID
     console.error(`[Error ID: ${errorID}]`, errorData, `${err.stack}`)
 
+    let statusType = null
+
+    if (err.errorType === 'AMS-006') {
+        statusType = 404
+    }
+
     if (err instanceof ValidationError) {
-        res.status(400).json({
+        res.status(statusType || 400).json({
             id: errorID,
             errorType: err.errorType,
             message: err.message + errorIDMessage,
@@ -155,7 +161,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else if (err instanceof TransformError) {
-        res.status(400).json({
+        res.status(statusType || 500).json({
             id: errorID,
             errorType: err.errorType,
             message: 'Error transforming site data: ' + err.message + errorIDMessage,
@@ -164,7 +170,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else if (err instanceof SiteDeploymentError) {
-        res.status(500).json({
+        res.status(statusType || 500).json({
             id: errorID,
             errorType: err.errorType,
             message: 'Error with site deployment: ' + err.message + errorIDMessage,
@@ -173,7 +179,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else if (err instanceof DataUploadError) {
-        res.status(500).json({
+        res.status(statusType || 500).json({
             id: errorID,
             errorType: err.errorType,
             message: 'Error uploading to S3: ' + err.message + errorIDMessage,
@@ -182,7 +188,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else if (err instanceof ScrapingError) {
-        res.status(400).json({
+        res.status(statusType || 400).json({
             id: errorID,
             errorType: err.errorType,
             message: 'Scraping Error: ' + err.message + errorIDMessage,
@@ -191,7 +197,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else if (err instanceof AuthorizationError) {
-        res.status(401).json({
+        res.status(statusType || 401).json({
             id: errorID,
             errorType: err.errorType,
             message: err.message + errorIDMessage,
@@ -199,7 +205,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
             status: errorStatus,
         })
     } else {
-        res.status(500).json({
+        res.status(statusType || 500).json({
             id: errorID,
             errorType: 'GEN-003',
             message: 'An unexpected error occurred: ' + err.message + errorIDMessage,

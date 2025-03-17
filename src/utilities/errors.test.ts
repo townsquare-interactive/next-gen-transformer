@@ -71,7 +71,7 @@ describe('handleError', () => {
         )
 
         // Check if response was sent with the correct status and JSON
-        expect(mockResponse.status).toHaveBeenCalledWith(400)
+        expect(mockResponse.status).toHaveBeenCalledWith(500)
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'TRN-001',
