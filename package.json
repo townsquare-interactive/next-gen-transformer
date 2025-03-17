@@ -12,7 +12,9 @@
         "generate-readme": "node generateReadme.js && cp README.md public/",
         "build": "node index.js",
         "prepare": "husky",
-        "postinstall": "playwright install"
+        "postinstall": "playwright install",
+        "test:load": "artillery run tests/load/scrape-site.yml",
+        "test:load:debug": "DEBUG=1 artillery run tests/load/scrape-site.yml"
     },
     "author": "",
     "license": "ISC",
@@ -63,6 +65,7 @@
         "@types/request-promise": "^4.1.48",
         "@types/swagger-ui-express": "^4.1.8",
         "@types/uuid": "^10.0.0",
+        "artillery": "^2.0.22",
         "husky": "^9.1.6",
         "nodemon": "^3.0.1",
         "sass": "^1.57.1",

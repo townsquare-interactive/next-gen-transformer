@@ -1,0 +1,35 @@
+config:
+    target: 'https://apex-transformer-git-ai-scrape-townsquare-interactive.vercel.app'
+    phases:
+        # Single phase to simulate burst of concurrent requests
+        - name: 'Concurrent requests burst'
+          duration: 10 #requests all come within 10 seconds
+          arrivalCount: 10 # Fixed number of requests to generate
+
+    # Default headers and settings for all requests
+    defaults:
+        headers:
+            Content-Type: 'application/json'
+            Authorization: 'Bearer {{ $processEnvironment.TRANSFORMER_API_KEY }}'
+
+    http:
+        timeout: 300000 # 5 minutes for HTTP request timeout
+        maxSockets: 20 # Increase max concurrent connections
+        socketTimeout: 300000 # 5 minutes for socket timeout
+    # Artillery processor to handle response validation
+    processor: './scrape-processor.cjs'
+
+scenarios:
+    - name: 'Scrape site flow'
+      flow:
+          - post:
+                url: '/api/cms-routes/scrape-site'
+                json:
+                    url: 'https://housetohomemi.com/'
+                    saveImages: true
+                    saveMethod: 'dudaUpload'
+                    uploadLocation: '007a0b1e3b8a4558acadef1a80adaec3'
+                expect:
+                    - statusCode: 200
+                    - contentType: json
+                afterResponse: 'validateScrapeResponse'
