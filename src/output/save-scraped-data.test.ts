@@ -48,6 +48,7 @@ describe('save', () => {
             .mockImplementationOnce(() => 'https://s3.example.com/image2.jpg')
 
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
+        const mockSeoUpload = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
             saveImages: true,
@@ -61,6 +62,7 @@ describe('save', () => {
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
+            seoUploadFunction: mockSeoUpload,
         })
 
         expect(result).toHaveProperty('dataUploadDetails')
@@ -155,6 +157,7 @@ describe('save', () => {
 
         const mockImageUpload = vi.fn().mockResolvedValue(mockDudaResponse)
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
+        const mockSeoUpload = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
             saveImages: true,
@@ -169,6 +172,7 @@ describe('save', () => {
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
+            seoUploadFunction: mockSeoUpload,
         })
 
         expect(result).toHaveProperty('dataUploadDetails')
@@ -223,7 +227,7 @@ describe('save', () => {
             .mockImplementationOnce(() => mockS3ImageResponse)
             .mockImplementationOnce(() => mockDudaResponse)
         const mockS3Upload = vi.fn().mockResolvedValue(mockS3Response)
-
+        const mockSeoUpload = vi.fn().mockResolvedValue({})
         const settings: Settings = {
             saveImages: true,
             saveMethod: 'dudaUpload',
@@ -237,6 +241,7 @@ describe('save', () => {
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockS3Upload,
+            seoUploadFunction: mockSeoUpload,
         })
 
         expect(result.dataUploadDetails?.s3UploadedImages).toBeDefined()
@@ -244,6 +249,7 @@ describe('save', () => {
         expect(mockImageUpload).toHaveBeenCalledTimes(2)
         expect(mockS3Upload).toHaveBeenCalled()
     })
+
     it('should handle Duda upload with imageList instead of imageFiles', async () => {
         const mockImageList = ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg']
 
@@ -282,10 +288,10 @@ describe('save', () => {
                 },
             ],
         }
+
         const mockImageUpload = vi.fn().mockResolvedValue(mockDudaResponse)
-
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
-
+        const mockSeoUpload = vi.fn().mockResolvedValue({})
         const settings: Settings = {
             saveImages: true,
             saveMethod: 'dudaUpload',
@@ -295,10 +301,11 @@ describe('save', () => {
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
         }
-        //
+
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
+            seoUploadFunction: mockSeoUpload,
         })
 
         expect(result).toHaveProperty('dataUploadDetails')

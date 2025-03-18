@@ -3,8 +3,9 @@ import type { Settings } from '../../src/controllers/scrape-controller.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
 import type { SaveOutput, SavingScrapedData } from '../output/save-scraped-data.js'
+import { dudaImageFetch, uploadSiteSEOToDuda } from './duda-api.js'
 
-interface UploadPayload {
+export interface UploadPayload {
     resource_type: 'IMAGE'
     src: string
     folder: string
@@ -18,7 +19,7 @@ export interface UploadedResourcesObj {
     status?: 'UPLOADED' | 'NOT_FOUND'
 }
 
-interface DudaResponse {
+export interface DudaResponse {
     success: boolean
     message?: string
     uploaded_resources: UploadedResourcesObj[]
@@ -27,10 +28,26 @@ interface DudaResponse {
 export async function save(saveData: SavingScrapedData) {
     console.log('saving to duda')
     const settings = saveData.settings
+
+    if (!settings.uploadLocation) {
+        console.log('no upload location for Duda')
+        throw new ScrapingError({
+            domain: settings.url,
+            message: 'Failed to upload to Duda, no uploadLocation found',
+            state: { scrapeStatus: 'Data not uploaded', method: settings.saveMethod },
+            errorType: 'SCR-012',
+        })
+    }
+
     const imageFiles = saveData.imageFiles
     const logoUrl = saveData.logoUrl
     const fetchFunction = saveData.functions?.imageUploadFunction
     const imageData = await saveImages(settings, imageFiles, saveData.imageList || [], logoUrl, fetchFunction)
+
+    if (saveData.siteData?.siteSeo) {
+        const seoUploadFunction = saveData.functions?.seoUploadFunction || uploadSiteSEOToDuda
+        await seoUploadFunction(settings.uploadLocation, saveData.siteData.siteSeo)
+    }
 
     return imageData
 }
@@ -42,17 +59,7 @@ export async function saveImages(
     logoUrl?: string,
     fetchFunction?: (payload: UploadPayload[]) => DudaResponse
 ): Promise<SaveOutput> {
-    if (!settings.uploadLocation) {
-        console.log('no upload location for Duda')
-        throw new ScrapingError({
-            domain: settings.url,
-            message: 'Failed to upload images to Duda, no uploadLocation found',
-            state: { scrapeStatus: 'Images not uploaded', method: settings.saveMethod },
-            errorType: 'SCR-012',
-        })
-    }
-
-    const dudaFetchFunction = fetchFunction || dudaFetch
+    const dudaFetchFunction = fetchFunction || dudaImageFetch
 
     let preprocessedPayload
     if (imageFiles && imageFiles.length > 0) {
@@ -105,47 +112,6 @@ export async function saveImages(
         return { uploadedImages: allUploads, imageUploadCount: succesfulImageCount, failedImageList: failedImageList }
     } else {
         return { uploadedImages: [], imageUploadCount: 0, failedImageList: [] }
-    }
-}
-
-async function dudaFetch(payload: UploadPayload[], settings?: Settings) {
-    const siteName = settings?.uploadLocation || 'c914d96aac4548c2985917d2af88827d'
-    const BASE_URL = 'https://api-sandbox.duda.co'
-    //https://developer.duda.co/reference/site-content-upload-resources
-    const dudaApiUrl = `${BASE_URL}/api/sites/multiscreen/resources/${siteName}/upload`
-    const DUDA_USERNAME = process.env.DUDA_USERNAME
-    const DUDA_PASSWORD = process.env.DUDA_PASSWORD
-
-    try {
-        // Encode username and password for Basic Auth
-        const authStr = `${DUDA_USERNAME}:${DUDA_PASSWORD}`
-        const authB64 = Buffer.from(authStr).toString('base64')
-        const HEADERS = {
-            Authorization: `Basic ${authB64}`,
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            Connection: 'keep-alive',
-            'Cache-Control': 'no-cache',
-            Pragma: 'no-cache',
-        }
-
-        const response = await fetch(dudaApiUrl, {
-            method: 'POST',
-            headers: HEADERS,
-            body: JSON.stringify(payload),
-        })
-
-        if (!response.ok) {
-            console.error(`status text: ${response.statusText}`)
-            throw response.statusText
-        }
-
-        const responseData: DudaResponse = await response.json()
-        return responseData
-    } catch (error) {
-        throw error
     }
 }
 

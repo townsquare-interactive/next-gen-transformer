@@ -2,7 +2,7 @@ import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
 import { saveData as s3FileUpload } from '../services/save-scraped-data-to-s3.js'
 import { UploadedResourcesObj, save as dudaUpload } from '../services/save-to-duda.js'
 import type { Settings } from '../controllers/scrape-controller.js'
-import { ScrapedAndAnalyzedSiteData } from '../schema/output-zod.js'
+import { ScrapedAndAnalyzedSiteData, ScrapedPageSeo } from '../schema/output-zod.js'
 
 export interface SaveOutput {
     uploadedImages?: UploadedResourcesObj[]
@@ -26,6 +26,7 @@ export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key:
 type utilityFunctions = {
     imageUploadFunction?: (payload: any) => any
     siteDataUploadFunction?: siteDataUploadFunction
+    seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>
 }
 
 export interface SavingScrapedData {

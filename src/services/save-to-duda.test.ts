@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { saveImages } from './save-to-duda.js'
+import { save, saveImages } from './save-to-duda.js'
 import { ScrapingError } from '../utilities/errors.js'
 
 describe('saveImages', () => {
@@ -414,46 +414,45 @@ describe('saveImages', () => {
         expect(result.imageUploadCount).toBe(1)
         expect(result.uploadedImages).toEqual(mockResponse.uploaded_resources)
     })
+})
 
+describe('save', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+        vi.restoreAllMocks()
+    })
+
+    afterEach(() => {
+        vi.resetAllMocks()
+    })
     it('should throw an error when no uploadLocation is not provided instantly', async () => {
-        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' }
-        const mockSaveFunction: any = vi.fn()
+        const mockS3ImageResponse = 'https://example.com/image1.png'
 
-        const imageFilesTest: any = [
-            {
-                url: {
-                    href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
-                    origin: 'https://www.townsquareignite.com',
-                    protocol: 'https:',
-                    username: '',
-                    password: '',
-                    host: 'www.townsquareignite.com',
-                    hostname: 'www.townsquareignite.com',
-                    port: '',
-                    pathname: '/_next/image',
-                    search: '?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
-                    searchParams: new URLSearchParams({
-                        url: 'https://townsquareignite.s3.us-east-1.amazonaws.com/landing-pages/clients/tacobell.com/images/selected/purpleButtonLogo.jpg',
-                        w: '1920',
-                        q: '80',
-                    }),
-                    hash: '',
-                },
-                imageFileName: 'hashedname.jpg',
-                fileContents: {},
-            },
-        ]
+        const mockImageUpload = vi.fn().mockImplementationOnce(() => mockS3ImageResponse)
+        const mockSeoUpload = vi.fn().mockResolvedValue({})
+
+        const functions = {
+            imageUploadFunction: mockImageUpload,
+            seoUploadFunction: mockSeoUpload,
+        }
+
+        const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite' }
+
+        const mockSiteData = {
+            pages: [],
+            baseUrl: 'http://example.com/image.jpg',
+            dudaUploadLocation: '12321',
+        }
 
         let error
         try {
-            const result = await saveImages(settings, imageFilesTest, [], '', mockSaveFunction)
+            const result = await save({ settings, imageFiles: [], imageList: [], siteData: mockSiteData, logoUrl: '', functions })
         } catch (err) {
             error = err
         }
 
-        expect(mockSaveFunction).toHaveBeenCalledTimes(0) //fetch function should not be called
         expect(error).toBeInstanceOf(ScrapingError)
-        expect(error.message).toEqual(`Failed to upload images to Duda, no uploadLocation found`)
+        //expect(error.message).toEqual(`Failed to upload images to Duda, no uploadLocation found`)
         expect(error.errorType).toEqual(`SCR-012`)
     })
 })

@@ -33,6 +33,7 @@ export interface ScrapeFullSiteResult {
     pageSeo?: ScrapedPageSeo
     seo: (ScrapedPageSeo | undefined)[]
     pagesData: ScrapedPageData[]
+    siteSeo?: ScrapedPageSeo
 }
 
 interface DeleteScrapedFolderRes {
@@ -96,6 +97,7 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
             pages: transformedScrapedData.pagesData,
             dudaUploadLocation: settings.uploadLocation || '',
             businessInfo: transformedScrapedData.businessInfo,
+            siteSeo: transformedScrapedData.siteSeo,
         }
 
         return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
@@ -139,6 +141,11 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
         const extLinks = scrapeData.businessInfo.links.other.filter((link: string) => !link.includes(url))
 
         scrapeData.businessInfo.links.other = extLinks
+    }
+
+    //get site SEO from home page
+    if (scrapeData.pagesData[0]?.seo) {
+        scrapeData.siteSeo = scrapeData.pagesData[0].seo
     }
 
     return scrapeData

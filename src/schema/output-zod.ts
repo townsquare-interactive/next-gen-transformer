@@ -551,6 +551,7 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
             s3LogoUrl: z.string().optional(),
         })
         .optional(),
+    siteSeo: ScrapedPageSeoSchema.optional(),
 })
 
 //scraped data
