@@ -40,7 +40,10 @@ export async function findPages(settings: Settings) {
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {
             const navExists = document.querySelector('nav') !== null
-            const links: HTMLAnchorElement[] = Array.from(navExists ? document.querySelectorAll('nav a[href]') : document.querySelectorAll('a[href]'))
+            const links: HTMLAnchorElement[] = Array.from(
+                navExists ? document.querySelectorAll('nav a[href], header a[href]') : document.querySelectorAll('a[href]')
+            )
+
             return links
                 .map((link) => link.href)
                 .filter((href) => {
@@ -50,13 +53,14 @@ export async function findPages(settings: Settings) {
                 })
         })
 
-        foundUrls.add(settings.url)
+        foundUrls.add(normalizeUrl(settings.url))
         for (let x = 0; x < pageUrls.length; x++) {
             const currentUrl = pageUrls[x]
+            const normalizedUrl = normalizeUrl(pageUrls[x])
 
-            if (!foundUrls.has(currentUrl) && urlsMatch(settings.url, currentUrl)) {
+            if (!foundUrls.has(normalizedUrl) && domainsMatch(settings.url, currentUrl)) {
                 if (!currentUrl.includes('#')) {
-                    foundUrls.add(currentUrl)
+                    foundUrls.add(normalizedUrl)
                 }
             }
         }
@@ -84,9 +88,32 @@ export async function findPages(settings: Settings) {
 }
 
 //make sure the URLs are not the same with www. or without
-function urlsMatch(baseUrl: string, testUrl: string): boolean {
+export function domainsMatch(baseUrl: string, testUrl: string): boolean {
     const base = new URL(baseUrl)
     const test = new URL(testUrl)
 
-    return base.hostname === test.hostname || base.hostname.replace(/^www\./, '') === test.hostname.replace(/^www\./, '')
+    // Check if hostnames match (with or without www)
+    const hostnameMatch = base.hostname === test.hostname || base.hostname.replace(/^www\./, '') === test.hostname.replace(/^www\./, '')
+
+    // If hostnames don't match, return false immediately
+    if (!hostnameMatch) return false
+
+    // Special handling for root paths
+    const isBaseRoot = base.pathname === '/' || base.pathname === ''
+    const isTestRoot = test.pathname === '/' || test.pathname === ''
+
+    if (isBaseRoot && isTestRoot) {
+        // If both are root paths, treat them as the same
+        return true
+    }
+
+    // For all other cases, just check if they're on the same domain
+    return hostnameMatch
+}
+
+// Helper function to normalize URLs (can be placed near domainsMatch function)
+export function normalizeUrl(url: string): string {
+    const urlObj = new URL(url)
+    // Remove trailing slashes and convert to lowercase
+    return urlObj.origin + urlObj.pathname.replace(/\/+$/, '') || '/'
 }

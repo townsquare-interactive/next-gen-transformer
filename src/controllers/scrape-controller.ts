@@ -8,6 +8,7 @@ import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
 import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
+import { defaultHeaders } from '../../api/scrapers/playwright-setup.js'
 
 export interface ScreenshotData {
     logoTag: string | null
@@ -253,16 +254,12 @@ async function isValidHtmlPage(url: string): Promise<boolean> {
     try {
         const response = await fetch(url, {
             method: 'HEAD',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            },
+            headers: defaultHeaders,
         })
         console.log('Response status:', response.status)
-        console.log('Response headers:', Object.fromEntries(response.headers))
 
         // Consider both 200 OK and 403 Cloudflare responses as valid if they return HTML
         const contentType = response.headers.get('content-type')
-        console.log('Content-Type:', contentType)
 
         if (contentType?.includes('text/html')) {
             return true
