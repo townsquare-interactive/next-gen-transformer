@@ -3,6 +3,7 @@ import { convertUrlToApexId, createRandomFiveCharString } from '../../src/utilit
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 import { ScrapingError } from '../../src/utilities/errors.js'
+import { BusinessHours, ScreenshotData } from '../../src/schema/output-zod.js'
 
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
@@ -215,4 +216,49 @@ export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) =
         }
     }
     return true
+}
+
+export const transformBusinessInfo = (businessInfo: ScreenshotData) => {
+    if (businessInfo.hours) {
+        businessInfo.hours = transformHours(businessInfo)
+    }
+
+    return businessInfo
+}
+
+const transformHours = (businessInfo: ScreenshotData) => {
+    if (businessInfo.hours) {
+        // If hours is just a string, return null for the hours object
+        if (typeof businessInfo.hours === 'string') {
+            return null
+        }
+
+        // Create a new hours object with all days initialized to null
+        const normalizedHours: BusinessHours = {
+            MON: null,
+            TUE: null,
+            WED: null,
+            THU: null,
+            FRI: null,
+            SAT: null,
+            SUN: null,
+        }
+
+        // Check if hours is an object and has valid day entries
+        if (typeof businessInfo.hours === 'object') {
+            const hours = businessInfo.hours
+            Object.keys(hours).forEach((day) => {
+                const upperDay = day.toUpperCase() as keyof typeof normalizedHours
+                if (upperDay in normalizedHours) {
+                    const value = hours[upperDay]
+                    normalizedHours[upperDay] = typeof value === 'string' ? value : null
+                }
+            })
+
+            return normalizedHours
+        } else {
+            return null
+        }
+    }
+    return null
 }

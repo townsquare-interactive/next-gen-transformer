@@ -31,7 +31,15 @@ export const siteDataResponseExample = {
         companyName: 'Aqua Pool & Spa',
         address: 'Hannibal, OH 43931',
         phoneNumber: '(740) 312-7321',
-        hours: 'Mon: 7:00AM-7:00PM, Tue: 7:00AM-7:00PM, Wed: 7:00AM-7:00PM, Thu: 7:00AM-7:00PM, Fri: 7:00AM-7:00PM, Sat: 7:00AM-7:00PM, Sun: 7:00AM-7:00PM',
+        hours: {
+            MON: '7:00AM-7:00PM',
+            TUE: '7:00AM-7:00PM',
+            WED: '7:00AM-7:00PM',
+            THU: '7:00AM-7:00PM',
+            FRI: '7:00AM-7:00PM',
+            SAT: '7:00AM-7:00PM',
+            SUN: '7:00AM-7:00PM',
+        },
         styles: {
             colors: {
                 primaryColor: '#1A6F8D',

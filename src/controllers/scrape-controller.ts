@@ -5,19 +5,11 @@ import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
-import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo } from '../schema/output-zod.js'
+import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo, ScreenshotData } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
 import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
 import { defaultHeaders } from '../../api/scrapers/playwright-setup.js'
-
-export interface ScreenshotData {
-    logoTag: string | null
-    companyName: string | null
-    address: string | null
-    phoneNumber: string | null
-    hours: string | null
-    links: { socials: string[]; other: string[] }
-}
+import { transformBusinessInfo } from '../../api/scrapers/utils.js'
 
 export interface ScrapeResult {
     imageList: string[]
@@ -147,6 +139,11 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
     //get site SEO from home page
     if (scrapeData.pagesData[0]?.seo) {
         scrapeData.siteSeo = scrapeData.pagesData[0].seo
+    }
+
+    //analyzed data from openai
+    if (scrapeData.businessInfo) {
+        scrapeData.businessInfo = transformBusinessInfo(scrapeData.businessInfo)
     }
 
     return scrapeData

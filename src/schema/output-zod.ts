@@ -526,13 +526,25 @@ const ScrapedPageDataSchema = z.object({
     forms: z.array(FormSchema).nullable(),
 })
 
+export const HoursSchema = z
+    .object({
+        MON: z.string().nullable(),
+        TUE: z.string().nullable(),
+        WED: z.string().nullable(),
+        THU: z.string().nullable(),
+        FRI: z.string().nullable(),
+        SAT: z.string().nullable(),
+        SUN: z.string().nullable(),
+    })
+    .nullable()
+
 // Schema for ScreenshotData
 const ScreenshotDataSchema = z.object({
     logoTag: z.string().optional().nullable(),
     companyName: z.string().nullable(),
     address: z.string().nullable(),
     phoneNumber: z.string().nullable(),
-    hours: z.string().nullable(),
+    hours: HoursSchema,
     links: z.object({
         socials: z.array(z.string()),
         other: z.array(z.string()),
@@ -560,6 +572,7 @@ export type ScrapedAndAnalyzedSiteData = z.infer<typeof ScrapedAndAnalyzedSiteDa
 export type ScrapedPageData = z.infer<typeof ScrapedPageDataSchema>
 export type ScreenshotData = z.infer<typeof ScreenshotDataSchema>
 export type ScrapedForm = z.infer<typeof FormSchema>
+export type BusinessHours = z.infer<typeof HoursSchema>
 
 /*---------------------------End of scraping------------------------------*/
 
