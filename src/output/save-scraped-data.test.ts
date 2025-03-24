@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { save } from './save-scraped-data.js'
 import type { ScrapedAndAnalyzedSiteData } from '../schema/output-zod.js'
-import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
-import { Settings } from '../controllers/scrape-controller.js'
+import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
+import { Settings } from '../services/scrape-service.js'
 
 describe('save', () => {
     it('should handle s3 upload with mock functions', async () => {

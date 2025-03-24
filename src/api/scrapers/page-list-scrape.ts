@@ -1,4 +1,4 @@
-import type { Settings } from '../../src/controllers/scrape-controller.js'
+import type { Settings } from '../../services/scrape-service.js'
 import { setupBrowser } from './playwright-setup.js'
 
 export async function findPages(settings: Settings) {

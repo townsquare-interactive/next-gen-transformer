@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { checkPageListForDeployements } from './create-site-controller.js'
-import { SiteDeploymentError } from '../utilities/errors'
-import { getFileS3 } from '../utilities/s3Functions'
-import { verifyDomain } from './domain-controller.js'
+import { checkPageListForDeployements } from './create-site-service.js'
+import { SiteDeploymentError } from '../utilities/errors.js'
+import { getFileS3 } from '../utilities/s3Functions.js'
+import { verifyDomain } from '../services/domain-service.js'
 
 /* const mockResponse = {
     configuredBy: null,
@@ -16,8 +16,8 @@ import { verifyDomain } from './domain-controller.js'
 } */
 
 // Mock the external functions and partially mock the module
-vi.mock('./domain-controller.js', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('./domain-controller.js')>()
+vi.mock('../services/domain-service.js', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../services/domain-service.js')>()
     return {
         ...actual,
         modifyDomainPublishStatus: vi.fn(),
@@ -37,8 +37,8 @@ vi.mock('./domain-controller.js', async (importOriginal) => {
     }
 })
 
-vi.mock('../utilities/s3Functions', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../utilities/s3Functions')>()
+vi.mock('../utilities/s3Functions.js', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../utilities/s3Functions.js')>()
     return {
         ...actual,
         getFileS3: vi.fn(),

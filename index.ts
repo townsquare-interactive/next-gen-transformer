@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
 config()
 import express from 'express'
-import router from './api/cms-routes.js'
+import router from './src/api/routes.js'
 import path from 'path'
 import { marked } from 'marked'
 import * as fs from 'fs'

@@ -1,7 +1,7 @@
-import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
+import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { saveData as s3FileUpload } from '../services/save-scraped-data-to-s3.js'
 import { UploadedResourcesObj, save as dudaUpload } from '../services/save-to-duda.js'
-import type { Settings } from '../controllers/scrape-controller.js'
+import type { Settings } from '../services/scrape-service.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedPageSeo } from '../schema/output-zod.js'
 
 export interface SaveOutput {

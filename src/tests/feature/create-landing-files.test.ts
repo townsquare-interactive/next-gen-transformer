@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { validateLandingRequestData } from '../../controllers/landing-controller'
+import { validateLandingRequestData } from '../../services/landing-service.js'
 import { LandingReq } from '../../schema/input-zod'
 import { TransformError } from '../../utilities/errors'
 import { createLandingPageFiles } from '../../translation-engines/landing'

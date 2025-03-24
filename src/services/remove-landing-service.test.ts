@@ -1,15 +1,15 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest'
-import { removeSiteFromS3, removeLandingPage, removeDomainAndS3, removeLandingProject } from './remove-landing-controller.js'
+import { removeSiteFromS3, removeLandingPage, removeDomainAndS3, removeLandingProject } from './remove-landing-service.js'
 import { deleteFolderS3, getFileS3, deleteFileS3, addFileS3 } from '../utilities/s3Functions.js'
-import { checkPageListForDeployements, getPageLayoutVars, getPageList, getPageandLanding } from './create-site-controller.js'
+import { checkPageListForDeployements, getPageLayoutVars, getPageList, getPageandLanding } from '../services/create-site-service.js'
 
 // Mock the S3 functions with correct typing
 vi.mock('../utilities/s3Functions.js', () => ({
     getFileS3: vi.fn<any>(),
 }))
 
-vi.mock('./remove-landing-controller', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('./remove-landing-controller')>()
+vi.mock('./remove-landing-service', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./remove-landing-service.js')>()
     return {
         ...actual,
         removeDomainAndS3: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock('../utilities/s3Functions.js', () => ({
     deleteFileS3: vi.fn<any>(),
 }))
 
-vi.mock('./create-site-controller.js', () => ({
+vi.mock('./create-site-service.js', () => ({
     getPageList: vi.fn<any>(),
     getPageLayoutVars: vi.fn<any>(),
     getPageandLanding: vi.fn<any>(),

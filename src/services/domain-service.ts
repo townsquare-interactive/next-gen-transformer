@@ -1,9 +1,9 @@
-import type { Dns, DomainOptions, DomainRes, Layout } from '../../types.js'
+import type { Dns, DomainOptions, DomainRes } from '../../types.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, getFileS3 } from '../utilities/s3Functions.js'
 import { checkApexIDInDomain, convertUrlToApexId, createRandomFiveCharString } from '../utilities/utils.js'
 import type { ApexPageType } from '../schema/output-zod.js'
-import { checkPageListForDeployements, createRedirectFile, getPageandLanding } from './create-site-controller.js'
+import { checkPageListForDeployements, createRedirectFile, getPageandLanding } from './create-site-service.js'
 const previewPostFix = '.vercel.app'
 
 export const modifyDomainPublishStatus = async (method: string, siteLayout: any, domainName: string, apexId: string, pathName = `${apexId}/layout`) => {

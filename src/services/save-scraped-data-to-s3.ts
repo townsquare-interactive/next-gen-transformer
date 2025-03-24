@@ -1,5 +1,5 @@
-import type { ImageFiles } from '../../api/scrapers/asset-scrape.js'
-import { type Settings } from '../controllers/scrape-controller.js'
+import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
+import { type Settings } from './scrape-service.js'
 import { SavingScrapedData, siteDataUploadFunction } from '../output/save-scraped-data.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema } from '../schema/output-zod.js'
 import { zodDataParse } from '../schema/utils-zod.js'
@@ -91,3 +91,34 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
         })
     }
 }
+
+/* function matchImagesWithS3(siteData: any): any[] {
+    return siteData.pages.map((page) => {
+        const s3PageImageList = page.images
+            .map((pageImage) => {
+                // Extract filename from page image URL, handling empty strings
+                if (!pageImage) return null
+                const pageImageFile = decodeURIComponent(pageImage.split('/').pop() || '')
+
+                // Find matching S3 image by comparing filenames
+                const matchingS3Image = siteData.s3UploadedImages.find((s3Image) => {
+                    const s3ImageFile = decodeURIComponent(s3Image.split('/').pop() || '')
+
+                    // Remove query parameters and compare base filenames
+                    const cleanPageFile = pageImageFile.split('?')[0]
+                    const cleanS3File = s3ImageFile.split('?')[0]
+
+                    return cleanPageFile === cleanS3File
+                })
+
+                return matchingS3Image
+            })
+            .filter((url): url is string => url !== null) // Remove null values
+
+        console.log('s3PageImageList', s3PageImageList)
+        return {
+            ...page,
+            s3PageImageList,
+        }
+    })
+} */

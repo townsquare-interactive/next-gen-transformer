@@ -1,12 +1,12 @@
 import OpenAI from 'openai'
-import { ScrapingError } from '../../src/utilities/errors.js'
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '12',
-})
+import { ScrapingError } from '../../utilities/errors.js'
 
 export async function analyzePageData(url: string, screenshotBuffer: Buffer, pageHtml: string) {
     try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY || '12',
+        })
+
         const base64Image = screenshotBuffer.toString('base64')
         const base64ImageUrl = `data:image/jpeg;base64,${base64Image}`
 

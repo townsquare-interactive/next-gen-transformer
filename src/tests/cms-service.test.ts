@@ -1,4 +1,4 @@
-import { getPageData } from '../controllers/cms-controller'
+import { getPageData } from '../services/cms-services.js'
 import { it, describe, expect } from 'vitest'
 
 describe('Get Page Data', () => {

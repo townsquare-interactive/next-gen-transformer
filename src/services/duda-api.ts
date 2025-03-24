@@ -1,5 +1,5 @@
 import { DudaResponse, UploadPayload } from './save-to-duda.js'
-import { Settings } from '../controllers/scrape-controller.js'
+import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 
 const dudaUserName = process.env.DUDA_USERNAME

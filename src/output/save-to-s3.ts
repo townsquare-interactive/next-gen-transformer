@@ -1,5 +1,5 @@
 import { addAssetFromSiteToS3, addFileS3 } from '../utilities/s3Functions.js'
-import { updatePageList } from '../controllers/cms-controller.js'
+import { updatePageList } from '../services/cms-services.js'
 import type { PublishData } from '../../types.js'
 import { SiteDataSchema, CMSPagesSchema } from '../schema/output-zod.js'
 import { logZodDataParse, zodDataParse } from '../schema/utils-zod.js'

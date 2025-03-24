@@ -1,5 +1,5 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getScrapedDataFromS3, scrapeAssetsFromSite } from './scrape-controller.js'
+import { getScrapedDataFromS3, scrapeAssetsFromSite } from './scrape-service.js'
 import { ScrapingError } from '../utilities/errors.js'
 
 describe('scrapeAssetsFromSite', () => {

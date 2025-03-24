@@ -1,5 +1,5 @@
 import { convertDescText, removeWhiteSpace, convertUrlToApexId, getPageNameFromDomain } from '../utilities/utils.js'
-import { createGlobalStylesheet } from './cms-controller.js'
+import { createGlobalStylesheet } from './cms-services.js'
 import {
     checkModulesForBMP,
     createFontData,
@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { zodDataParse } from '../schema/utils-zod.js'
 import { ApexPageType, SiteDataType } from '../schema/output-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
-import { getPageandLanding } from './create-site-controller.js'
+import { getPageandLanding } from './create-site-service.js'
 
 export const validateLandingRequestData = (req: { body: LandingReq }, type = 'input') => {
     const siteData = zodDataParse<LandingReq, typeof LandingInputSchema>(req.body, LandingInputSchema, type)

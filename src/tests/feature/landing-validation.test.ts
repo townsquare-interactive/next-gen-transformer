@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ValidationError } from '../../utilities/errors.js'
-import { validateLandingRequestData } from '../../controllers/landing-controller'
+import { validateLandingRequestData } from '../../services/landing-service.js'
 import { LandingReq } from '../../schema/input-zod'
 
 // Define a valid example input that matches the LandingInputSchema

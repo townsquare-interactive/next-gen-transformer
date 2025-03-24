@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { checkDomainConfigOnVercel, verifyDomain } from './domain-controller.js'
+import { checkDomainConfigOnVercel, verifyDomain } from './domain-service.js'
 
 describe('checkDomainConfigOnVercel', () => {
     it('should create an array from a response with A records', async () => {

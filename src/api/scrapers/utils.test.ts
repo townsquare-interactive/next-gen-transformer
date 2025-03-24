@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { checkPagesAreOnSameDomain, cleanseHtml, extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
-import { ScrapingError } from '../../src/utilities/errors.js'
+import { ScrapingError } from '../../utilities/errors.js'
 
 /**
  * @vitest-environment jsdom

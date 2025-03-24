@@ -1,9 +1,9 @@
 import { Browser, Page, Response } from 'playwright'
 import path from 'path'
-import type { ScrapeResult, Settings } from '../../src/controllers/scrape-controller.js'
+import type { ScrapeResult, Settings } from '../../services/scrape-service.js'
 import { cleanseHtml, extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
 import { analyzePageData } from '../openai/api.js'
-import { ScrapedPageSeo } from '../../src/schema/output-zod.js'
+import { ScrapedPageSeo } from '../../schema/output-zod.js'
 
 import { setupBrowser } from './playwright-setup.js'
 

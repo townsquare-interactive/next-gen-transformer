@@ -1,12 +1,12 @@
-import type { Layout } from '../../types'
+import type { Layout } from '../../types.js'
 import { RemoveLandingPageReq, RemoveLandingPageSchema, RemoveLandingProjectReq, RemoveLandingProjectSchema } from '../schema/input-zod.js'
-import { PageListType } from '../schema/output-zod'
+import { PageListType } from '../schema/output-zod.js'
 import { zodDataParse } from '../schema/utils-zod.js'
 import { SiteDeploymentError } from '../utilities/errors.js'
 import { addFileS3, deleteFileS3, deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { convertUrlToApexId, getPageNameFromDomain } from '../utilities/utils.js'
-import { getPageLayoutVars, getPageList } from './create-site-controller.js'
-import { removeDomainFromVercel } from './domain-controller.js'
+import { getPageLayoutVars, getPageList } from './create-site-service.js'
+import { removeDomainFromVercel } from './domain-service.js'
 
 export const removeLandingProject = async (req: RemoveLandingProjectReq) => {
     const parsedReq = zodDataParse(req, RemoveLandingProjectSchema)

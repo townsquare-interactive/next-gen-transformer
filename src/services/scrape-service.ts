@@ -1,15 +1,15 @@
-import { ImageFiles, scrape } from '../../api/scrapers/asset-scrape.js'
-import { findPages } from '../../api/scrapers/page-list-scrape.js'
+import { ImageFiles, scrape } from '../api/scrapers/asset-scrape.js'
+import { findPages } from '../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
-import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../../api/scrapers/utils.js'
+import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../api/scrapers/utils.js'
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo, ScreenshotData } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
 import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
-import { defaultHeaders } from '../../api/scrapers/playwright-setup.js'
-import { transformBusinessInfo } from '../../api/scrapers/utils.js'
+import { defaultHeaders } from '../api/scrapers/playwright-setup.js'
+import { transformBusinessInfo } from '../api/scrapers/utils.js'
 
 export interface ScrapeResult {
     imageList: string[]

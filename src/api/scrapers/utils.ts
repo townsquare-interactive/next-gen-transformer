@@ -1,9 +1,9 @@
 import { Page } from 'playwright'
-import { convertUrlToApexId, createRandomFiveCharString } from '../../src/utilities/utils.js'
+import { convertUrlToApexId, createRandomFiveCharString } from '../../utilities/utils.js'
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
-import { ScrapingError } from '../../src/utilities/errors.js'
-import { BusinessHours, ScreenshotData } from '../../src/schema/output-zod.js'
+import { ScrapingError } from '../../utilities/errors.js'
+import { BusinessHours, ScreenshotData } from '../../schema/output-zod.js'
 
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
