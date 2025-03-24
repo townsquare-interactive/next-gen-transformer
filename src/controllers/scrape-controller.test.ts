@@ -148,7 +148,7 @@ describe('scrapeAssetsFromSite', () => {
             domain: url,
             message: 'Permanent scraping error',
             state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
-            errorType: 'SCR-011',
+            errorType: 'GEN-003',
         })
     })
 

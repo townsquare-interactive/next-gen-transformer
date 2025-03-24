@@ -100,7 +100,7 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
             domain: settings.url,
             message: error.message,
             state: { scrapeStatus: 'Site not scraped' },
-            errorType: error.errorType || 'SCR-011',
+            errorType: error.errorType || 'GEN-003',
         })
     }
 }

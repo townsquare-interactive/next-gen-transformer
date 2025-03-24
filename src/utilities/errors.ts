@@ -152,6 +152,10 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
         statusType = 404
     }
 
+    if (err.errorType === 'GEN-003') {
+        statusType = 500
+    }
+
     if (err instanceof ValidationError) {
         res.status(statusType || 400).json({
             id: errorID,

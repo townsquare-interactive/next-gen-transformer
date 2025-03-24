@@ -2,6 +2,8 @@
 import { SiteDataType } from '../schema/output-zod'
 import { CMSNavItem, CMSPage, Contact, LunaModuleItem, CarouselSettings, ThemeStyles, PageSeo, Logo, Slot, FontType, DomainOptions } from '../../types'
 import crypto from 'crypto'
+import { Request } from 'express'
+import { AuthorizationError, ValidationError } from './errors.js'
 
 export const bucketUrl = 'https://townsquareinteractive.s3.amazonaws.com'
 const globalAssets = bucketUrl + '/global-assets'
@@ -986,9 +988,8 @@ export const replaceKey = (value: Record<any, any>, oldKey: string, newKey: stri
         value[newKey] = value[oldKey]
         //Object.defineProperty(value, newKey, Object.getOwnPropertyDescriptor(value, oldKey))
         delete value[oldKey]
-    } else if ([oldKey]) {
-        console.log('key is not in obj')
     }
+    console.log('key is not in obj')
 
     return { ...value }
 }
@@ -1215,4 +1216,35 @@ export const getPageNameFromDomain = (domain: string) => {
 export function generateAccessToken(length = 16) {
     //string will be double the length param
     return crypto.randomBytes(length).toString('hex')
+}
+
+export const checkAuthToken = (req: Request): void => {
+    try {
+        const authHeader = req.headers['authorization']
+        if (!authHeader) {
+            throw new AuthorizationError({
+                message: 'No authorization header present',
+                errorType: 'AUT-017',
+                state: {},
+            })
+        }
+
+        const token = authHeader.split(' ')[1] // Extract the token (Bearer <token>)
+        if (token !== process.env.TRANSFORMER_API_KEY) {
+            throw new AuthorizationError({
+                message: 'Incorrect authorization bearer token',
+                errorType: 'AUT-017',
+                state: {},
+            })
+        }
+    } catch (err) {
+        if (err instanceof AuthorizationError) {
+            throw err
+        }
+        throw new ValidationError({
+            message: 'Error attempting to validate Bearer token: ' + err.message,
+            errorType: 'VAL-015',
+            state: {},
+        })
+    }
 }
