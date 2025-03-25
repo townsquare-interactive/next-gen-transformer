@@ -6,7 +6,7 @@ import { PageObject, LocationObject } from '../types/duda-api-type.js'
 
 const dudaUserName = process.env.DUDA_USERNAME
 const dudaPassword = process.env.DUDA_PASSWORD
-const BASE_URL = 'https://api-sandbox.duda.co'
+const BASE_URL = process.env.DUDA_USE_SANDBOX === '1' ? 'https://api-sandbox.duda.co' : 'https://api.duda.co'
 
 // Encode username and password for Basic Auth
 const authStr = `${dudaUserName}:${dudaPassword}`
