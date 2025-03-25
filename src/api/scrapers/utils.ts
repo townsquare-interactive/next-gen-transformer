@@ -169,13 +169,28 @@ export const extractPageContent = async (page: Page) => {
         document.querySelectorAll('header *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)').forEach((el) => {
             el.remove()
         })
-        console.log('Extracted body text:', document.body)
-        // Return visible text content
+
         const bodyText = document.body?.textContent || '' // Safeguard against undefined
 
-        return bodyText.trim() // Trim whitespace
+        const rawContent = bodyText.trim()
+
+        //clean the content
+        const cleanedContent = rawContent
+            .replace(/\t/g, ' ') // Replace tabs with spaces
+            .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
+            .replace(/\n\s+/g, '\n') // Remove whitespace at start of lines
+            .replace(/\s+\n/g, '\n') // Remove whitespace at end of lines
+            .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with just 2
+            .split(/\n/) // Split into lines
+            .map((line) => line.trim()) // Trim each line
+            .filter((line) => line) // Remove empty lines
+            .join('\n\n') // Join with double newlines for paragraph spacing
+            .trim() // Final trim of the whole text
+
+        return cleanedContent
     })
 }
+
 export function hashUrl(url: string): string {
     return crypto.createHash('md5').update(url).digest('hex')
 }
