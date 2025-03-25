@@ -3,6 +3,7 @@ import * as ScrapeController from './controllers/scrape-controller.js'
 import * as LandingController from './controllers/landing-controller.js'
 import * as CreateSiteController from './controllers/create-site-controller.js'
 import * as CMSController from './controllers/cms-controller.js'
+import * as DudaController from './controllers/duda-controller.js'
 
 const router = express.Router()
 
@@ -32,5 +33,8 @@ router.post('/move-s3-data-to-duda', ScrapeController.moveS3DataToDuda)
 
 //save from luna cms
 router.post('/save', CMSController.save)
+
+// Duda routes
+router.post('/duda-create-page', DudaController.createPage)
 
 export default router

@@ -1,6 +1,8 @@
 import { DudaResponse, UploadPayload } from './save-to-duda.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
+import { dudaApiClient } from './duda-api-client'
+import { PageObject } from '../types/duda-api-type'
 
 const dudaUserName = process.env.DUDA_USERNAME
 const dudaPassword = process.env.DUDA_PASSWORD
@@ -72,4 +74,25 @@ export async function uploadSiteSEOToDuda(siteId: string, seoData: ScrapedPageSe
     } catch (error) {
         throw error
     }
+}
+
+export async function createDudaPage(siteName: string, pageData: PageObject) {
+    const response = await dudaApiClient.getClient().pages.v2.create({
+        site_name: siteName,
+        page: {
+            seo: pageData.seo
+                ? {
+                      no_index: pageData.seo.no_index ?? false,
+                      title: pageData.seo.title || '',
+                      description: pageData.seo.description || '',
+                      og_image: pageData.seo.og_image || '',
+                  }
+                : undefined, // Avoid adding `seo` entirely if undefined
+            draft_status: 'STAGED_DRAFT',
+            title: pageData.title,
+            path: pageData.path,
+        },
+    })
+
+    return response
 }
