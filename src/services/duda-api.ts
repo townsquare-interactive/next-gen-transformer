@@ -2,7 +2,7 @@ import { DudaResponse, UploadPayload } from './save-to-duda.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 import { dudaApiClient } from './duda-api-client'
-import { PageObject } from '../types/duda-api-type'
+import { PageObject, LocationObject } from '../types/duda-api-type'
 
 const dudaUserName = process.env.DUDA_USERNAME
 const dudaPassword = process.env.DUDA_PASSWORD
@@ -92,6 +92,27 @@ export async function createDudaPage(siteName: string, pageData: PageObject) {
             title: pageData.title,
             path: pageData.path,
         },
+    })
+
+    return response
+}
+
+export async function createDudaLocation(siteName: string, locationData: LocationObject) {
+    const response = await dudaApiClient.getClient().content.multilocation.create({
+        site_name: siteName,
+        ...(locationData.label && { label: locationData.label }),
+        ...(locationData.phones && { phones: locationData.phones }),
+        ...(locationData.emails && { emails: locationData.emails }),
+        ...(locationData.social_accounts && { social_accounts: locationData.social_accounts }),
+        ...(locationData.address && { address: locationData.address }),
+        ...(locationData.logo_url && { logo_url: locationData.logo_url }),
+        ...(locationData.business_hours && {
+            business_hours: locationData.business_hours.map(({ days, open, close }) => ({
+                days: days as ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[],
+                open,
+                close,
+            })),
+        }),
     })
 
     return response
