@@ -51,7 +51,7 @@ export const createLayoutFile = async (siteData: LandingReq, apexID: string) => 
     const colors: LandingColors = siteData.colors
     const favicon = siteData.favicon
     const url = siteData.url
-    let customComponents = siteData.customOptions.customComponents || []
+    const customComponents = siteData.customOptions.customComponents || []
 
     const { siteLayout, sitePage } = await getPageandLanding(apexID, siteData.pageUri || '', 'landing')
     const analytics = siteData.customOptions.analytics
@@ -212,7 +212,7 @@ export const createPageFile = (siteData: LandingReq, siteLayout: SiteDataType) =
 }
 
 const createModules = (modules: AiPageModules, phoneNumber: string) => {
-    let newModules = []
+    const newModules = []
     let modCount = 1
     let bannerCount = 1
     for (let i = 0; i < modules.length; i++) {

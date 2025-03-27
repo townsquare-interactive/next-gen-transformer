@@ -8,7 +8,7 @@ interface reqBody {
 }
 
 function transformLayoutTemplate(layoutTemplate: any, basePath: string) {
-    let siteLayout = layoutTemplate
+    const siteLayout = layoutTemplate
     siteLayout.s3Folder = basePath
     siteLayout.siteName = basePath
     siteLayout.url = basePath + '.production.townsquareinteractive.com'
@@ -33,7 +33,7 @@ export const transformCreateSite = async (req: reqBody) => {
             break
     }
 
-    let siteLayout = transformLayoutTemplate(layout.layout, basePath)
+    const siteLayout = transformLayoutTemplate(layout.layout, basePath)
 
     try {
         const siteData = {

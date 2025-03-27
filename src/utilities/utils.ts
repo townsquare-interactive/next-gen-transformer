@@ -16,7 +16,7 @@ export const socials = {
 }
 
 export function socialConvert(str: string) {
-    let icon = iconConvert(str)
+    const icon = iconConvert(str)
 
     if (icon === socials.google) {
         return ['fab', socials.google]
@@ -293,7 +293,7 @@ export const transformCompositeItems = (compositeItems: any[]) => {
     //seperate modal item
     const modalItems = componentItems.filter((e: any) => e.component === 'popup_modal')
     //all non modal items
-    let newCompositeItems = componentItems.filter((e: any) => e.component != 'popup_modal')
+    const newCompositeItems = componentItems.filter((e: any) => e.component != 'popup_modal')
 
     //add plugin for each item
     for (const i in modalItems) {
@@ -324,7 +324,7 @@ export const transformCompositeItems = (compositeItems: any[]) => {
 }
 
 export function checkModalBtn(btnLink: string, pageModals: { modalNum: number; modalTitle: any }[]) {
-    for (let x in pageModals) {
+    for (const x in pageModals) {
         if (btnLink === '#modal_' + pageModals[x].modalTitle.replace(' ', '-')) {
             return Number(x)
         }
@@ -374,7 +374,7 @@ export async function transformcontact(contactInfo: Contact) {
 
     //create coordinates for map
     if (contactInfo.address) {
-        let coords = await newAddyCoords(contactInfo.address)
+        const coords = await newAddyCoords(contactInfo.address)
         contactInfo.address = { ...contactInfo.address, coordinates: coords }
     }
 
@@ -460,14 +460,14 @@ export const transformNav = (menu: CMSNavItem[], siteUrl: string) => {
 }
 
 export const determineNavParent = (menu: CMSNavItem[]) => {
-    let editTable = []
+    const editTable = []
     for (let i = 0; i < menu.length; i++) {
         //create table of items that have parent
         if (menu[i].menu_item_parent == 0) {
             //Sometimes submenu is not passed but we can use menu_item_parent
             if (!menu[i].submenu) {
-                let submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent)
-                let newTable = submenu.length != 0 ? { ...menu[i], submenu } : menu[i]
+                const submenu = menu.filter((value) => menu[i].ID == value.menu_item_parent)
+                const newTable = submenu.length != 0 ? { ...menu[i], submenu } : menu[i]
                 editTable.push(newTable)
             }
         }
@@ -589,13 +589,13 @@ export const isFeatureBtn = (modRenderType: string, well: string | number, btnCo
 }
 
 export const createTsiImageLink = (cmsUrl: string, imgUrl: string) => {
-    let imageUrl = 'http://' + cmsUrl + imgUrl
+    const imageUrl = 'http://' + cmsUrl + imgUrl
     return encodeURI(imageUrl)
 }
 
 export const createFavLink = (cmsUrl: string, fav: string) => {
-    let stripPath = stripImageFolders(fav)
-    let fullUrl = cmsUrl + stripPath
+    const stripPath = stripImageFolders(fav)
+    const fullUrl = cmsUrl + stripPath
     return fullUrl
 }
 
@@ -724,9 +724,9 @@ const transformItemLinks = (item: LunaModuleItem) => {
 }
 
 export const createModalPageList = (modules: any[]) => {
-    let pageModals = []
+    const pageModals = []
     let modalNum = 0
-    for (let i in modules) {
+    for (const i in modules) {
         if (Object.keys(modules[i]).length != 0) {
             for (const [key, pageModule] of Object.entries<Record<string, any>>(modules[i])) {
                 //for (const pageModule in value.data.modules[i]) {
@@ -738,7 +738,7 @@ export const createModalPageList = (modules: any[]) => {
                         if (pageModule.well == '1') {
                             autoOpen = true
                         }
-                        for (let m in pageModule.items) {
+                        for (const m in pageModule.items) {
                             if (pageModule.items[m].autoOpen === true) {
                                 autoOpen = true
                             }
@@ -968,7 +968,7 @@ export const newAddyCoords = async (addy: any) => {
 
 //reuseables
 export const removeDuplicatesArray = (arr: any[]) => {
-    let uniqueArr = arr.filter((c, index) => {
+    const uniqueArr = arr.filter((c, index) => {
         return arr.indexOf(c) === index
     })
     return uniqueArr
@@ -1060,24 +1060,24 @@ export function wrapTextWithPTags(text: string) {
 
 function processImageTag(desc: string, cmsUrl: string) {
     // Regular expression to match <img> tag
-    var imgRegex = /<img([^>]*)src\s*=\s*["']([^"']*)["']([^>]*)>/g
+    const imgRegex = /<img([^>]*)src\s*=\s*["']([^"']*)["']([^>]*)>/g
 
     // Function to replace the src attribute
     function replaceSrc(match: any, p1: string, p2: string, p3: string) {
         // Add the string variable to the beginning of the src value
-        var newSrc = cmsUrl + p2
+        const newSrc = cmsUrl + p2
         return '<img' + p1 + 'src="' + 'http://' + newSrc + '"' + p3 + '>'
     }
 
     // Use replace function with the defined callback
-    var processedDesc = desc.replace(imgRegex, replaceSrc)
+    const processedDesc = desc.replace(imgRegex, replaceSrc)
 
     return processedDesc
 }
 
 export const convertDescText = (desc: string) => {
     const wrappedText = wrapTextWithPTags(desc)
-    let convertedDesc = convertSpecialTokens(wrappedText)
+    const convertedDesc = convertSpecialTokens(wrappedText)
 
     //const convertedImages = processImageTag(convertedDesc, cmsUrl)
     return convertedDesc
@@ -1085,9 +1085,9 @@ export const convertDescText = (desc: string) => {
 
 export const seperateScriptCode = (customPageCode: string, pageSlug?: string) => {
     let pageCss = ''
-    let styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
+    const styleMatchReg = /<style[^>]*>([^<]+)<\/style>/gi
     let nextMatch = styleMatchReg.exec(customPageCode)
-    let cssStringArray = []
+    const cssStringArray = []
     while (nextMatch != null) {
         cssStringArray.push(nextMatch[1])
         nextMatch = styleMatchReg.exec(customPageCode)

@@ -46,7 +46,7 @@ const toStringSchema = z.coerce.string()
 
 export const transformPagesData = async (pageData: Page, sitePageData: any, themeStyles: ThemeStyles, basePath: string, cmsUrl: string) => {
     console.log('page transformer started')
-    let newData = []
+    const newData = []
 
     //for each page
     for (const [key, value] of Object.entries(pageData)) {
@@ -56,9 +56,9 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
         if (Object.keys(value.data).length === 0 && value.attrs) {
             console.log('initiated page name change')
             const oldPageSlug = sitePageData[key].backup.attrs.slug
-            let oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
-            let oldSiteData: Layout = await getFileS3(`${basePath}/layout.json`)
-            let oldNav = oldSiteData.cmsNav
+            const oldPageFile = await getFileS3(`${basePath}/pages/${oldPageSlug}.json`)
+            const oldSiteData: Layout = await getFileS3(`${basePath}/layout.json`)
+            const oldNav = oldSiteData.cmsNav
 
             const newSlug = value.attrs.slug
             const newTitle = value.attrs.title
@@ -75,7 +75,7 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
 
             //filter array to update nav spot with changed page name
             if (oldNav.findIndex((x) => x.slug === oldPageSlug) != -1) {
-                var foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
+                const foundIndex = oldNav.findIndex((x) => x.slug === oldPageSlug)
                 const newField = {
                     ...oldNav[foundIndex],
                     slug: newSlug,
@@ -112,7 +112,7 @@ export const transformPagesData = async (pageData: Page, sitePageData: any, them
                 value.data.scripts = seperatedCode.scripts
 
                 //create list of page modals
-                let pageModals: { modalNum: number; modalTitle: string; openEveryTime: boolean; autoOpen: boolean }[] = createModalPageList(value.data.modules)
+                const pageModals: { modalNum: number; modalTitle: string; openEveryTime: boolean; autoOpen: boolean }[] = createModalPageList(value.data.modules)
                 value.data.pageModals = pageModals
 
                 //transforming page data
@@ -163,7 +163,7 @@ const createPageScss = async (pageData: CMSPage, pageSlug: string, basePath: str
 export const deletePages = async (pages: CMSPage[], basePath: string) => {
     console.log('deleter started')
     const oldPageList = await getFileS3(`${basePath}/pages/page-list.json`)
-    let newPageList = []
+    const newPageList = []
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
         if (!(oldPageList.pages[i].id in pages)) {
@@ -180,7 +180,7 @@ export const deletePages = async (pages: CMSPage[], basePath: string) => {
 export const updatePageList = async (page: CMSPage[] | Page[], basePath: string) => {
     console.log('page list updater started ------')
     const pageListUrl = `${basePath}/pages/page-list`
-    let pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
+    const pageListFile = await getFileS3(`${basePath}/pages/page-list.json`)
     addPagesToList(pageListFile, page, basePath)
     //Can use add file when ready, instead of addpagelist logging
     console.log('new page list', pageListFile)
@@ -193,7 +193,7 @@ export const updatePageList = async (page: CMSPage[] | Page[], basePath: string)
 //add page object to pagelist
 const addPagesToList = async (pageListFile: { pages: [{ slug: string }] }, page: CMSPage[] | Page[], basePath: string) => {
     for (let i = 0; i < page.length; i++) {
-        let pageData = page[i].data
+        const pageData = page[i].data
 
         const newPageItem = {
             name: pageData.title,
@@ -258,7 +258,7 @@ export const createOrEditLayout = async (file: any, basePath: string, themeStyle
         const social = []
 
         for (let i = 0; i < socials.length; i++) {
-            let item = socials[i]
+            const item = socials[i]
             const url = item.format.replace(/\%.*/, '') + item.value
 
             if (socials[i]) {
@@ -409,11 +409,11 @@ const transformPageModules = (
     cmsUrl: string,
     pageModals: { modalNum: number; modalTitle: any; openEveryTime: boolean; autoOpen: boolean }[]
 ) => {
-    let columnsData = []
+    const columnsData = []
 
     for (let i = 0; i <= moduleList.length; ++i) {
         if (moduleList[i]) {
-            let newData = []
+            const newData = []
             let modCount = 0
 
             const isSingleColumn = moduleList.filter((e: any) => Object.keys(e).length != 0).length === 2
@@ -470,7 +470,7 @@ const transformPageModules = (
                 let itemCount = 1
                 //loop for each item inside of module
                 for (let i = 0; i < currentModule.items.length; i++) {
-                    let currentItem = currentModule.items[i]
+                    const currentItem = currentModule.items[i]
                     currentModule.items[i] = transformModuleItem(
                         currentModule,
                         currentItem,
@@ -666,7 +666,7 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
 
     const colorClasses = createColorClasses(themeStyles)
 
-    let customCss = code.CSS
+    const customCss = code.CSS
         ? `
     /*---------------------Custom Code--------------------*/
     ${code.CSS}
@@ -681,7 +681,7 @@ export const createGlobalStylesheet = async (themeStyles: ThemeStyles, fonts: an
         allPageStyles = ''
     }
 
-    let globalStyles = colorClasses
+    const globalStyles = colorClasses
     const globalConverted = convertSpecialTokens(globalStyles, 'code')
     const customConverted = convertSpecialTokens(fontClasses + customCss + allPageStyles, 'code')
     const convertedGlobal = sass.compileString(globalConverted)

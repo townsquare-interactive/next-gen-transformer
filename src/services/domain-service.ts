@@ -93,13 +93,13 @@ export const publishDomainToVercel = async (domainOptions: DomainOptions, apexID
 
     const postfix = domainOptions.usingPreview ? previewPostFix : ''
     let domainName = domainOptions.domain + postfix
-    let randomString = createRandomFiveCharString()
-    let randomStringDomain = domainOptions.domain + '-' + randomString
+    const randomString = createRandomFiveCharString()
+    const randomStringDomain = domainOptions.domain + '-' + randomString
     let altDomain = randomStringDomain + postfix
 
     //check if s3 folder exists for domain
     if (typeof siteLayout != 'string' && siteLayout) {
-        let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
+        const publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((domain: string) => domain === domainName).length
 
         //check if a random char generated domain has already been published
@@ -330,11 +330,11 @@ export const removeDomainFromVercel = async (domain: string, pageUri = '', type 
     }
 
     const { siteLayout, sitePage } = await getPageandLanding(finalApexID, pageUri, type)
-    let domainName = domain
+    const domainName = domain
 
     if (typeof siteLayout != 'string' && siteLayout) {
         //check that this url is tied with the S3 layout published domains field
-        let publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
+        const publishedDomains = siteLayout.publishedDomains ? siteLayout.publishedDomains : []
         const isDomainPublishedAlready = publishedDomains.filter((listedDomain) => listedDomain === domainName).length
 
         //check here for page-list length, only delete url if no more?

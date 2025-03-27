@@ -38,7 +38,7 @@ exec('npm run strapi import -- -f export_new.tar.gz.enc', (error, stdout, stderr
 const dbUrl = 'http://127.0.0.1:1337'
 
 export const transformStrapi = async (req: Request) => {
-    let pagesList = []
+    const pagesList = []
 
     //console.log('lets check the req', req, req.entry)
     //console.log('this will check for draft==========================', req.entry.publishedAt ? 'this is published' : 'this is draft', req)
@@ -86,7 +86,7 @@ export const transformStrapi = async (req: Request) => {
         //if saved type is a page
         if (req.entry.slug != null && req.entry.Body) {
             let modCount = 0
-            let newPages = []
+            const newPages = []
             //module loop
 
             for (const i in req.entry.Body) {
@@ -280,7 +280,7 @@ export const transformStrapi = async (req: Request) => {
 
         //----------------------global styles ---------------------------------
         const siteCustomCss = { CSS: '' }
-        let currentPageList = ''
+        const currentPageList = ''
 
         //fonts
         const strapiFonts = createFonts({

@@ -4,7 +4,7 @@ import { FontType, ThemeStyles } from '../../types.js'
 import { convertDescText, createFontImport, socialConvert } from './utils.js'
 
 export const transformSocial = (socials: string[]) => {
-    let newSocials = []
+    const newSocials = []
     for (let i = 0; i < socials.length; i++) {
         if (socials[i]) {
             newSocials.push({
@@ -53,7 +53,7 @@ function convertIframe(input: string): string {
 
 //use the request sections to create modules
 export const createModulesWithSections = (sections: Sections) => {
-    let modules = []
+    const modules = []
     for (let i = 0; i < sections.length; i++) {
         const section = sections[i]
         if (section.headline && i === 0) {
@@ -140,7 +140,7 @@ export const createModulesWithSections = (sections: Sections) => {
 }
 
 export const createReviewItems = (reviews: { name?: string; text: string }[]) => {
-    let items = []
+    const items = []
     for (let i = 0; i < reviews.length; i++) {
         const newItem = {
             desc: convertDescText(reviews[i].text),
@@ -200,7 +200,7 @@ export const transformFonts = (scrapedFonts: ScrapedFonts[]) => {
         }
 
         //assign default values
-        let fontObject: FontObject = {
+        const fontObject: FontObject = {
             headlineFont: {
                 label: 'Oswald',
                 google: 'Oswald:400,700',
@@ -219,7 +219,7 @@ export const transformFonts = (scrapedFonts: ScrapedFonts[]) => {
         }
 
         //assign default values
-        let fontSections = {
+        const fontSections = {
             hdrs: {
                 label: 'Headlines',
                 value: 'Oswald',

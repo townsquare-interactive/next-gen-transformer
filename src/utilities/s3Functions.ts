@@ -142,7 +142,7 @@ export const addFolderS3 = async (file: any, key: string) => {
 
 //adds file from luna site to s3 folder (used for favicons)
 export const addAssetFromSiteToS3 = async (file: any, key: string) => {
-    var options = {
+    const options = {
         uri: 'http://' + file,
         encoding: null,
     }
@@ -230,7 +230,7 @@ export const deleteFileS3 = async (key: string) => {
 }
 
 export const getCssFile = async (pageSlug: string, basePath: string) => {
-    var options = {
+    const options = {
         uri: `${bucketUrl}/${basePath}/styles/${pageSlug}.scss`,
         encoding: null,
     }

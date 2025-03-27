@@ -121,7 +121,7 @@ export const transformVcita = (vcita: any, engage: any, businessInfo: any) => {
     const defineActions = (actionsObject: any, isStarterPackage = false) => {
         const actions: any = []
         Object.keys(actionsObject).forEach(function (action) {
-            var object = actionsObject[action]
+            const object = actionsObject[action]
 
             if (object.active === false) return
             switch (action) {

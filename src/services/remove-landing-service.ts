@@ -100,7 +100,7 @@ export const removeLandingPage = async (apexID: string, pageSlug: string) => {
 
     //get pagelist
     const oldPageList: PageListType = await getFileS3(`${apexID}/pages/page-list.json`)
-    let newPageList: PageListType = { pages: [] }
+    const newPageList: PageListType = { pages: [] }
 
     for (let i = 0; i < oldPageList.pages.length; i++) {
         if (!(oldPageList.pages[i].slug === pageSlug)) {

@@ -57,7 +57,7 @@ export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: Scra
 export async function saveImages(settings: Settings, imageFiles: ImageFiles[], logoUrl?: string, fetchFunction?: (payload: string[]) => string) {
     try {
         let uploadedImagesCount = 0
-        let imageList: UploadedResourcesObj[] = []
+        const imageList: UploadedResourcesObj[] = []
         console.log('imagefiles length', imageFiles.length)
         const uploadImage = fetchFunction || addImageToS3
 

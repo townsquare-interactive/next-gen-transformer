@@ -68,7 +68,7 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
             ],
         })
 
-        let rawContent = response.choices[0]?.message?.content || ''
+        const rawContent = response.choices[0]?.message?.content || ''
         console.log('openai anlysis raw result', rawContent)
         const parsedJson = extractJsonFromRes(rawContent)
         console.log('parsed json', parsedJson)

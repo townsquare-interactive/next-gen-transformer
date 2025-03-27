@@ -95,7 +95,7 @@ export async function saveImages(
 
         const allUploads: UploadedResourcesObj[] = []
         let succesfulImageCount = 0
-        let failedImageList: string[] = []
+        const failedImageList: string[] = []
         batchResults.forEach((result) => {
             result.uploaded_resources.forEach((batch) => {
                 if (batch.status === 'UPLOADED') {

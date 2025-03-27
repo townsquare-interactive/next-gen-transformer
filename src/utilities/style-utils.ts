@@ -128,7 +128,7 @@ export const createColorClasses = (themeStyles: ThemeStyles) => {
     .caption-background{background-color:var(--caption-background);}
     `
 
-    let colorStyles = colorVars + textColors + btnStyles + backgroundStyles
+    const colorStyles = colorVars + textColors + btnStyles + backgroundStyles
 
     return colorStyles
 }
@@ -285,9 +285,9 @@ export function createFlexTextColorVars(color: string, label: string) {
 function hslToRgb(h: number, s: number, l: number) {
     s /= 100
     l /= 100
-    let c = (1 - Math.abs(2 * l - 1)) * s
-    let x = c * (1 - Math.abs(((h / 60) % 2) - 1))
-    let m = l - c / 2
+    const c = (1 - Math.abs(2 * l - 1)) * s
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+    const m = l - c / 2
     let r = 0,
         g = 0,
         b = 0
@@ -428,7 +428,7 @@ export const createItemStyles = (items: LunaModuleItem[], well: string, modType:
             } else if (!currentItem.image) {
                 itemStyle = { background: `${currentItem.promoColor}` }
             } else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
-                let modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`)
+                const modBackground = currentItem.modColor1.replace(')', `,${currentItem.modOpacity})`)
                 itemStyle = { background: modBackground }
             } else {
                 itemStyle = {}
@@ -441,7 +441,7 @@ export const createItemStyles = (items: LunaModuleItem[], well: string, modType:
                     backgroundImage: `linear-gradient(-45deg, ${currentItem.textureImage?.gradientColors[0]}, ${currentItem.textureImage?.gradientColors[1]})`,
                 }
             } else if (currentItem.image && currentItem.modColor1 && currentItem.modOpacity) {
-                let modBackground = currentItem.modColor1.replace(')', `,${1 - currentItem.modOpacity})`)
+                const modBackground = currentItem.modColor1.replace(')', `,${1 - currentItem.modOpacity})`)
                 captionStyle = { background: modBackground }
             } else if (currentItem.promoColor) {
                 itemStyle = { background: `${currentItem.promoColor}` }

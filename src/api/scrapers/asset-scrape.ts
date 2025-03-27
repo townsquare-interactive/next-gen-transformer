@@ -203,7 +203,7 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                         }
 
                         // Ensure file extension is properly formatted
-                        let fileNameWithExt = fileName.replaceAll(fileExtension, '') + fileExtension
+                        const fileNameWithExt = fileName.replaceAll(fileExtension, '') + fileExtension
 
                         imageFiles.push({
                             imageFileName: fileNameWithExt,

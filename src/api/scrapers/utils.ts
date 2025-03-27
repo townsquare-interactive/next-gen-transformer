@@ -12,7 +12,7 @@ export function preprocessImageUrl(itemUrl: URL | null): string | null {
         return null
     }
 
-    let url = itemUrl
+    const url = itemUrl
 
     // Extract the actual S3 URL from the `url` query parameter, or fallback to the raw href
     const s3Url = url.searchParams.get('url')

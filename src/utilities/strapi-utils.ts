@@ -5,7 +5,7 @@ export const transformStrapiNav = (nav: [{ title: string; related: { slug: strin
     console.log('running strapi transformmmm--------------------------------')
     //nav
     //check for s3 cmsNav / check if page is already there
-    let newNav = []
+    const newNav = []
 
     for (let i = 0; i < nav.length; i++) {
         if (nav[i].related?.slug) {
@@ -89,7 +89,7 @@ export const convertColumns = (columns: string | number | undefined) => {
 }
 
 export const createSocials = (socialMedia: { url: string }[]) => {
-    let socialMediaItems = []
+    const socialMediaItems = []
     if (socialMedia.length != 0) {
         const inputtedSocials = socialMedia || []
 
@@ -866,7 +866,7 @@ export const createContactInfo = async (
 
     const newAddy = await createAddress(attributes)
 
-    let contactInfo = {
+    const contactInfo = {
         address: newAddy,
         phone: attributes.phone,
         email: [
@@ -903,7 +903,7 @@ const createAnchorLinksArr = (module: CurrentModule, anchorTags: anchorTags) => 
     let anchorLink = module.title?.replace(' ', '-') || ''
     console.log('title', module.title, 'link', anchorLink)
 
-    let anchorItem = {
+    const anchorItem = {
         title: module.title,
         url: '#' + anchorLink,
         menu_item_parent: 0,
