@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { createDudaLocation, createDudaPage } from '../../services/duda-api'
-import { PageObject, LocationObject } from '../../types/duda-api-type'
+import { createDudaLocation, createDudaPage } from '../../services/duda-api.js'
+import { PageObject, LocationObject } from '../../types/duda-api-type.js'
 
 /**
  * Controller to create a new Duda page.

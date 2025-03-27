@@ -1,8 +1,8 @@
 import { DudaResponse, UploadPayload } from './save-to-duda.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
-import { dudaApiClient } from './duda-api-client'
-import { PageObject, LocationObject } from '../types/duda-api-type'
+import { dudaApiClient } from './duda-api-client.js'
+import { PageObject, LocationObject } from '../types/duda-api-type.js'
 
 const dudaUserName = process.env.DUDA_USERNAME
 const dudaPassword = process.env.DUDA_PASSWORD
