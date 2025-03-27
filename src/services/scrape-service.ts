@@ -1,6 +1,6 @@
 import { ImageFiles, scrape } from '../api/scrapers/asset-scrape.js'
 import { findPages } from '../api/scrapers/page-list-scrape.js'
-import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
+import { SaveFileMethodType, ScrapeSettings, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../api/scrapers/utils.js'
@@ -46,6 +46,7 @@ export interface Settings extends ScrapeWebsiteReq {
         isValidateUrl?: (url: string) => Promise<boolean>
     }
     basePath: string
+    queueScrape?: boolean
 }
 
 export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
@@ -58,9 +59,16 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
         analyzeHomepageData: validatedRequest.analyzeHomepageData === undefined ? true : validatedRequest.analyzeHomepageData,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
+        queueScrape: validatedRequest.queueScrape === undefined ? false : validatedRequest.queueScrape,
     }
 
     return scrapeSettings
+}
+
+export const scrapeAndSaveFullSite = async (scrapeSettings: ScrapeSettings) => {
+    const pages = await getPageList(scrapeSettings)
+    const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
+    await save(scrapeSettings, scrapedData)
 }
 
 export async function scrapeAssetsFromSite(settings: Settings, pages?: string[]) {
@@ -201,9 +209,11 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
                 })
             )
         )
-
+        //ScrapedPageData
         // Extract successful results
-        const validScrapedPages = scrapedPages.filter((res) => res.status === 'fulfilled' && res.value).map((res) => (res as PromiseFulfilledResult<any>).value)
+        const validScrapedPages = scrapedPages
+            .filter((res) => res.status === 'fulfilled' && res.value)
+            .map((res) => (res as PromiseFulfilledResult<ScrapeResult>).value)
 
         // Push results from other pages
         seo.push(...validScrapedPages.map((data) => data.pageSeo))

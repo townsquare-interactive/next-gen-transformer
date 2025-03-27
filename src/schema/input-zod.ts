@@ -550,6 +550,7 @@ const scrapeExample = {
     saveImages: true,
     analyzeHomepageData: true,
     scrapeImages: true,
+    queueScrape: false,
 } as const
 
 //request body coming from AI tool
@@ -580,6 +581,10 @@ export const ScrapeWebsiteSchema = z
         scrapeImages: z.boolean().optional().openapi({
             description: 'Boolean on whether or not to scrape for images',
             default: scrapeExample.scrapeImages,
+        }),
+        queueScrape: z.boolean().optional().openapi({
+            description: 'Boolean on whether or not to queue the scrape',
+            default: scrapeExample.queueScrape,
         }),
     })
     .openapi({

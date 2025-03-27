@@ -25,6 +25,7 @@
         "@dudadev/partner-api": "^2.11.2",
         "@smithy/node-http-handler": "^4.0.3",
         "@sparticuz/chromium": "^131.0.0",
+        "@vercel/functions": "^2.0.0",
         "@vercel/node": "^3.0.7",
         "@vercel/postgres": "^0.5.1",
         "aws-sdk": "^2.1189.0",

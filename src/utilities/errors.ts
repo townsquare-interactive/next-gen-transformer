@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Response } from 'express'
-import { LandingReq } from '../schema/input-zod'
-import { Dns } from '../../types'
+import { LandingReq } from '../schema/input-zod.js'
+import { Dns } from '../../types.js'
 
 //Type declarations
 interface ErrorState {
@@ -133,7 +133,7 @@ export class AuthorizationError extends BaseError {
 const errorStatus = 'Error'
 
 // Handles all types of errors and calls the specified error class
-export const handleError = (err: BaseError, res: Response, url: string = '') => {
+export const handleError = (err: BaseError, res: Response, url: string = '', sendResponse: boolean = true) => {
     const errorID = uuidv4()
 
     const errorData = {
@@ -146,76 +146,78 @@ export const handleError = (err: BaseError, res: Response, url: string = '') => 
     // Log the error with the unique ID
     console.error(`[Error ID: ${errorID}]`, errorData, `${err.stack}`)
 
-    let statusType = null
+    if (sendResponse) {
+        let statusType = null
 
-    if (err.errorType === 'AMS-006') {
-        statusType = 404
-    }
+        if (err.errorType === 'AMS-006') {
+            statusType = 404
+        }
 
-    if (err.errorType === 'GEN-003') {
-        statusType = 500
-    }
+        if (err.errorType === 'GEN-003') {
+            statusType = 500
+        }
 
-    if (err instanceof ValidationError) {
-        res.status(statusType || 400).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: err.message + errorIDMessage,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else if (err instanceof TransformError) {
-        res.status(statusType || 500).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: 'Error transforming site data: ' + err.message + errorIDMessage,
-            domain: url,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else if (err instanceof SiteDeploymentError) {
-        res.status(statusType || 500).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: 'Error with site deployment: ' + err.message + errorIDMessage,
-            domain: err.domain,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else if (err instanceof DataUploadError) {
-        res.status(statusType || 500).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: 'Error uploading to S3: ' + err.message + errorIDMessage,
-            domain: err.domain,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else if (err instanceof ScrapingError) {
-        res.status(statusType || 400).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: 'Scraping Error: ' + err.message + errorIDMessage,
-            domain: url,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else if (err instanceof AuthorizationError) {
-        res.status(statusType || 401).json({
-            id: errorID,
-            errorType: err.errorType,
-            message: err.message + errorIDMessage,
-            state: err.state,
-            status: errorStatus,
-        })
-    } else {
-        res.status(statusType || 500).json({
-            id: errorID,
-            errorType: 'GEN-003',
-            message: 'An unexpected error occurred: ' + err.message + errorIDMessage,
-            status: errorStatus,
-            state: err.state,
-            domain: url,
-        })
+        if (err instanceof ValidationError) {
+            res.status(statusType || 400).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: err.message + errorIDMessage,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else if (err instanceof TransformError) {
+            res.status(statusType || 500).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: 'Error transforming site data: ' + err.message + errorIDMessage,
+                domain: url,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else if (err instanceof SiteDeploymentError) {
+            res.status(statusType || 500).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: 'Error with site deployment: ' + err.message + errorIDMessage,
+                domain: err.domain,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else if (err instanceof DataUploadError) {
+            res.status(statusType || 500).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: 'Error uploading to S3: ' + err.message + errorIDMessage,
+                domain: err.domain,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else if (err instanceof ScrapingError) {
+            res.status(statusType || 400).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: 'Scraping Error: ' + err.message + errorIDMessage,
+                domain: url,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else if (err instanceof AuthorizationError) {
+            res.status(statusType || 401).json({
+                id: errorID,
+                errorType: err.errorType,
+                message: err.message + errorIDMessage,
+                state: err.state,
+                status: errorStatus,
+            })
+        } else {
+            res.status(statusType || 500).json({
+                id: errorID,
+                errorType: 'GEN-003',
+                message: 'An unexpected error occurred: ' + err.message + errorIDMessage,
+                status: errorStatus,
+                state: err.state,
+                domain: url,
+            })
+        }
     }
 }

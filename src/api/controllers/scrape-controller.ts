@@ -8,10 +8,12 @@ import {
     moveS3DataToDuda as moveS3DataToDudaService,
     scrapeAssetsFromSite,
     removeScrapedFolder,
+    scrapeAndSaveFullSite,
 } from '../../services/scrape-service.js'
 import { save } from '../../output/save-scraped-data.js'
 import { handleError } from '../../utilities/errors.js'
 import checkAuthToken from '../middleware/AuthMiddleware.js'
+import { waitUntil } from '@vercel/functions'
 
 export const getPageList = async (req: Request, res: Response) => {
     try {
@@ -46,9 +48,28 @@ export const scrapeSite = async (req: Request, res: Response) => {
         checkAuthToken(req)
         const validatedRequest = zodDataParse(req.body, ScrapeWebsiteSchema, 'scrapedInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
-        const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
-        const saveResponse = await save(scrapeSettings, scrapedData)
-        res.json(saveResponse)
+
+        //queue scraping to happen after response is sent if enabled
+        if (scrapeSettings.queueScrape) {
+            res.status(202).json({ message: `Scraping in progress for ${scrapeSettings.url}` })
+
+            waitUntil(
+                new Promise(async () => {
+                    try {
+                        await scrapeAndSaveFullSite(scrapeSettings)
+                        console.log('Background scraping completed successfully')
+                    } catch (err) {
+                        //seperate error handling for background process
+                        err.state = { ...err.state, req: req.body }
+                        handleError(err, res, req.body.url, false)
+                    }
+                })
+            )
+            return
+        } else {
+            const saveResponse = await scrapeAndSaveFullSite(scrapeSettings)
+            res.json(saveResponse)
+        }
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
