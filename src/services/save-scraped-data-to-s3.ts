@@ -7,6 +7,8 @@ import { ScrapingError } from '../utilities/errors.js'
 import { addFileS3, addImageToS3 } from '../utilities/s3Functions.js'
 import { UploadedResourcesObj } from './save-to-duda.js'
 
+export const s3ScrapedSitesFolder = 'scraped-sites/'
+
 export async function saveData(saveData: SavingScrapedData) {
     console.log('saving to s3')
     const fetchFunction = saveData.functions?.imageUploadFunction
@@ -40,7 +42,7 @@ export async function saveData(saveData: SavingScrapedData) {
 export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData, siteDataUploadFunction?: siteDataUploadFunction) => {
     try {
         const uploadFunction = siteDataUploadFunction || addFileS3
-        const folderPath = `${settings.basePath}/scraped/siteData`
+        const folderPath = `${s3ScrapedSitesFolder}${settings.basePath}/scraped/siteData`
         const siteDataUrl = await uploadFunction(scrapedPageData, folderPath)
 
         return siteDataUrl
@@ -63,7 +65,8 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
 
         let s3LogoUrl = ''
         for (let i = 0; i < imageFiles.length; i++) {
-            const basePath = imageFiles[i].type === 'logo' ? settings.basePath + '/scraped/images/logos' : settings.basePath + '/scraped/images'
+            const baseS3FolderName = `${s3ScrapedSitesFolder}${settings.basePath}`
+            const basePath = imageFiles[i].type === 'logo' ? baseS3FolderName + '/scraped/images/logos' : baseS3FolderName + '/scraped/images'
             let fileName = `${basePath}/${imageFiles[i].imageFileName}`
 
             if (imageFiles[i].type === 'logo') {

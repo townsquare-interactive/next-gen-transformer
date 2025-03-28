@@ -10,6 +10,7 @@ import pLimit from 'p-limit'
 import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
 import { defaultHeaders } from '../api/scrapers/playwright-setup.js'
 import { transformBusinessInfo } from '../api/scrapers/utils.js'
+import { s3ScrapedSitesFolder } from './save-scraped-data-to-s3.js'
 
 export interface ScrapeResult {
     imageList: string[]
@@ -236,7 +237,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {
     try {
         const siteFolderName = convertUrlToApexId(url)
-        const scrapedFolder = `${siteFolderName}/scraped`
+        const scrapedFolder = `${s3ScrapedSitesFolder}${siteFolderName}/scraped`
         const deleteStatus = await deleteFolderS3(scrapedFolder)
         console.log(deleteStatus)
         return { ...deleteStatus, url: url }
@@ -277,7 +278,7 @@ async function isValidHtmlPage(url: string): Promise<boolean> {
 export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: string) => Promise<ScrapedAndAnalyzedSiteData>) => {
     const getFile = getFileFunction || getFileS3
     const siteFolderName = convertUrlToApexId(url)
-    const scrapedFolder = `${siteFolderName}/scraped`
+    const scrapedFolder = `${s3ScrapedSitesFolder}${siteFolderName}/scraped`
     const siteDataPath = scrapedFolder + '/siteData.json'
     const scrapedData = await getFile(siteDataPath, null)
     console.log('siteData', scrapedData)
