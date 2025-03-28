@@ -60,7 +60,7 @@ export async function setupBrowser(): Promise<{ browser: Browser; page: Page }> 
     )
 
     const browser = await playwrightChromium.launch({
-        headless: false,
+        headless: true,
         executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
         args: [
             ...chromium.args,

@@ -8,7 +8,6 @@ import {
     moveS3DataToDuda as moveS3DataToDudaService,
     scrapeAssetsFromSite,
     removeScrapedFolder,
-    scrapeAndSaveFullSite,
 } from '../../services/scrape-service.js'
 import { save } from '../../output/save-scraped-data.js'
 import { handleError } from '../../utilities/errors.js'
@@ -54,20 +53,26 @@ export const scrapeSite = async (req: Request, res: Response) => {
             res.status(202).json({ message: `Scraping in progress for ${scrapeSettings.url}` })
 
             waitUntil(
-                new Promise(async () => {
+                new Promise(async (resolve, reject) => {
                     try {
-                        await scrapeAndSaveFullSite(scrapeSettings)
+                        const pages = await getPageListService(scrapeSettings)
+                        const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
+                        await save(scrapeSettings, scrapedData)
                         console.log('Background scraping completed successfully')
+                        resolve(true)
                     } catch (err) {
                         //seperate error handling for background process
                         err.state = { ...err.state, req: req.body }
                         handleError(err, res, req.body.url, false)
+                        reject(err)
                     }
                 })
             )
             return
         } else {
-            const saveResponse = await scrapeAndSaveFullSite(scrapeSettings)
+            const pages = await getPageListService(scrapeSettings)
+            const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
+            const saveResponse = await save(scrapeSettings, scrapedData)
             res.json(saveResponse)
         }
     } catch (err) {

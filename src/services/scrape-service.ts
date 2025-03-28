@@ -65,13 +65,6 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
     return scrapeSettings
 }
 
-export const scrapeAndSaveFullSite = async (scrapeSettings: ScrapeSettings) => {
-    const pages = await getPageList(scrapeSettings)
-    const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
-    const savedData = await save(scrapeSettings, scrapedData)
-    return savedData
-}
-
 export async function scrapeAssetsFromSite(settings: Settings, pages?: string[]) {
     const siteName = settings.url
     const scrapeFunction = settings.functions?.scrapeFunction || scrape

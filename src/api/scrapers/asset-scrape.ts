@@ -214,7 +214,7 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                             fileExtension: fileExtension,
                         })
                     } catch (err) {
-                        console.error(`Error processing image response from ${url.href}:`, err)
+                        console.log(`Error processing image response from ${url.href}:`, err)
                     }
                 })()
 
