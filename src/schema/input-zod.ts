@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { AddressSchema, AnalyticsSchema, NavMenuItemSchema } from './utils-zod.js'
-import { extendZodWithOpenApi, createDocument } from 'zod-openapi'
+import { extendZodWithOpenApi } from 'zod-openapi'
 /* ----------------------------------- Saved Data -------------------------------------*/
 
 extendZodWithOpenApi(z)
@@ -591,6 +591,10 @@ export const ScrapeWebsiteSchema = z
         example: scrapeExample,
     })
 
+export const ScrapeSettings = ScrapeWebsiteSchema.extend({
+    basePath: z.string(),
+})
+
 //request body coming from AI tool
 export const ScrapePagesSchema = ScrapeWebsiteSchema.extend({
     pages: z.array(URL).openapi({
@@ -636,6 +640,7 @@ export const RequestDataSchema = z.object({
 export type Url = z.infer<typeof URL>
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type ScrapeWebsiteReq = z.infer<typeof ScrapeWebsiteSchema>
+export type ScrapeSettings = z.infer<typeof ScrapeSettings>
 export type LandingReq = z.infer<typeof LandingInputSchema>
 export type RequestDataReq = z.infer<typeof RequestDataSchema>
 export type CustomComponent = z.infer<typeof CustomComponentSchema>
