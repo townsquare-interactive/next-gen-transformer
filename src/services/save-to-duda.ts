@@ -4,6 +4,7 @@ import { preprocessImageUrl } from '../api/scrapers/utils.js'
 import { ScrapingError } from '../utilities/errors.js'
 import type { SaveOutput, SavingScrapedData } from '../output/save-scraped-data.js'
 import { dudaImageFetch, uploadSiteSEOToDuda } from './duda-api.js'
+import { savePagesToDuda } from './duda/save-pages.js'
 
 export interface UploadPayload {
     resource_type: 'IMAGE'
@@ -26,7 +27,7 @@ export interface DudaResponse {
 }
 
 export async function save(saveData: SavingScrapedData) {
-    console.log('saving to duda')
+    console.log('saving to duda', saveData)
     const settings = saveData.settings
 
     if (!settings.uploadLocation) {
@@ -47,6 +48,11 @@ export async function save(saveData: SavingScrapedData) {
     if (saveData.siteData?.siteSeo) {
         const seoUploadFunction = saveData.functions?.seoUploadFunction || uploadSiteSEOToDuda
         await seoUploadFunction(settings.uploadLocation, saveData.siteData.siteSeo)
+    }
+
+    if (saveData.siteData?.pages) {
+        const savePagesToDudaFunction = saveData.functions?.savePagesToDudaFunction || savePagesToDuda
+        await savePagesToDudaFunction(settings.uploadLocation, saveData.siteData.pages)
     }
 
     return imageData

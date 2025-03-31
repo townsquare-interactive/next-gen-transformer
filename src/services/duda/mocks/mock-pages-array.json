@@ -1,0 +1,58 @@
+[
+    {
+        "url": "https://aquapoolandspaoh.com/",
+        "seo": {
+            "title": "Aqua Pool & Spa | Custom Pools | Pool Hardscaping | New Martinsville, WV & Hannibal, OH",
+            "metaDescription": "Aqua Pool & Spa provides custom pool installation services including concrete, fiberglass & vinyl pools. Serving New Martinsville, WV & Hannibal, OH. Call today!",
+            "metaKeywords": "",
+            "ogTitle": "Aqua Pool & Spa | Custom Pools | Pool Hardscaping | New Martinsville, WV & Hannibal, OH",
+            "ogDescription": "Aqua Pool & Spa provides custom pool installation services including concrete, fiberglass & vinyl pools. Serving New Martinsville, WV & Hannibal, OH. Call today!",
+            "pageUrl": "https://aquapoolandspaoh.com/"
+        },
+        "images": [
+            "https://aquapoolandspaoh.com/files/shutterstock/2023/11/1699373659636_shutterstock_316062692_1699373171_e1b44676722eb2c8eb7630f90d0a37024f.jpg?w=1600&h=2133"
+        ],
+        "content": "Hire a Reputable and Licensed Pool Installer...",
+        "forms": []
+    },
+    {
+        "url": "https://aquapoolandspaoh.com/services",
+        "seo": {
+            "title": "Our Pool Services | Aqua Pool & Spa",
+            "metaDescription": "Explore our range of pool services, including custom pool construction, hardscaping, and pool maintenance. Contact us for a consultation!",
+            "metaKeywords": "custom pools, pool installation, pool maintenance",
+            "ogTitle": "Our Pool Services | Aqua Pool & Spa",
+            "ogDescription": "Explore our range of pool services, including custom pool construction, hardscaping, and pool maintenance. Contact us for a consultation!",
+            "pageUrl": "https://aquapoolandspaoh.com/services"
+        },
+        "images": [
+            "https://aquapoolandspaoh.com/files/shutterstock/2023/11/shutterstock_613622132_1699545014_e1a3b5ae99e0e77bd06cfea271179a4410.jpg?w=1600&h=2133"
+        ],
+        "content": "We offer a wide range of pool services, including custom pool installations, pool hardscaping, and maintenance plans to keep your pool in perfect condition. Learn more about our offerings and how we can help you create the perfect backyard oasis.",
+        "forms": []
+    },
+    {
+        "url": "https://aquapoolandspaoh.com/contact",
+        "seo": {
+            "title": "Contact Us | Aqua Pool & Spa",
+            "metaDescription": "Have questions? Contact Aqua Pool & Spa today to discuss your custom pool needs. We’re happy to help!",
+            "metaKeywords": "contact, pool inquiries, get a quote",
+            "ogTitle": "Contact Us | Aqua Pool & Spa",
+            "ogDescription": "Have questions? Contact Aqua Pool & Spa today to discuss your custom pool needs. We’re happy to help!",
+            "pageUrl": "https://aquapoolandspaoh.com/contact"
+        },
+        "images": [],
+        "content": "Let's Talk! Thanks for stopping by! We're here to help—please don't hesitate to reach out. Get in touch with us today for a free consultation!",
+        "forms": [
+            {
+                "title": "Contact Form",
+                "fields": [
+                    { "type": "text", "name": "Name", "label": "Name", "placeholder": "Enter your name", "required": true },
+                    { "type": "email", "name": "Email", "label": "Email", "placeholder": "Enter your email", "required": true },
+                    { "type": "tel", "name": "Phone", "label": "Phone", "placeholder": "Enter your phone number", "required": false },
+                    { "type": "textarea", "name": "Message", "label": "Message", "placeholder": "Enter your message", "required": true }
+                ]
+            }
+        ]
+    }
+]

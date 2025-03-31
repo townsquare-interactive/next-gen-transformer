@@ -27,6 +27,7 @@ export type utilityFunctions = {
     imageUploadFunction?: (payload: any) => any
     siteDataUploadFunction?: siteDataUploadFunction
     seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>
+    savePagesToDudaFunction?: (siteId: string, seoData: ScrapedAndAnalyzedSiteData['pages']) => Promise<void>
 }
 
 export interface SavingScrapedData {
