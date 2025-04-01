@@ -34,7 +34,12 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
                         {
                           "logoTag": "string or null",
                           "companyName": "string or null",
-                          "address": "string or null",
+                          "address": {
+                            "streetAddress": "string or null",
+                            "city": "string or null",
+                            "state": "string or null",
+                            "postalCode": "string or null",
+                          },
                           "phoneNumber": "string or null",
                           "email": "string or null",
                           "hours":{"MON": "string or null", "TUE": "string or null", "WED": "string or null","THU": "string or null","FRI": "string or null", "SAT": "string or null", "SUN": "string or null"},

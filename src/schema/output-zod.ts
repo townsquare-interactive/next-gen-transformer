@@ -542,7 +542,13 @@ export const HoursSchema = z
 const ScreenshotDataSchema = z.object({
     logoTag: z.string().optional().nullable(),
     companyName: z.string().nullable(),
-    address: z.string().nullable(),
+    address: z.object({
+        streetAddress: z.string().nullable().optional(),
+        city: z.string().nullable().optional(),
+        state: z.string().nullable().optional(),
+        postalCode: z.string().nullable().optional(),
+        country: z.string().nullable().optional(),
+    }),
     email: z.string().email().nullable(),
     phoneNumber: z.string().nullable(),
     hours: HoursSchema,

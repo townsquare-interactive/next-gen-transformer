@@ -132,13 +132,6 @@ export async function getPageList(settings: Settings) {
 }
 
 const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string) => {
-    //remove links from same domain
-    if (scrapeData.businessInfo?.links.other) {
-        const extLinks = scrapeData.businessInfo.links.other.filter((link: string) => !link.includes(url))
-
-        scrapeData.businessInfo.links.other = extLinks
-    }
-
     //get site SEO from home page
     if (scrapeData.pagesData[0]?.seo) {
         scrapeData.siteSeo = scrapeData.pagesData[0].seo
@@ -146,7 +139,7 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
 
     //analyzed data from openai
     if (scrapeData.businessInfo) {
-        scrapeData.businessInfo = transformBusinessInfo(scrapeData.businessInfo)
+        scrapeData.businessInfo = transformBusinessInfo(scrapeData.businessInfo, url)
     }
 
     return scrapeData

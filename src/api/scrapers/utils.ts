@@ -233,9 +233,20 @@ export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) =
     return true
 }
 
-export const transformBusinessInfo = (businessInfo: ScreenshotData) => {
+export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string) => {
     if (businessInfo.hours) {
         businessInfo.hours = transformHours(businessInfo)
+    }
+
+    //remove links from same domain in other section
+    if (businessInfo?.links?.other) {
+        const extLinks = businessInfo.links.other.filter((link: string) => !link.includes(url))
+        businessInfo.links.other = extLinks
+    }
+
+    if (businessInfo.address) {
+        businessInfo.address.country = 'US' //default to US
+        console.log('businessInfo.address', businessInfo.address)
     }
 
     return businessInfo
