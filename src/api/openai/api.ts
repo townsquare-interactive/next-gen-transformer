@@ -36,6 +36,7 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
                           "companyName": "string or null",
                           "address": "string or null",
                           "phoneNumber": "string or null",
+                          "email": "string or null",
                           "hours":{"MON": "string or null", "TUE": "string or null", "WED": "string or null","THU": "string or null","FRI": "string or null", "SAT": "string or null", "SUN": "string or null"},
                           "styles": {
                             "colors": {

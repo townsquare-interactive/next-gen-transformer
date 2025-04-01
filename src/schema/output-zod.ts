@@ -543,11 +543,30 @@ const ScreenshotDataSchema = z.object({
     logoTag: z.string().optional().nullable(),
     companyName: z.string().nullable(),
     address: z.string().nullable(),
+    email: z.string().email().nullable(),
     phoneNumber: z.string().nullable(),
     hours: HoursSchema,
     links: z.object({
         socials: z.array(z.string()),
         other: z.array(z.string()),
+    }),
+    styles: z.object({
+        fonts: z
+            .object({
+                headerFonts: z.array(z.string()).nullable(),
+                bodyFonts: z.array(z.string()).nullable(),
+            })
+            .nullable(),
+        colors: z
+            .object({
+                primaryColor: z.string().nullable().optional(),
+                secondaryColor: z.string().nullable().optional(),
+                tertiaryColor: z.string().nullable().optional(),
+                quaternary: z.string().nullable().optional(),
+                textColor: z.string().nullable().optional(),
+                mainContentBackgroundColor: z.string().nullable().optional(),
+            })
+            .nullable(),
     }),
 })
 
