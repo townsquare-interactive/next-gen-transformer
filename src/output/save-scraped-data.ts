@@ -23,7 +23,8 @@ export interface ScrapedDataToSave {
 
 export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string) => string
 
-export type utilityFunctions = {
+type utilityFunctions = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     imageUploadFunction?: (payload: any) => any
     siteDataUploadFunction?: siteDataUploadFunction
     seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>

@@ -14,7 +14,7 @@ describe('saveImages', () => {
 
     it('should return the correct image upload details and call the functions correctly', async () => {
         const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
-        const imageFiles: any = [
+        const imageFiles = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -81,9 +81,10 @@ describe('saveImages', () => {
             ],
         }
 
-        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+        const mockSaveFunction = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
+        // @ts-expect-error: simply ignored
         const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
         console.log('Result:', result)
 
@@ -113,7 +114,7 @@ describe('saveImages', () => {
 
     it('should remove duplicates before uploading images', async () => {
         const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
-        const imageFiles: any = [
+        const imageFiles = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -200,9 +201,10 @@ describe('saveImages', () => {
             ],
         }
 
-        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+        const mockSaveFunction = vi.fn(async () => mockResponse)
 
         console.log('Starting test...')
+        // @ts-expect-error: simply ignored
         const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
         console.log('Result:', result)
 
@@ -248,12 +250,12 @@ describe('saveImages', () => {
             ],
         }
 
-        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+        const mockSaveFunction = vi.fn(async () => mockResponse)
         const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
         const errMessage = 'Network error'
         mockSaveFunction.mockRejectedValueOnce(new Error(errMessage))
 
-        const imageFilesErr: any = [
+        const imageFilesErr = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -324,7 +326,8 @@ describe('saveImages', () => {
 
         let error
         try {
-            const result = await saveImages(settings, imageFilesErr, [], '', mockSaveFunction)
+            // @ts-expect-error: simply ignored
+            await saveImages(settings, imageFilesErr, [], '', mockSaveFunction)
         } catch (err) {
             error = err
         }
@@ -337,7 +340,7 @@ describe('saveImages', () => {
     //it should handle failed uploads
     it('should return failed upload list correctly', async () => {
         const settings = { url: 'scrapedsite.com', basePath: 'scrapedSite', uploadLocation: '12321' }
-        const imageFiles: any = [
+        const imageFiles = [
             {
                 url: {
                     href: 'https://www.townsquareignite.com/_next/image?url=https%3A%2F%2Ftownsquareignite.s3.us-east-1.amazonaws.com%2Flanding-pages%2Fclients%2Ftacobell.com%2Fimages%2Fselected%2FpurpleButtonLogo.jpg&w=1920&q=80',
@@ -404,7 +407,8 @@ describe('saveImages', () => {
             ],
         }
 
-        const mockSaveFunction: any = vi.fn(async () => mockResponse)
+        const mockSaveFunction = vi.fn(async () => mockResponse)
+        // @ts-expect-error: simply ignored
         const result = await saveImages(settings, imageFiles, [], '', mockSaveFunction)
 
         expect(result.failedImageList?.length).toBe(1)
@@ -447,7 +451,7 @@ describe('save', () => {
 
         let error
         try {
-            const result = await save({ settings, imageFiles: [], imageList: [], siteData: mockSiteData, logoUrl: '', functions })
+            await save({ settings, imageFiles: [], imageList: [], siteData: mockSiteData, logoUrl: '', functions })
         } catch (err) {
             error = err
         }
