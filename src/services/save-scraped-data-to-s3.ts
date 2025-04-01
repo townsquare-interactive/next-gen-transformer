@@ -4,7 +4,7 @@ import { SavingScrapedData, siteDataUploadFunction } from '../output/save-scrape
 import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema } from '../schema/output-zod.js'
 import { zodDataParse } from '../schema/utils-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
-import { addFileS3, addImageToS3 } from '../utilities/s3Functions.js'
+import { addFileS3, addImageToS3, deleteFolderS3 } from '../utilities/s3Functions.js'
 import { UploadedResourcesObj } from './save-to-duda.js'
 
 export const s3ScrapedSitesFolder = 'scraped-sites/'
@@ -62,10 +62,19 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
         const imageList: UploadedResourcesObj[] = []
         console.log('imagefiles length', imageFiles.length)
         const uploadImage = fetchFunction || addImageToS3
-
+        const baseS3FolderName = `${s3ScrapedSitesFolder}${settings.basePath}`
         let s3LogoUrl = ''
+
+        //remove scraped images folder if it exists
+        try {
+            const scrapedImagesFolder = `${baseS3FolderName}/scraped/images`
+            const deleteStatus = await deleteFolderS3(scrapedImagesFolder)
+            console.log('deleteStatus', deleteStatus)
+        } catch (err) {
+            console.log('unable to delete scraped images folder', err)
+        }
+
         for (let i = 0; i < imageFiles.length; i++) {
-            const baseS3FolderName = `${s3ScrapedSitesFolder}${settings.basePath}`
             const basePath = imageFiles[i].type === 'logo' ? baseS3FolderName + '/scraped/images/logos' : baseS3FolderName + '/scraped/images'
             let fileName = `${basePath}/${imageFiles[i].imageFileName}`
 

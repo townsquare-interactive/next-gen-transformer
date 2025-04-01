@@ -559,8 +559,8 @@ const ScreenshotDataSchema = z.object({
     styles: z.object({
         fonts: z
             .object({
-                headerFonts: z.array(z.string()).nullable(),
-                bodyFonts: z.array(z.string()).nullable(),
+                headerFonts: z.array(z.string().nullable()).nullable(),
+                bodyFonts: z.array(z.string().nullable()).nullable(),
             })
             .nullable(),
         colors: z

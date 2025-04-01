@@ -40,8 +40,9 @@ export async function findPages(settings: Settings) {
         // Logic to find links to other pages
         const pageUrls = await page.evaluate(() => {
             const navExists = document.querySelector('nav') !== null
+            const headerExists = document.querySelector('header') !== null
             const links: HTMLAnchorElement[] = Array.from(
-                navExists ? document.querySelectorAll('nav a[href], header a[href]') : document.querySelectorAll('a[href]')
+                navExists || headerExists ? document.querySelectorAll('nav a[href], header a[href]') : document.querySelectorAll('a[href]')
             )
 
             return links

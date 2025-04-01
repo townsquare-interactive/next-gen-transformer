@@ -1,6 +1,6 @@
 import { ImageFiles, scrape } from '../api/scrapers/asset-scrape.js'
 import { findPages } from '../api/scrapers/page-list-scrape.js'
-import { SaveFileMethodType, ScrapeSettings, ScrapeWebsiteReq } from '../schema/input-zod.js'
+import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
 import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../api/scrapers/utils.js'

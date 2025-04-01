@@ -288,3 +288,71 @@ const transformHours = (businessInfo: ScreenshotData) => {
     }
     return null
 }
+
+export interface ImageDimensions {
+    width: number
+    height: number
+}
+
+export const isTrackingOrGoogle = (url: URL, dimensions?: ImageDimensions): boolean => {
+    // Common tracking pixel patterns
+    const trackingPatterns = [/=FGET$/i, /gstatic\.com/i, /mt\.googleapis\.com/i]
+    const isTrackingUrl = trackingPatterns.some((pattern) => pattern.test(url.href))
+
+    const isTinyImage = dimensions && (dimensions.width <= 1 || dimensions.height <= 1 || (dimensions.width <= 3 && dimensions.height <= 3))
+
+    return isTrackingUrl || !!isTinyImage
+}
+
+export const isValidImageType = (contentType: string): boolean => {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
+    return validTypes.includes(contentType.toLowerCase())
+}
+
+export const isValidImageSize = (fileSize: number): boolean => {
+    const MIN_SIZE = 100 // 100 bytes
+    const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+    return fileSize >= MIN_SIZE && fileSize <= MAX_SIZE
+}
+
+export const getImageDimensions = async (buffer: Buffer): Promise<ImageDimensions | null> => {
+    try {
+        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+
+        // Check for PNG
+        if (buffer[0] === 0x89 && buffer[1] === 0x50) {
+            return {
+                width: view.getUint32(16, false),
+                height: view.getUint32(20, false),
+            }
+        }
+
+        // Check for JPEG
+        if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+            let pos = 2
+            while (pos < buffer.length) {
+                if (buffer[pos] === 0xff && buffer[pos + 1] === 0xc0) {
+                    return {
+                        height: view.getUint16(pos + 5, false),
+                        width: view.getUint16(pos + 7, false),
+                    }
+                }
+                pos++
+            }
+        }
+
+        // Check for GIF
+        if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
+            // 'GIF' signature
+            return {
+                width: view.getUint16(6, true),
+                height: view.getUint16(8, true),
+            }
+        }
+
+        return null
+    } catch (error) {
+        console.error('Error getting image dimensions:', error)
+        return null
+    }
+}

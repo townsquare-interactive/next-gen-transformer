@@ -1,7 +1,18 @@
 import { Browser, Page, Response } from 'playwright'
 import path from 'path'
 import type { ScrapeResult, Settings } from '../../services/scrape-service.js'
-import { cleanseHtml, extractFormData, extractPageContent, hashUrl, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import {
+    cleanseHtml,
+    extractFormData,
+    extractPageContent,
+    hashUrl,
+    preprocessImageUrl,
+    updateImageObjWithLogo,
+    isTrackingOrGoogle,
+    isValidImageType,
+    isValidImageSize,
+    getImageDimensions,
+} from './utils.js'
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
 
@@ -156,22 +167,28 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
 const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<ImageFiles[]> => {
     try {
         const imageFiles: ImageFiles[] = []
-        const imagePromises: Promise<void>[] = [] // Store all async image processing
+        const imagePromises: Promise<void>[] = []
+        const processedUrls = new Set<string>()
 
         page.on('response', async (response: Response) => {
             if (response.request().resourceType() === 'image') {
                 const url = new URL(response.url())
 
+                // Skip if we've already processed this URL
+                if (processedUrls.has(url.href)) {
+                    return
+                }
+                processedUrls.add(url.href)
+
                 // Handle possible redirect
                 const status = response.status()
                 if (status >= 300 && status <= 399) {
-                    //console.info(`Redirect from ${url} to ${response.headers()['location']}`)
                     return
                 }
 
+                //skip if the content type is not an image
                 const contentType = response.headers()['content-type']
-                if (!contentType || !contentType.startsWith('image/')) {
-                    //console.log(`Skipping non-image URL: ${url.href}`)
+                if (!contentType || !isValidImageType(contentType)) {
                     return
                 }
 
@@ -185,6 +202,18 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                 const imageProcessingPromise = (async () => {
                     try {
                         const fileContents = await response.body()
+
+                        // Rule out non image sizes
+                        if (!isValidImageSize(fileContents.length)) {
+                            return
+                        }
+
+                        // Get image dimensions and check if it's a tracking pixel
+                        const dimensions = await getImageDimensions(fileContents)
+                        if (dimensions && isTrackingOrGoogle(url, dimensions)) {
+                            return
+                        }
+
                         const hashedName = hashUrl(response.url()) // Hash the image URL to create a unique name
                         const fileExtension = path.extname(url.pathname) || '.jpg' // Default to .jpg if no extension
                         const hashedFileName = `${hashedName}${fileExtension}`
@@ -193,12 +222,6 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
 
                         if (!fileName) {
                             console.warn(`Unexpected parsing of URL ${url}, fileName is empty!`)
-                            return
-                        }
-
-                        // Filter out requests for tracking
-                        if (fileName.endsWith('=FGET')) {
-                            //console.log(`Skipping URL with invalid extension =fget: ${url.href}`)
                             return
                         }
 
@@ -218,7 +241,7 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                     }
                 })()
 
-                imagePromises.push(imageProcessingPromise) // Store the promise
+                imagePromises.push(imageProcessingPromise)
             }
         })
 

@@ -23,7 +23,7 @@ export interface ScrapedDataToSave {
 
 export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string) => string
 
-type utilityFunctions = {
+export type utilityFunctions = {
     imageUploadFunction?: (payload: any) => any
     siteDataUploadFunction?: siteDataUploadFunction
     seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>
@@ -64,7 +64,8 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
                 scrapedData.siteData,
                 scrapedData.imageFiles,
                 scrapedData.imageList,
-                s3SavedRes?.imageData?.logoUrl || '',
+                //s3SavedRes?.imageData?.logoUrl || '',
+                '',
                 functions
             )
         }
