@@ -45,9 +45,22 @@ export type LocationObject = {
         country: string
     }
     logo_url?: string
-    business_hours?: {
-        days: ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[]
-        open: string
-        close: string
-    }[]
+    business_hours?:
+        | {
+              days: ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[]
+              open: string
+              close: string
+          }[]
+        | null
+}
+
+export type BusinessInfoObject = {
+    site_texts?: {
+        custom: Array<{ label: string; text: string }>
+    }
+    companyName: string
+    business_data: {
+        name: string
+        logo_url: string
+    }
 }

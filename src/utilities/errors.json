@@ -49,5 +49,8 @@
     },
     "AUT-017": {
         "description": "Invalid authentication Bearer token"
+    },
+    "DUD-018": {
+        "description": "Error when uploading to Duda"
     }
 }

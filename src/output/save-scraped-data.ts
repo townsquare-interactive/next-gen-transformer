@@ -67,8 +67,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
                 scrapedData.siteData,
                 scrapedData.imageFiles,
                 scrapedData.imageList,
-                //s3SavedRes?.imageData?.logoUrl || '',
-                '',
+                s3SavedRes?.imageData?.logoUrl || '',
                 functions
             )
         }

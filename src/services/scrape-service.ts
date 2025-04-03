@@ -3,7 +3,7 @@ import { findPages } from '../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
-import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles } from '../api/scrapers/utils.js'
+import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles, transformScrapedPageData } from '../api/scrapers/utils.js'
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo, ScreenshotData } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
@@ -140,6 +140,10 @@ const transformSiteScrapedData = (scrapeData: ScrapeFullSiteResult, url: string)
     //analyzed data from openai
     if (scrapeData.businessInfo) {
         scrapeData.businessInfo = transformBusinessInfo(scrapeData.businessInfo, url)
+    }
+
+    if (scrapeData.pagesData) {
+        scrapeData.pagesData = transformScrapedPageData(scrapeData.pagesData)
     }
 
     return scrapeData

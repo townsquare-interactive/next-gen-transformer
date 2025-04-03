@@ -39,13 +39,6 @@ export function transformScrapedPageDataToDudaFormat(page: ScrapedPageData): Pag
             if (url === '/') return '/index' // Duda API does not accept '/'
             return url.replace(/\.[^/.]+$/, '') // Remove file extension
         })(),
-        title: (() => {
-            const path = new URL(page.url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
-            const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
-            const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
-            return lastSegment
-                .replace(/-/g, ' ') // Replace hyphens with spaces
-                .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize each word
-        })(),
+        title: page.title ?? '',
     }
 }

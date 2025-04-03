@@ -93,5 +93,6 @@ Listed below are the common error types that can be seen in the API response aft
 | VAL-015 | Error validating Bearer token |
 | SCR-016 | List of pages to scrape are not all on the same domain |
 | AUT-017 | Invalid authentication Bearer token |
+| DUD-018 | Error when uploading to Duda |
 
 <!-- ERROR_TABLE_END -->

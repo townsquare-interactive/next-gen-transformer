@@ -524,6 +524,7 @@ const ScrapedPageDataSchema = z.object({
     url: z.string(),
     content: z.string().nullable(),
     forms: z.array(FormSchema).nullable(),
+    title: z.string().nullable().optional(),
 })
 
 export const HoursSchema = z

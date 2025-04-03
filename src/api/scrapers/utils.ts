@@ -3,7 +3,7 @@ import { convertUrlToApexId, createRandomFiveCharString } from '../../utilities/
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 import { ScrapingError } from '../../utilities/errors.js'
-import { BusinessHours, ScreenshotData } from '../../schema/output-zod.js'
+import { BusinessHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
 
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
@@ -107,14 +107,20 @@ export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: 
         const srcMatch = logoAnalysis?.match(/<img\s[^>]*src="([^"]+)"/) //match the image tag src value
         const logoSrc = srcMatch ? srcMatch[1] : null
 
-        // Update the type to 'logo' for all matching objects in the imageFiles array
-        imageFiles.forEach((imageFile) => {
-            if (imageFile.originalImageLink.includes(logoSrc || '')) {
-                imageFile.type = 'logo'
-            }
-        })
+        if (logoSrc) {
+            // Remove protocolrom both URLs for comparison
+            const normalizedLogoSrc = logoSrc.replace(/^https?:\/\//, '')
+
+            // Update the type to 'logo' for all matching objects in the imageFiles array
+            imageFiles.forEach((imageFile) => {
+                const normalizedImageLink = imageFile.originalImageLink.replace(/^https?:\/\//, '')
+                if (normalizedImageLink.includes(normalizedLogoSrc)) {
+                    imageFile.type = 'logo'
+                }
+            })
+        }
     } else {
-        console.log('No logo analysis result, imageFiles remain unchanged.')
+        console.log('No logo analysis match result, imageFiles remain unchanged.')
     }
 
     return imageFiles
@@ -157,38 +163,85 @@ export const extractFormData = async (page: Page) => {
 }
 
 export const extractPageContent = async (page: Page) => {
-    return await page.evaluate(() => {
+    const result = await page.evaluate(() => {
         // Unwanted tags for content scrape
         const unwantedSelectors = ['nav', 'footer', 'script', 'style']
 
+        // Instead of removing, let's clone the body first
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = document.body.innerHTML
+
+        // Remove unwanted elements from our clone
         unwantedSelectors.forEach((selector) => {
-            document.querySelectorAll(selector).forEach((el) => el.remove())
+            tempDiv.querySelectorAll(selector).forEach((el) => el.remove())
         })
 
-        // Remove <header> content without removing headline tags
-        document.querySelectorAll('header *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)').forEach((el) => {
-            el.remove()
+        // Handle header elements - only preserve heading tags
+        tempDiv.querySelectorAll('header').forEach((header) => {
+            // Find all heading elements in the header
+            const headings = header.querySelectorAll('h1, h2, h3, h4, h5, h6')
+            // Move only the heading elements to the header's parent
+            headings.forEach((heading) => {
+                header.parentNode?.insertBefore(heading, header)
+            })
+            // Remove the header and any remaining content
+            header.remove()
         })
 
-        const bodyText = document.body?.textContent || '' // Safeguard against undefined
+        // Get all text nodes and formatting elements
+        const content: string[] = []
+        const tagsToKeep = ['B', 'I', 'EM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']
 
-        const rawContent = bodyText.trim()
+        // Process all content in document order
+        const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT)
 
-        //clean the content
-        const cleanedContent = rawContent
-            .replace(/\t/g, ' ') // Replace tabs with spaces
-            .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
-            .replace(/\n\s+/g, '\n') // Remove whitespace at start of lines
-            .replace(/\s+\n/g, '\n') // Remove whitespace at end of lines
-            .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with just 2
-            .split(/\n/) // Split into lines
-            .map((line) => line.trim()) // Trim each line
-            .filter((line) => line) // Remove empty lines
-            .join('\n\n') // Join with double newlines for paragraph spacing
-            .trim() // Final trim of the whole text
+        let node
+        while ((node = walker.nextNode())) {
+            if (node.nodeType === 3) {
+                // Check if any ancestor is a tag we're keeping
+                let hasPreservedAncestor = false
+                let current = node.parentElement
+                while (current) {
+                    if (current.tagName.match(/^H[1-6]$/) || tagsToKeep.includes(current.tagName)) {
+                        hasPreservedAncestor = true
+                        break
+                    }
+                    current = current.parentElement
+                }
 
-        return cleanedContent
+                // Only add text if it's not inside any preserved tag
+                if (!hasPreservedAncestor) {
+                    const text = node.textContent?.trim()
+                    if (text) {
+                        content.push(text)
+                    }
+                }
+            } else if (node.nodeType === 1) {
+                // Element node
+                const element = node as HTMLElement
+                if (element.tagName.match(/^H[1-6]$/) || tagsToKeep.includes(element.tagName)) {
+                    content.push(element.outerHTML)
+                }
+            }
+        }
+
+        const finalContent = content
+            .join(' ')
+            .replace(/\t/g, ' ')
+            .replace(/[ \t]+/g, ' ')
+            .replace(/\n\s+/g, '\n')
+            .replace(/\s+\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .split(/\n/)
+            .map((line) => line.trim())
+            .filter((line) => line)
+            .join('\n\n')
+            .trim()
+
+        return finalContent
     })
+
+    return result
 }
 
 export function hashUrl(url: string): string {
@@ -252,6 +305,32 @@ export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string)
     return businessInfo
 }
 
+// Helper function to normalize time format
+const normalizeTimeFormat = (timeStr: string): string => {
+    // Handle empty or invalid input
+    if (!timeStr) return timeStr
+
+    // Split into parts if it's a range
+    const parts = timeStr.split('-').map((part) => part.trim())
+
+    return parts
+        .map((time) => {
+            // Remove any dots from am/pm
+            time = time.replace(/\./g, '')
+
+            // Convert to lowercase for consistency
+            time = time.toLowerCase()
+
+            // If time doesn't include minutes, add :00
+            if (!time.includes(':') && (time.includes('am') || time.includes('pm'))) {
+                time = time.replace(/([0-9]+)(am|pm)/, '$1:00$2')
+            }
+
+            return time
+        })
+        .join(' - ')
+}
+
 const transformHours = (businessInfo: ScreenshotData) => {
     if (businessInfo.hours) {
         // If hours is just a string, return null for the hours object
@@ -277,7 +356,8 @@ const transformHours = (businessInfo: ScreenshotData) => {
                 const upperDay = day.toUpperCase() as keyof typeof normalizedHours
                 if (upperDay in normalizedHours) {
                     const value = hours[upperDay]
-                    normalizedHours[upperDay] = typeof value === 'string' ? value : null
+                    // Normalize the time format if it's a string
+                    normalizedHours[upperDay] = typeof value === 'string' ? normalizeTimeFormat(value) : null
                 }
             })
 
@@ -287,6 +367,25 @@ const transformHours = (businessInfo: ScreenshotData) => {
         }
     }
     return null
+}
+
+export const transformScrapedPageData = (pages: ScrapedPageData[]) => {
+    const newPages = []
+    for (const page of pages) {
+        const newPage = {
+            ...page,
+            title: (() => {
+                const path = new URL(page.url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
+                const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
+                const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
+                return lastSegment
+                    .replace(/-/g, ' ') // Replace hyphens with spaces
+                    .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize each word
+            })(),
+        }
+        newPages.push(newPage)
+    }
+    return newPages
 }
 
 export interface ImageDimensions {

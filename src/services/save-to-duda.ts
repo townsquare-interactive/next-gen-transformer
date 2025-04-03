@@ -28,7 +28,6 @@ export interface DudaResponse {
 }
 
 export async function save(saveData: SavingScrapedData) {
-    console.log('saving to duda', saveData)
     const settings = saveData.settings
 
     if (!settings.uploadLocation) {
@@ -42,7 +41,7 @@ export async function save(saveData: SavingScrapedData) {
     }
 
     const imageFiles = saveData.imageFiles
-    const logoUrl = saveData.logoUrl
+    const logoUrl = saveData.siteData?.assetData?.s3LogoUrl || saveData.logoUrl
     const fetchFunction = saveData.functions?.imageUploadFunction
     const imageData = await saveImages(settings, imageFiles, saveData.imageList || [], logoUrl, fetchFunction)
 
@@ -58,7 +57,7 @@ export async function save(saveData: SavingScrapedData) {
 
     if (saveData.siteData?.businessInfo) {
         const saveBusinessInfoToDudaFunction = saveData.functions?.saveBusinessInfoToDudaFunction || saveBusinessInfoToDuda
-        await saveBusinessInfoToDudaFunction(settings.uploadLocation, saveData?.siteData?.assetData?.s3LogoUrl ?? '', saveData.siteData.businessInfo)
+        await saveBusinessInfoToDudaFunction(settings.uploadLocation, logoUrl ?? '', saveData.siteData.businessInfo, saveData.siteData.pages)
     }
 
     return imageData
@@ -133,35 +132,27 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: stri
     const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
-        const processedUrl = preprocessImageUrl(file.url)
+        if (file.type != 'logo') {
+            const processedUrl = preprocessImageUrl(file.url)
 
-        if (!processedUrl) {
-            console.warn(`Invalid URL skipped: ${file.url}`)
-            return
+            if (!processedUrl) {
+                console.warn(`Invalid URL skipped: ${file.url}`)
+                return
+            }
+
+            if (seenUrls.has(processedUrl)) {
+                console.warn(`Duplicate URL skipped: ${processedUrl}`)
+                return
+            }
+
+            seenUrls.add(processedUrl)
+            processedUrls.push({
+                resource_type: 'IMAGE',
+                src: processedUrl,
+                folder: dudaImageFolder,
+            })
         }
-
-        if (seenUrls.has(processedUrl)) {
-            console.warn(`Duplicate URL skipped: ${processedUrl}`)
-            return
-        }
-
-        seenUrls.add(processedUrl)
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: processedUrl,
-            folder: dudaImageFolder,
-        })
     })
-
-    //add logo src seperately from s3 url
-    if (logoUrl) {
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: logoUrl,
-            //folder: 'logos',
-            folder: dudaImageFolder,
-        })
-    }
 
     return processedUrls
 }

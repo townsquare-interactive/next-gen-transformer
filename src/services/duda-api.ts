@@ -2,7 +2,8 @@ import { DudaResponse, UploadPayload } from './save-to-duda.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 import { dudaApiClient } from './duda-api-client.js'
-import { PageObject, LocationObject } from '../types/duda-api-type.js'
+import { PageObject, LocationObject, BusinessInfoObject } from '../types/duda-api-type.js'
+import { DataUploadError } from '../utilities/errors.js'
 
 const dudaUserName = process.env.DUDA_USERNAME
 const dudaPassword = process.env.DUDA_PASSWORD
@@ -116,4 +117,19 @@ export async function createDudaLocation(siteName: string, locationData: Locatio
     })
 
     return response
+}
+
+export async function uploadBusinessInfo(siteName: string, businessInfo: BusinessInfoObject) {
+    try {
+        const response = await dudaApiClient.getClient().content.update({
+            site_name: siteName,
+            business_data: businessInfo.business_data,
+            ...(businessInfo.site_texts && { site_texts: businessInfo.site_texts }),
+        })
+
+        return response
+    } catch (error) {
+        console.error('error uploading business info to duda', error)
+        throw error
+    }
 }
