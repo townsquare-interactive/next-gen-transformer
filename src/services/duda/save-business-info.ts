@@ -7,58 +7,23 @@ type BusinessInfoData = ScrapedAndAnalyzedSiteData['businessInfo']
 export async function saveBusinessInfoToDuda(siteId: string, logoUrl: string, businessInfo: BusinessInfoData, pages: ScrapedAndAnalyzedSiteData['pages']) {
     const transformedLocationData: LocationObject = transformBusinessInfoDataToDudaLocation(logoUrl, businessInfo)
 
-    const transformedBusinessInfoData: BusinessInfoObject = transformBusinessInfoDataToDudaFormat(logoUrl, businessInfo, pages)
+    const transformedBusinessInfoData: BusinessInfoObject = transformBusinessInfoDataToDudaFormat(logoUrl, businessInfo, pages, transformedLocationData)
 
-    const busInfoRes = await uploadBusinessInfo(siteId, transformedBusinessInfoData)
-    console.log('Duda business info response: ', busInfoRes)
+    await uploadBusinessInfo(siteId, transformedBusinessInfoData)
 
-    const response = await createDudaLocation(siteId, transformedLocationData)
-
-    console.log(`Successfully saved business info for site: ${siteId}`, response)
+    //adding alternate locations
+    //const response = await createDudaLocation(siteId, transformedLocationData)
+    //console.log(`Successfully saved business info for site: ${siteId}`, response)
 }
 
 export const transformBusinessInfoDataToDudaFormat = (
     logoUrl: string,
     businessInfo: BusinessInfoData,
-    pages: ScrapedAndAnalyzedSiteData['pages']
+    pages: ScrapedAndAnalyzedSiteData['pages'],
+    transformedLocationData: LocationObject
 ): BusinessInfoObject => {
     // Transform pages into custom text array with content splitting
-    const customTexts = pages.flatMap((page) => {
-        const content = (page.content || '').replace(/\n/g, '<br>')
-        const chunkSize = 4000
-
-        // If content is under the limit, return single entry
-        if (content.length <= chunkSize) {
-            return [
-                {
-                    label: page.title || '',
-                    text: content,
-                },
-            ]
-        }
-
-        // Split content into chunks of 4000 characters
-        // Try to split at sentence or paragraph boundaries
-        const chunks: string[] = []
-        let currentChunk = ''
-        const sentences = content.split(/(?<=[.!?])\s+/)
-
-        for (const sentence of sentences) {
-            if ((currentChunk + sentence).length <= chunkSize) {
-                currentChunk += (currentChunk ? ' ' : '') + sentence
-            } else {
-                if (currentChunk) chunks.push(currentChunk)
-                currentChunk = sentence
-            }
-        }
-        if (currentChunk) chunks.push(currentChunk)
-
-        // Create array of labeled chunks
-        return chunks.map((chunk, index) => ({
-            label: chunks.length > 1 ? `${page.title || ''} (Part ${index + 1})` : page.title || '',
-            text: chunk,
-        }))
-    })
+    const customTexts = transformTextToDudaFormat(pages, businessInfo)
 
     const transformedData = {
         companyName: businessInfo?.companyName ?? '',
@@ -69,9 +34,10 @@ export const transformBusinessInfoDataToDudaFormat = (
             name: businessInfo?.companyName ?? '',
             logo_url: logoUrl,
         },
+        location_data: transformedLocationData,
     }
 
-    console.log('transformedData buiness_data', transformedData.business_data)
+    console.log('transformedData duda data', transformedData)
 
     return transformedData
 }
@@ -151,5 +117,51 @@ export function transformBusinessInfoDataToDudaLocation(logoUrl: string, busines
               })()
             : undefined,
     }
+}
+
+export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData) => {
+    const customTexts = pages.flatMap((page) => {
+        if (!page.content) return []
+        const chunks: string[] = []
+        const content = (page.content || '').replace(/\n/g, '<br>') //add line breaks
+        const chunkSize = 4000
+
+        // If content is under the limit, return single entry
+        if (content.length <= chunkSize) {
+            return [
+                {
+                    label: page.title || '',
+                    text: content,
+                },
+            ]
+        }
+
+        // Split content into chunks of exactly 4000 characters
+
+        for (let i = 0; i < content.length; i += chunkSize) {
+            chunks.push(content.slice(i, i + chunkSize))
+        }
+
+        // Create array of labeled chunks
+        return chunks.map((chunk, index) => ({
+            label: chunks.length > 1 ? `${page.title || ''} (Part ${index + 1})` : page.title || '',
+            text: chunk,
+        }))
+    })
+
+    const fonts = businessInfo?.styles?.fonts
+    let fontText
+    if (fonts) {
+        const headerFonts = fonts.headerFonts?.join(', ')
+        const bodyFonts = fonts.bodyFonts?.join(', ')
+
+        fontText = {
+            label: 'Fonts',
+            text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
+        }
+        customTexts.push(fontText)
+    }
+
+    return customTexts
 }
 type DayType = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'

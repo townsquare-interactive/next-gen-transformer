@@ -63,4 +63,5 @@ export type BusinessInfoObject = {
         name: string
         logo_url: string
     }
+    location_data: LocationObject
 }

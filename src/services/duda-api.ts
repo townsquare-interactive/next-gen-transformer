@@ -125,6 +125,21 @@ export async function uploadBusinessInfo(siteName: string, businessInfo: Busines
             site_name: siteName,
             business_data: businessInfo.business_data,
             ...(businessInfo.site_texts && { site_texts: businessInfo.site_texts }),
+            location_data: {
+                ...(businessInfo.location_data.label && { label: businessInfo.location_data.label }),
+                ...(businessInfo.location_data.phones && { phones: businessInfo.location_data.phones }),
+                ...(businessInfo.location_data.emails && { emails: businessInfo.location_data.emails }),
+                ...(businessInfo.location_data.social_accounts && { social_accounts: businessInfo.location_data.social_accounts }),
+                ...(businessInfo.location_data.address && { address: businessInfo.location_data.address }),
+                ...(businessInfo.location_data.logo_url && { logo_url: businessInfo.location_data.logo_url }),
+                ...(businessInfo.location_data.business_hours && {
+                    business_hours: businessInfo.location_data.business_hours.map(({ days, open, close }) => ({
+                        days: days as ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[],
+                        open,
+                        close,
+                    })),
+                }),
+            },
         })
 
         return response

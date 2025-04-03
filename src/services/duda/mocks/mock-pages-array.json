@@ -13,7 +13,8 @@
             "https://aquapoolandspaoh.com/files/shutterstock/2023/11/1699373659636_shutterstock_316062692_1699373171_e1b44676722eb2c8eb7630f90d0a37024f.jpg?w=1600&h=2133"
         ],
         "content": "Hire a Reputable and Licensed Pool Installer...",
-        "forms": []
+        "forms": [],
+        "title": "Home"
     },
     {
         "url": "https://aquapoolandspaoh.com/services.php",
@@ -29,7 +30,8 @@
             "https://aquapoolandspaoh.com/files/shutterstock/2023/11/shutterstock_613622132_1699545014_e1a3b5ae99e0e77bd06cfea271179a4410.jpg?w=1600&h=2133"
         ],
         "content": "We offer a wide range of pool services, including custom pool installations, pool hardscaping, and maintenance plans to keep your pool in perfect condition. Learn more about our offerings and how we can help you create the perfect backyard oasis.",
-        "forms": []
+        "forms": [],
+        "title": "Services"
     },
     {
         "url": "https://aquapoolandspaoh.com/contact-us",
@@ -53,6 +55,7 @@
                     { "type": "textarea", "name": "Message", "label": "Message", "placeholder": "Enter your message", "required": true }
                 ]
             }
-        ]
+        ],
+        "title": "Contact Us"
     }
 ]

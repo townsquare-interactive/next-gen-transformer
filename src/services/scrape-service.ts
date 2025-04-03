@@ -278,7 +278,6 @@ export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: 
     const scrapedFolder = `${s3ScrapedSitesFolder}${siteFolderName}/scraped`
     const siteDataPath = scrapedFolder + '/siteData.json'
     const scrapedData = await getFile(siteDataPath, null)
-    console.log('siteData', scrapedData)
     if (!scrapedData) {
         throw new ScrapingError({
             domain: url,
