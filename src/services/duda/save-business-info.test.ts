@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { transformBusinessInfoDataToDudaLocation, transformBusinessInfoDataToDudaFormat } from './save-business-info.ts'
+import { transformBusinessInfoDataToDudaLocation, transformBusinessInfoDataToDudaFormat, transformSocialAccountsToDudaFormat } from './save-business-info.ts'
 import mockBusinessInfoObject from './mocks/mock-business-info-object.json'
 import { ScrapedAndAnalyzedSiteData } from '../../schema/output-zod.js'
 
@@ -31,6 +31,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 { days: ['SAT'], open: '10:00', close: '22:00' },
                 { days: ['SUN'], open: '10:00', close: '22:00' },
             ],
+            social_accounts: {},
         })
     })
 
@@ -40,6 +41,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
         expect(result).toEqual({
             label: '',
             logo_url: logoUrl,
+            social_accounts: {},
         })
 
         // Ensure that missing fields are explicitly undefined
@@ -83,6 +85,29 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 { days: ['SAT'], open: '10:00', close: '22:00' },
                 { days: ['SUN'], open: '10:00', close: '22:00' },
             ],
+            social_accounts: {},
+        })
+    })
+    it('should transform social accounts to duda format', () => {
+        const result = transformBusinessInfoDataToDudaLocation(logoUrl, {
+            ...mockBusinessInfoObject,
+            links: {
+                socials: [
+                    'https://www.facebook.com/mybusiness',
+                    'https://www.instagram.com/mycompany?querytest?josh',
+                    'https://x.com/twitterhandle',
+                    'https://www.yelp.com/biz/my-business-name',
+                    'https://www.linkedin.com/company/companyname',
+                ],
+                other: [],
+            },
+        })
+        expect(result.social_accounts).toEqual({
+            facebook: 'mybusiness',
+            instagram: 'mycompany',
+            twitter: 'twitterhandle',
+            yelp: 'my-business-name',
+            linkedin: 'companyname',
         })
     })
 })
@@ -109,6 +134,16 @@ describe('transformBusinessInfoToDudaFormat', () => {
             { days: ['SAT' as const], open: '10:00', close: '22:00' },
             { days: ['SUN' as const], open: '10:00', close: '22:00' },
         ],
+        social_accounts: {},
+        links: {
+            socials: [
+                'https://www.facebook.com/mybusiness',
+                'https://www.instagram.com/mycompany',
+                'https://x.com/twitterhandle',
+                'https://www.yelp.com/biz/my-business-name',
+                'https://www.linkedin.com/company/companyname',
+            ],
+        },
     }
     it('should transform business info to Duda format', () => {
         const pages = [
@@ -159,5 +194,114 @@ describe('transformBusinessInfoToDudaFormat', () => {
         }
 
         expect(result).toEqual(transformedResultCheck)
+    })
+})
+
+describe('transformSocialAccountsToDudaFormat', () => {
+    it('should transform social media links correctly', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [
+                    'https://www.facebook.com/mybusiness',
+                    'https://www.instagram.com/mycompany',
+                    'https://x.com/twitterhandle',
+                    'https://www.yelp.com/biz/my-business-name',
+                    'https://www.linkedin.com/company/companyname',
+                ],
+                other: [],
+            },
+        }
+
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+
+        expect(result).toEqual({
+            facebook: 'mybusiness',
+            instagram: 'mycompany',
+            twitter: 'twitterhandle',
+            yelp: 'my-business-name',
+            linkedin: 'companyname',
+        })
+    })
+
+    it('should handle empty social links', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({})
+    })
+
+    it('should handle missing social links', () => {
+        const businessInfo: Partial<BusinessInfoData> = {}
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({})
+    })
+
+    it('should ignore unsupported social platforms', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: ['https://www.facebook.com/mybusiness', 'https://unknown-platform.com/business'],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({
+            facebook: 'mybusiness',
+        })
+    })
+
+    it('should handle invalid URLs', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: ['https://www.facebook.com/mybusiness', 'invalid-url', 'https://www.instagram.com/'],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({
+            facebook: 'mybusiness',
+        })
+    })
+
+    it('should handle URLs with query parameters', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [
+                    'https://www.facebook.com/mybusiness?ref=page_internal',
+                    'https://www.instagram.com/mycompany?igshid=123456',
+                    'https://www.facebook.com/target?234343?user=josh',
+                    'https://www.linkedin.com/company/mycompany?originalSubdomain=uk',
+                ],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({
+            facebook: 'target',
+            instagram: 'mycompany',
+            linkedin: 'mycompany',
+        })
+    })
+
+    it('should handle URLs with special characters', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [
+                    'https://www.facebook.com/my.business.name',
+                    'https://www.instagram.com/my_company_2023',
+                    'https://www.linkedin.com/company/my-company!',
+                ],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result).toEqual({
+            facebook: 'mybusinessname',
+            instagram: 'my_company_2023',
+            linkedin: 'my-company',
+        })
     })
 })

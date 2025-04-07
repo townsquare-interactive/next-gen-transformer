@@ -1,3 +1,4 @@
+import { SocialAccounts } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 import { ScrapedAndAnalyzedSiteData } from '../../schema/output-zod.js'
 import { BusinessInfoObject, LocationObject } from '../../types/duda-api-type.js'
 import { createDudaLocation, uploadBusinessInfo } from '../duda-api.js'
@@ -14,6 +15,60 @@ export async function saveBusinessInfoToDuda(siteId: string, logoUrl: string, bu
     //adding alternate locations
     //const response = await createDudaLocation(siteId, transformedLocationData)
     //console.log(`Successfully saved business info for site: ${siteId}`, response)
+}
+
+const determineSocialAccountType = (str: string) => {
+    if (str.includes('google')) return 'google'
+    if (str.includes('facebook')) return 'facebook'
+    if (str.includes('instagram')) return 'instagram'
+    if (str.includes('twitter')) return 'twitter'
+    if (str.includes('linkedin')) return 'linkedin'
+    if (str.includes('youtube') || str.includes('youtu.be')) return 'youtube'
+    if (str.includes('pinterest')) return 'pinterest'
+    if (str.includes('vimeo')) return 'vimeo'
+    if (str.includes('/x.com')) return 'twitter'
+    if (str.includes('tiktok')) return 'tiktok'
+    if (str.includes('yelp')) return 'yelp'
+    if (str.includes('foursquare')) return 'foursquare'
+    if (str.includes('rss')) return 'rss'
+    if (str.includes('reddit')) return 'reddit'
+    if (str.includes('tripadvisor')) return 'tripadvisor'
+    if (str.includes('snapchat')) return 'snapchat'
+    return null
+}
+
+export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoData) => {
+    const socialLinks = businessInfo?.links?.socials
+    if (!socialLinks?.length) return {}
+
+    const socialAccounts: Record<string, string> = {}
+
+    socialLinks.forEach((link) => {
+        try {
+            const url = new URL(link)
+            // Get the path without query parameters
+            const pathSegments = url.pathname.split('/').filter(Boolean)
+            let finalSegment = pathSegments[pathSegments.length - 1]
+
+            if (finalSegment) {
+                // Remove any query parameters if they exist
+                finalSegment = finalSegment.split('?')[0]
+                // Clean up any remaining special characters
+                finalSegment = finalSegment.replace(/[^a-zA-Z0-9-_]/g, '')
+
+                const type = determineSocialAccountType(link.toLowerCase())
+                if (type && finalSegment && finalSegment.length < 61) {
+                    socialAccounts[type] = finalSegment
+                } else {
+                    console.warn('Invalid URL in social links:', link)
+                }
+            }
+        } catch (error) {
+            console.warn('Invalid URL in social links:', link)
+        }
+    })
+
+    return socialAccounts
 }
 
 export const transformBusinessInfoDataToDudaFormat = (
@@ -37,8 +92,6 @@ export const transformBusinessInfoDataToDudaFormat = (
         location_data: transformedLocationData,
     }
 
-    console.log('transformedData duda data', transformedData)
-
     return transformedData
 }
 
@@ -56,6 +109,7 @@ export function transformBusinessInfoDataToDudaLocation(logoUrl: string, busines
               }
             : undefined,
         logo_url: logoUrl,
+        social_accounts: transformSocialAccountsToDudaFormat(businessInfo),
         business_hours: businessInfo?.hours
             ? (() => {
                   const hours = Object.entries(businessInfo.hours).map(([day, hours]) => {
