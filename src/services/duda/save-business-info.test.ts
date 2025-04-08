@@ -13,8 +13,8 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
 
         expect(result).toEqual({
             label: 'June Foot Spa',
-            phones: [{ phoneNumber: '(929) 566-7799', label: 'Main' }],
-            emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Main' }],
+            phones: [{ phoneNumber: '(929) 566-7799', label: 'Phone' }],
+            emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Email' }],
             address: {
                 streetAddress: '149-36 Northern Blvd',
                 city: 'Flushing',
@@ -67,8 +67,8 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
 
         expect(result).toEqual({
             label: 'June Foot Spa',
-            phones: [{ phoneNumber: '(929) 566-7799', label: 'Main' }],
-            emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Main' }],
+            phones: [{ phoneNumber: '(929) 566-7799', label: 'Phone' }],
+            emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Email' }],
             address: {
                 streetAddress: '149-36 Northern Blvd',
                 city: 'Flushing',
@@ -116,8 +116,8 @@ describe('transformBusinessInfoToDudaFormat', () => {
     const logoUrl = 'https://example.com/logo.png'
     const dudaLocationData = {
         label: 'June Foot Spa',
-        phones: [{ phoneNumber: '(929) 566-7799', label: 'Main' }],
-        emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Main' }],
+        phones: [{ phoneNumber: '(929) 566-7799', label: 'Phone' }],
+        emails: [{ emailAddress: 'howareyoucolin@gmail.com', label: 'Email' }],
         address: {
             streetAddress: '149-36 Northern Blvd',
             city: 'Flushing',

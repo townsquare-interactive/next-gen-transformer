@@ -98,8 +98,8 @@ export const transformBusinessInfoDataToDudaFormat = (
 export function transformBusinessInfoDataToDudaLocation(logoUrl: string, businessInfo: BusinessInfoData): LocationObject {
     return {
         label: businessInfo?.companyName ?? '',
-        phones: businessInfo?.phoneNumber ? [{ phoneNumber: businessInfo.phoneNumber, label: 'Main' }] : undefined,
-        emails: businessInfo?.email ? [{ emailAddress: businessInfo.email, label: 'Main' }] : undefined,
+        phones: businessInfo?.phoneNumber ? [{ phoneNumber: businessInfo.phoneNumber, label: 'Phone' }] : undefined,
+        emails: businessInfo?.email ? [{ emailAddress: businessInfo.email, label: 'Email' }] : undefined,
         address: businessInfo?.address
             ? {
                   streetAddress: businessInfo?.address?.streetAddress ?? '',
