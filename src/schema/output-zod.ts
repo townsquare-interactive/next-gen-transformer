@@ -539,6 +539,15 @@ export const HoursSchema = z
     })
     .nullable()
 
+const ColorsSchema = z.object({
+    primaryColor: z.string().nullable().optional(),
+    secondaryColor: z.string().nullable().optional(),
+    tertiaryColor: z.string().nullable().optional(),
+    quaternary: z.string().nullable().optional(),
+    textColor: z.string().nullable().optional(),
+    mainContentBackgroundColor: z.string().nullable().optional(),
+})
+
 // Schema for ScreenshotData
 const ScreenshotDataSchema = z.object({
     logoTag: z.string().optional().nullable(),
@@ -564,16 +573,7 @@ const ScreenshotDataSchema = z.object({
                 bodyFonts: z.array(z.string().nullable()).nullable(),
             })
             .nullable(),
-        colors: z
-            .object({
-                primaryColor: z.string().nullable().optional(),
-                secondaryColor: z.string().nullable().optional(),
-                tertiaryColor: z.string().nullable().optional(),
-                quaternary: z.string().nullable().optional(),
-                textColor: z.string().nullable().optional(),
-                mainContentBackgroundColor: z.string().nullable().optional(),
-            })
-            .nullable(),
+        colors: ColorsSchema.nullable(),
     }),
 })
 
@@ -599,7 +599,7 @@ export type ScrapedPageData = z.infer<typeof ScrapedPageDataSchema>
 export type ScreenshotData = z.infer<typeof ScreenshotDataSchema>
 export type ScrapedForm = z.infer<typeof FormSchema>
 export type BusinessHours = z.infer<typeof HoursSchema>
-
+export type ScrapedColors = z.infer<typeof ColorsSchema>
 /*---------------------------End of scraping------------------------------*/
 
 export type CompositeData = z.infer<typeof CompositeSchema>

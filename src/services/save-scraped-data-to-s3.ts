@@ -5,7 +5,7 @@ import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema } from '..
 import { zodDataParse } from '../schema/utils-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { addFileS3, addImageToS3, deleteFolderS3 } from '../utilities/s3Functions.js'
-import { UploadedResourcesObj } from './save-to-duda.js'
+import { UploadedResourcesObj } from './duda/save-images.js'
 
 export const s3ScrapedSitesFolder = 'scraped-sites/'
 

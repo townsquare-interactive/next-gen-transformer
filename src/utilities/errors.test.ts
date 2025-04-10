@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ValidationError, TransformError, SiteDeploymentError, handleError, DataUploadError } from './errors'
+import { ValidationError, TransformError, SiteDeploymentError, handleError, DataUploadError } from './errors.js'
 
 // Mocking uuidv4 to always return the same UUID
 vi.mock('uuid', () => ({
@@ -149,7 +149,7 @@ describe('handleError', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             id: '12345678-1234-1234-1234-123456789abc',
             errorType: 'AWS-007',
-            message: 'Error uploading to S3: Data upload error (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            message: 'Error uploading data: Data upload error (Error ID: 12345678-1234-1234-1234-123456789abc)',
             domain: 'example.com',
             state: { fileStatus: 'deploymentState' },
             status: 'Error',

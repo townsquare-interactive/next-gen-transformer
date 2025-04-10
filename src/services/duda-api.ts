@@ -1,8 +1,8 @@
-import { DudaResponse, UploadPayload } from './save-to-duda.js'
+import { DudaResponse, UploadPayload } from './duda/save-images.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 import { dudaApiClient } from './duda-api-client.js'
-import { PageObject, LocationObject, BusinessInfoObject } from '../types/duda-api-type.js'
+import { PageObject, LocationObject, BusinessInfoObject, DudaColors } from '../types/duda-api-type.js'
 import { DataUploadError } from '../utilities/errors.js'
 
 const dudaUserName = process.env.DUDA_USERNAME
@@ -96,6 +96,40 @@ export async function createDudaPage(siteName: string, pageData: PageObject) {
     })
 
     return response
+}
+
+export async function getDudaColors(siteName: string) {
+    const response = await dudaApiClient.getClient().sites.theme.get({
+        site_name: siteName,
+    })
+
+    console.log('duda colors', response.colors)
+
+    return response.colors
+}
+
+export async function updateDudaTheme(siteName: string, colorData: DudaColors) {
+    try {
+        const response = await dudaApiClient.getClient().sites.theme.update({
+            site_name: siteName,
+            ...(colorData && { colors: colorData }),
+        })
+
+        return response
+    } catch (error) {
+        console.error(`error updating duda theme`, error)
+        const errorMessage = error[0].error.message
+        throw new DataUploadError({
+            message: errorMessage,
+            domain: '',
+            errorType: 'DUD-018',
+            state: {
+                fileStatus: 'Duda files not uploaded correctly',
+                responseStatus: error[0].status,
+                errorCode: error[0].error.error_code,
+            },
+        })
+    }
 }
 
 export async function createDudaLocation(siteName: string, locationData: LocationObject) {

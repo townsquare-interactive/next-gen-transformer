@@ -4,6 +4,33 @@ import type { ScrapedAndAnalyzedSiteData } from '../schema/output-zod.js'
 import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { Settings } from '../services/scrape-service.js'
 
+const mockBusinessInfo = {
+    styles: {
+        colors: {
+            primaryColor: '#000000',
+            secondaryColor: '#FFFFFF',
+            tertiaryColor: '#000000',
+            textColor: '#000000',
+            mainContentBackgroundColor: '#FFFFFF',
+        },
+        fonts: {
+            headerFonts: ['Arial', 'Helvetica', 'sans-serif'],
+            bodyFonts: ['Arial', 'Helvetica', 'sans-serif'],
+        },
+    },
+    companyName: 'Test Company',
+    address: {
+        streetAddress: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        postalCode: '12345',
+    },
+    phoneNumber: '123-456-7890',
+    email: 'test@example.com',
+    hours: null,
+    links: { socials: [], other: [] },
+}
+
 describe('save', () => {
     it('should handle s3 upload with mock functions', async () => {
         const mockImageFiles: ImageFiles[] = [
@@ -134,6 +161,13 @@ describe('save', () => {
             pages: [],
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '12321',
+            businessInfo: mockBusinessInfo,
+            siteSeo: {
+                title: 'Test Company',
+                metaDescription: 'Test Description',
+                metaKeywords: 'test, company, test company',
+                pageUrl: 'http://example.com',
+            },
         }
 
         const mockScrapedData = {
@@ -158,6 +192,9 @@ describe('save', () => {
         const mockImageUpload = vi.fn().mockResolvedValue(mockDudaResponse)
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
         const mockSeoUpload = vi.fn().mockResolvedValue({})
+        const mockUploadColors = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
+        const mockUploadPages = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
             saveImages: true,
@@ -173,8 +210,19 @@ describe('save', () => {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
             seoUploadFunction: mockSeoUpload,
+            saveColorsToDudaFunction: mockUploadColors,
+            saveBusinessInfoToDudaFunction: mockUploadBusinessInfo,
+            savePagesToDudaFunction: mockUploadPages,
         })
 
+        //mock functions to be called with correct arguments
+        expect(mockImageUpload).toHaveBeenCalled()
+        expect(mockUploadColors).toHaveBeenCalledWith(settings.uploadLocation, mockBusinessInfo.styles.colors)
+        expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo)
+        expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages)
+        expect(mockUploadPages).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.pages)
+
+        //returned upload data
         expect(result).toHaveProperty('dataUploadDetails')
         expect(result.dataUploadDetails?.imageUploadTotal).toBe(1)
         expect(result.dataUploadDetails?.failedImageCount).toBe(0)
@@ -199,6 +247,13 @@ describe('save', () => {
             pages: [],
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '12321',
+            businessInfo: mockBusinessInfo,
+            siteSeo: {
+                title: 'Test Company',
+                metaDescription: 'Test Description',
+                metaKeywords: 'test, company, test company',
+                pageUrl: 'http://example.com',
+            },
         }
 
         const mockScrapedData = {
@@ -228,6 +283,11 @@ describe('save', () => {
             .mockImplementationOnce(() => mockDudaResponse)
         const mockS3Upload = vi.fn().mockResolvedValue(mockS3Response)
         const mockSeoUpload = vi.fn().mockResolvedValue({})
+        const mockUploadColors = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
+        const mockUploadPages = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfoToDuda = vi.fn().mockResolvedValue({})
+
         const settings: Settings = {
             saveImages: true,
             saveMethod: 'dudaUpload',
@@ -242,12 +302,18 @@ describe('save', () => {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockS3Upload,
             seoUploadFunction: mockSeoUpload,
+            saveColorsToDudaFunction: mockUploadColors,
+            saveBusinessInfoToDudaFunction: mockUploadBusinessInfo,
+            savePagesToDudaFunction: mockUploadPages,
         })
 
         expect(result.dataUploadDetails?.s3UploadedImages).toBeDefined()
         expect(result.dataUploadDetails?.uploadedResources).toEqual(mockDudaResponse.uploaded_resources)
         expect(mockImageUpload).toHaveBeenCalledTimes(2)
         expect(mockS3Upload).toHaveBeenCalled()
+        expect(mockUploadColors).toHaveBeenCalled()
+        expect(mockSeoUpload).toHaveBeenCalled()
+        expect(mockUploadBusinessInfo).toHaveBeenCalled()
     })
 
     it('should handle Duda upload with imageList instead of imageFiles', async () => {
@@ -292,6 +358,8 @@ describe('save', () => {
         const mockImageUpload = vi.fn().mockResolvedValue(mockDudaResponse)
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
         const mockSeoUpload = vi.fn().mockResolvedValue({})
+        const mockUploadColors = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
         const settings: Settings = {
             saveImages: true,
             saveMethod: 'dudaUpload',
@@ -305,10 +373,13 @@ describe('save', () => {
         const result = await save(settings, mockScrapedData, {
             imageUploadFunction: mockImageUpload,
             siteDataUploadFunction: mockSiteDataUpload,
+            saveBusinessInfoToDudaFunction: mockUploadBusinessInfo,
             seoUploadFunction: mockSeoUpload,
+            saveColorsToDudaFunction: mockUploadColors,
         })
 
         expect(result).toHaveProperty('dataUploadDetails')
+        expect(mockImageUpload).toHaveBeenCalled()
         expect(result.dataUploadDetails?.imageUploadTotal).toBe(2)
         expect(result.dataUploadDetails?.failedImageCount).toBe(0)
         expect(result.dataUploadDetails?.uploadedResources).toHaveLength(2)

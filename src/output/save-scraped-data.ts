@@ -1,8 +1,9 @@
 import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { saveData as s3FileUpload } from '../services/save-scraped-data-to-s3.js'
-import { UploadedResourcesObj, save as dudaUpload } from '../services/save-to-duda.js'
+import { save as dudaUpload } from '../services/save-to-duda.js'
+import { UploadedResourcesObj } from '../services/duda/save-images.js'
 import type { Settings } from '../services/scrape-service.js'
-import { ScrapedAndAnalyzedSiteData, ScrapedPageSeo } from '../schema/output-zod.js'
+import { ScrapedAndAnalyzedSiteData, ScrapedColors, ScrapedPageSeo } from '../schema/output-zod.js'
 
 export interface SaveOutput {
     uploadedImages?: UploadedResourcesObj[]
@@ -30,6 +31,7 @@ type utilityFunctions = {
     seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>
     savePagesToDudaFunction?: (siteId: string, seoData: ScrapedAndAnalyzedSiteData['pages']) => Promise<void>
     saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, businessInfo: ScrapedAndAnalyzedSiteData['businessInfo']) => Promise<void>
+    saveColorsToDudaFunction?: (siteId: string, colors: ScrapedColors) => Promise<void>
 }
 
 export interface SavingScrapedData {

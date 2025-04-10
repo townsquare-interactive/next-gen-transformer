@@ -54,6 +54,8 @@ interface DataUploadErrorType extends ErrorClass {
     domain: string
     state: {
         fileStatus: string
+        responseStatus?: number
+        errorCode?: string
     } & ErrorState
 }
 
@@ -187,7 +189,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '', sen
             res.status(statusType || 500).json({
                 id: errorID,
                 errorType: err.errorType,
-                message: 'Error uploading to S3: ' + err.message + errorIDMessage,
+                message: 'Error uploading data: ' + err.message + errorIDMessage,
                 domain: err.domain,
                 state: err.state,
                 status: errorStatus,

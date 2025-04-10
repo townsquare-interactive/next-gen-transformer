@@ -65,3 +65,9 @@ export type BusinessInfoObject = {
     }
     location_data: LocationObject
 }
+
+export type DudaColors = {
+    id: string
+    value: string | null
+    label: string
+}[]
