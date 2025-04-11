@@ -104,23 +104,25 @@ const getFileSize = async (fileContents: Buffer | Uint8Array | Blob): Promise<nu
 
 export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: ImageFiles[]) => {
     if (logoAnalysis) {
-        const srcMatch = logoAnalysis?.match(/<img\s[^>]*src="([^"]+)"/) //match the image tag src value
+        // Extract src value from img tag
+        const srcMatch = logoAnalysis.match(/src=["']([^"']+)["']/)
         const logoSrc = srcMatch ? srcMatch[1] : null
 
         if (logoSrc) {
-            // Remove protocolrom both URLs for comparison
-            const normalizedLogoSrc = logoSrc.replace(/^https?:\/\//, '')
+            // Remove protocol and leading slashes from both URLs for comparison
+            const normalizedLogoSrc = logoSrc.replace(/^(?:https?:)?\/\//, '')
 
             // Update the type to 'logo' for all matching objects in the imageFiles array
             imageFiles.forEach((imageFile) => {
-                const normalizedImageLink = imageFile.originalImageLink.replace(/^https?:\/\//, '')
-                if (normalizedImageLink.includes(normalizedLogoSrc)) {
+                const normalizedImageLink = imageFile.originalImageLink.replace(/^(?:https?:)?\/\//, '')
+                if (normalizedImageLink === normalizedLogoSrc) {
                     imageFile.type = 'logo'
+                    console.log('Matched logo exactly:', imageFile.originalImageLink)
                 }
             })
         }
     } else {
-        console.log('No logo analysis match result, imageFiles remain unchanged.')
+        console.log('No logo analysis provided, imageFiles remain unchanged.')
     }
 
     return imageFiles

@@ -38,10 +38,11 @@ export async function save(saveData: SavingScrapedData) {
     const logoUrl = saveData.siteData?.assetData?.s3LogoUrl || saveData.logoUrl
     const fetchFunction = saveData.functions?.imageUploadFunction
     const imageData = await saveImages(settings, imageFiles, saveData.imageList || [], logoUrl, fetchFunction)
+    const dudaLogoUrl = imageData.dudaLogoUrl
 
     if (saveData.siteData?.businessInfo) {
         const saveBusinessInfoToDudaFunction = saveData.functions?.saveBusinessInfoToDudaFunction || saveBusinessInfoToDuda
-        await saveBusinessInfoToDudaFunction(settings.uploadLocation, logoUrl ?? '', saveData.siteData.businessInfo, saveData.siteData.pages)
+        await saveBusinessInfoToDudaFunction(settings.uploadLocation, dudaLogoUrl ?? '', saveData.siteData.businessInfo, saveData.siteData.pages)
     }
 
     return imageData

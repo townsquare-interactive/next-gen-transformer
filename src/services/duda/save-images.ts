@@ -4,6 +4,7 @@ import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../../utilities/errors.js'
 import type { SaveOutput } from '../../output/save-scraped-data.js'
 import { dudaImageFetch } from '../duda-api.js'
+import { logoFileName } from '../save-scraped-data-to-s3.js'
 
 export interface UploadPayload {
     resource_type: 'IMAGE'
@@ -43,6 +44,8 @@ export async function saveImages(
         preprocessedPayload = processSringArrayForDuda(imageList, logoUrl)
     }
 
+    const originalLogoUrl = findLogoFile(imageList, imageFiles, logoFileName)
+
     if (preprocessedPayload) {
         // Slice preprocessed payload into batches of 10
         const batches = processBatch(preprocessedPayload, 10)
@@ -65,6 +68,7 @@ export async function saveImages(
 
         console.log('Batch upload results:', batchResults[0]?.uploaded_resources)
         console.log(`Total batches uploaded: ${batchResults.length}`)
+        let dudaLogoUrl
 
         const allUploads: UploadedResourcesObj[] = []
         let succesfulImageCount = 0
@@ -78,11 +82,16 @@ export async function saveImages(
                     failedImageList.push(batch.original_url || '')
                 }
 
+                //find duda logoUrl for business info
+                if (originalLogoUrl && batch.original_url?.includes(originalLogoUrl)) {
+                    dudaLogoUrl = batch.new_url
+                }
+
                 allUploads.push(batch)
             })
         })
 
-        return { uploadedImages: allUploads, imageUploadCount: succesfulImageCount, failedImageList: failedImageList }
+        return { uploadedImages: allUploads, imageUploadCount: succesfulImageCount, failedImageList: failedImageList, dudaLogoUrl }
     } else {
         return { uploadedImages: [], imageUploadCount: 0, failedImageList: [] }
     }
@@ -94,7 +103,6 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: stri
     const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
-        if (file.type != 'logo') {
             const processedUrl = preprocessImageUrl(file.url)
 
             if (!processedUrl) {
@@ -113,7 +121,6 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: stri
                 src: processedUrl,
                 folder: dudaImageFolder,
             })
-        }
     })
 
     return processedUrls
@@ -164,3 +171,15 @@ export function processBatch(payload: UploadPayload[], batchSize: number): Uploa
     return batches
 }
 
+const findLogoFile = (imageList: string[] | undefined, imageFiles: ImageFiles[] | undefined, logoFileName: string) => {
+    if (imageList && imageList.length > 0) {
+        return imageList.find((url) => url.includes(logoFileName))
+    }
+
+    if (imageFiles && imageFiles.length > 0) {
+        const logoFile = imageFiles.find((file) => file.type === 'logo')
+        return logoFile?.imageFileName
+    }
+
+    return undefined
+}

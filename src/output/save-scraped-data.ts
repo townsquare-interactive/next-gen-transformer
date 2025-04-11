@@ -12,6 +12,7 @@ export interface SaveOutput {
     logoUrl?: string
     siteDataUrl?: string
     siteData?: ScrapedAndAnalyzedSiteData
+    dudaLogoUrl?: string
 }
 
 export interface ScrapedDataToSave {

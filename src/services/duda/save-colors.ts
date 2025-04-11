@@ -80,17 +80,13 @@ export function transformColorsToDudaFormat(dudaColors: DudaColors, colors: Scra
     addColor(colors.textColor || '', 'text-scraped')
     addColor(colors.mainContentBackgroundColor || '', 'background-scraped')
 
-    //upload colors
     return newDudaColors
 }
 
 export async function saveColorsToDuda(uploadLocation: string, colors: ScrapedColors) {
-    //get colors from Duda API
     const dudaColors: DudaColors = await getDudaColors(uploadLocation) //must append new colors to existing colors
     const addedDudaColors = transformColorsToDudaFormat(dudaColors, colors)
-    console.log('addedDudaColors', addedDudaColors)
 
-    //upload colors
     await updateDudaTheme(uploadLocation, addedDudaColors)
     return
 }

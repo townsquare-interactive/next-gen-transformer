@@ -9,6 +9,8 @@ import { UploadedResourcesObj } from './duda/save-images.js'
 
 export const s3ScrapedSitesFolder = 'scraped-sites/'
 
+export const logoFileName = 'header-logo'
+
 export async function saveData(saveData: SavingScrapedData) {
     console.log('saving to s3')
     const fetchFunction = saveData.functions?.imageUploadFunction
@@ -80,7 +82,7 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
 
             if (imageFiles[i].type === 'logo') {
                 console.log('we have a logo img', imageFiles[i].imageFileName)
-                fileName = `${basePath}/header-logo${imageFiles[i].fileExtension}` //need to add file ext
+                fileName = `${basePath}/${logoFileName}${imageFiles[i].fileExtension}` //need to add file ext
             }
 
             //may have to change this to hash
