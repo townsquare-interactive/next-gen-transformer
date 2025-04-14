@@ -31,9 +31,11 @@ export async function saveImages(
     imageFiles?: ImageFiles[],
     imageList?: string[],
     logoUrl?: string,
-    fetchFunction?: (payload: UploadPayload[]) => DudaResponse
+    fetchFunction?: (payload: UploadPayload[]) => Promise<DudaResponse>
 ): Promise<SaveOutput> {
     const dudaFetchFunction = fetchFunction || dudaImageFetch
+    const BATCH_DELAY = 2000 // 2 second delay
+    const BATCHES_BEFORE_DELAY = 3 // Number of batches to process before delay
 
     let preprocessedPayload
     if (imageFiles && imageFiles.length > 0) {
@@ -50,11 +52,18 @@ export async function saveImages(
         // Slice preprocessed payload into batches of 10
         const batches = processBatch(preprocessedPayload, 10)
         const batchResults: DudaResponse[] = []
+        console.log('batches length', batches.length)
 
-        for (const batch of batches) {
+        for (let i = 0; i < batches.length; i++) {
             try {
-                const responseData = await dudaFetchFunction(batch, settings)
+                const responseData = await dudaFetchFunction(batches[i], settings)
                 batchResults.push(responseData)
+
+                // Add delay after every 3 batches (but not after the last batch)
+                if ((i + 1) % BATCHES_BEFORE_DELAY === 0 && i < batches.length - 1) {
+                    console.log(`Processed ${i + 1} batches, pausing for ${BATCH_DELAY}ms...`)
+                    await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY))
+                }
             } catch (error) {
                 console.error(`Error uploading batch: ${error}`)
                 throw new ScrapingError({
@@ -66,7 +75,6 @@ export async function saveImages(
             }
         }
 
-        console.log('Batch upload results:', batchResults[0]?.uploaded_resources)
         console.log(`Total batches uploaded: ${batchResults.length}`)
         let dudaLogoUrl
 
@@ -103,24 +111,24 @@ export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: stri
     const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
-            const processedUrl = preprocessImageUrl(file.url)
+        const processedUrl = preprocessImageUrl(file.url)
 
-            if (!processedUrl) {
-                console.warn(`Invalid URL skipped: ${file.url}`)
-                return
-            }
+        if (!processedUrl) {
+            console.warn(`Invalid URL skipped: ${file.url}`)
+            return
+        }
 
-            if (seenUrls.has(processedUrl)) {
-                console.warn(`Duplicate URL skipped: ${processedUrl}`)
-                return
-            }
+        if (seenUrls.has(processedUrl)) {
+            console.warn(`Duplicate URL skipped: ${processedUrl}`)
+            return
+        }
 
-            seenUrls.add(processedUrl)
-            processedUrls.push({
-                resource_type: 'IMAGE',
-                src: processedUrl,
-                folder: dudaImageFolder,
-            })
+        seenUrls.add(processedUrl)
+        processedUrls.push({
+            resource_type: 'IMAGE',
+            src: processedUrl,
+            folder: dudaImageFolder,
+        })
     })
 
     return processedUrls
