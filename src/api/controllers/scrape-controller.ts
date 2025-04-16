@@ -111,7 +111,7 @@ export const moveS3DataToDuda = async (req: Request, res: Response) => {
         checkAuthToken(req)
         const validatedRequest = zodDataParse(req.body, MoveS3DataToDudaSchema, 'moveS3DataToDuda')
         const scrapedData = await getScrapedDataFromS3(validatedRequest.url)
-        const moveResponse = await moveS3DataToDudaService(scrapedData, validatedRequest.uploadLocation)
+        const moveResponse = await moveS3DataToDudaService(scrapedData, validatedRequest.uploadLocation, validatedRequest.siteType)
         res.json(moveResponse)
     } catch (err) {
         err.state = { ...err.state, req: req.body }

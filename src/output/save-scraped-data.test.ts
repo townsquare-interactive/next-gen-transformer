@@ -84,6 +84,7 @@ describe('save', () => {
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
+            siteType: 'priority',
         }
         //
         const result = await save(settings, mockScrapedData, {
@@ -110,6 +111,7 @@ describe('save', () => {
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
+            siteType: 'priority',
         }
 
         const mockImageFiles: ImageFiles[] = [
@@ -204,6 +206,7 @@ describe('save', () => {
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
+            siteType: 'priority',
         }
 
         const result = await save(settings, mockScrapedData, {
@@ -219,7 +222,7 @@ describe('save', () => {
         expect(mockImageUpload).toHaveBeenCalled()
         expect(mockUploadColors).toHaveBeenCalledWith(settings.uploadLocation, mockBusinessInfo.styles.colors)
         expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo)
-        expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages)
+        expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages, settings)
         expect(mockUploadPages).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.pages)
 
         //returned upload data
@@ -286,7 +289,6 @@ describe('save', () => {
         const mockUploadColors = vi.fn().mockResolvedValue({})
         const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
         const mockUploadPages = vi.fn().mockResolvedValue({})
-        const mockUploadBusinessInfoToDuda = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
             saveImages: true,
@@ -296,6 +298,7 @@ describe('save', () => {
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
+            siteType: 'priority',
         }
 
         const result = await save(settings, mockScrapedData, {
@@ -368,6 +371,7 @@ describe('save', () => {
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
             analyzeHomepageData: true,
+            siteType: 'priority',
         }
 
         const result = await save(settings, mockScrapedData, {

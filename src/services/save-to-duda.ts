@@ -1,10 +1,17 @@
 import { ScrapingError } from '../utilities/errors.js'
 import type { SavingScrapedData } from '../output/save-scraped-data.js'
-import { uploadSiteSEOToDuda } from './duda-api.js'
+import { getDudaSite, uploadSiteSEOToDuda } from './duda-api.js'
 import { savePagesToDuda } from './duda/save-pages.js'
 import { saveBusinessInfoToDuda } from './duda/save-business-info.js'
 import { saveColorsToDuda } from './duda/save-colors.js'
 import { saveImages } from './duda/save-images.js'
+import { ScrapedPageSeo } from '../schema/output-zod.js'
+
+const saveSiteSEO = async (siteId: string, seoData: ScrapedPageSeo) => {
+    const currentSiteData = await getDudaSite(siteId)
+    const currentSiteSeo = currentSiteData?.site_seo
+    await uploadSiteSEOToDuda(siteId, seoData, currentSiteSeo)
+}
 
 export async function save(saveData: SavingScrapedData) {
     const settings = saveData.settings
@@ -20,7 +27,8 @@ export async function save(saveData: SavingScrapedData) {
     }
 
     if (saveData.siteData?.siteSeo) {
-        const seoUploadFunction = saveData.functions?.seoUploadFunction || uploadSiteSEOToDuda
+        const seoUploadFunction = saveData.functions?.seoUploadFunction || saveSiteSEO
+        //await seoUploadFunction(settings.uploadLocation, saveData.siteData.siteSeo)
         await seoUploadFunction(settings.uploadLocation, saveData.siteData.siteSeo)
     }
 
@@ -42,7 +50,7 @@ export async function save(saveData: SavingScrapedData) {
 
     if (saveData.siteData?.businessInfo) {
         const saveBusinessInfoToDudaFunction = saveData.functions?.saveBusinessInfoToDudaFunction || saveBusinessInfoToDuda
-        await saveBusinessInfoToDudaFunction(settings.uploadLocation, dudaLogoUrl ?? '', saveData.siteData.businessInfo, saveData.siteData.pages)
+        await saveBusinessInfoToDudaFunction(settings.uploadLocation, dudaLogoUrl ?? '', saveData.siteData.businessInfo, saveData.siteData.pages, settings)
     }
 
     return imageData

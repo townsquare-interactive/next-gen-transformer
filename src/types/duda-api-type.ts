@@ -71,3 +71,10 @@ export type DudaColors = {
     value: string | null
     label: string
 }[]
+
+export interface DudaSiteSeo {
+    og_image?: string | null
+    title?: string
+    description?: string
+    no_index?: boolean
+}

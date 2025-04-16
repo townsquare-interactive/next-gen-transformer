@@ -11,6 +11,7 @@ import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
 import { defaultHeaders } from '../api/scrapers/playwright-setup.js'
 import { transformBusinessInfo } from '../api/scrapers/utils.js'
 import { s3ScrapedSitesFolder } from './save-scraped-data-to-s3.js'
+import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 
 export interface ScrapeResult {
     imageList: string[]
@@ -45,9 +46,11 @@ export interface Settings extends ScrapeWebsiteReq {
         scrapeFunction?: ScrapeFunctionType
         scrapePagesFunction?: (settings: Settings) => Promise<string[]>
         isValidateUrl?: (url: string) => Promise<boolean>
+        getBusinessInfo?: (siteId: string) => Promise<ContentLibraryResponse>
     }
     basePath: string
     queueScrape?: boolean
+    siteType?: 'priority' | 'secondary'
 }
 
 export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
@@ -61,6 +64,7 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
         analyzeHomepageData: validatedRequest.analyzeHomepageData === undefined ? true : validatedRequest.analyzeHomepageData,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
         queueScrape: validatedRequest.queueScrape === undefined ? false : validatedRequest.queueScrape,
+        siteType: validatedRequest.siteType === undefined ? 'priority' : validatedRequest.siteType,
     }
 
     return scrapeSettings
@@ -289,7 +293,7 @@ export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: 
     return scrapedData
 }
 
-export const moveS3DataToDuda = async (siteData: ScrapedAndAnalyzedSiteData, uploadLocation: string) => {
+export const moveS3DataToDuda = async (siteData: ScrapedAndAnalyzedSiteData, uploadLocation: string, siteType: 'priority' | 'secondary') => {
     const scrapedData: ScrapedDataToSave = {
         imageNames: [],
         url: siteData.baseUrl,
@@ -305,6 +309,7 @@ export const moveS3DataToDuda = async (siteData: ScrapedAndAnalyzedSiteData, upl
         basePath: siteData.baseUrl,
         backupImagesSave: false,
         saveImages: true,
+        siteType: siteType,
     }
 
     const savedData = await save(settings, scrapedData)

@@ -23,6 +23,8 @@ export default defineConfig([
                 'always', // Always require extensions
                 { js: 'always', ts: 'always' },
             ],
+            '@typescript-eslint/no-explicit-any': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
         },
     },
 ])

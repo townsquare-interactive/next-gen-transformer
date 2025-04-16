@@ -2,7 +2,7 @@ import { DudaResponse, UploadPayload } from './duda/save-images.js'
 import { Settings } from './scrape-service.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 import { dudaApiClient } from './duda-api-client.js'
-import { PageObject, LocationObject, BusinessInfoObject, DudaColors } from '../types/duda-api-type.js'
+import { PageObject, LocationObject, BusinessInfoObject, DudaColors, DudaSiteSeo } from '../types/duda-api-type.js'
 import { DataUploadError } from '../utilities/errors.js'
 
 const dudaUserName = process.env.DUDA_USERNAME
@@ -47,13 +47,23 @@ export async function dudaImageFetch(payload: UploadPayload[], settings?: Settin
     }
 }
 
-export async function uploadSiteSEOToDuda(siteId: string, seoData: ScrapedPageSeo) {
+export async function getDudaSite(siteId: string) {
+    const response = await dudaApiClient.getClient().sites.get({
+        site_name: siteId,
+    })
+
+    console.log('duda site', response)
+
+    return response
+}
+
+export async function uploadSiteSEOToDuda(siteId: string, seoData: ScrapedPageSeo, currentSiteSeo?: DudaSiteSeo | null) {
     const updateSiteUrl = `${BASE_URL}/api/sites/multiscreen/update/${siteId}`
 
     const payload = {
         site_seo: {
-            title: seoData.title || '',
-            description: seoData.metaDescription || '',
+            title: currentSiteSeo?.title || seoData.title || '',
+            description: currentSiteSeo?.description || seoData.metaDescription || '',
         },
     }
 
@@ -106,6 +116,16 @@ export async function getDudaColors(siteName: string) {
     console.log('duda colors', response.colors)
 
     return response.colors
+}
+
+export async function getBusinessInfoFromDuda(siteName: string) {
+    const response = await dudaApiClient.getClient().content.get({
+        site_name: siteName,
+    })
+
+    console.log('duda business info', response)
+
+    return response
 }
 
 export async function updateDudaTheme(siteName: string, colorData: DudaColors) {
@@ -179,6 +199,15 @@ export async function uploadBusinessInfo(siteName: string, businessInfo: Busines
         return response
     } catch (error) {
         console.error('error uploading business info to duda', error)
-        throw error
+        throw new DataUploadError({
+            message: 'uploading business info to duda',
+            domain: '',
+            errorType: 'DUD-018',
+            state: {
+                fileStatus: 'Duda files not uploaded correctly',
+                responseStatus: error[0].status,
+                errorCode: error[0].error.error_code,
+            },
+        })
     }
 }

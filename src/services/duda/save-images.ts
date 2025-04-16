@@ -40,7 +40,7 @@ export async function saveImages(
     let preprocessedPayload
     if (imageFiles && imageFiles.length > 0) {
         //use imageFiles from scraper
-        preprocessedPayload = processImageUrlsForDuda(imageFiles, logoUrl)
+        preprocessedPayload = processImageUrlsForDuda(imageFiles)
     } else if (imageList && imageList.length > 0) {
         //use imageList from s3
         preprocessedPayload = processSringArrayForDuda(imageList, logoUrl)
@@ -105,7 +105,7 @@ export async function saveImages(
     }
 }
 
-export function processImageUrlsForDuda(imageFiles: ImageFiles[], logoUrl?: string): UploadPayload[] {
+export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload[] {
     const seenUrls = new Set<string>()
     const processedUrls: UploadPayload[] = []
     const dudaImageFolder = 'Imported'

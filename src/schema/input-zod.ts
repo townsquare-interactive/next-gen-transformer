@@ -553,6 +553,11 @@ const scrapeExample = {
     queueScrape: false,
 } as const
 
+const siteType = z.literal('priority').or(z.literal('secondary')).optional().openapi({
+    description: 'Will site be saved as primary or secondary site',
+    default: 'priority',
+})
+
 //request body coming from AI tool
 export const ScrapeWebsiteSchema = z
     .object({
@@ -586,6 +591,7 @@ export const ScrapeWebsiteSchema = z
             description: 'Boolean on whether or not to queue the scrape',
             default: scrapeExample.queueScrape,
         }),
+        siteType: siteType,
     })
     .openapi({
         example: scrapeExample,
@@ -629,6 +635,7 @@ export const GetScrapeDataSchema = z.object({
 export const MoveS3DataToDudaSchema = z.object({
     url: URL,
     uploadLocation: z.string(),
+    siteType: siteType,
 })
 
 export const RequestDataSchema = z.object({

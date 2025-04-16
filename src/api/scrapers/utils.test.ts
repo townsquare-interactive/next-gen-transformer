@@ -1,5 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
-import { checkPagesAreOnSameDomain, cleanseHtml, extractFormData, extractPageContent, preprocessImageUrl, updateImageObjWithLogo } from './utils.js'
+import {
+    calculateAddressSimilarity,
+    checkPagesAreOnSameDomain,
+    cleanseHtml,
+    extractFormData,
+    extractPageContent,
+    preprocessImageUrl,
+    updateImageObjWithLogo,
+} from './utils.js'
 import { ScrapingError } from '../../utilities/errors.js'
 
 /**
@@ -365,5 +373,43 @@ describe('checkPagesAreOnSameDomain', () => {
             state: { scrapeStatus: 'Site not scraped', pages: invalidPages },
             errorType: 'SCR-016',
         })
+    })
+})
+
+describe('calculateAddressSimilarity', () => {
+    it('should return true if addresses match', () => {
+        const newAddress = '123 Main St'
+        const currentAddress = '123 Main St'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(true)
+    })
+
+    it('should return true if addresses are similar', () => {
+        const newAddress = '123 North Main Street'
+        const currentAddress = '123 N Main St'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(true)
+    })
+
+    it('should return false if addresses are not similar', () => {
+        const newAddress = '123 Main St'
+        const currentAddress = '456 Main St'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(false)
+    })
+
+    it('should return true if addresses are similar besides secondary address', () => {
+        const newAddress = '123 North Main Street'
+        const currentAddress = '123 N Main St STE #1036'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(true)
+    })
+
+    it('should return false for different steet numbers', () => {
+        const newAddress = '121 North Main Street'
+        const currentAddress = '123 North Main Street'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(false)
+    })
+
+    it('should return false for different addresses', () => {
+        const newAddress = '440 N Main St'
+        const currentAddress = '410 Cedar Road'
+        expect(calculateAddressSimilarity(newAddress, currentAddress)).toBe(false)
     })
 })
