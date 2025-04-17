@@ -63,7 +63,7 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
         analyzeHomepageData: validatedRequest.analyzeHomepageData === undefined ? true : validatedRequest.analyzeHomepageData,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
-        queueScrape: validatedRequest.queueScrape === undefined ? false : validatedRequest.queueScrape,
+        queueScrape: validatedRequest.queueScrape === undefined ? true : validatedRequest.queueScrape,
         siteType: validatedRequest.siteType === undefined ? 'priority' : validatedRequest.siteType,
     }
 
