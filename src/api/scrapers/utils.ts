@@ -823,3 +823,30 @@ export const createCombinedAddress = (businessInfo: BusinessInfoData, currentBus
         newAddressData,
     }
 }
+
+export const isStockImage = (url: URL): boolean => {
+    // Common stock photo domains
+    const stockDomains = [
+        'shutterstock.com',
+        'istockphoto.com',
+        'stock.adobe.com',
+        'gettyimages.com',
+        'dreamstime.com',
+        'depositphotos.com',
+        'alamy.com',
+        '123rf.com',
+        'stockphoto.com',
+        'bigstockphoto.com',
+    ]
+
+    // Check if URL is from a stock photo domain
+    if (stockDomains.some((domain) => url.hostname.includes(domain))) {
+        return true
+    }
+
+    // Check filename patterns indicating stock photos
+    const stockPatterns = [/stock[_-]?photo/i, /shutterstock/i, /istock/i, /getty/i, /bigstock/i, /depositphotos/i, /adobe[_-]?stock/i]
+
+    const filename = url.pathname.split('/').pop() || ''
+    return stockPatterns.some((pattern) => pattern.test(filename))
+}

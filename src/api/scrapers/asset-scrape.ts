@@ -12,6 +12,7 @@ import {
     isValidImageType,
     isValidImageSize,
     getImageDimensions,
+    isStockImage,
 } from './utils.js'
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
@@ -201,9 +202,14 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                 // Process image response asynchronously and store the promise
                 const imageProcessingPromise = (async () => {
                     try {
+                        // Skip stock images (fastest check - just URL parsing)
+                        if (isStockImage(url)) {
+                            return
+                        }
+
                         const fileContents = await response.body()
 
-                        // Rule out non image sizes
+                        // Rule out non image sizes (simple buffer length check)
                         if (!isValidImageSize(fileContents.length)) {
                             return
                         }
