@@ -29,9 +29,9 @@ type utilityFunctions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     imageUploadFunction?: (payload: any) => any
     siteDataUploadFunction?: siteDataUploadFunction
-    seoUploadFunction?: (siteId: string, seoData: ScrapedPageSeo) => Promise<void>
+    seoUploadFunction?: (siteId: string, seoData?: ScrapedPageSeo, enableBusinessSchema?: boolean) => Promise<void>
     savePagesToDudaFunction?: (siteId: string, seoData: ScrapedAndAnalyzedSiteData['pages']) => Promise<void>
-    saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, businessInfo: ScrapedAndAnalyzedSiteData['businessInfo']) => Promise<void>
+    saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, businessInfo: ScrapedAndAnalyzedSiteData['businessInfo']) => Promise<boolean>
     saveColorsToDudaFunction?: (siteId: string, colors: ScrapedColors) => Promise<void>
 }
 

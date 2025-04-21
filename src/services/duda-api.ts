@@ -52,38 +52,39 @@ export async function getDudaSite(siteId: string) {
         site_name: siteId,
     })
 
-    console.log('duda site', response)
-
     return response
 }
 
-export async function uploadSiteSEOToDuda(siteId: string, seoData: ScrapedPageSeo, currentSiteSeo?: DudaSiteSeo | null) {
-    const updateSiteUrl = `${BASE_URL}/api/sites/multiscreen/update/${siteId}`
-
-    const payload = {
-        site_seo: {
-            title: currentSiteSeo?.title || seoData.title || '',
-            description: currentSiteSeo?.description || seoData.metaDescription || '',
-        },
-    }
-
+export async function updateSiteContent(siteId: string, seoData?: ScrapedPageSeo, currentSiteSeo?: DudaSiteSeo | null, enableBusinessSchema?: boolean) {
     try {
-        const response = await fetch(updateSiteUrl, {
-            method: 'POST',
-            headers: HEADERS,
-            body: JSON.stringify(payload),
+        const response = await dudaApiClient.getClient().sites.update({
+            site_name: siteId,
+            site_seo: {
+                ...(currentSiteSeo?.title || seoData?.title ? { title: currentSiteSeo?.title || seoData?.title } : {}),
+                ...(currentSiteSeo?.description || seoData?.metaDescription ? { description: currentSiteSeo?.description || seoData?.metaDescription } : {}),
+            },
+            ...(enableBusinessSchema !== undefined && enableBusinessSchema !== null
+                ? {
+                      schemas: {
+                          local_business: {
+                              enabled: enableBusinessSchema,
+                          },
+                      },
+                  }
+                : {}),
         })
-
-        if (!response.ok) {
-            console.error(`status text: ${response.statusText}`)
-            throw response.statusText
-        }
-        if (response.status === 204) {
-            console.log('site seo uploaded to duda')
-            return
-        }
     } catch (error) {
-        throw error
+        const errorMessage = error[0].error.message
+        throw new DataUploadError({
+            message: errorMessage,
+            domain: '',
+            errorType: 'DUD-018',
+            state: {
+                fileStatus: 'Duda files not uploaded correctly',
+                responseStatus: error[0].status,
+                errorCode: error[0].error.error_code,
+            },
+        })
     }
 }
 
@@ -113,8 +114,6 @@ export async function getDudaColors(siteName: string) {
         site_name: siteName,
     })
 
-    console.log('duda colors', response.colors)
-
     return response.colors
 }
 
@@ -130,6 +129,7 @@ export async function getBusinessInfoFromDuda(siteName: string) {
 
 export async function updateDudaTheme(siteName: string, colorData: DudaColors) {
     try {
+        // @ts-expect-error - Duda API types are incomplete for theme update
         const response = await dudaApiClient.getClient().sites.theme.update({
             site_name: siteName,
             ...(colorData && { colors: colorData }),

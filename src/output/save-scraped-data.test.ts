@@ -195,7 +195,7 @@ describe('save', () => {
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
         const mockSeoUpload = vi.fn().mockResolvedValue({})
         const mockUploadColors = vi.fn().mockResolvedValue({})
-        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue(false)
         const mockUploadPages = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
@@ -221,7 +221,7 @@ describe('save', () => {
         //mock functions to be called with correct arguments
         expect(mockImageUpload).toHaveBeenCalled()
         expect(mockUploadColors).toHaveBeenCalledWith(settings.uploadLocation, mockBusinessInfo.styles.colors)
-        expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo)
+        expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo, false)
         expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages, settings)
         expect(mockUploadPages).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.pages)
 
@@ -287,7 +287,7 @@ describe('save', () => {
         const mockS3Upload = vi.fn().mockResolvedValue(mockS3Response)
         const mockSeoUpload = vi.fn().mockResolvedValue({})
         const mockUploadColors = vi.fn().mockResolvedValue({})
-        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue(false)
         const mockUploadPages = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
@@ -362,7 +362,7 @@ describe('save', () => {
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
         const mockSeoUpload = vi.fn().mockResolvedValue({})
         const mockUploadColors = vi.fn().mockResolvedValue({})
-        const mockUploadBusinessInfo = vi.fn().mockResolvedValue({})
+        const mockUploadBusinessInfo = vi.fn().mockResolvedValue(false)
         const settings: Settings = {
             saveImages: true,
             saveMethod: 'dudaUpload',

@@ -644,6 +644,12 @@ export const RequestDataSchema = z.object({
     }),
 })
 
+//request body coming from AI tool
+export const ToggleBusinessSchema = z.object({
+    siteName: z.string(),
+    toggleOption: z.boolean(),
+})
+
 export type Url = z.infer<typeof URL>
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type ScrapeWebsiteReq = z.infer<typeof ScrapeWebsiteSchema>
@@ -664,3 +670,4 @@ GetPageListSchema.openapi({ ref: 'get-page-list' })
 ScrapePagesSchema.openapi({ ref: 'scrape-pages' })
 GetScrapeDataSchema.openapi({ ref: 'get-scraped-data' })
 MoveS3DataToDudaSchema.openapi({ ref: 'move-s3-data-to-duda' })
+ToggleBusinessSchema.openapi({ ref: 'toggle-business-schema' })

@@ -34,7 +34,8 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'VAL-001', state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] } },
+            { errorType: 'VAL-001', state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] }, error: expect.anything() },
+
             expect.any(String)
         )
 
@@ -66,7 +67,8 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'TRN-001', state: { siteStatus: 'deploymentState' } },
+            { errorType: 'TRN-001', state: { siteStatus: 'deploymentState' }, error: expect.anything() },
+
             expect.any(String)
         )
 
@@ -106,6 +108,7 @@ describe('handleError', () => {
                 state: {
                     domainStatus: 'Domain unable to be removed from project',
                 },
+                error: expect.anything(),
             },
             expect.any(String)
         )
@@ -140,7 +143,7 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: 'AWS-007', state: { fileStatus: 'deploymentState' } },
+            { errorType: 'AWS-007', state: { fileStatus: 'deploymentState' }, error: expect.anything() },
             expect.any(String)
         )
 
@@ -168,7 +171,7 @@ describe('handleError', () => {
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
             '[Error ID: 12345678-1234-1234-1234-123456789abc]',
-            { errorType: undefined, state: undefined },
+            { errorType: undefined, state: undefined, error: expect.anything() },
             expect.any(String)
         )
 

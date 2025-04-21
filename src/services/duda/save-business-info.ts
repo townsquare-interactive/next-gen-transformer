@@ -50,6 +50,25 @@ export async function saveBusinessInfoToDuda(
         const response = await createDudaLocation(siteId, locations[1])
         console.log(`Successfully saved business info for site: ${siteId}`, response)
     }
+
+    //enable business schema
+    let enableBusinessSchema = false
+    if (transformedBusinessInfoData.location_data) {
+        let doesAddressExist = false
+        let doesCompanyNameExist = false
+        if (transformedBusinessInfoData.location_data.address?.city && transformedBusinessInfoData.location_data.address?.postalCode) {
+            doesAddressExist = true
+        }
+        if (transformedBusinessInfoData.companyName) {
+            doesCompanyNameExist = true
+        }
+
+        if (doesAddressExist && doesCompanyNameExist) {
+            enableBusinessSchema = true
+        }
+    }
+
+    return enableBusinessSchema
 }
 
 export const transformBusinessInfoDataToDudaFormat = (

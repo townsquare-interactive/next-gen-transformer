@@ -6,9 +6,15 @@ import {
     MoveS3DataToDudaSchema,
     ScrapePagesSchema,
     ScrapeWebsiteSchema,
+    ToggleBusinessSchema,
 } from './src/schema/input-zod.js'
-import * as errorTypes from './src/utilities/errors.json' assert { type: 'json' }
 import { scrapeResponseExample, landing200ResponseExample, unauthorizedResponseExample, siteDataResponseExample } from './templates/responseExamples.js'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const errorTypes: Record<string, { description: string }> = JSON.parse(readFileSync(join(__dirname, './src/utilities/errors.json'), 'utf8'))
 
 export const openApiSpec = createDocument({
     openapi: '3.1.0',
@@ -480,6 +486,47 @@ export const openApiSpec = createDocument({
                 },
             },
         },
+        '/api/cms-routes/duda-toggle-business-schema': {
+            patch: {
+                summary: 'Toggle business schema',
+                description: 'Toggles the business schema for a given URL.',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/ToggleBusinessSchema',
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    '200': {
+                        description: 'business schema enabled',
+                    },
+                    '401': unauthorizedResponseExample,
+                    '500': {
+                        description: 'Bad request',
+                        content: {
+                            'application/json': {
+                                example: {
+                                    id: '8c14b40b-b269-480f-a085-a394c902f0ba',
+                                    errorType: 'DUD-019',
+                                    message:
+                                        'Error uploading data: Missing required schema fields: Business Name,Geo Coordinates,Physical Address (Error ID: 8c14b40b-b269-480f-a085-a394c902f0ba)',
+                                    domain: '5d22ed458e774b5cbbed7e3335e86975',
+                                    state: {
+                                        missingFields: ['Business Name', 'Geo Coordinates', 'Physical Address'],
+                                        fileStatus: 'not uploaded',
+                                    },
+                                    status: 'Error',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -497,6 +544,7 @@ export const openApiSpec = createDocument({
             ScrapePagesSchema,
             GetScrapeDataSchema,
             MoveS3DataToDudaSchema,
+            ToggleBusinessSchema,
             ErrorTypes: {
                 type: 'string',
                 enum: Object.keys(errorTypes),

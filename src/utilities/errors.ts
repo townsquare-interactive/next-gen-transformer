@@ -56,6 +56,7 @@ interface DataUploadErrorType extends ErrorClass {
         fileStatus: string
         responseStatus?: number
         errorCode?: string
+        missingFields?: string[]
     } & ErrorState
 }
 
@@ -141,6 +142,7 @@ export const handleError = (err: BaseError, res: Response, url: string = '', sen
     const errorData = {
         errorType: err.errorType,
         state: err.state,
+        error: err,
     }
 
     const errorIDMessage = ` (Error ID: ${errorID})`

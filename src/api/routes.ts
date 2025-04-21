@@ -37,5 +37,5 @@ router.post('/save', CMSController.save)
 // Duda routes
 router.post('/duda-create-page', DudaController.createPage)
 router.post('/duda-create-location', DudaController.createLocation)
-
+router.patch('/duda-toggle-business-schema', DudaController.changeBusinessSchemaStatus)
 export default router

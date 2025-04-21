@@ -1,6 +1,10 @@
 import { Request, Response } from 'express'
 import { createDudaLocation, createDudaPage } from '../../services/duda-api.js'
 import { PageObject, LocationObject } from '../../types/duda-api-type.js'
+import { handleError } from '../../utilities/errors.js'
+import { toggleBusinessSchema } from '../../services/duda/toggleBusinessSchema.js'
+import { ToggleBusinessSchema } from '../../schema/input-zod.js'
+import { zodDataParse } from '../../schema/utils-zod.js'
 
 /**
  * Controller to create a new Duda page.
@@ -114,5 +118,16 @@ export const createLocation = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error creating Duda location:', error)
         res.status(500).json({ success: false, error: error })
+    }
+}
+
+export const changeBusinessSchemaStatus = async (req: Request, res: Response) => {
+    const validatedRequest = zodDataParse(req.body, ToggleBusinessSchema, 'input')
+
+    try {
+        const response = await toggleBusinessSchema(validatedRequest.siteName, validatedRequest.toggleOption)
+        return res.json({ data: response })
+    } catch (err) {
+        handleError(err, res)
     }
 }
