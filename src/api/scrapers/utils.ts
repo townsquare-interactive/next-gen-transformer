@@ -117,7 +117,7 @@ export const updateImageObjWithLogo = (logoAnalysis: string | null, imageFiles: 
             // Update the type to 'logo' for all matching objects in the imageFiles array
             imageFiles.forEach((imageFile) => {
                 const normalizedImageLink = imageFile.originalImageLink.replace(/^(?:https?:)?\/\//, '')
-                if (normalizedImageLink === normalizedLogoSrc) {
+                if (normalizedImageLink.includes(normalizedLogoSrc)) {
                     imageFile.type = 'logo'
                     console.log('Matched logo exactly:', imageFile.originalImageLink)
                 }
