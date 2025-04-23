@@ -86,8 +86,8 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
                 args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-web-security'],
                 env: {
                     ...process.env,
-                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs20.x',
-                    AWS_LAMBDA_JS_RUNTIME: 'nodejs20.x',
+                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs22.x',
+                    AWS_LAMBDA_JS_RUNTIME: 'nodejs22.x',
                 },
             })
 
