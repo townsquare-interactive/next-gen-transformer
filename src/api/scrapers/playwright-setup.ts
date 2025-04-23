@@ -1,6 +1,6 @@
 import chromium from '@sparticuz/chromium'
 import { addExtra } from 'playwright-extra'
-import { chromium as pw, Browser, Page } from 'playwright'
+import { chromium as pw, BrowserContext, Page } from 'playwright'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 //import { chromium as playwrightChromium } from 'playwright'
 //import { chromium as playwrightChromium } from 'playwright-extra'
@@ -23,6 +23,8 @@ import 'puppeteer-extra-plugin-stealth/evasions/window.outerdimensions/index.js'
 import 'puppeteer-extra-plugin-stealth/evasions/defaultArgs/index.js'
 import 'puppeteer-extra-plugin-user-preferences/index.js'
 import 'puppeteer-extra-plugin-user-data-dir/index.js'
+import { rm } from 'fs/promises'
+import { v4 as uuidv4 } from 'uuid'
 
 export const defaultHeaders = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -37,44 +39,73 @@ export const defaultHeaders = {
     'Sec-Fetch-User': '?1',
 }
 
-export async function setupBrowser(): Promise<{ browser: Browser; page: Page }> {
-    const playwrightChromium = addExtra(pw)
-    playwrightChromium.use(
-        StealthPlugin({
-            enabledEvasions: new Set([
-                'chrome.runtime',
-                'defaultArgs',
-                'iframe.contentWindow',
-                'media.codecs',
-                'navigator.languages',
-                'navigator.permissions',
-                'navigator.plugins',
-                'navigator.vendor',
-                'navigator.webdriver',
-                'sourceurl',
-                'user-agent-override',
-                'webgl.vendor',
-                'window.outerdimensions',
-            ]),
-        })
-    )
+export async function setupBrowser(): Promise<{ browser: BrowserContext; page: Page }> {
+    // Generate unique temp directory for this browser instance
+    const tmpDirKey = uuidv4()
+    const userDataDir = `/tmp/playwright_${tmpDirKey}`
 
-    const browser = await playwrightChromium.launch({
-        headless: true,
-        executablePath: process.env.AWS_EXECUTION_ENV ? await chromium.executablePath() : undefined,
-        args: [
-            ...chromium.args,
-            '--no-sandbox',
-            '--disable-gpu',
-            '--disable-setuid-sandbox',
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins,site-per-process',
-            '--disable-site-isolation-trials',
-        ],
-    })
+    try {
+        const playwrightChromium = addExtra(pw)
+        playwrightChromium.use(
+            StealthPlugin({
+                enabledEvasions: new Set([
+                    'chrome.runtime',
+                    'defaultArgs',
+                    'iframe.contentWindow',
+                    'media.codecs',
+                    'navigator.languages',
+                    'navigator.permissions',
+                    'navigator.plugins',
+                    'navigator.vendor',
+                    'navigator.webdriver',
+                    'sourceurl',
+                    'user-agent-override',
+                    'webgl.vendor',
+                    'window.outerdimensions',
+                ]),
+            })
+        )
 
-    const page = await browser.newPage()
-    await page.setExtraHTTPHeaders(defaultHeaders)
+        const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION
+        if (isServerless) {
+            const executablePath = await chromium.executablePath()
 
-    return { browser, page }
+            // Create browser context with persistent storage
+            const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
+                headless: true,
+                executablePath,
+                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+            })
+
+            const page = await browser.newPage()
+            await page.setExtraHTTPHeaders(defaultHeaders)
+
+            return {
+                browser,
+                page,
+            }
+        } else {
+            // Non-serverless setup
+            const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            })
+
+            const page = await browser.newPage()
+            await page.setExtraHTTPHeaders(defaultHeaders)
+
+            return {
+                browser,
+                page,
+            }
+        }
+    } catch (error) {
+        // Clean up temp dir if browser launch fails
+        try {
+            await rm(userDataDir, { recursive: true, force: true })
+        } catch (cleanupError) {
+            console.log('Cleanup warning:', cleanupError)
+        }
+        throw error
+    }
 }

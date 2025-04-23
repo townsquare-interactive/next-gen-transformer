@@ -1,4 +1,4 @@
-import { Browser, Page, Response } from 'playwright'
+import { BrowserContext, Page, Response } from 'playwright'
 import path from 'path'
 import type { ScrapeResult, Settings } from '../../services/scrape-service.js'
 import {
@@ -165,7 +165,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     }
 }
 
-const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<ImageFiles[]> => {
+const scrapeImagesFromPage = async (page: Page, browser: BrowserContext): Promise<ImageFiles[]> => {
     try {
         const imageFiles: ImageFiles[] = []
         const imagePromises: Promise<void>[] = []
@@ -194,7 +194,7 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                 }
 
                 // Skip if page or browser is already closed
-                if (page.isClosed() || browser.isConnected() === false) {
+                if (page.isClosed()) {
                     console.warn(`Skipping response.body() because the page or browser is closed: ${url.href}`)
                     return
                 }

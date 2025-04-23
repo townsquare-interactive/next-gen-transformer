@@ -297,7 +297,7 @@ export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string)
 
     //remove links from same domain in other section
     if (businessInfo?.links?.other) {
-        const extLinks = businessInfo.links.other.filter((link: string) => !link.includes(url))
+        const extLinks = businessInfo.links.other.filter((link: string | null) => !link?.includes(url))
         businessInfo.links.other = extLinks
     }
 
@@ -734,6 +734,7 @@ export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoDa
 
     socialLinks.forEach((link) => {
         try {
+            if (!link) return
             const url = new URL(link)
             // Get the path without query parameters
             const pathSegments = url.pathname.split('/').filter(Boolean)

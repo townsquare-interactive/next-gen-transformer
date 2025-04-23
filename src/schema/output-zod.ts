@@ -563,8 +563,8 @@ const ScreenshotDataSchema = z.object({
     phoneNumber: z.string().nullable(),
     hours: HoursSchema,
     links: z.object({
-        socials: z.array(z.string()),
-        other: z.array(z.string()),
+        socials: z.array(z.string().nullable()).nullable(),
+        other: z.array(z.string().nullable()).nullable(),
     }),
     styles: z.object({
         fonts: z
