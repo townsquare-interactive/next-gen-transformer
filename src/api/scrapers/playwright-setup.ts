@@ -26,6 +26,16 @@ import 'puppeteer-extra-plugin-user-data-dir/index.js'
 import { rm } from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
+// Configure Chromium at module level - this was missing in new version
+chromium.setHeadlessMode = true
+chromium.setGraphicsMode = false
+
+// Set AWS Lambda environment at module level
+if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs22.x'
+    process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
+}
+
 export const defaultHeaders = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -67,23 +77,31 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
         )
 
         const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION
+
         if (isServerless) {
-            // Set AWS environment variables if they're not set (for fluid compute)
-            if (!process.env.AWS_EXECUTION_ENV) {
-                process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs22.x'
-            }
-            if (!process.env.AWS_LAMBDA_JS_RUNTIME) {
-                process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
-            }
-
+            console.log('Running in serverless environment')
             const executablePath = await chromium.executablePath()
-            console.log('isServerless', executablePath)
+            console.log('Chrome executable path:', executablePath)
 
-            // Create browser context with persistent storage
+            // Ensure Chrome binary is executable in Vercel - from old code
+            if (process.env.VERCEL) {
+                const { chmod } = await import('node:fs/promises')
+                await chmod(executablePath, '755').catch((err) => console.error('Failed to chmod Chrome binary:', err))
+            }
+
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
                 executablePath,
-                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-web-security'],
+                args: [
+                    ...chromium.args,
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process',
+                    '--disable-site-isolation-trials',
+                ],
                 env: {
                     ...process.env,
                     AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs22.x',
@@ -103,7 +121,14 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
             // Non-serverless setup
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+                args: [
+                    '--no-sandbox',
+                    '--disable-gpu',
+                    '--disable-setuid-sandbox',
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process',
+                    '--disable-site-isolation-trials',
+                ],
             })
 
             const page = await browser.newPage()
@@ -115,11 +140,18 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
             }
         }
     } catch (error) {
-        // Clean up temp dir if browser launch fails
         try {
             await rm(userDataDir, { recursive: true, force: true })
         } catch (cleanupError) {
             console.log('Cleanup warning:', cleanupError)
+        }
+        console.error('Error launching browser:', error)
+        if (error instanceof Error) {
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name,
+            })
         }
         throw error
     }
