@@ -69,12 +69,13 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
         const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION
         if (isServerless) {
             const executablePath = await chromium.executablePath()
+            console.log('isServerless', executablePath)
 
             // Create browser context with persistent storage
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
                 executablePath,
-                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-web-security'],
             })
 
             const page = await browser.newPage()
@@ -85,6 +86,7 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
                 page,
             }
         } else {
+            console.log('not serverless')
             // Non-serverless setup
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
