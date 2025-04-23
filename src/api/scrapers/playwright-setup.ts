@@ -32,8 +32,10 @@ chromium.setGraphicsMode = false
 
 // Set AWS Lambda environment at module level
 if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs22.x'
-    process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
+    Object.assign(process.env, {
+        AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs22.x',
+        AWS_LAMBDA_JS_RUNTIME: 'nodejs22.x',
+    })
 }
 
 export const defaultHeaders = {
@@ -80,18 +82,10 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
 
         if (isServerless) {
             console.log('Running in serverless environment')
-            const executablePath = await chromium.executablePath()
-            console.log('Chrome executable path:', executablePath)
-
-            // Ensure Chrome binary is executable in Vercel - from old code
-            if (process.env.VERCEL) {
-                const { chmod } = await import('node:fs/promises')
-                await chmod(executablePath, '755').catch((err) => console.error('Failed to chmod Chrome binary:', err))
-            }
 
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
-                executablePath,
+                executablePath: await chromium.executablePath(),
                 args: [
                     ...chromium.args,
                     '--no-sandbox',
@@ -101,6 +95,8 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
                     '--disable-web-security',
                     '--disable-features=IsolateOrigins,site-per-process',
                     '--disable-site-isolation-trials',
+                    '--single-process', // Add this for Lambda
+                    '--no-zygote', // Add this for Lambda
                 ],
                 env: {
                     ...process.env,
