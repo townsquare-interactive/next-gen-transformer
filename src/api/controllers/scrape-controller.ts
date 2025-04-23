@@ -33,9 +33,9 @@ export const scrapePages = async (req: Request, res: Response) => {
         checkAuthToken(req)
         const validatedRequest = zodDataParse(req.body, ScrapePagesSchema, 'scrapedPagesInput')
         const scrapeSettings = getScrapeSettings(validatedRequest)
-        const scrapedData = await scrapeAssetsFromSite(scrapeSettings, validatedRequest.pages)
-        const saveResponse = await save(scrapeSettings, scrapedData)
-        res.json(saveResponse)
+        //const scrapedData = await scrapeAssetsFromSite(scrapeSettings, validatedRequest.pages)
+        //const saveResponse = await save(scrapeSettings, scrapedData)
+        res.json('complete')
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
@@ -74,6 +74,7 @@ export const scrapeSite = async (req: Request, res: Response) => {
             const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
             const saveResponse = await save(scrapeSettings, scrapedData)
             res.json(saveResponse)
+            //res.json('complete')
         }
     } catch (err) {
         err.state = { ...err.state, req: req.body }

@@ -1,5 +1,5 @@
 config:
-    target: 'https://apex-transformer-git-ai-scrape-townsquare-interactive.vercel.app'
+    target: 'https://apex-transformer-dauwib893-townsquare-interactive.vercel.app'
     phases:
         # Single phase to simulate burst of concurrent requests
         - name: 'Concurrent requests burst'
@@ -10,7 +10,7 @@ config:
     defaults:
         headers:
             Content-Type: 'application/json'
-            Authorization: 'Bearer {{ $processEnvironment.TRANSFORMER_API_KEY }}'
+            Authorization: 'Bearer a430451139f1356c2f2a5d2ca455e34b3'
 
     http:
         timeout: 300000 # 5 minutes for HTTP request timeout
@@ -25,10 +25,11 @@ scenarios:
           - post:
                 url: '/api/cms-routes/scrape-site'
                 json:
-                    url: 'https://housetohomemi.com/'
-                    saveImages: true
-                    saveMethod: 'dudaUpload'
-                    uploadLocation: '007a0b1e3b8a4558acadef1a80adaec3'
+                    #url: 'https://mertscharlotte.com/'
+                    url: 'https://aquapoolandspaoh.com/'
+                    #saveImages: true
+                    #saveMethod: 'dudaUpload'
+                    #uploadLocation: '007a0b1e3b8a4558acadef1a80adaec3'
                 expect:
                     - statusCode: 200
                     - contentType: json

@@ -18,6 +18,7 @@ import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
 
 import { setupBrowser } from './playwright-setup.js'
+import { rm } from 'fs/promises'
 
 export interface ImageFiles {
     imageFileName: string
@@ -59,109 +60,178 @@ async function scrollToLazyLoadImages(page: Page, millisecondsBetweenScrolling: 
 
 // Main scrape function
 export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {
-    const { browser, page } = await setupBrowser()
-    const isHomePage = n === 0
-
-    //scraping site images
-    let imageFiles: ImageFiles[] = []
-
-    //limit image scraping to the first 22 pages found
-    if (settings.scrapeImages && n < 23) {
-        console.log('Scraping images...')
-        imageFiles = await scrapeImagesFromPage(page, browser)
-    } else {
-        console.log('Skipping image scrape.', settings.url)
-    }
-
+    let browser, page, tempDir
     try {
-        const response = await page.goto(settings.url, {
-            timeout: settings.timeoutLength || 60000,
-            waitUntil: 'domcontentloaded',
-        })
+        const isHomePage = n === 0
+        const setup = await setupBrowser()
+        browser = setup.browser
+        page = setup.page
+        tempDir = setup._tempDir
 
-        if (isHomePage) {
-            await page.waitForTimeout(4000)
+        //scraping site images
+        let imageFiles: ImageFiles[] = []
+
+        //limit image scraping to the first 22 pages found
+        if (settings.scrapeImages && n < 23) {
+            console.log('Scraping images...')
+            imageFiles = await scrapeImagesFromPage(page, browser)
+        } else {
+            console.log('Skipping image scrape.', settings.url)
         }
-        // Check if we're still on a challenge page
-        const pageTitle = await page.title()
-        if (pageTitle.includes('Just a moment')) {
-            console.log('Detected Cloudflare challenge page, waiting longer...', settings.url)
-            await page.waitForTimeout(10000)
-        }
 
-        console.log('Page loaded, proceeding with scrape...')
-
-        if (!response || !response.ok()) {
-            if (response) {
-                console.error(`Response status: ${response.status()}`)
-                console.error(`Response headers:`, response.headers())
-                console.error(`Response body:`, await response.text().catch(() => '[Unable to read body]'))
-            } else {
-                console.error(`Response object is null/undefined`)
+        try {
+            // Before using the page, verify it's still valid
+            /*             if (!browser.isConnected() || page.isClosed()) {
+                console.log('Browser or page disconnected, creating new instance')
+                const newSetup = await setupBrowser()
+                browser = newSetup.browser
+                page = newSetup.page
             }
-            throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
-        }
-
-        //extract form data from pages
-        const formData = await extractFormData(page)
-
-        let screenshotBuffer
-        //home page or contact page
-        if (isHomePage) {
-            screenshotBuffer = await page.screenshot({ fullPage: true })
-
-            imageFiles.push({
-                imageFileName: 'home-screenshot.jpg',
-                fileContents: screenshotBuffer,
-                url: null, //setting this to undefined prevents Duda uploading
-                hashedFileName: '',
-                originalImageLink: '',
-                fileExtension: '.jpg',
+ */
+            const response = await page.goto(settings.url, {
+                timeout: settings.timeoutLength || 60000,
+                waitUntil: 'domcontentloaded',
             })
-        }
 
-        const seoData = await page.evaluate(() => {
+            if (isHomePage) {
+                await page.waitForTimeout(4000)
+            }
+            // Check if we're still on a challenge page
+            const pageTitle = await page.title()
+            if (pageTitle.includes('Just a moment')) {
+                console.log('Detected Cloudflare challenge page, waiting longer...', settings.url)
+                await page.waitForTimeout(10000)
+            }
+
+            console.log('Page loaded, proceeding with scrape...')
+
+            if (!response || !response.ok()) {
+                if (response) {
+                    console.error(`Response status: ${response.status()}`)
+                    console.error(`Response headers:`, response.headers())
+                    console.error(`Response body:`, await response.text().catch(() => '[Unable to read body]'))
+                } else {
+                    console.error(`Response object is null/undefined`)
+                }
+                throw new Error(`Failed to load the page: ${settings.url} (status: ${response?.status()})`)
+            }
+
+            //extract form data from pages
+            const formData = await extractFormData(page)
+
+            let screenshotBuffer
+            //home page or contact page
+            if (isHomePage) {
+                try {
+                    // Wait a bit longer for the page to stabilize
+                    await page.waitForLoadState('networkidle').catch(() => console.log('Timeout waiting for network idle'))
+
+                    // Log memory usage before screenshot
+                    console.log('Taking screenshot...')
+
+                    // Try with a more conservative screenshot approach
+                    screenshotBuffer = await page
+                        .screenshot({
+                            fullPage: true,
+                            timeout: 30000, // 30 second timeout
+                            scale: 'device', // Use device scale instead of trying to scale up
+                        })
+                        .catch(async (error) => {
+                            console.error('Screenshot failed:', error)
+                            // Fallback to viewport screenshot if full page fails
+                            return page.screenshot({
+                                fullPage: false,
+                                timeout: 15000,
+                            })
+                        })
+
+                    console.log('Screenshot captured successfully')
+
+                    imageFiles.push({
+                        imageFileName: 'home-screenshot.jpg',
+                        fileContents: screenshotBuffer,
+                        url: null,
+                        hashedFileName: '',
+                        originalImageLink: '',
+                        fileExtension: '.jpg',
+                    })
+                } catch (error) {
+                    console.error('Failed to capture screenshot:', error)
+                    // Continue without screenshot rather than failing the whole scrape
+                    screenshotBuffer = null
+                }
+            }
+
+            const seoData = await page.evaluate(() => {
+                return {
+                    title: document.title || '',
+                    metaDescription: document.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+                    metaKeywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
+                    ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '',
+                    ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '',
+                }
+            })
+
+            let scrapeAnalysisResult
+            if (isHomePage && settings.analyzeHomepageData && screenshotBuffer) {
+                console.log('Using AI to analyze page...')
+                const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
+                scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
+
+                if (scrapeAnalysisResult.logoTag) {
+                    console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
+                    imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
+                }
+            }
+
+            //this step must be done last as it modies the DOM
+            const pageTextContent = await extractPageContent(page)
+
+            //stop lazy load image processing after 10 pages for speed reasons
+            if (settings.scrapeImages && n < 11) {
+                await scrollToLazyLoadImages(page, 1000, settings.url)
+            }
+
             return {
-                title: document.title || '',
-                metaDescription: document.querySelector('meta[name="description"]')?.getAttribute('content') || '',
-                metaKeywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
-                ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '',
-                ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '',
+                imageList: imageFiles.map((file) => file.originalImageLink),
+                imageFiles,
+                pageSeo: { ...seoData, pageUrl: settings.url },
+                businessInfo: scrapeAnalysisResult,
+                content: pageTextContent,
+                forms: formData,
             }
-        })
-
-        let scrapeAnalysisResult
-        if (isHomePage && settings.analyzeHomepageData && screenshotBuffer) {
-            console.log('Using AI to analyze page...')
-            const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
-            scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
-
-            if (scrapeAnalysisResult.logoTag) {
-                console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
-                imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
-            }
-        }
-
-        //this step must be done last as it modies the DOM
-        const pageTextContent = await extractPageContent(page)
-
-        //stop lazy load image processing after 10 pages for speed reasons
-        if (settings.scrapeImages && n < 11) {
-            await scrollToLazyLoadImages(page, 1000, settings.url)
-        }
-        await browser.close()
-
-        return {
-            imageList: imageFiles.map((file) => file.originalImageLink),
-            imageFiles,
-            pageSeo: { ...seoData, pageUrl: settings.url },
-            businessInfo: scrapeAnalysisResult,
-            content: pageTextContent,
-            forms: formData,
+        } catch (error) {
+            console.error(`Detailed error info:`, {
+                //browserConnected: browser?.isConnected(),
+                //pageIsClosed: page?.isClosed(),
+                error: error.message,
+                stack: error.stack,
+            })
+            throw error
         }
     } catch (error) {
-        console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)
+        console.error(`Detailed error info:`, {
+            //browserConnected: browser?.isConnected(),
+            //pageIsClosed: page?.isClosed(),
+            error: error.message,
+            stack: error.stack,
+        })
         throw error
+    } finally {
+        try {
+            console.log('asset cleanup time')
+            // Close browser first
+            if (browser) {
+                await browser.close().catch(console.error)
+            }
+
+            // Clean up only this instance's temp directory
+            if (tempDir) {
+                await rm(tempDir, { recursive: true, force: true }).catch((err) => console.log(`Cleanup warning for ${tempDir}:`, err))
+            }
+        } catch (cleanupError) {
+            console.error('Cleanup error:', cleanupError)
+        }
     }
 }
 
@@ -194,10 +264,10 @@ const scrapeImagesFromPage = async (page: Page, browser: Browser): Promise<Image
                 }
 
                 // Skip if page or browser is already closed
-                if (page.isClosed() || browser.isConnected() === false) {
+                /*                 if (page.isClosed() || browser.isConnected() === false) {
                     console.warn(`Skipping response.body() because the page or browser is closed: ${url.href}`)
                     return
-                }
+                } */
 
                 // Process image response asynchronously and store the promise
                 const imageProcessingPromise = (async () => {

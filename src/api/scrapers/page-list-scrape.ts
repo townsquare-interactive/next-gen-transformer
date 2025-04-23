@@ -1,10 +1,17 @@
+import { rm } from 'fs/promises'
 import type { Settings } from '../../services/scrape-service.js'
 import { setupBrowser } from './playwright-setup.js'
 
 export async function findPages(settings: Settings) {
+    let browser, page, tempDir
     try {
+        const setup = await setupBrowser()
+        browser = setup.browser
+        page = setup.page
+        tempDir = setup._tempDir // Get the temp directory path
+
         const foundUrls = new Set<string>()
-        const { browser, page } = await setupBrowser()
+
         console.log(`Loading main page: ${settings.url}`)
 
         const response = await page.goto(settings.url, {
@@ -21,7 +28,6 @@ export async function findPages(settings: Settings) {
             } else {
                 console.error(`Response object is null/undefined`)
             }
-            await browser.close()
             throw new Error(`Failed to load the page: ${settings.url}`)
         }
 
@@ -80,11 +86,26 @@ export async function findPages(settings: Settings) {
         //console.log(`Found ${filteredUrlArray.length} filteredpages:`, filteredUrlArray)
 
         console.log(`Found ${urlArray.length} pages:`, urlArray)
-        await browser.close()
 
         return urlArray
     } catch (error) {
         throw error
+    } finally {
+        try {
+            console.log('asset cleanup time list')
+
+            // Close browser first
+            if (browser) {
+                await browser.close().catch(console.error)
+            }
+
+            // Then clean up only this instance's temp directory
+            if (tempDir) {
+                await rm(tempDir, { recursive: true, force: true }).catch((err) => console.log(`Cleanup warning for ${tempDir}:`, err))
+            }
+        } catch (cleanupError) {
+            console.error('Cleanup error:', cleanupError)
+        }
     }
 }
 
