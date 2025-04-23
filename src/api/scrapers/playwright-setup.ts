@@ -68,6 +68,14 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
 
         const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION
         if (isServerless) {
+            // Set AWS environment variables if they're not set (for fluid compute)
+            if (!process.env.AWS_EXECUTION_ENV) {
+                process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs22.x'
+            }
+            if (!process.env.AWS_LAMBDA_JS_RUNTIME) {
+                process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
+            }
+
             const executablePath = await chromium.executablePath()
             console.log('isServerless', executablePath)
 
@@ -76,6 +84,11 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
                 headless: true,
                 executablePath,
                 args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-web-security'],
+                env: {
+                    ...process.env,
+                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs20.x',
+                    AWS_LAMBDA_JS_RUNTIME: 'nodejs20.x',
+                },
             })
 
             const page = await browser.newPage()
