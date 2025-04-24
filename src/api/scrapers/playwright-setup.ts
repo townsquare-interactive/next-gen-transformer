@@ -26,16 +26,6 @@ import 'puppeteer-extra-plugin-user-data-dir/index.js'
 import { rm } from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
-// Configure Chromium at module level
-/* chromium.setHeadlessMode = true
-chromium.setGraphicsMode = false
-
-// Set AWS Lambda environment - use the exact same env vars that worked
-if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs20.x'
-    process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
-} */
-
 export const defaultHeaders = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -50,7 +40,7 @@ export const defaultHeaders = {
 }
 
 export async function setupBrowser(): Promise<{ browser: BrowserContext; page: Page }> {
-    // Keep the temp directory approach that fixed our earlier issues
+    // Generate unique temp directory for this browser instance
     const tmpDirKey = uuidv4()
     const userDataDir = `/tmp/playwright_${tmpDirKey}`
 
@@ -77,56 +67,28 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
         )
 
         const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION
-
         if (isServerless) {
-            console.log('Running in serverless environment')
             const executablePath = await chromium.executablePath()
-            console.log('Chrome executable path:', executablePath)
 
-            if (process.env.VERCEL) {
-                const { chmod } = await import('node:fs/promises')
-                await chmod(executablePath, '755').catch((err) => console.error('Failed to chmod Chrome binary:', err))
-            }
-
-            // Use launchPersistentContext but with simpler args like the working version
+            // Create browser context with persistent storage
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
-                executablePath: await chromium.executablePath(),
-                args: [
-                    ...chromium.args,
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process',
-                    '--disable-site-isolation-trials',
-                    '--single-process', // Add this for Lambda
-                    '--no-zygote', // Add this for Lambda
-                ],
-                /*  env: {
-                    ...process.env,
-                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs20.x',
-                    AWS_LAMBDA_JS_RUNTIME: 'nodejs22.x',
-                }, */
+                executablePath,
+                args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
             })
 
             const page = await browser.newPage()
             await page.setExtraHTTPHeaders(defaultHeaders)
 
-            return { browser, page }
+            return {
+                browser,
+                page,
+            }
         } else {
             // Non-serverless setup
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-gpu',
-                    '--disable-setuid-sandbox',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process',
-                    '--disable-site-isolation-trials',
-                ],
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
             })
 
             const page = await browser.newPage()
@@ -138,18 +100,11 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
             }
         }
     } catch (error) {
+        // Clean up temp dir if browser launch fails
         try {
             await rm(userDataDir, { recursive: true, force: true })
         } catch (cleanupError) {
             console.log('Cleanup warning:', cleanupError)
-        }
-        console.error('Error launching browser:', error)
-        if (error instanceof Error) {
-            console.error('Error details:', {
-                message: error.message,
-                stack: error.stack,
-                name: error.name,
-            })
         }
         throw error
     }
