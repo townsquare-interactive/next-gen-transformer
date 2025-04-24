@@ -26,6 +26,24 @@ app.use((req, res, next) => {
     })
 })
 
+// Add timeout middleware here
+app.use((req, res, next) => {
+    // Set timeout to 13 minutes (780000ms)
+    res.setTimeout(780000, () => {
+        console.log('Request has timed out.')
+        if (!res.headersSent) {
+            res.status(504).send('Request timeout')
+        }
+    })
+
+    // Add keep-alive headers
+    res.setHeader('Connection', 'keep-alive')
+    res.setHeader('Keep-Alive', 'timeout=780')
+    res.setHeader('Cache-Control', 'no-cache, no-transform')
+
+    next()
+})
+
 app.use(express.json({ limit: '80mb' }))
 app.use(express.urlencoded({ limit: '80mb', extended: true, parameterLimit: 5000000 }))
 app.use('/api/cms-routes', routes)

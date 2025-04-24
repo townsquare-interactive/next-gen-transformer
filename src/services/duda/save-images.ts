@@ -158,12 +158,11 @@ export function processSringArrayForDuda(imageFiles: string[], logoUrl?: string)
         })
     })
 
-    //add logo src seperately from s3 url
-    if (logoUrl) {
+    // Only add logoUrl if it hasn't been processed already
+    if (logoUrl && !seenUrls.has(logoUrl)) {
         processedUrls.push({
             resource_type: 'IMAGE',
             src: logoUrl,
-            //folder: 'logos',
             folder: dudaImageFolder,
         })
     }
