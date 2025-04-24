@@ -26,17 +26,15 @@ import 'puppeteer-extra-plugin-user-data-dir/index.js'
 import { rm } from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
-// Configure Chromium at module level - this was missing in new version
-chromium.setHeadlessMode = true
+// Configure Chromium at module level
+/* chromium.setHeadlessMode = true
 chromium.setGraphicsMode = false
 
-// Set AWS Lambda environment at module level
+// Set AWS Lambda environment - use the exact same env vars that worked
 if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    Object.assign(process.env, {
-        AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs22.x',
-        AWS_LAMBDA_JS_RUNTIME: 'nodejs22.x',
-    })
-}
+    process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs20.x'
+    process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs22.x'
+} */
 
 export const defaultHeaders = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -52,7 +50,7 @@ export const defaultHeaders = {
 }
 
 export async function setupBrowser(): Promise<{ browser: BrowserContext; page: Page }> {
-    // Generate unique temp directory for this browser instance
+    // Keep the temp directory approach that fixed our earlier issues
     const tmpDirKey = uuidv4()
     const userDataDir = `/tmp/playwright_${tmpDirKey}`
 
@@ -82,7 +80,15 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
 
         if (isServerless) {
             console.log('Running in serverless environment')
+            const executablePath = await chromium.executablePath()
+            console.log('Chrome executable path:', executablePath)
 
+            if (process.env.VERCEL) {
+                const { chmod } = await import('node:fs/promises')
+                await chmod(executablePath, '755').catch((err) => console.error('Failed to chmod Chrome binary:', err))
+            }
+
+            // Use launchPersistentContext but with simpler args like the working version
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
                 executablePath: await chromium.executablePath(),
@@ -98,22 +104,18 @@ export async function setupBrowser(): Promise<{ browser: BrowserContext; page: P
                     '--single-process', // Add this for Lambda
                     '--no-zygote', // Add this for Lambda
                 ],
-                env: {
+                /*  env: {
                     ...process.env,
-                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs22.x',
+                    AWS_EXECUTION_ENV: 'AWS_Lambda_nodejs20.x',
                     AWS_LAMBDA_JS_RUNTIME: 'nodejs22.x',
-                },
+                }, */
             })
 
             const page = await browser.newPage()
             await page.setExtraHTTPHeaders(defaultHeaders)
 
-            return {
-                browser,
-                page,
-            }
+            return { browser, page }
         } else {
-            console.log('not serverless')
             // Non-serverless setup
             const browser = await playwrightChromium.launchPersistentContext(userDataDir, {
                 headless: true,
