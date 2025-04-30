@@ -21,7 +21,7 @@ export async function savePageToDuda(siteId: string, page: ScrapedPageData) {
         const response = await createDudaPage(siteId, transformedPageData)
         console.log(`Page successfully saved to Duda for site: ${siteId}`, response)
     } catch (error) {
-        console.error(`Error saving page to Duda for site: ${siteId}`, error)
+        console.warn(`Error saving page to Duda for site: ${siteId}`, error)
     }
 }
 

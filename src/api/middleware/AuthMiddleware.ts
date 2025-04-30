@@ -1,7 +1,7 @@
 import { AuthorizationError, ValidationError } from '../../utilities/errors.js'
 import { Request } from 'express'
 
-export default (req: Request): void => {
+export default (req: Request): { vercelLogUrl?: string } => {
     try {
         const authHeader = req.headers['authorization']
         if (!authHeader) {
@@ -20,6 +20,23 @@ export default (req: Request): void => {
                 state: {},
             })
         }
+
+        //get vercel request id url if available
+        const requestId = req.headers['x-vercel-id']
+        console.log('requestId', requestId)
+        let vercelLogUrl: string | undefined
+        if (requestId) {
+            try {
+                const vercelLogBaseUrl = 'https://vercel.com/townsquare-interactive/apex-transformer/logs?selectedLogId='
+                const strippedRequestId = requestId.toString().split('::')[1] // Split on '::' and take second part
+                vercelLogUrl = vercelLogBaseUrl + strippedRequestId
+                return { vercelLogUrl }
+            } catch (error) {
+                console.log('Failed to process Vercel request ID:', requestId, error)
+            }
+        }
+
+        return { vercelLogUrl }
     } catch (err) {
         if (err instanceof AuthorizationError) {
             throw err

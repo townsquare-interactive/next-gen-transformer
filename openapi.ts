@@ -73,6 +73,7 @@ export const openApiSpec = createDocument({
                                                 },
                                             },
                                         },
+                                        vercelLogUrl: { type: 'string' },
                                         failedImages: { type: 'array' },
                                         s3LogoUrl: { type: 'string' },
                                         scrapedPages: {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import checkAuthToken from '../middleware/AuthMiddleware.js'
+import middleware from '../middleware/AuthMiddleware.js'
 import { handleError } from '../../utilities/errors.js'
 import { createLandingPageFiles } from '../../translation-engines/landing.js'
 import { saveToS3 } from '../../output/save-to-s3.js'
@@ -14,7 +14,7 @@ const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '0' ? false : true
 
 export const createLanding = async (req: Request, res: Response) => {
     try {
-        checkAuthToken(req)
+        middleware(req)
         const { apexID, siteData, domainOptions } = validateLandingRequestData(req)
         const data = await createLandingPageFiles(siteData, apexID)
         const s3Res = await saveToS3({ ...data })
