@@ -23,7 +23,6 @@ export default (req: Request): { vercelLogUrl?: string } => {
 
         //get vercel request id url if available
         const requestId = req.headers['x-vercel-id']
-        console.log('requestId', requestId)
         let vercelLogUrl: string | undefined
         if (requestId) {
             try {

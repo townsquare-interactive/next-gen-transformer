@@ -84,6 +84,7 @@ export function transformColorsToDudaFormat(dudaColors: DudaColors, colors: Scra
 }
 
 export async function saveColorsToDuda(uploadLocation: string, colors: ScrapedColors) {
+    // @ts-expect-error (ignoring because duda type is incorrect)
     const dudaColors: DudaColors = await getDudaColors(uploadLocation) //must append new colors to existing colors
     const addedDudaColors = transformColorsToDudaFormat(dudaColors, colors)
 

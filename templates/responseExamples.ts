@@ -65,6 +65,7 @@ export const scrapeResponseExample = {
     dataUploadDetails: {
         imageUploadTotal: 31,
         failedImageCount: 0,
+        vercelLogUrl: 'https://vercel.com/townsquare-interactive/apex-transformer/logs?selectedLogId=1234567890',
         uploadedResources: [
             {
                 original_url: 'https://i0.wp.com/mertscharlotte.com/wp-content/uploads/2022/07/pic6.jpg?w=777&ssl=1',
