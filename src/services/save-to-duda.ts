@@ -1,7 +1,6 @@
 import { ScrapingError } from '../utilities/errors.js'
 import type { SavingScrapedData } from '../output/save-scraped-data.js'
 import { getDudaSite, updateSiteContent } from './duda-api.js'
-import { savePagesToDuda } from './duda/save-pages.js'
 import { saveBusinessInfoToDuda } from './duda/save-business-info.js'
 import { saveColorsToDuda } from './duda/save-colors.js'
 import { saveImages } from './duda/save-images.js'
@@ -26,10 +25,10 @@ export async function save(saveData: SavingScrapedData) {
         })
     }
 
-    if (saveData.siteData?.pages) {
+    /*     if (saveData.siteData?.pages) {
         const savePagesToDudaFunction = saveData.functions?.savePagesToDudaFunction || savePagesToDuda
         await savePagesToDudaFunction(settings.uploadLocation, saveData.siteData.pages)
-    }
+    } */
 
     if (saveData.siteData?.businessInfo?.styles.colors) {
         const saveColorsToDudaFunction = saveData.functions?.saveColorsToDudaFunction || saveColorsToDuda

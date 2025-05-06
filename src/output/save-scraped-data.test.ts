@@ -196,7 +196,6 @@ describe('save', () => {
         const mockSeoUpload = vi.fn().mockResolvedValue({})
         const mockUploadColors = vi.fn().mockResolvedValue({})
         const mockUploadBusinessInfo = vi.fn().mockResolvedValue(false)
-        const mockUploadPages = vi.fn().mockResolvedValue({})
 
         const settings: Settings = {
             saveImages: true,
@@ -215,7 +214,6 @@ describe('save', () => {
             seoUploadFunction: mockSeoUpload,
             saveColorsToDudaFunction: mockUploadColors,
             saveBusinessInfoToDudaFunction: mockUploadBusinessInfo,
-            savePagesToDudaFunction: mockUploadPages,
         })
 
         //mock functions to be called with correct arguments
@@ -223,7 +221,6 @@ describe('save', () => {
         expect(mockUploadColors).toHaveBeenCalledWith(settings.uploadLocation, mockBusinessInfo.styles.colors)
         expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo, false)
         expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages, settings)
-        expect(mockUploadPages).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.pages)
 
         //returned upload data
         expect(result).toHaveProperty('dataUploadDetails')
