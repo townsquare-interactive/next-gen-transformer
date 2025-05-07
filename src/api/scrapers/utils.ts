@@ -516,6 +516,18 @@ export const transformTextToDudaFormat = (
         customTexts.push(fontText)
     }
 
+    //add address into text section
+    const addressText = {
+        label: 'Address',
+        text:
+            !businessInfo?.address?.streetAddress && !businessInfo?.address?.city && !businessInfo?.address?.state
+                ? ''
+                : `${businessInfo?.address?.streetAddress ? businessInfo?.address?.streetAddress + '<br>' : ''}${businessInfo?.address?.city || ''}, ${
+                      businessInfo?.address?.state || ''
+                  }<br>${businessInfo?.address?.postalCode || ''}`,
+    }
+    customTexts.push(addressText)
+
     return customTexts
 }
 

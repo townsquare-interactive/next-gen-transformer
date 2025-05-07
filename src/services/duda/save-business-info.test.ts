@@ -592,6 +592,10 @@ describe('transformBusinessInfoToDudaFormat', () => {
                     { label: 'June Foot Spa', text: 'check stuff' },
                     { label: 'June Page 2', text: 'page 2 content' },
                     { label: 'Fonts', text: 'Header Fonts: Arial, Helvetica<br><br>Body Fonts: Arial, Helvetica' },
+                    {
+                        label: 'Address',
+                        text: '149-36 Northern Blvd<br>Flushing, <br>11354',
+                    },
                 ],
             },
             business_data: {
@@ -618,7 +622,12 @@ describe('transformBusinessInfoToDudaFormat', () => {
         const transformedResultCheck = {
             companyName: 'June Foot Spa',
             site_texts: {
-                custom: [],
+                custom: [
+                    {
+                        label: 'Address',
+                        text: '149-36 Northern Blvd<br>Flushing, <br>11354',
+                    },
+                ],
             },
             business_data: {
                 name: 'June Foot Spa',
