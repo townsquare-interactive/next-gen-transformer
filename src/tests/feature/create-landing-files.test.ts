@@ -189,7 +189,7 @@ describe('createLandingPageFiles', () => {
     })
 
     it('should throw a TransformError if an error occurs', async () => {
-        // @ts-ignore (ignoring because we are causing an error on purpose here)
+        // @ts-expect-error (ignoring because we are causing an error on purpose here)
         siteData.colors = null //change required value to null to cause error
 
         // Additional check to ensure the TransformError details

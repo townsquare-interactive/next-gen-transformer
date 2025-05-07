@@ -42,7 +42,10 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
                           },
                           "phoneNumber": "string or null",
                           "email": "string or null",
-                          "hours":{"MON": "string or null", "TUE": "string or null", "WED": "string or null","THU": "string or null","FRI": "string or null", "SAT": "string or null", "SUN": "string or null"},
+                          "hours":{
+                          "regularHours":{"MON": "string or null", "TUE": "string or null", "WED": "string or null","THU": "string or null","FRI": "string or null", "SAT": "string or null", "SUN": "string or null"},
+                          "is24Hours":boolean or false,
+                          },
                           "styles": {
                             "colors": {
                               "primaryColor": "hex or null",

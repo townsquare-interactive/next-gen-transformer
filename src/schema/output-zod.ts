@@ -539,6 +539,11 @@ export const HoursSchema = z
     })
     .nullable()
 
+export const ScrapedHoursSchema = z.object({
+    regularHours: HoursSchema,
+    is24Hours: z.boolean(),
+})
+
 const ColorsSchema = z.object({
     primaryColor: z.string().nullable().optional(),
     secondaryColor: z.string().nullable().optional(),
@@ -561,7 +566,7 @@ const ScreenshotDataSchema = z.object({
     }),
     email: z.string().email().nullable(),
     phoneNumber: z.string().nullable(),
-    hours: HoursSchema,
+    hours: ScrapedHoursSchema.nullable(),
     links: z.object({
         socials: z.array(z.string().nullable()).nullable(),
         other: z.array(z.string().nullable()).nullable(),
@@ -599,6 +604,7 @@ export type ScrapedPageData = z.infer<typeof ScrapedPageDataSchema>
 export type ScreenshotData = z.infer<typeof ScreenshotDataSchema>
 export type ScrapedForm = z.infer<typeof FormSchema>
 export type BusinessHours = z.infer<typeof HoursSchema>
+export type ScrapedHours = z.infer<typeof ScrapedHoursSchema>
 export type ScrapedColors = z.infer<typeof ColorsSchema>
 /*---------------------------End of scraping------------------------------*/
 

@@ -14,7 +14,6 @@ describe('save', () => {
 
     it('should throw an error when no uploadLocation is not provided instantly', async () => {
         const mockS3ImageResponse = 'https://example.com/image1.png'
-
         const mockImageUpload = vi.fn().mockImplementationOnce(() => mockS3ImageResponse)
         const mockSeoUpload = vi.fn().mockResolvedValue({})
 

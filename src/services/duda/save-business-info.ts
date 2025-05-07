@@ -5,7 +5,7 @@ import { createDudaLocation, getBusinessInfoFromDuda, uploadBusinessInfo } from 
 import { Settings } from '../scrape-service.js'
 import {
     combineSocialAccounts,
-    transformBusinessHours,
+    transformHoursToDudaFormat,
     transformTextToDudaFormat,
     transformSocialAccountsToDudaFormat,
     createCombinedAddress,
@@ -136,6 +136,7 @@ export function transformBusinessInfoDataToDudaLocations(
                 ? {
                       streetAddress: combinedBusinessAddress?.streetAddress ?? '',
                       city: combinedBusinessAddress?.city ?? '',
+                      region: combinedBusinessAddress?.state ?? '',
                       postalCode: combinedBusinessAddress?.postalCode ?? '',
                       country: 'US',
                   }
@@ -148,7 +149,7 @@ export function transformBusinessInfoDataToDudaLocations(
                 : null
             : currentLocationInfo?.business_hours && currentLocationInfo.business_hours.length > 0
             ? currentLocationInfo.business_hours
-            : transformBusinessHours(businessInfo?.hours) || undefined,
+            : transformHoursToDudaFormat(businessInfo?.hours) || undefined,
     }
     locations.push(firstLocation)
 
@@ -161,13 +162,14 @@ export function transformBusinessInfoDataToDudaLocations(
                 ? {
                       streetAddress: businessInfo?.address?.streetAddress ?? '',
                       city: businessInfo?.address?.city ?? '',
+                      region: businessInfo?.address?.state ?? '',
                       postalCode: businessInfo?.address?.postalCode ?? '',
                       country: businessInfo?.address?.country ?? 'US',
                   }
                 : undefined,
             logo_url: logoUrl,
             social_accounts: transformSocialAccountsToDudaFormat(businessInfo),
-            business_hours: transformBusinessHours(businessInfo?.hours),
+            business_hours: transformHoursToDudaFormat(businessInfo?.hours) || undefined,
         }
         locations.push(secondLocation)
     }

@@ -21,6 +21,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 city: 'Flushing',
                 postalCode: '11354',
                 country: 'US',
+                region: '',
             },
             logo_url: logoUrl,
             business_hours: [
@@ -56,13 +57,16 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
         const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
             ...mockBusinessInfoObject,
             hours: {
-                MON: '9:00am to 11:00pm',
-                TUE: '9:00am to 11:00pm',
-                WED: '8:00am - 12:00am',
-                THU: '9:00am - 11:00pm',
-                FRI: '9:00am - 11:00pm',
-                SAT: '10am - 10pm',
-                SUN: '10am - 10pm',
+                regularHours: {
+                    MON: '9:00am to 11:00pm',
+                    TUE: '9:00am to 11:00pm',
+                    WED: '8:00am - 12:00am',
+                    THU: '9:00am - 11:00pm',
+                    FRI: '9:00am - 11:00pm',
+                    SAT: '10am - 10pm',
+                    SUN: '11am–9pm', //use en-dash
+                },
+                is24Hours: false,
             },
         })
 
@@ -75,6 +79,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 city: 'Flushing',
                 postalCode: '11354',
                 country: 'US',
+                region: '',
             },
             logo_url: logoUrl,
             business_hours: [
@@ -84,11 +89,31 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 { days: ['THU'], open: '09:00', close: '23:00' },
                 { days: ['FRI'], open: '09:00', close: '23:00' },
                 { days: ['SAT'], open: '10:00', close: '22:00' },
-                { days: ['SUN'], open: '10:00', close: '22:00' },
+                { days: ['SUN'], open: '11:00', close: '21:00' },
             ],
             social_accounts: {},
         })
     })
+    it('should transform handle 24/7 hours format to Duda format', () => {
+        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
+            ...mockBusinessInfoObject,
+            hours: {
+                regularHours: {
+                    MON: null,
+                    TUE: null,
+                    WED: null,
+                    THU: null,
+                    FRI: null,
+                    SAT: null,
+                    SUN: null,
+                },
+                is24Hours: true,
+            },
+        })
+
+        expect(result[0].business_hours).toEqual([{ days: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'], open: '00:00', close: '24:00' }])
+    })
+
     it('should transform social accounts to duda format', () => {
         const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
             ...mockBusinessInfoObject,
@@ -177,13 +202,16 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 phoneNumber: '(929)5667799',
                 email: 'howareyoucolin@gmail.com',
                 hours: {
-                    MON: '3:00am to 2:00pm' as const,
-                    TUE: '9:00am to 11:00pm' as const,
-                    WED: '8:00am - 12:00am' as const,
-                    THU: '9:00am - 11:00pm' as const,
-                    FRI: '9:00am - 11:00pm' as const,
-                    SAT: null,
-                    SUN: null,
+                    regularHours: {
+                        MON: '3:00am to 2:00pm' as const,
+                        TUE: '9:00am to 11:00pm' as const,
+                        WED: '8:00am - 12:00am' as const,
+                        THU: '9:00am - 11:00pm' as const,
+                        FRI: '9:00am - 11:00pm' as const,
+                        SAT: null,
+                        SUN: null,
+                    },
+                    is24Hours: false,
                 },
             },
             currentBusinessInfo
@@ -206,6 +234,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: '',
         })
 
         //keep one phone
@@ -235,6 +264,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     city: 'Flushing',
                     postalCode: '11354',
                     country: 'US',
+                    state: 'NY',
                 },
                 links: {
                     socials: ['https://www.facebook.com/newbusiness', 'https://www.instagram.com/mycompany', 'https://x.com/twitterhandle'],
@@ -243,13 +273,16 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 phoneNumber: '323-222-2222',
                 email: 'howareyoucolin@gmail.com',
                 hours: {
-                    MON: '3:00am to 2:00pm' as const,
-                    TUE: '9:00am to 11:00pm' as const,
-                    WED: '8:00am - 12:00am' as const,
-                    THU: '9:00am - 11:00pm' as const,
-                    FRI: '9:00am - 11:00pm' as const,
-                    SAT: null,
-                    SUN: null,
+                    regularHours: {
+                        MON: '3:00am to 2:00pm' as const,
+                        TUE: '9:00am to 11:00pm' as const,
+                        WED: '8:00am - 12:00am' as const,
+                        THU: '9:00am - 11:00pm' as const,
+                        FRI: '9:00am - 11:00pm' as const,
+                        SAT: null,
+                        SUN: null,
+                    },
+                    is24Hours: false,
                 },
             },
             {
@@ -278,6 +311,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: '',
         })
 
         //keep one phone
@@ -303,6 +337,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: 'NY',
         })
         expect(result[1].phones).toEqual([{ phoneNumber: '323-222-2222', label: 'Phone' }])
         expect(result[1].business_hours).toEqual([
@@ -342,6 +377,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: '',
         })
     })
     it('should replace flawed location with full in primary location', () => {
@@ -378,6 +414,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Charlotte',
             postalCode: '28204',
             country: 'US',
+            region: '',
         })
     })
     it('should handle one location with no current info', () => {
@@ -388,6 +425,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 city: 'Flushing',
                 postalCode: '11354',
                 country: 'US',
+                state: 'NY',
             },
             links: {
                 socials: ['https://www.facebook.com/newbusiness', 'https://www.instagram.com/mycompany', 'https://x.com/twitterhandle'],
@@ -396,13 +434,16 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             phoneNumber: '323-222-2222',
             email: 'company@company.com',
             hours: {
-                MON: '3:00am to 2:00pm' as const,
-                TUE: '9:00am to 11:00pm' as const,
-                WED: '8:00am - 12:00am' as const,
-                THU: '9:00am - 11:00pm' as const,
-                FRI: '9:00am - 11:00pm' as const,
-                SAT: null,
-                SUN: null,
+                regularHours: {
+                    MON: '3:00am to 2:00pm' as const,
+                    TUE: '9:00am to 11:00pm' as const,
+                    WED: '8:00am - 12:00am' as const,
+                    THU: '9:00am - 11:00pm' as const,
+                    FRI: '9:00am - 11:00pm' as const,
+                    SAT: null,
+                    SUN: null,
+                },
+                is24Hours: false,
             },
         })
 
@@ -421,6 +462,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: 'NY',
         })
 
         //keep one phone
@@ -449,6 +491,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     streetAddress: '123 Main St',
                     city: 'Flushing',
                     postalCode: '11354',
+                    state: 'NY',
                     country: 'US',
                 },
                 links: {
@@ -458,13 +501,16 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 phoneNumber: '323-222-2222',
                 email: 'company@company.com',
                 hours: {
-                    MON: '3:00am to 2:00pm' as const,
-                    TUE: '9:00am to 11:00pm' as const,
-                    WED: '8:00am - 12:00am' as const,
-                    THU: '9:00am - 11:00pm' as const,
-                    FRI: '9:00am - 11:00pm' as const,
-                    SAT: null,
-                    SUN: null,
+                    regularHours: {
+                        MON: '3:00am to 2:00pm' as const,
+                        TUE: '9:00am to 11:00pm' as const,
+                        WED: '8:00am - 12:00am' as const,
+                        THU: '9:00am - 11:00pm' as const,
+                        FRI: '9:00am - 11:00pm' as const,
+                        SAT: null,
+                        SUN: null,
+                    },
+                    is24Hours: false,
                 },
             },
             {
@@ -521,6 +567,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: 'NY',
         })
 
         //keep one phone
@@ -556,6 +603,7 @@ describe('transformBusinessInfoToDudaFormat', () => {
             city: 'Flushing',
             postalCode: '11354',
             country: 'US',
+            region: '',
         },
         logo_url: logoUrl,
         business_hours: [

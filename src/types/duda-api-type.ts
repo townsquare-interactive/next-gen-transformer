@@ -43,6 +43,7 @@ export type LocationObject = {
         city: string
         postalCode: string
         country: string
+        region: string
     }
     logo_url?: string
     business_hours?:

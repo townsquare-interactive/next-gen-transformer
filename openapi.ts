@@ -119,7 +119,14 @@ export const openApiSpec = createDocument({
                                                         companyName: { type: 'string' },
                                                         address: { type: 'string' },
                                                         phoneNumber: { type: 'string' },
-                                                        hours: { type: 'string' },
+                                                        hours: {
+                                                            type: 'object',
+                                                            properties: {
+                                                                regularHours: { type: 'string' },
+                                                                is24Hours: { type: 'boolean' },
+                                                            },
+                                                        },
+
                                                         styles: {
                                                             type: 'object',
                                                             properties: {

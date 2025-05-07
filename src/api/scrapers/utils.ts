@@ -3,7 +3,7 @@ import { convertUrlToApexId, createRandomFiveCharString } from '../../utilities/
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 import { ScrapingError } from '../../utilities/errors.js'
-import { BusinessHours, ScrapedAndAnalyzedSiteData, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
+import { BusinessHours, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
 import { BusinessInfoData } from '../../services/duda/save-business-info.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 
@@ -291,8 +291,8 @@ export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) =
 }
 
 export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string) => {
-    if (businessInfo.hours) {
-        businessInfo.hours = transformHours(businessInfo)
+    if (businessInfo.hours?.regularHours) {
+        businessInfo.hours = { ...businessInfo.hours, regularHours: transformHours(businessInfo) }
     }
 
     //remove links from same domain in other section
@@ -309,7 +309,6 @@ export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string)
     return businessInfo
 }
 
-// Helper function to normalize time format
 const normalizeTimeFormat = (timeStr: string): string => {
     // Handle empty or invalid input
     if (!timeStr) return timeStr
@@ -334,9 +333,8 @@ const normalizeTimeFormat = (timeStr: string): string => {
         })
         .join(' - ')
 }
-
 const transformHours = (businessInfo: ScreenshotData) => {
-    if (businessInfo.hours) {
+    if (businessInfo.hours?.regularHours) {
         // If hours is just a string, return null for the hours object
         if (typeof businessInfo.hours === 'string') {
             return null
@@ -353,9 +351,10 @@ const transformHours = (businessInfo: ScreenshotData) => {
             SUN: null,
         }
 
+        const regularHours = businessInfo.hours?.regularHours
         // Check if hours is an object and has valid day entries
-        if (typeof businessInfo.hours === 'object') {
-            const hours = businessInfo.hours
+        if (typeof regularHours === 'object') {
+            const hours = regularHours
             Object.keys(hours).forEach((day) => {
                 const upperDay = day.toUpperCase() as keyof typeof normalizedHours
                 if (upperDay in normalizedHours) {
@@ -695,14 +694,28 @@ export const determineSocialAccountType = (str: string) => {
 }
 
 type DayType = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
-export const transformBusinessHours = (businessHours?: BusinessHours) => {
+export const transformHoursToDudaFormat = (hours?: ScrapedHours | null) => {
+    if (!hours) return undefined
+    const businessHours = hours.regularHours
+
+    //Handle 24/7 hours
+    if (hours.is24Hours) {
+        return [
+            {
+                days: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as DayType[],
+                open: '00:00',
+                close: '24:00',
+            },
+        ]
+    }
+
     if (!businessHours) return undefined
 
     return (() => {
         const hours = Object.entries(businessHours).map(([day, hours]) => {
             if (!hours) return undefined
 
-            const normalizedHours = hours.replace(/\s+to\s+/i, ' - ')
+            const normalizedHours = hours.replace(/\s+to\s+/i, ' - ').replace(/[–—−]/g, '-') // normalize en-dash, em-dash, to, and minus sign to hyphen
             let [open, close] = normalizedHours.split('-').map((str: string) => str.trim())
 
             const formatTime = (time: string) => {
@@ -828,6 +841,7 @@ export const createCombinedAddress = (businessInfo: BusinessInfoData, currentBus
         streetAddress: addSecondLocation ? currentBusinessInfo?.location_data?.address?.streetAddress || '' : combinedBusinessAddress?.streetAddress ?? '',
         city: addSecondLocation ? currentBusinessInfo?.location_data?.address?.city || '' : combinedBusinessAddress?.city ?? '',
         postalCode: addSecondLocation ? currentBusinessInfo?.location_data?.address?.postalCode || '' : combinedBusinessAddress?.postalCode ?? '',
+        state: addSecondLocation ? currentBusinessInfo?.location_data?.address?.region || '' : combinedBusinessAddress?.state ?? '',
         country: 'US',
     }
     //Do we just return this new address and change the logic in the main function to be simpler?
