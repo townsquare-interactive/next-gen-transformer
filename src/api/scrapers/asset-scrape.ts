@@ -143,7 +143,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         }
 
         //this step must be done last as it modies the DOM
-        const pageTextContent = await extractPageContent(page)
+        const pageTextContent = await extractPageContent(page, isHomePage)
 
         //stop lazy load image processing after 10 pages for speed reasons
         if (settings.scrapeImages && n < 11) {

@@ -215,7 +215,7 @@ describe('extractFormData', () => {
 })
 
 describe('extractPageContent', () => {
-    it('extracts content excluding unwanted tags', async () => {
+    it('extracts content excluding unwanted tags for non home pages', async () => {
         const mockContentHTML = `
             <body><nav>Navigation Menu</nav>
             <header>
@@ -226,6 +226,7 @@ describe('extractPageContent', () => {
                 <h2>Subtitle</h2>
                 <p>Article content here.</p>
             </article>
+            <div class="footer">Footer Div</div>
             <footer>Footer Text</footer>
             <script>console.log('script tag')</script></body>
         `
@@ -239,11 +240,38 @@ describe('extractPageContent', () => {
             }),
         }
 
-        const content = await extractPageContent(page as any)
+        const content = await extractPageContent(page as any, false)
 
-        // Expected content: Header and visible text from <article>
-        expect(content).toContain(`Subtitle`)
-        expect(content).toContain(`Article content here.`)
+        expect(content).toEqual('<h1>Main Title</h1> <h2>Subtitle</h2> Article content here.')
+    })
+
+    it('keeps footer content if home page is true', async () => {
+        const mockContentHTML = `
+            <body><nav>Navigation Menu</nav>
+            <header>
+                <h1>Main Title</h1>
+                <p>Some header text</p>
+            </header>
+            <article>
+                <h2>Subtitle</h2>
+                <p>Article content here.</p>
+            </article>
+            <div class="footer">Footer Div</div>
+            <footer>Footer Text</footer>
+            <script>console.log('script tag')</script></body>
+        `
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn: (isHomePage: boolean) => any) => {
+                document.body.innerHTML = mockContentHTML
+                console.log('Simulated body HTML:', document.body.innerHTML)
+
+                return fn(true)
+            }),
+        }
+
+        const content = await extractPageContent(page as any, true)
+
+        expect(content).toEqual('<h1>Main Title</h1> <h2>Subtitle</h2> Article content here. Footer Div Footer Text')
     })
 
     it('returns empty string if the body has no content', async () => {
@@ -255,7 +283,7 @@ describe('extractPageContent', () => {
             }),
         }
 
-        const content = await extractPageContent(page as any)
+        const content = await extractPageContent(page as any, false)
 
         expect(page.evaluate).toHaveBeenCalledOnce()
         expect(content).toEqual('')
@@ -277,7 +305,7 @@ describe('extractPageContent', () => {
             }),
         }
 
-        const content = await extractPageContent(page as any)
+        const content = await extractPageContent(page as any, false)
 
         expect(page.evaluate).toHaveBeenCalledOnce()
         expect(content).toEqual(`Visible paragraph text.`)
@@ -299,7 +327,7 @@ describe('extractPageContent', () => {
             }),
         }
 
-        const content = await extractPageContent(page as any)
+        const content = await extractPageContent(page as any, false)
 
         // expect(page.evaluate).toHaveBeenCalledOnce()
         expect(content).toContain(`Main Title`)

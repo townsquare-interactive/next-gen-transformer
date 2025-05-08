@@ -166,10 +166,21 @@ export const extractFormData = async (page: Page) => {
     }
 }
 
-export const extractPageContent = async (page: Page) => {
-    const result = await page.evaluate(() => {
+export const extractPageContent = async (page: Page, isHomePage: boolean) => {
+    const result = await page.evaluate((isHomePage) => {
         // Unwanted tags for content scrape
-        const unwantedSelectors = ['nav', 'footer', 'script', 'style']
+        const unwantedSelectors = ['nav', 'script', 'style']
+
+        if (!isHomePage) {
+            // Add common footer selectors
+            const footerSelectors = [
+                'footer', //footer tag
+                '.footer', //footer class
+                '[class*="footer" i]', // matches any class containing "footer"
+                '#footer',
+            ].join(', ')
+            unwantedSelectors.push(footerSelectors)
+        }
 
         // Instead of removing, let's clone the body first
         const tempDiv = document.createElement('div')
@@ -177,7 +188,12 @@ export const extractPageContent = async (page: Page) => {
 
         // Remove unwanted elements from our clone
         unwantedSelectors.forEach((selector) => {
-            tempDiv.querySelectorAll(selector).forEach((el) => el.remove())
+            if (selector.includes(',')) {
+                // Handle compound footer selectors
+                tempDiv.querySelectorAll(selector).forEach((el) => el.remove())
+            } else {
+                tempDiv.querySelectorAll(selector).forEach((el) => el.remove())
+            }
         })
 
         // Handle header elements - only preserve heading tags
@@ -243,7 +259,7 @@ export const extractPageContent = async (page: Page) => {
             .trim()
 
         return finalContent
-    })
+    }, isHomePage)
 
     return result
 }
