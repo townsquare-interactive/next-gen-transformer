@@ -628,7 +628,7 @@ describe('transformBusinessInfoToDudaFormat', () => {
     }
     it('should transform business info to Duda format', () => {
         const pages = [
-            { content: 'check stuff', url: 'https://example.com/page1', images: [], forms: [], title: 'June Foot Spa' },
+            { content: 'check stuff⌛🌟🌐\n', url: 'https://example.com/page1', images: [], forms: [], title: 'June Foot Spa' },
             { content: 'page 2 content', url: 'https://example.com/page2', images: [], forms: [], title: 'June Page 2' },
         ]
         const result = transformBusinessInfoDataToDudaFormat(logoUrl, mockBusinessInfoObject, pages, dudaLocationData, 'https://example.com')
@@ -637,7 +637,7 @@ describe('transformBusinessInfoToDudaFormat', () => {
             companyName: 'June Foot Spa',
             site_texts: {
                 custom: [
-                    { label: 'June Foot Spa', text: 'check stuff' },
+                    { label: 'June Foot Spa', text: 'check stuff<br>' }, //remove emojis
                     { label: 'June Page 2', text: 'page 2 content' },
                     { label: 'Fonts', text: 'Header Fonts: Arial, Helvetica<br><br>Body Fonts: Arial, Helvetica' },
                     {

@@ -459,6 +459,18 @@ export const getImageDimensions = async (buffer: Buffer): Promise<ImageDimension
     }
 }
 
+const filterContent = (content: string) => {
+    let filteredContent = content
+    filteredContent = filteredContent.replace(/\n/g, '<br>') //add line breaks
+    filteredContent = filteredContent.replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // Remove emojis and symbols
+    filteredContent = filteredContent.replace(/[\u{FE00}-\u{FE0F}]/gu, '') // Remove variation selectors
+    filteredContent = filteredContent.replace(/[\u{1F000}-\u{1F02F}]/gu, '') // Remove additional emojis
+    filteredContent = filteredContent.replace(/[^\p{L}\p{N}\p{P}\p{Z}\u0020-\u00FF]/gu, '') // Keep letters, numbers, punctuation, spaces, and basic Latin characters
+    filteredContent = filteredContent.replace(/[ \t]+/g, ' ')
+
+    return filteredContent
+}
+
 export const transformTextToDudaFormat = (
     pages: ScrapedAndAnalyzedSiteData['pages'],
     businessInfo: BusinessInfoData,
@@ -470,7 +482,7 @@ export const transformTextToDudaFormat = (
     const customTexts = pages.flatMap((page) => {
         if (!page.content) return []
         const chunks: string[] = []
-        const content = (page.content || '').replace(/\n/g, '<br>') //add line breaks
+        const content = filterContent(page.content || '')
         const chunkSize = 4000
 
         // Create the base label first
