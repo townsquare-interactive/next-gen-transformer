@@ -59,12 +59,12 @@ export type BusinessInfoObject = {
     site_texts?: {
         custom: Array<{ label: string; text: string }>
     }
-    companyName: string
-    business_data: {
+    companyName?: string
+    business_data?: {
         name: string
         logo_url: string
     }
-    location_data: LocationObject
+    location_data?: LocationObject
 }
 
 export type DudaColors = {

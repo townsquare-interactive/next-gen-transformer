@@ -650,6 +650,23 @@ export const ToggleBusinessSchema = z.object({
     toggleOption: z.boolean(),
 })
 
+export const SaveGeneratedContentSchema = z.object({
+    gpid: z.string(),
+    homepage_content: z.string().optional(),
+    service_1_name: z.string().optional(),
+    service_1_content: z.string().optional(),
+    service_2_name: z.string().optional(),
+    service_2_content: z.string().optional(),
+    service_3_name: z.string().optional(),
+    service_3_content: z.string().optional(),
+    service_4_name: z.string().optional(),
+    service_4_content: z.string().optional(),
+    service_5_name: z.string().optional(),
+    service_5_content: z.string().optional(),
+    service_6_name: z.string().optional(),
+    service_6_content: z.string().optional(),
+})
+
 export type Url = z.infer<typeof URL>
 export type HeaderButtons = z.infer<typeof HeaderButtonsObj>
 export type ScrapeWebsiteReq = z.infer<typeof ScrapeWebsiteSchema>
@@ -663,6 +680,7 @@ export type LandingColors = z.infer<typeof LandingColorsSchema>
 export type RemoveLandingPageReq = z.infer<typeof RemoveLandingPageSchema>
 export type RemoveLandingProjectReq = z.infer<typeof RemoveLandingProjectSchema>
 export type SaveFileMethodType = z.infer<typeof SaveFileMethod>
+export type SaveGeneratedContentReq = z.infer<typeof SaveGeneratedContentSchema>
 
 ScrapeWebsiteSchema.openapi({ ref: 'scrape-site' })
 LandingInputSchema.openapi({ ref: 'landing' })
@@ -671,3 +689,4 @@ ScrapePagesSchema.openapi({ ref: 'scrape-pages' })
 GetScrapeDataSchema.openapi({ ref: 'get-scraped-data' })
 MoveS3DataToDudaSchema.openapi({ ref: 'move-s3-data-to-duda' })
 ToggleBusinessSchema.openapi({ ref: 'toggle-business-schema' })
+SaveGeneratedContentSchema.openapi({ ref: 'save-generated-content' })

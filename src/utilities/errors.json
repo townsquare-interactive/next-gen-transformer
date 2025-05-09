@@ -52,5 +52,8 @@
     },
     "DUD-018": {
         "description": "Error when uploading to Duda"
+    },
+    "DUD-019": {
+        "description": "Duda site not found"
     }
 }

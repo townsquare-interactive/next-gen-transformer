@@ -4,6 +4,7 @@ import {
     GetScrapeDataSchema,
     LandingInputSchema,
     MoveS3DataToDudaSchema,
+    SaveGeneratedContentSchema,
     ScrapePagesSchema,
     ScrapeWebsiteSchema,
     ToggleBusinessSchema,
@@ -535,6 +536,31 @@ export const openApiSpec = createDocument({
                 },
             },
         },
+        '/api/cms-routes/duda-save-content': {
+            post: {
+                summary: 'Save generated content to Duda',
+                description: 'Saves generated content to Duda for a given URL.',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/SaveGeneratedContentSchema',
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    '200': {
+                        description: 'Successfully saved content to Duda',
+                    },
+                    '401': unauthorizedResponseExample,
+                    '404': {
+                        description: 'Duda site not found',
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -553,6 +579,7 @@ export const openApiSpec = createDocument({
             GetScrapeDataSchema,
             MoveS3DataToDudaSchema,
             ToggleBusinessSchema,
+            SaveGeneratedContentSchema,
             ErrorTypes: {
                 type: 'string',
                 enum: Object.keys(errorTypes),

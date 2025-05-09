@@ -161,6 +161,10 @@ export const handleError = (err: BaseError, res: Response, url: string = '', sen
             statusType = 500
         }
 
+        if (err.errorType === 'DUD-019') {
+            statusType = 404
+        }
+
         if (err instanceof ValidationError) {
             res.status(statusType || 400).json({
                 id: errorID,

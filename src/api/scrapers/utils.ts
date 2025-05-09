@@ -6,6 +6,7 @@ import { ScrapingError } from '../../utilities/errors.js'
 import { BusinessHours, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
 import { BusinessInfoData } from '../../services/duda/save-business-info.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
+import { SaveGeneratedContentReq } from '../../schema/input-zod.js'
 
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
@@ -487,6 +488,10 @@ const filterContent = (content: string) => {
     return filteredContent
 }
 
+interface ServiceContent {
+    label: string
+    text: string
+}
 export const transformTextToDudaFormat = (
     pages: ScrapedAndAnalyzedSiteData['pages'],
     businessInfo: BusinessInfoData,
@@ -556,6 +561,50 @@ export const transformTextToDudaFormat = (
     customTexts.push(addressText)
 
     return customTexts
+}
+
+export function transformAIContent(data: SaveGeneratedContentReq): ServiceContent[] {
+    const services: ServiceContent[] = []
+    const contentLabelPostfix = 'AI'
+
+    // Add homepage content first if it exists and is not empty
+    if (data.homepage_content && data.homepage_content.trim() !== '') {
+        services.push({
+            label: `Home ${contentLabelPostfix}`,
+            text: data.homepage_content,
+        })
+    }
+
+    // Find all service keys and get the maximum number
+    const serviceKeys = Object.keys(data)
+        .filter((key) => key.match(/^service_\d+_name$/))
+        .map((key) => parseInt(key.match(/\d+/)?.[0] || '0'))
+
+    const maxServiceNumber = Math.max(...serviceKeys, 0)
+
+    // Loop through all available services
+    for (let i = 1; i <= maxServiceNumber; i++) {
+        const nameKey = `service_${i}_name` as keyof SaveGeneratedContentReq
+        const contentKey = `service_${i}_content` as keyof SaveGeneratedContentReq
+
+        // Only add to array if both name and content exist
+        if (data[nameKey] && data[contentKey]) {
+            services.push({
+                label: `${data[nameKey]} ${contentLabelPostfix}`,
+                text: data[contentKey],
+            })
+        }
+    }
+
+    return services
+}
+
+export const transformContentToBusinessInfo = (formattedContent: ServiceContent[]) => {
+    return {
+        site_texts: {
+            custom: formattedContent,
+        },
+    }
 }
 
 // Common street direction abbreviations

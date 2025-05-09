@@ -48,11 +48,38 @@ export async function dudaImageFetch(payload: UploadPayload[], settings?: Settin
 }
 
 export async function getDudaSite(siteId: string) {
+    try {
     const response = await dudaApiClient.getClient().sites.get({
         site_name: siteId,
     })
 
     return response
+    } catch (error) {
+        translateDudaError(error, siteId)
+    }
+}
+
+export async function getDudaSiteId(gpid: string) {
+    const decodedGpid = decodeURIComponent(gpid)
+    const encodedGpid = encodeURIComponent(decodedGpid)
+
+    const response = await dudaApiClient.getClient().sites.getByExternalID({
+        external_uid: encodedGpid,
+    })
+
+    if (!response || !Array.isArray(response) || response.length === 0) {
+        throw new DataUploadError({
+            message: 'Duda site not found',
+            domain: '',
+            errorType: 'DUD-019',
+
+            state: {
+                fileStatus: 'Duda site unchanged',
+            },
+        })
+    }
+
+    return response[0]
 }
 
 export async function updateSiteContent(siteId: string, seoData?: ScrapedPageSeo, currentSiteSeo?: DudaSiteSeo | null, enableBusinessSchema?: boolean) {
@@ -177,16 +204,16 @@ export async function uploadBusinessInfo(siteName: string, businessInfo: Busines
     try {
         const response = await dudaApiClient.getClient().content.update({
             site_name: siteName,
-            business_data: businessInfo.business_data,
+            ...(businessInfo.business_data && { business_data: businessInfo.business_data }),
             ...(businessInfo.site_texts && { site_texts: businessInfo.site_texts }),
             location_data: {
-                ...(businessInfo.location_data.label && { label: businessInfo.location_data.label }),
-                ...(businessInfo.location_data.phones && { phones: businessInfo.location_data.phones }),
-                ...(businessInfo.location_data.emails && { emails: businessInfo.location_data.emails }),
-                ...(businessInfo.location_data.social_accounts && { social_accounts: businessInfo.location_data.social_accounts }),
-                ...(businessInfo.location_data.address && { address: businessInfo.location_data.address }),
-                ...(businessInfo.location_data.logo_url && { logo_url: businessInfo.location_data.logo_url }),
-                ...(businessInfo.location_data.business_hours && {
+                ...(businessInfo.location_data?.label && { label: businessInfo.location_data.label }),
+                ...(businessInfo.location_data?.phones && { phones: businessInfo.location_data.phones }),
+                ...(businessInfo.location_data?.emails && { emails: businessInfo.location_data.emails }),
+                ...(businessInfo.location_data?.social_accounts && { social_accounts: businessInfo.location_data.social_accounts }),
+                ...(businessInfo.location_data?.address && { address: businessInfo.location_data.address }),
+                ...(businessInfo.location_data?.logo_url && { logo_url: businessInfo.location_data.logo_url }),
+                ...(businessInfo.location_data?.business_hours && {
                     business_hours: businessInfo.location_data.business_hours.map(({ days, open, close }) => ({
                         days: days as ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[],
                         open,

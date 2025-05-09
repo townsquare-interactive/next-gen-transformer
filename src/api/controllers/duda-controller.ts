@@ -3,8 +3,10 @@ import { createDudaLocation, createDudaPage } from '../../services/duda-api.js'
 import { PageObject, LocationObject } from '../../types/duda-api-type.js'
 import { handleError } from '../../utilities/errors.js'
 import { toggleBusinessSchema } from '../../services/duda/toggleBusinessSchema.js'
-import { ToggleBusinessSchema } from '../../schema/input-zod.js'
+import { SaveGeneratedContentSchema, ToggleBusinessSchema } from '../../schema/input-zod.js'
 import { zodDataParse } from '../../schema/utils-zod.js'
+import { saveGeneratedContent } from '../../services/duda/duda-service.js'
+import middleware from '../middleware/AuthMiddleware.js'
 
 /**
  * Controller to create a new Duda page.
@@ -127,6 +129,18 @@ export const changeBusinessSchemaStatus = async (req: Request, res: Response) =>
     try {
         const response = await toggleBusinessSchema(validatedRequest.siteName, validatedRequest.toggleOption)
         return res.json({ data: response })
+    } catch (err) {
+        handleError(err, res)
+    }
+}
+
+export const saveContent = async (req: Request, res: Response) => {
+    middleware(req)
+    try {
+        const validatedRequest = zodDataParse(req.body, SaveGeneratedContentSchema, 'input')
+        const response = await saveGeneratedContent(validatedRequest)
+
+        return res.json({ response })
     } catch (err) {
         handleError(err, res)
     }
