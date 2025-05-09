@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import { saveGeneratedContent } from './duda-service.js'
-import { ValidationError } from '../../utilities/errors.js'
 
 describe('saveGeneratedContent', () => {
     const requestExample = {

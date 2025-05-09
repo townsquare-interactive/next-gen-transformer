@@ -492,75 +492,30 @@ interface ServiceContent {
     label: string
     text: string
 }
-export const transformTextToDudaFormat = (
-    pages: ScrapedAndAnalyzedSiteData['pages'],
-    businessInfo: BusinessInfoData,
-    url: string,
-    currentBusinessInfo?: ContentLibraryResponse
-) => {
-    const currentTextsExist = currentBusinessInfo?.site_texts?.custom && currentBusinessInfo?.site_texts?.custom.length > 0
 
-    const customTexts = pages.flatMap((page) => {
-        if (!page.content) return []
-        const chunks: string[] = []
-        const content = filterContent(page.content || '')
-        const chunkSize = 4000
-
-        // Create the base label first
-        const baseLabel = currentTextsExist ? `${page.title || ''} (${url})` : page.title || ''
-
-        // If content is under the length limit, return single entry
-        if (content.length <= chunkSize) {
-            const result = {
+// Helper function to chunk and label content
+function createContentChunks(content: string, baseLabel: string, chunkSize: number = 4000) {
+    // If content is under the length limit, return single entry
+    if (content.length <= chunkSize) {
+        return [
+            {
                 label: baseLabel,
                 text: content,
-            }
-            return [result]
-        }
-
-        // Split content into chunks of exactly 4000 characters if page content is over limit
-        for (let i = 0; i < content.length; i += chunkSize) {
-            chunks.push(content.slice(i, i + chunkSize))
-        }
-
-        // Create array of labeled chunks
-        const result = chunks.map((chunk, index) => {
-            const label = chunks.length > 1 ? `${baseLabel} (Part ${index + 1})` : baseLabel
-            return {
-                label,
-                text: chunk,
-            }
-        })
-
-        return result
-    })
-
-    const fonts = businessInfo?.styles?.fonts
-    let fontText
-    if (fonts) {
-        const headerFonts = fonts.headerFonts?.join(', ')
-        const bodyFonts = fonts.bodyFonts?.join(', ')
-
-        fontText = {
-            label: 'Fonts',
-            text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
-        }
-        customTexts.push(fontText)
+            },
+        ]
     }
 
-    //add address into text section
-    const addressText = {
-        label: 'Address',
-        text:
-            !businessInfo?.address?.streetAddress && !businessInfo?.address?.city && !businessInfo?.address?.state
-                ? ''
-                : `${businessInfo?.address?.streetAddress ? businessInfo?.address?.streetAddress + '<br>' : ''}${businessInfo?.address?.city || ''}, ${
-                      businessInfo?.address?.state || ''
-                  }<br>${businessInfo?.address?.postalCode || ''}`,
+    const chunks: string[] = []
+    // Split content into chunks of exactly 4000 characters
+    for (let i = 0; i < content.length; i += chunkSize) {
+        chunks.push(content.slice(i, i + chunkSize))
     }
-    customTexts.push(addressText)
 
-    return customTexts
+    // Create array of labeled chunks
+    return chunks.map((chunk, index) => ({
+        label: chunks.length > 1 ? `${baseLabel} (Part ${index + 1})` : baseLabel,
+        text: chunk,
+    }))
 }
 
 export function transformAIContent(data: SaveGeneratedContentReq): ServiceContent[] {
@@ -569,10 +524,8 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
 
     // Add homepage content first if it exists and is not empty
     if (data.homepage_content && data.homepage_content.trim() !== '') {
-        services.push({
-            label: `Home ${contentLabelPostfix}`,
-            text: data.homepage_content,
-        })
+        const homeLabel = `Home ${contentLabelPostfix}`
+        services.push(...createContentChunks(data.homepage_content, homeLabel))
     }
 
     // Find all service keys and get the maximum number
@@ -589,14 +542,56 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
 
         // Only add to array if both name and content exist
         if (data[nameKey] && data[contentKey]) {
-            services.push({
-                label: `${data[nameKey]} ${contentLabelPostfix}`,
-                text: data[contentKey],
-            })
+            const serviceLabel = `${data[nameKey]} ${contentLabelPostfix}`
+            services.push(...createContentChunks(data[contentKey] as string, serviceLabel))
         }
     }
 
     return services
+}
+
+export const transformTextToDudaFormat = (
+    pages: ScrapedAndAnalyzedSiteData['pages'],
+    businessInfo: BusinessInfoData,
+    url: string,
+    currentBusinessInfo?: ContentLibraryResponse
+) => {
+    const currentTextsExist = currentBusinessInfo?.site_texts?.custom && currentBusinessInfo?.site_texts?.custom.length > 0
+
+    const customTexts = pages.flatMap((page) => {
+        if (!page.content) return []
+        const content = filterContent(page.content || '')
+        const baseLabel = currentTextsExist ? `${page.title || ''} (${url})` : page.title || ''
+
+        return createContentChunks(content, baseLabel)
+    })
+
+    // Add fonts if they exist
+    const fonts = businessInfo?.styles?.fonts
+    if (fonts) {
+        const headerFonts = fonts.headerFonts?.join(', ')
+        const bodyFonts = fonts.bodyFonts?.join(', ')
+
+        const fontText = {
+            label: 'Fonts',
+            text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
+        }
+        customTexts.push(fontText)
+    }
+
+    // Add address
+    const addressText = {
+        label: 'Address',
+        text:
+            !businessInfo?.address?.streetAddress && !businessInfo?.address?.city && !businessInfo?.address?.state
+                ? ''
+                : `${businessInfo?.address?.streetAddress ? businessInfo?.address?.streetAddress + '<br>' : ''}${businessInfo?.address?.city || ''}, ${
+                      businessInfo?.address?.state || ''
+                  }<br>${businessInfo?.address?.postalCode || ''}`,
+    }
+    customTexts.push(addressText)
+
+    return customTexts
 }
 
 export const transformContentToBusinessInfo = (formattedContent: ServiceContent[]) => {
