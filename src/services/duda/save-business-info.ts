@@ -80,7 +80,7 @@ export const transformBusinessInfoDataToDudaFormat = (
     currentBusinessInfo?: ContentLibraryResponse
 ): BusinessInfoObject => {
     // Transform pages into custom text array with content splitting
-    const customTexts = transformTextToDudaFormat(pages, businessInfo, url, currentBusinessInfo)
+    const customTexts = transformTextToDudaFormat(pages, businessInfo)
     const transformedData = {
         companyName: currentBusinessInfo?.business_data?.name ?? businessInfo?.companyName ?? '',
         site_texts: {

@@ -550,18 +550,11 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
     return services
 }
 
-export const transformTextToDudaFormat = (
-    pages: ScrapedAndAnalyzedSiteData['pages'],
-    businessInfo: BusinessInfoData,
-    url: string,
-    currentBusinessInfo?: ContentLibraryResponse
-) => {
-    const currentTextsExist = currentBusinessInfo?.site_texts?.custom && currentBusinessInfo?.site_texts?.custom.length > 0
-
+export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData) => {
     const customTexts = pages.flatMap((page) => {
         if (!page.content) return []
         const content = filterContent(page.content || '')
-        const baseLabel = currentTextsExist ? `${page.title || ''} (${url})` : page.title || ''
+        const baseLabel = `${page.title || ''}: ${page.url}`
 
         return createContentChunks(content, baseLabel)
     })

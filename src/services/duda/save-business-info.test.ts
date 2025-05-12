@@ -637,8 +637,8 @@ describe('transformBusinessInfoToDudaFormat', () => {
             companyName: 'June Foot Spa',
             site_texts: {
                 custom: [
-                    { label: 'June Foot Spa', text: 'check stuff<br>' }, //remove emojis
-                    { label: 'June Page 2', text: 'page 2 content' },
+                    { label: 'June Foot Spa: https://example.com/page1', text: 'check stuff<br>' }, //remove emojis
+                    { label: 'June Page 2: https://example.com/page2', text: 'page 2 content' },
                     { label: 'Fonts', text: 'Header Fonts: Arial, Helvetica<br><br>Body Fonts: Arial, Helvetica' },
                     {
                         label: 'Address',
