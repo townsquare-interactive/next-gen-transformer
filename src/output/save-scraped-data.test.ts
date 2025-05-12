@@ -83,7 +83,6 @@ describe('save', () => {
             backupImagesSave: true,
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
-            analyzeHomepageData: true,
             siteType: 'priority',
         }
         //
@@ -110,7 +109,6 @@ describe('save', () => {
             saveMethod: 's3Upload',
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
-            analyzeHomepageData: true,
             siteType: 'priority',
         }
 
@@ -204,7 +202,6 @@ describe('save', () => {
             backupImagesSave: false,
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
-            analyzeHomepageData: true,
             siteType: 'priority',
         }
 
@@ -294,7 +291,6 @@ describe('save', () => {
             backupImagesSave: true,
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
-            analyzeHomepageData: true,
             siteType: 'priority',
         }
 
@@ -367,7 +363,6 @@ describe('save', () => {
             uploadLocation: '12321',
             basePath: 'http://example.com',
             url: 'http://example.com/image.jpg',
-            analyzeHomepageData: true,
             siteType: 'priority',
         }
 

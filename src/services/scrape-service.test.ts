@@ -102,12 +102,16 @@ describe('scrapeAssetsFromSite', () => {
 
         let error
         try {
-            const result = await scrapeAssetsFromSite({
-                url,
-                saveMethod: 'test',
-                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
-                basePath: 'scrapeurl',
-            })
+            const result = await scrapeAssetsFromSite(
+                {
+                    url,
+                    saveMethod: 'test',
+                    functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
+                    basePath: 'scrapeurl',
+                },
+                undefined,
+                1
+            )
         } catch (err) {
             error = err
         }
@@ -132,12 +136,16 @@ describe('scrapeAssetsFromSite', () => {
 
         let error: any
         try {
-            await scrapeAssetsFromSite({
-                url,
-                saveMethod: 'test',
-                functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl },
-                basePath: 'scrapeurl',
-            })
+            await scrapeAssetsFromSite(
+                {
+                    url,
+                    saveMethod: 'test',
+                    functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl },
+                    basePath: 'scrapeurl',
+                },
+                undefined,
+                1
+            )
         } catch (err) {
             error = err
         }
@@ -150,11 +158,11 @@ describe('scrapeAssetsFromSite', () => {
             state: { scrapeStatus: 'Site not scraped' }, // Match the actual value
             errorType: 'GEN-003',
         })
-    })
+    }, 15000)
 
     it('should fail when the URL is not a valid site', async () => {
         const errUrl = 'https://www.notereal.com'
-        let error: any
+        let error
 
         const mockFindPagesFunction = vi.fn().mockResolvedValue(['https://notereal.com/page1', 'https://notereal.com/page2'])
 
@@ -183,6 +191,48 @@ describe('scrapeAssetsFromSite', () => {
             state: { scrapeStatus: 'Site not scraped' },
             errorType: 'SCR-011',
         })
+    }, 15000)
+
+    it('should retry and succeed after initial failure', async () => {
+        const testUrl = 'https://www.example.com'
+        let attemptCount = 0
+
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
+        const mockScrapeFunction = vi.fn().mockResolvedValue({
+            imageList: ['image1.jpg', 'image2.jpg'],
+            imageFiles: [
+                { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
+                { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
+                { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
+            ],
+        })
+
+        // Mock function that fails first time, succeeds second time
+        const mockFindPagesFunction = vi.fn().mockImplementation(() => {
+            attemptCount++
+            if (attemptCount === 1) {
+                throw new Error('First attempt failed')
+            }
+            return Promise.resolve(['https://www.example.com/page1'])
+        })
+
+        const result = await scrapeAssetsFromSite({
+            url: testUrl,
+            timeoutLength: 10000,
+            functions: { scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl, scrapeFunction: mockScrapeFunction },
+            basePath: 'example',
+        })
+
+        // Verify the function was called multiple times
+        expect(mockFindPagesFunction).toHaveBeenCalledTimes(2)
+
+        // Verify we got a successful result
+        expect(result).toBeDefined()
+        expect(result.url).toBe(testUrl)
+
+        // Verify the mock functions were called as expected
+        expect(mockValidateURl).toHaveBeenCalled()
+        expect(mockScrapeFunction).toHaveBeenCalled()
     }, 15000)
 
     afterEach(() => {

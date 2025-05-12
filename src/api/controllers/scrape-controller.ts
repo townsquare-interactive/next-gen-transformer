@@ -55,8 +55,7 @@ export const scrapeSite = async (req: Request, res: Response) => {
             waitUntil(
                 new Promise(async (resolve, reject) => {
                     try {
-                        const pages = await getPageListService(scrapeSettings)
-                        const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
+                        const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
                         await save(scrapeSettings, scrapedData)
                         console.log('Background scraping completed successfully')
                         resolve(true)
@@ -70,9 +69,9 @@ export const scrapeSite = async (req: Request, res: Response) => {
             )
             return
         } else {
-            const pages = await getPageListService(scrapeSettings)
-            const scrapedData = await scrapeAssetsFromSite(scrapeSettings, pages.pages)
+            const scrapedData = await scrapeAssetsFromSite(scrapeSettings)
             const saveResponse = await save(scrapeSettings, scrapedData)
+
             res.json(saveResponse)
         }
     } catch (err) {

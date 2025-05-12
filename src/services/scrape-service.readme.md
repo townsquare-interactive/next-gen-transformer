@@ -17,7 +17,6 @@ These utilities have been created to scrape assets from a website and save them 
 | `saveImages`                    | Boolean | Save scraped images.                                            | `true`        |
 | `scrapeImages`                  | Boolean | Scrape images at all.                                           | `true`        |
 | `backupImagesSave`              | Boolean | Backup save the images to S3.                                   | `true`        |
-| `analyzeHomepageData`           | Boolean | Analyze the homepage with AI and save siteData file.            | `true`        |
 
 ---
 

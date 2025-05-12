@@ -23,7 +23,7 @@ export async function saveData(saveData: SavingScrapedData) {
 
     let siteDataUrl
     let siteData
-    if (saveData.siteData && saveData.settings.analyzeHomepageData) {
+    if (saveData.siteData) {
         //modify siteData based off S3 saved data
         siteData = {
             ...saveData.siteData,

@@ -61,7 +61,6 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
         basePath: convertUrlToApexId(validatedRequest.url),
         backupImagesSave: validatedRequest.backupImagesSave === undefined ? true : validatedRequest.backupImagesSave,
         saveImages: validatedRequest.saveImages === undefined ? true : validatedRequest.saveImages,
-        analyzeHomepageData: validatedRequest.analyzeHomepageData === undefined ? true : validatedRequest.analyzeHomepageData,
         scrapeImages: validatedRequest.scrapeImages === undefined ? true : validatedRequest.scrapeImages,
         queueScrape: validatedRequest.queueScrape === undefined ? false : validatedRequest.queueScrape,
         siteType: validatedRequest.siteType === undefined ? 'priority' : validatedRequest.siteType,
@@ -70,11 +69,12 @@ export function getScrapeSettings(validatedRequest: ScrapeWebsiteReq) {
     return scrapeSettings
 }
 
-export async function scrapeAssetsFromSite(settings: Settings, pages?: string[]) {
+export async function scrapeAssetsFromSite(settings: Settings, pages?: string[], retries = 3) {
     const siteName = settings.url
     const scrapeFunction = settings.functions?.scrapeFunction || scrape
     const scrapePagesFunction = settings.functions?.scrapePagesFunction || findPages
     const isValidateUrl = settings.functions?.isValidateUrl || isValidHtmlPage
+    const MAX_RETRIES = retries
 
     try {
         //confirm base URL returns HTML
@@ -82,25 +82,36 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[])
             throw { message: `Invalid or non-HTML page: ${settings.url}`, errorType: 'SCR-011' }
         }
 
-        const pagesToScrape = pages ? pages : await scrapePagesFunction(settings)
-        checkPagesAreOnSameDomain(settings.url, pagesToScrape)
-        const scrapeData = await scrapeDataFromPages(pagesToScrape, settings, scrapeFunction)
-        const transformedScrapedData = transformSiteScrapedData(scrapeData, siteName)
+        //retry scraping process if it fails initially
+        let lastError
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const pagesToScrape = pages ? pages : await scrapePagesFunction(settings)
+                checkPagesAreOnSameDomain(settings.url, pagesToScrape)
+                const scrapeData = await scrapeDataFromPages(pagesToScrape, settings, scrapeFunction)
+                const transformedScrapedData = transformSiteScrapedData(scrapeData, siteName)
 
-        if (!settings.analyzeHomepageData) {
-            console.log('analyzeHomepageData is false so siteData file will not be overwritten')
+                const siteData: ScrapedAndAnalyzedSiteData = {
+                    baseUrl: settings.url,
+                    pages: transformedScrapedData.pagesData,
+                    dudaUploadLocation: settings.uploadLocation || '',
+                    businessInfo: transformedScrapedData.businessInfo,
+                    siteSeo: transformedScrapedData.siteSeo,
+                }
+
+                return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
+            } catch (error) {
+                lastError = error
+                console.error(`Scraping attempt ${attempt} failed:`, error)
+                if (attempt === MAX_RETRIES) {
+                    throw lastError
+                }
+                console.log(`Retrying... (Attempt ${attempt + 1} of ${MAX_RETRIES})`)
+                // Optional: Add delay between retries
+                await new Promise((resolve) => setTimeout(resolve, 3000 * attempt))
+            }
         }
-
-        //create s3 scrape data
-        const siteData: ScrapedAndAnalyzedSiteData = {
-            baseUrl: settings.url,
-            pages: transformedScrapedData.pagesData,
-            dudaUploadLocation: settings.uploadLocation || '',
-            businessInfo: transformedScrapedData.businessInfo,
-            siteSeo: transformedScrapedData.siteSeo,
-        }
-
-        return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
+        throw lastError
     } catch (error) {
         console.error(error)
         throw new ScrapingError({
@@ -199,8 +210,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
                         return await scrapeFunction({ ...settings, url: page }, index + 1)
                     } catch (err) {
                         console.error('Scrape function failed for page:', page, err)
-                        return null // Handle failures gracefully
-                        // throw err
+                        return null // Handle failures gracefully for inner pages
                     }
                 })
             )

@@ -131,7 +131,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         })
 
         let scrapeAnalysisResult
-        if (isHomePage && settings.analyzeHomepageData && screenshotBuffer) {
+        if (isHomePage && screenshotBuffer) {
             console.log('Using AI to analyze page...')
             const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
             scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)

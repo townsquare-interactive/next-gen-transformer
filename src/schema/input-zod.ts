@@ -548,7 +548,6 @@ const scrapeExample = {
     uploadLocation: '234kj324lk32jl3klllk3',
     backupImagesSave: true,
     saveImages: true,
-    analyzeHomepageData: true,
     scrapeImages: true,
     queueScrape: false,
 } as const
@@ -578,10 +577,6 @@ export const ScrapeWebsiteSchema = z
         saveImages: z.boolean().optional().openapi({
             description: 'Boolean on whether or not to save images at all',
             default: scrapeExample.saveImages,
-        }),
-        analyzeHomepageData: z.boolean().optional().openapi({
-            description: 'Boolean on whether or not to analyze with AI',
-            default: scrapeExample.analyzeHomepageData,
         }),
         scrapeImages: z.boolean().optional().openapi({
             description: 'Boolean on whether or not to scrape for images',
@@ -616,7 +611,6 @@ export const ScrapePagesSchema = ScrapeWebsiteSchema.extend({
         saveMethod: 's3Upload',
         backupImagesSave: true,
         saveImages: true,
-        analyzeHomepageData: true,
         scrapeImages: true,
     },
 })
