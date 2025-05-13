@@ -10,7 +10,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
     const logoUrl = 'https://example.com/logo.png'
 
     it('should transform business info to Duda format', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, mockBusinessInfoObject)
+        const result = transformBusinessInfoDataToDudaLocations(logoUrl, mockBusinessInfoObject, {})
 
         expect(result[0]).toEqual({
             label: 'June Foot Spa',
@@ -38,7 +38,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
     })
 
     it('should handle missing optional fields correctly', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {} as BusinessInfoData)
+        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {} as BusinessInfoData, {})
 
         expect(result[0]).toEqual({
             label: '',
@@ -54,21 +54,25 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
     })
 
     it('should transform alternate hours format to Duda format', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
-            ...mockBusinessInfoObject,
-            hours: {
-                regularHours: {
-                    MON: '9:00am to 11:00pm',
-                    TUE: '9:00am to 11:00pm',
-                    WED: '8:00am - 12:00am',
-                    THU: '9:00am - 11:00pm',
-                    FRI: '9:00am - 11:00pm',
-                    SAT: '10am - 10pm',
-                    SUN: '11am–9pm', //use en-dash
+        const result = transformBusinessInfoDataToDudaLocations(
+            logoUrl,
+            {
+                ...mockBusinessInfoObject,
+                hours: {
+                    regularHours: {
+                        MON: '9:00am to 11:00pm',
+                        TUE: '9:00am to 11:00pm',
+                        WED: '8:00am - 12:00am',
+                        THU: '9:00am - 11:00pm',
+                        FRI: '9:00am - 11:00pm',
+                        SAT: '10am - 10pm',
+                        SUN: '11am–9pm', //use en-dash
+                    },
+                    is24Hours: false,
                 },
-                is24Hours: false,
             },
-        })
+            {}
+        )
 
         expect(result[0]).toEqual({
             label: 'June Foot Spa',
@@ -95,44 +99,58 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
         })
     })
     it('should transform handle 24/7 hours format to Duda format', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
-            ...mockBusinessInfoObject,
-            hours: {
-                regularHours: {
-                    MON: null,
-                    TUE: null,
-                    WED: null,
-                    THU: null,
-                    FRI: null,
-                    SAT: null,
-                    SUN: null,
+        const result = transformBusinessInfoDataToDudaLocations(
+            logoUrl,
+            {
+                ...mockBusinessInfoObject,
+                hours: {
+                    regularHours: {
+                        MON: null,
+                        TUE: null,
+                        WED: null,
+                        THU: null,
+                        FRI: null,
+                        SAT: null,
+                        SUN: null,
+                    },
+                    is24Hours: true,
                 },
-                is24Hours: true,
             },
-        })
+            {}
+        )
 
         expect(result[0].business_hours).toEqual([{ days: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'], open: '00:00', close: '24:00' }])
     })
 
     it('should transform social accounts to duda format', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
-            ...mockBusinessInfoObject,
-            links: {
-                socials: [
-                    'https://www.facebook.com/mybusiness',
-                    'https://www.instagram.com/mycompany?querytest?josh',
-                    'https://x.com/twitterhandle',
-                    'https://www.yelp.com/biz/my-business-name',
-                    'https://www.linkedin.com/company/companyname',
-                ],
-                other: [],
+        const result = transformBusinessInfoDataToDudaLocations(
+            logoUrl,
+            {
+                ...mockBusinessInfoObject,
+                links: {
+                    socials: [
+                        'https://www.facebook.com/mybusiness',
+                        'https://www.instagram.com/mycompany?querytest?josh',
+                        'https://x.com/twitterhandle',
+                        'https://www.yelp.com/biz/my-business-name',
+                        'https://www.linkedin.com/companyname',
+                    ],
+                    other: [],
+                },
             },
-        })
+            {
+                facebook: 'mybusiness',
+                instagram: 'mycompany',
+                twitter: 'twitterhandle',
+                yelp: 'biz/my-business-name',
+                linkedin: 'companyname',
+            }
+        )
         expect(result[0].social_accounts).toEqual({
             facebook: 'mybusiness',
             instagram: 'mycompany',
             twitter: 'twitterhandle',
-            yelp: 'my-business-name',
+            yelp: 'biz/my-business-name',
             linkedin: 'companyname',
         })
     })
@@ -214,6 +232,13 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     is24Hours: false,
                 },
             },
+            {
+                facebook: 'newbusiness',
+                instagram: 'mycompany',
+                twitter: 'twitterhandle',
+                yelp: 'my-business-name',
+                linkedin: 'companyname',
+            },
             currentBusinessInfo
         )
 
@@ -285,6 +310,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     is24Hours: false,
                 },
             },
+            {},
             {
                 ...currentBusinessInfo,
                 location_data: {
@@ -296,15 +322,6 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
 
         //only have one location (matching addresses)
         expect(result.length).toEqual(2)
-
-        //overwrite only blank social accounts, merge others
-        expect(result[0].social_accounts).toEqual({
-            facebook: 'newbusiness',
-            instagram: 'mycompany',
-            twitter: 'twitterhandle',
-            yelp: 'my-business-name',
-            linkedin: 'companyname',
-        })
 
         expect(result[0].address).toEqual({
             streetAddress: '149-36 Northern Blvd',
@@ -360,6 +377,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     country: 'US',
                 },
             },
+            {},
             {
                 ...currentBusinessInfo,
                 location_data: {
@@ -392,6 +410,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     country: 'US',
                 },
             },
+            {},
             {
                 ...currentBusinessInfo,
                 location_data: {
@@ -418,34 +437,42 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
         })
     })
     it('should handle one location with no current info', () => {
-        const result = transformBusinessInfoDataToDudaLocations(logoUrl, {
-            ...mockBusinessInfoObject,
-            address: {
-                streetAddress: '123 Main St',
-                city: 'Flushing',
-                postalCode: '11354',
-                country: 'US',
-                state: 'NY',
-            },
-            links: {
-                socials: ['https://www.facebook.com/newbusiness', 'https://www.instagram.com/mycompany', 'https://x.com/twitterhandle'],
-                other: [],
-            },
-            phoneNumber: '323-222-2222',
-            email: 'company@company.com',
-            hours: {
-                regularHours: {
-                    MON: '3:00am to 2:00pm' as const,
-                    TUE: '9:00am to 11:00pm' as const,
-                    WED: '8:00am - 12:00am' as const,
-                    THU: '9:00am - 11:00pm' as const,
-                    FRI: '9:00am - 11:00pm' as const,
-                    SAT: null,
-                    SUN: null,
+        const result = transformBusinessInfoDataToDudaLocations(
+            logoUrl,
+            {
+                ...mockBusinessInfoObject,
+                address: {
+                    streetAddress: '123 Main St',
+                    city: 'Flushing',
+                    postalCode: '11354',
+                    country: 'US',
+                    state: 'NY',
                 },
-                is24Hours: false,
+                links: {
+                    socials: ['https://www.facebook.com/newbusiness', 'https://www.instagram.com/mycompany', 'https://x.com/twitterhandle'],
+                    other: [],
+                },
+                phoneNumber: '323-222-2222',
+                email: 'company@company.com',
+                hours: {
+                    regularHours: {
+                        MON: '3:00am to 2:00pm' as const,
+                        TUE: '9:00am to 11:00pm' as const,
+                        WED: '8:00am - 12:00am' as const,
+                        THU: '9:00am - 11:00pm' as const,
+                        FRI: '9:00am - 11:00pm' as const,
+                        SAT: null,
+                        SUN: null,
+                    },
+                    is24Hours: false,
+                },
             },
-        })
+            {
+                facebook: 'newbusiness',
+                instagram: 'mycompany',
+                twitter: 'twitterhandle',
+            }
+        )
 
         //only have one location (matching addresses)
         expect(result.length).toEqual(1)
@@ -512,6 +539,11 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                     },
                     is24Hours: false,
                 },
+            },
+            {
+                facebook: 'newbusiness',
+                instagram: 'mycompany',
+                twitter: 'twitterhandle',
             },
             {
                 //current info form duda
@@ -631,7 +663,7 @@ describe('transformBusinessInfoToDudaFormat', () => {
             { content: 'check stuff⌛🌟🌐\n', url: 'https://example.com/page1', images: [], forms: [], title: 'June Foot Spa' },
             { content: 'page 2 content', url: 'https://example.com/page2', images: [], forms: [], title: 'June Page 2' },
         ]
-        const result = transformBusinessInfoDataToDudaFormat(logoUrl, mockBusinessInfoObject, pages, dudaLocationData, 'https://example.com')
+        const result = transformBusinessInfoDataToDudaFormat(logoUrl, mockBusinessInfoObject, pages, dudaLocationData, [])
 
         const transformedResultCheck = {
             companyName: 'June Foot Spa',
@@ -664,7 +696,7 @@ describe('transformBusinessInfoToDudaFormat', () => {
             { ...mockBusinessInfoObject, styles: { fonts: null, colors: null } },
             pages,
             dudaLocationData,
-            'https://example.com'
+            []
         )
 
         const transformedResultCheck = {
@@ -705,12 +737,12 @@ describe('transformSocialAccountsToDudaFormat', () => {
 
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
 
-        expect(result).toEqual({
+        expect(result.socialAccounts).toEqual({
             facebook: 'mybusiness',
             instagram: 'mycompany',
             twitter: 'twitterhandle',
-            yelp: 'my-business-name',
-            linkedin: 'companyname',
+            yelp: 'biz/my-business-name',
+            linkedin: 'company/companyname',
         })
     })
 
@@ -722,13 +754,13 @@ describe('transformSocialAccountsToDudaFormat', () => {
             },
         }
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({})
+        expect(result.socialAccounts).toEqual({})
     })
 
     it('should handle missing social links', () => {
         const businessInfo: Partial<BusinessInfoData> = {}
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({})
+        expect(result.socialAccounts).toEqual({})
     })
 
     it('should ignore unsupported social platforms', () => {
@@ -739,7 +771,7 @@ describe('transformSocialAccountsToDudaFormat', () => {
             },
         }
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({
+        expect(result.socialAccounts).toEqual({
             facebook: 'mybusiness',
         })
     })
@@ -752,7 +784,7 @@ describe('transformSocialAccountsToDudaFormat', () => {
             },
         }
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({
+        expect(result.socialAccounts).toEqual({
             facebook: 'mybusiness',
         })
     })
@@ -765,15 +797,28 @@ describe('transformSocialAccountsToDudaFormat', () => {
                     'https://www.instagram.com/mycompany?igshid=123456',
                     'https://www.facebook.com/target?234343?user=josh',
                     'https://www.linkedin.com/company/mycompany?originalSubdomain=uk',
+                    '',
                 ],
                 other: [],
             },
         }
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({
+        expect(result.socialAccounts).toEqual({
             facebook: 'target',
             instagram: 'mycompany',
-            linkedin: 'mycompany',
+            linkedin: 'company/mycompany',
+        })
+    })
+    it('should handle URLs with query parameters', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: ['https://www.facebook.com/people/kyle/233234', ''],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result.socialAccounts).toEqual({
+            facebook: 'people/kyle/233234',
         })
     })
 
@@ -789,10 +834,41 @@ describe('transformSocialAccountsToDudaFormat', () => {
             },
         }
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
-        expect(result).toEqual({
+        expect(result.socialAccounts).toEqual({
             facebook: 'mybusinessname',
             instagram: 'my_company_2023',
-            linkedin: 'my-company',
+            linkedin: 'company/my-company',
         })
+    })
+
+    it('should handle google my business in the other links list', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [],
+                other: ['https://www.google.com/maps/place/Josh+Co./@33.3908482,-94.239245'],
+            },
+        }
+
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+
+        expect(result.socialAccounts).toEqual({
+            google_my_business: 'Josh+Co./@33.3908482,-94.239245',
+        })
+        expect(result.skippedLinks).toEqual([])
+    })
+    it('should skip URLs that are too long and add to skippedLinks', () => {
+        const longUrl =
+            'https://www.google.com/maps/place/Passion+Nails+and+Spas/@33.939385,-117.9693012,1645m/data=!3m2!1e3!4b1!4m6!3m5!1s0x80c2d5285d200529:0x7ccdab2f72ef8a4d!8m2!3d33.939385!4d-117.9693012!16s%2Fg%2F1tcv1qfw?entry=ttu&g_ep=EgoyMDI1MDEwOC4wIKXMDSoASAFQAw%3D%3D'
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: [],
+                other: [longUrl],
+            },
+        }
+
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+
+        expect(result.socialAccounts).toEqual({})
+        expect(result.skippedLinks).toEqual([longUrl])
     })
 })

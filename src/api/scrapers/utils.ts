@@ -550,7 +550,7 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
     return services
 }
 
-export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData) => {
+export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData, skippedLinks: string[]) => {
     const customTexts = pages.flatMap((page) => {
         if (!page.content) return []
         const content = filterContent(page.content || '')
@@ -570,6 +570,15 @@ export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pag
             text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
         }
         customTexts.push(fontText)
+    }
+
+    // Add skipped links
+    if (skippedLinks && skippedLinks.length) {
+        const skippedLinksText = {
+            label: 'Social Media',
+            text: skippedLinks.join('<br>'),
+        }
+        customTexts.push(skippedLinksText)
     }
 
     // Add address
@@ -739,7 +748,6 @@ export const determineIfLocationsMatch = (newBusinessInfo: BusinessInfoData, cur
 }
 
 export const determineSocialAccountType = (str: string) => {
-    if (str.includes('google')) return 'google'
     if (str.includes('facebook')) return 'facebook'
     if (str.includes('instagram')) return 'instagram'
     if (str.includes('twitter')) return 'twitter'
@@ -817,31 +825,58 @@ export const transformHoursToDudaFormat = (hours?: ScrapedHours | null) => {
 }
 
 export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoData) => {
-    const socialLinks = businessInfo?.links?.socials
-    if (!socialLinks?.length) return {}
+    const socialLinks = [...(businessInfo?.links?.socials || [])]
+
+    // Check other links for Google My Business to push to social links
+    const otherLinks = businessInfo?.links?.other || []
+    const googleBusinessLink = otherLinks.find((link) => link?.includes('google.com/maps/place'))
+    if (googleBusinessLink) {
+        socialLinks.push(googleBusinessLink)
+    }
+
+    if (!socialLinks.length) return { socialAccounts: {}, skippedLinks: [] }
 
     const socialAccounts: Record<string, string> = {}
+    const skippedLinks: string[] = []
 
     socialLinks.forEach((link) => {
         try {
             if (!link) return
+
+            // Special handling for Google My Business links
+            if (link.includes('google.com/maps/place')) {
+                const placeIndex = link.indexOf('/place/')
+                if (placeIndex !== -1) {
+                    const placeData = link.slice(placeIndex + 7) // +7 to skip '/place/'
+                    if (placeData.length > 200) {
+                        //max character limit for Duda GMB links
+                        skippedLinks.push(link)
+                        return
+                    }
+                    socialAccounts['google_my_business'] = placeData
+                    return
+                }
+            }
+
             const url = new URL(link)
-            // Get the path without query parameters
-            const pathSegments = url.pathname.split('/').filter(Boolean)
-            let finalSegment = pathSegments[pathSegments.length - 1]
+            const type = determineSocialAccountType(link.toLowerCase())
 
-            if (finalSegment) {
-                // Remove any query parameters if they exist
-                finalSegment = finalSegment.split('?')[0]
-                // Clean up any remaining special characters
-                finalSegment = finalSegment.replace(/[^a-zA-Z0-9-_]/g, '')
+            if (type) {
+                // Get full path but clean it
+                const fullPath = url.pathname
+                    .replace(/^\/|\/$/g, '') // Remove leading/trailing slashes
+                    .split('?')[0] // Remove query parameters
+                    .replace(/[^\w\/-]/g, '') // Remove special chars except for alphanumeric, hyphens, and forward slashes
 
-                const type = determineSocialAccountType(link.toLowerCase())
-                if (type && finalSegment && finalSegment.length < 61) {
-                    socialAccounts[type] = finalSegment
+                if (fullPath && fullPath.length < 61) {
+                    socialAccounts[type] = fullPath
                 } else {
+                    skippedLinks.push(link)
                     console.warn('Invalid URL in social links:', link)
                 }
+            } else {
+                skippedLinks.push(link)
+                console.warn('Unknown social media type:', link)
             }
         } catch (error) {
             console.warn('Invalid URL in social links:', link)
@@ -849,30 +884,44 @@ export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoDa
         }
     })
 
-    return socialAccounts
+    return { socialAccounts, skippedLinks }
 }
 
 export const combineSocialAccounts = (currentLocationInfo: ContentLibraryResponse['location_data'] | undefined, businessInfo: BusinessInfoData) => {
     if (currentLocationInfo?.social_accounts?.socialAccounts && !businessInfo?.links?.socials) {
-        return currentLocationInfo.social_accounts.socialAccounts
+        return {
+            socialAccounts: currentLocationInfo.social_accounts.socialAccounts,
+            skippedLinks: undefined,
+        }
     }
 
     if (currentLocationInfo?.social_accounts?.socialAccounts && businessInfo?.links?.socials) {
-        const newSocialAccounts = transformSocialAccountsToDudaFormat(businessInfo)
+        const { socialAccounts, skippedLinks } = transformSocialAccountsToDudaFormat(businessInfo)
+        const newSocialAccounts = socialAccounts
         const currentAccounts = currentLocationInfo.social_accounts.socialAccounts
 
         // Merge accounts, keeping current values only if they're truthy
         return {
+            socialAccounts: {
             ...newSocialAccounts,
             ...Object.fromEntries(Object.entries(currentAccounts).filter(([_, value]) => value)),
+            },
+            skippedLinks,
         }
     }
 
     if (businessInfo?.links?.socials) {
-        return transformSocialAccountsToDudaFormat(businessInfo)
+        const { socialAccounts, skippedLinks } = transformSocialAccountsToDudaFormat(businessInfo)
+        return {
+            socialAccounts,
+            skippedLinks,
+        }
     }
 
-    return {}
+    return {
+        socialAccounts: {},
+        skippedLinks: [],
+    }
 }
 
 export const createCombinedAddress = (businessInfo: BusinessInfoData, currentBusinessInfo: ContentLibraryResponse) => {

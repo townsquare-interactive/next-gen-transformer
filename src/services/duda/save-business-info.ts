@@ -3,13 +3,7 @@ import { ScrapedAndAnalyzedSiteData } from '../../schema/output-zod.js'
 import { BusinessInfoObject, LocationObject } from '../../types/duda-api-type.js'
 import { createDudaLocation, getBusinessInfoFromDuda, uploadBusinessInfo } from '../duda-api.js'
 import { Settings } from '../scrape-service.js'
-import {
-    combineSocialAccounts,
-    transformHoursToDudaFormat,
-    transformTextToDudaFormat,
-    transformSocialAccountsToDudaFormat,
-    createCombinedAddress,
-} from '../../api/scrapers/utils.js'
+import { combineSocialAccounts, transformHoursToDudaFormat, transformTextToDudaFormat, createCombinedAddress } from '../../api/scrapers/utils.js'
 
 export type BusinessInfoData = ScrapedAndAnalyzedSiteData['businessInfo']
 
@@ -30,7 +24,10 @@ export async function saveBusinessInfoToDuda(
         currentBusinessInfo = await getBusinessInfoFunction(siteId)
     }
 
-    const locations = transformBusinessInfoDataToDudaLocations(logoUrl, businessInfo, currentBusinessInfo)
+    const currentLocationInfo = currentBusinessInfo?.location_data
+    const { socialAccounts, skippedLinks } = combineSocialAccounts(currentLocationInfo, businessInfo)
+
+    const locations = transformBusinessInfoDataToDudaLocations(logoUrl, businessInfo, socialAccounts, currentBusinessInfo)
     const primaryLocation = locations[0]
 
     const transformedBusinessInfoData: BusinessInfoObject = transformBusinessInfoDataToDudaFormat(
@@ -38,7 +35,7 @@ export async function saveBusinessInfoToDuda(
         businessInfo,
         pages,
         primaryLocation,
-        settings.url,
+        skippedLinks || [],
         currentBusinessInfo
     )
 
@@ -76,11 +73,11 @@ export const transformBusinessInfoDataToDudaFormat = (
     businessInfo: BusinessInfoData,
     pages: ScrapedAndAnalyzedSiteData['pages'],
     transformedLocationData: LocationObject,
-    url: string,
+    skippedLinks: string[],
     currentBusinessInfo?: ContentLibraryResponse
 ): BusinessInfoObject => {
     // Transform pages into custom text array with content splitting
-    const customTexts = transformTextToDudaFormat(pages, businessInfo)
+    const customTexts = transformTextToDudaFormat(pages, businessInfo, skippedLinks)
     const transformedData = {
         companyName: currentBusinessInfo?.business_data?.name ?? businessInfo?.companyName ?? '',
         site_texts: {
@@ -99,6 +96,7 @@ export const transformBusinessInfoDataToDudaFormat = (
 export function transformBusinessInfoDataToDudaLocations(
     logoUrl: string,
     businessInfo: BusinessInfoData,
+    socialAccounts: LocationObject['social_accounts'],
     currentBusinessInfo?: ContentLibraryResponse
 ): LocationObject[] {
     const locations: LocationObject[] = []
@@ -112,8 +110,6 @@ export function transformBusinessInfoDataToDudaLocations(
         addSecondLocation = addressData.addSecondLocation
         combinedBusinessAddress = addressData.newAddressData
     }
-
-    const socialAccounts = combineSocialAccounts(currentLocationInfo, businessInfo)
 
     //logic breakdown
     //If we are adding a second location -> use current info if available for first location and new business info for second location. Replace certain things in primary location if not currently there with new info (phone, email, social accounts)
@@ -168,7 +164,7 @@ export function transformBusinessInfoDataToDudaLocations(
                   }
                 : undefined,
             logo_url: logoUrl,
-            social_accounts: transformSocialAccountsToDudaFormat(businessInfo),
+            social_accounts: socialAccounts,
             business_hours: transformHoursToDudaFormat(businessInfo?.hours) || undefined,
         }
         locations.push(secondLocation)
