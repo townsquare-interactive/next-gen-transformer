@@ -168,22 +168,30 @@ export const extractFormData = async (page: Page) => {
 }
 
 export const extractPageContent = async (page: Page, isHomePage: boolean) => {
+    /*     if (page.url().includes('/veterinary-services')) {
+        console.log('contoent', await page.content())
+    } */
     const result = await page.evaluate((isHomePage) => {
         // Unwanted tags for content scrape
         const unwantedSelectors = ['nav', 'script', 'style']
 
         if (!isHomePage) {
-            // Add common footer selectors
+            // Remove common footer selectors from inner page scraping
             const footerSelectors = [
-                'footer', //footer tag
-                '.footer', //footer class
-                '[class*="footer" i]', // matches any class containing "footer"
-                '#footer',
+                'footer', // HTML5 semantic tag
+                '.footer', // exact class match
+                '#footer', // ID match
+                '.site-footer',
+                '.page-footer',
+                '.main-footer',
+                '.footer-container',
+                '.container-footer',
+                '.dmFooterContainer',
             ].join(', ')
             unwantedSelectors.push(footerSelectors)
         }
 
-        // Instead of removing, let's clone the body first
+        // Clone the body html
         const tempDiv = document.createElement('div')
         tempDiv.innerHTML = document.body.innerHTML
 
@@ -903,8 +911,8 @@ export const combineSocialAccounts = (currentLocationInfo: ContentLibraryRespons
         // Merge accounts, keeping current values only if they're truthy
         return {
             socialAccounts: {
-            ...newSocialAccounts,
-            ...Object.fromEntries(Object.entries(currentAccounts).filter(([_, value]) => value)),
+                ...newSocialAccounts,
+                ...Object.fromEntries(Object.entries(currentAccounts).filter(([_, value]) => value)),
             },
             skippedLinks,
         }
