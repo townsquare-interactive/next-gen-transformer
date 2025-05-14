@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Block develop branch pushes from 8:30 AM to 10:30 AM EST (UTC-5 or UTC-4 for DST)
+
+START="08:30"
+END="10:30"
+TZ="America/New_York"
+
+BLOCKED_BRANCHES="^(develop|main|master|release(-.*)?)\$"
+
+branch_name=$(git branch --show-current)
+if [[ "$branch_name" =~ $BLOCKED_BRANCHES ]]; then
+  current_time=$(TZ=$TZ date +%H:%M)
+
+  if [[ "$current_time" > "$START" && "$current_time" < "$END" ]]; then
+    echo "❌ Push to $branch_name is not allowed between $START and $END EST."
+    exit 1
+  fi
+fi
+
+exit 0
