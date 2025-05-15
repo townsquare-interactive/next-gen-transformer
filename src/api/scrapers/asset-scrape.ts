@@ -65,8 +65,8 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     //scraping site images
     let imageFiles: ImageFiles[] = []
 
-    //limit image scraping to the first 22 pages found
-    if (settings.scrapeImages && n < 23) {
+    //limit image scraping to the first 26 pages found
+    if (settings.scrapeImages && n < 27) {
         console.log('Scraping images...')
         imageFiles = await scrapeImagesFromPage(page, browser)
     } else {
@@ -145,8 +145,8 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         //this step must be done last as it modies the DOM
         const pageTextContent = await extractPageContent(page, isHomePage)
 
-        //stop lazy load image processing after 10 pages for speed reasons
-        if (settings.scrapeImages && n < 11) {
+        //stop lazy load image processing after 15 pages for speed reasons
+        if (settings.scrapeImages && n < 16) {
             await scrollToLazyLoadImages(page, 1000, settings.url)
         }
         await browser.close()

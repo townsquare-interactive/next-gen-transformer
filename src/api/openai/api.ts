@@ -27,7 +27,7 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
 
                         Task 4: Identify the logo from the header section of the HTML (if available) and provide the <img> tag with the src value.
 
-                        Task 5: Identify the extrnal links in the sites code. Seperate them from social media links and other links. Remove duplicates of social media links if they seem to be going to the same pages. Do not include any links that link within the same domain of ${url}.
+                        Task 5: Identify the extrnal links in the sites code. Seperate them from social media links and other links. Remove duplicates of social media links if they seem to be going to the same pages. Do not include any links that link within the same domain of ${url}. Do not alter the individual links in any way.
 
                         Respond in the following JSON format:
                         

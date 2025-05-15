@@ -48,15 +48,11 @@ export async function dudaImageFetch(payload: UploadPayload[], settings?: Settin
 }
 
 export async function getDudaSite(siteId: string) {
-    try {
     const response = await dudaApiClient.getClient().sites.get({
         site_name: siteId,
     })
 
     return response
-    } catch (error) {
-        translateDudaError(error, siteId)
-    }
 }
 
 export async function getDudaSiteId(gpid: string) {
