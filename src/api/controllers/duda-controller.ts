@@ -124,9 +124,9 @@ export const createLocation = async (req: Request, res: Response) => {
 }
 
 export const changeBusinessSchemaStatus = async (req: Request, res: Response) => {
-    const validatedRequest = zodDataParse(req.body, ToggleBusinessSchema, 'input')
-
     try {
+        middleware(req)
+        const validatedRequest = zodDataParse(req.body, ToggleBusinessSchema, 'input')
         const response = await toggleBusinessSchema(validatedRequest.siteName, validatedRequest.toggleOption)
         return res.json({ data: response })
     } catch (err) {
@@ -135,8 +135,8 @@ export const changeBusinessSchemaStatus = async (req: Request, res: Response) =>
 }
 
 export const saveContent = async (req: Request, res: Response) => {
-    middleware(req)
     try {
+        middleware(req)
         const validatedRequest = zodDataParse(req.body, SaveGeneratedContentSchema, 'input')
         const response = await saveGeneratedContent(validatedRequest)
 

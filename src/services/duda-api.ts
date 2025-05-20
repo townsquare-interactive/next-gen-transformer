@@ -28,54 +28,60 @@ export async function dudaImageFetch(payload: UploadPayload[], settings?: Settin
     //https://developer.duda.co/reference/site-content-upload-resources
     const dudaApiUrl = `${BASE_URL}/api/sites/multiscreen/resources/${siteName}/upload`
 
-    try {
-        const response = await fetch(dudaApiUrl, {
-            method: 'POST',
-            headers: HEADERS,
-            body: JSON.stringify(payload),
-        })
+    const response = await fetch(dudaApiUrl, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(payload),
+    })
 
-        if (!response.ok) {
-            console.error(`status text: ${response.statusText}`)
-            throw response.statusText
-        }
-
-        const responseData: DudaResponse = await response.json()
-        return responseData
-    } catch (error) {
-        throw error
+    if (!response.ok) {
+        console.error(`status text: ${response.statusText}`)
+        throw response.statusText
     }
+
+    const responseData: DudaResponse = await response.json()
+    return responseData
 }
 
 export async function getDudaSite(siteId: string) {
-    const response = await dudaApiClient.getClient().sites.get({
-        site_name: siteId,
-    })
+    try {
+        const response = await dudaApiClient.getClient().sites.get({
+            site_name: siteId,
+        })
 
-    return response
+        return response
+    } catch (error) {
+        translateDudaError(error, siteId)
+    }
 }
 
 export async function getDudaSiteId(gpid: string) {
-    const decodedGpid = decodeURIComponent(gpid)
-    const encodedGpid = encodeURIComponent(decodedGpid)
+    try {
+        const decodedGpid = decodeURIComponent(gpid)
+        const encodedGpid = encodeURIComponent(decodedGpid)
 
-    const response = await dudaApiClient.getClient().sites.getByExternalID({
-        external_uid: encodedGpid,
-    })
-
-    if (!response || !Array.isArray(response) || response.length === 0) {
-        throw new DataUploadError({
-            message: 'Duda site not found',
-            domain: '',
-            errorType: 'DUD-019',
-
-            state: {
-                fileStatus: 'Duda site unchanged',
-            },
+        const response = await dudaApiClient.getClient().sites.getByExternalID({
+            external_uid: encodedGpid,
         })
-    }
 
-    return response[0]
+        //duda does not throw an error if site is not found, so we need to check the response
+        if (!response || !Array.isArray(response) || response.length === 0) {
+            console.log('gpid', gpid)
+            throw new DataUploadError({
+                message: 'Duda site not found',
+                domain: '',
+                errorType: 'DUD-019',
+
+                state: {
+                    fileStatus: 'Duda site unchanged',
+                },
+            })
+        }
+
+        return response[0]
+    } catch (error) {
+        translateDudaError(error, gpid)
+    }
 }
 
 export async function updateSiteContent(siteId: string, seoData?: ScrapedPageSeo, currentSiteSeo?: DudaSiteSeo | null, enableBusinessSchema?: boolean) {
@@ -97,17 +103,7 @@ export async function updateSiteContent(siteId: string, seoData?: ScrapedPageSeo
                 : {}),
         })
     } catch (error) {
-        const errorMessage = error[0].error.message
-        throw new DataUploadError({
-            message: errorMessage,
-            domain: '',
-            errorType: 'DUD-018',
-            state: {
-                fileStatus: 'Duda files not uploaded correctly',
-                responseStatus: error[0].status,
-                errorCode: error[0].error.error_code,
-            },
-        })
+        translateDudaError(error, siteId)
     }
 }
 
@@ -133,21 +129,29 @@ export async function createDudaPage(siteName: string, pageData: PageObject) {
 }
 
 export async function getDudaColors(siteName: string) {
-    const response = await dudaApiClient.getClient().sites.theme.get({
-        site_name: siteName,
-    })
+    try {
+        const response = await dudaApiClient.getClient().sites.theme.get({
+            site_name: siteName,
+        })
 
-    return response.colors
+        return response.colors
+    } catch (error) {
+        translateDudaError(error, siteName)
+    }
 }
 
 export async function getBusinessInfoFromDuda(siteName: string) {
-    const response = await dudaApiClient.getClient().content.get({
-        site_name: siteName,
-    })
+    try {
+        const response = await dudaApiClient.getClient().content.get({
+            site_name: siteName,
+        })
 
-    console.log('duda business info', response)
+        console.log('duda business info', response)
 
-    return response
+        return response
+    } catch (error) {
+        translateDudaError(error, siteName)
+    }
 }
 
 export async function updateDudaTheme(siteName: string, colorData: DudaColors) {
@@ -161,39 +165,34 @@ export async function updateDudaTheme(siteName: string, colorData: DudaColors) {
         return response
     } catch (error) {
         console.error(`error updating duda theme`, error)
-        const errorMessage = error[0].error.message
-        throw new DataUploadError({
-            message: errorMessage,
-            domain: '',
-            errorType: 'DUD-018',
-            state: {
-                fileStatus: 'Duda files not uploaded correctly',
-                responseStatus: error[0].status,
-                errorCode: error[0].error.error_code,
-            },
-        })
+        translateDudaError(error, siteName)
     }
 }
 
 export async function createDudaLocation(siteName: string, locationData: LocationObject) {
-    const response = await dudaApiClient.getClient().content.multilocation.create({
-        site_name: siteName,
-        ...(locationData.label && { label: locationData.label }),
-        ...(locationData.phones && { phones: locationData.phones }),
-        ...(locationData.emails && { emails: locationData.emails }),
-        ...(locationData.social_accounts && { social_accounts: locationData.social_accounts }),
-        ...(locationData.address && { address: locationData.address }),
-        ...(locationData.logo_url && { logo_url: locationData.logo_url }),
-        ...(locationData.business_hours && {
-            business_hours: locationData.business_hours.map(({ days, open, close }) => ({
-                days: days as ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[],
-                open,
-                close,
-            })),
-        }),
-    })
+    try {
+        const response = await dudaApiClient.getClient().content.multilocation.create({
+            site_name: siteName,
+            ...(locationData.label && { label: locationData.label }),
+            ...(locationData.phones && { phones: locationData.phones }),
+            ...(locationData.emails && { emails: locationData.emails }),
+            ...(locationData.social_accounts && { social_accounts: locationData.social_accounts }),
+            ...(locationData.address && { address: locationData.address }),
+            ...(locationData.logo_url && { logo_url: locationData.logo_url }),
+            ...(locationData.business_hours && {
+                business_hours: locationData.business_hours.map(({ days, open, close }) => ({
+                    days: days as ('MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN')[],
+                    open,
+                    close,
+                })),
+            }),
+        })
 
-    return response
+        return response
+    } catch (error) {
+        console.error('error creating duda location', error)
+        translateDudaError(error, siteName)
+    }
 }
 
 export async function uploadBusinessInfo(siteName: string, businessInfo: BusinessInfoObject) {
@@ -222,14 +221,63 @@ export async function uploadBusinessInfo(siteName: string, businessInfo: Busines
         return response
     } catch (error) {
         console.error('error uploading business info to duda', error)
+        translateDudaError(error, siteName)
+    }
+}
+
+interface DudaError {
+    error: {
+        message?: string
+        error_code?: string
+        data?: string
+    }
+    status: number
+}
+
+const translateDudaError = (error: DudaError[], siteName: string) => {
+    console.log('duda error', error)
+
+    if (error[0]) {
+        const errorMessage = error[0]?.error?.message
+        const errorCode = error[0]?.error?.error_code
+        const errorStatus = error[0]?.status
+        let errorMessageTranslation = ''
+
+        console.log('duda error message', errorMessage)
+
+        //Generic duda internal error
+        if (errorCode === 'InternalError') {
+            errorMessageTranslation = 'Duda API internal error'
+        }
+
+        //error message does not exist with 401 so we can add it
+        if (errorStatus === 401) {
+            errorMessageTranslation = 'Invalid Duda API credentials'
+        }
+
+        //siteName not found (could also be sandbox/prod env variable mismatch)
+        if (errorCode === 'ResourceNotExist') {
+            console.log('unable to find site, using sandbox? ', process.env.DUDA_USE_SANDBOX)
+            console.log('site name: ', siteName)
+        }
+
         throw new DataUploadError({
-            message: 'uploading business info to duda',
+            message: errorMessageTranslation || errorMessage || 'Duda API error',
             domain: '',
             errorType: 'DUD-018',
             state: {
-                fileStatus: 'Duda files not uploaded correctly',
-                responseStatus: error[0].status,
-                errorCode: error[0].error.error_code,
+                fileStatus: 'Duda data not uploaded correctly',
+                dudaErrorCode: errorCode,
+                dudaErrorStatus: errorStatus,
+            },
+        })
+    } else {
+        throw new DataUploadError({
+            message: 'Duda generic API error',
+            domain: '',
+            errorType: 'DUD-018',
+            state: {
+                fileStatus: 'Duda data not uploaded correctly',
             },
         })
     }

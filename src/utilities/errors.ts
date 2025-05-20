@@ -54,8 +54,8 @@ interface DataUploadErrorType extends ErrorClass {
     domain: string
     state: {
         fileStatus: string
-        responseStatus?: number
-        errorCode?: string
+        dudaErrorCode?: string
+        dudaErrorStatus?: number
         missingFields?: string[]
     } & ErrorState
 }
