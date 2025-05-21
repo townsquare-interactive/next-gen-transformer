@@ -33,6 +33,9 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 { days: ['SAT'], open: '10:00', close: '22:00' },
                 { days: ['SUN'], open: '10:00', close: '22:00' },
             ],
+            schema: {
+                type: 'HardwareStore',
+            },
             social_accounts: {},
         })
     })
@@ -95,6 +98,9 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
                 { days: ['SAT'], open: '10:00', close: '22:00' },
                 { days: ['SUN'], open: '11:00', close: '21:00' },
             ],
+            schema: {
+                type: 'HardwareStore',
+            },
             social_accounts: {},
         })
     })
@@ -514,6 +520,7 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             logoUrl,
             {
                 ...mockBusinessInfoObject,
+                businessType: 'Random',
                 address: {
                     streetAddress: '123 Main St',
                     city: 'Flushing',
@@ -601,6 +608,9 @@ describe('transformBusinessInfoDataToDudaLocation', () => {
             country: 'US',
             region: 'NY',
         })
+
+        //incorrect schema passed does not add schema to location
+        expect(result[0].schema).toBeUndefined()
 
         //keep one phone
         expect(result[0].phones?.length).toEqual(1)

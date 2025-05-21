@@ -20,6 +20,9 @@ export type LocationObject = {
         emailAddress: string
         label: string
     }[]
+    schema?: {
+        type?: string
+    }
     social_accounts?: {
         tripadvisor?: string
         youtube?: string

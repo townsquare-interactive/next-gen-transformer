@@ -567,6 +567,7 @@ const ScreenshotDataSchema = z.object({
     email: z.string().email().nullable(),
     phoneNumber: z.string().nullable(),
     hours: ScrapedHoursSchema.nullable(),
+    businessType: z.string().nullable(),
     links: z.object({
         socials: z.array(z.string().nullable()).nullable(),
         other: z.array(z.string().nullable()).nullable(),

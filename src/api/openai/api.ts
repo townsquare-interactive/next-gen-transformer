@@ -29,6 +29,8 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
 
                         Task 5: Identify the extrnal links in the sites code. Seperate them from social media links and other links. Remove duplicates of social media links if they seem to be going to the same pages. Do not include any links that link within the same domain of ${url}. Do not alter the individual links in any way.
 
+                        Task 6: Identify the business type of the site. Please choose an option from schema.org business types or null if it does not fit any of the options.
+
                         Respond in the following JSON format:
                         
                         {
@@ -46,6 +48,7 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
                           "regularHours":{"MON": "string or null", "TUE": "string or null", "WED": "string or null","THU": "string or null","FRI": "string or null", "SAT": "string or null", "SUN": "string or null"},
                           "is24Hours":boolean or false,
                           },
+                          "businessType":"string or null"
                           "styles": {
                             "colors": {
                               "primaryColor": "hex or null",

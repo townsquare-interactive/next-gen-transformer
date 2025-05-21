@@ -4,7 +4,7 @@ import { BusinessInfoObject, LocationObject } from '../../types/duda-api-type.js
 import { createDudaLocation, getBusinessInfoFromDuda, uploadBusinessInfo } from '../duda-api.js'
 import { Settings } from '../scrape-service.js'
 import { combineSocialAccounts, transformHoursToDudaFormat, transformTextToDudaFormat, createCombinedAddress } from '../../api/scrapers/utils.js'
-
+import { schemaOrgBusinessTypes } from './constants.js'
 export type BusinessInfoData = ScrapedAndAnalyzedSiteData['businessInfo']
 
 export async function saveBusinessInfoToDuda(
@@ -111,6 +111,15 @@ export function transformBusinessInfoDataToDudaLocations(
         combinedBusinessAddress = addressData.newAddressData
     }
 
+    //duda business type from schema.org
+    let businessType = null
+    if (businessInfo?.businessType) {
+        const cleanedBusinessType = businessInfo?.businessType?.replace(' ', '')
+        if (schemaOrgBusinessTypes.includes(cleanedBusinessType)) {
+            businessType = cleanedBusinessType
+        }
+    }
+
     //logic breakdown
     //If we are adding a second location -> use current info if available for first location and new business info for second location. Replace certain things in primary location if not currently there with new info (phone, email, social accounts)
     //If we are not adding a second location -> use current info if available for first location and new business info for fields that are not available
@@ -139,6 +148,7 @@ export function transformBusinessInfoDataToDudaLocations(
                 : undefined,
         logo_url: currentLocationInfo?.logo_url ? currentLocationInfo.logo_url : logoUrl,
         social_accounts: socialAccounts,
+        ...(businessType && { schema: { type: businessType } }),
         business_hours: addSecondLocation
             ? currentLocationInfo?.business_hours && currentLocationInfo.business_hours.length > 0
                 ? currentLocationInfo.business_hours

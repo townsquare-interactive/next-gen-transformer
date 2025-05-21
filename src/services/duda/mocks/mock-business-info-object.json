@@ -22,6 +22,7 @@
         },
         "is24Hours": false
     },
+    "businessType": "HardwareStore",
     "styles": {
         "colors": {
             "primaryColor": "#CC0000",
