@@ -215,6 +215,7 @@ export async function uploadBusinessInfo(siteName: string, businessInfo: Busines
                         close,
                     })),
                 }),
+                ...(businessInfo.location_data?.schema && { schema: businessInfo.location_data.schema }),
             },
         })
 

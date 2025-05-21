@@ -5,6 +5,7 @@ import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { Settings } from '../services/scrape-service.js'
 
 const mockBusinessInfo = {
+    businessType: 'NailSalon',
     styles: {
         colors: {
             primaryColor: '#000000',
