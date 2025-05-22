@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import {
     calculateAddressSimilarity,
     checkPagesAreOnSameDomain,
-    cleanseHtml,
+    cleanHtmlForAnalysis,
     extractFormData,
     extractPageContent,
     preprocessImageUrl,
@@ -335,7 +335,7 @@ describe('extractPageContent', () => {
     })
 })
 
-describe('cleanseHtml', () => {
+describe('cleanHtmlForAnalysis', () => {
     it('should remove script, meta, noscript, link, and svg elements from the page', async () => {
         document.body.innerHTML = `
             <div>
@@ -352,13 +352,33 @@ describe('cleanseHtml', () => {
             evaluate: vi.fn().mockImplementation(async (fn) => fn()),
         }
 
-        const cleanedHtml = await cleanseHtml(page as any)
+        const cleanedHtml = await cleanHtmlForAnalysis(page as any)
         expect(cleanedHtml).toContain('<p>Keep this text</p>')
         expect(cleanedHtml).not.toContain('<script>')
         expect(cleanedHtml).not.toContain('<meta')
         expect(cleanedHtml).not.toContain('<noscript>')
         expect(cleanedHtml).not.toContain('<link')
         expect(cleanedHtml).not.toContain('<svg')
+    })
+    it('should move hours to the top of the markdown', async () => {
+        document.body.innerHTML = `
+        <div class="content">
+            <p>Keep this text</p>
+        </div>
+        <div class="hours-section">
+            <span class="hours">Hours</span>
+        </div>
+        <footer>Footer</footer>
+    `
+
+        const page = {
+            evaluate: vi.fn().mockImplementation(async (fn) => fn()),
+        }
+
+        const cleanedHtml = await cleanHtmlForAnalysis(page as any)
+        expect(cleanedHtml.replace(/\s+/g, ' ').trim()).toBe(
+            '<div class="hours-section"> <span class="hours">Hours</span> </div> <footer>Footer</footer> <div class="content"> <p>Keep this text</p> </div>'
+        )
     })
 
     it('should truncate HTML if it exceeds 100000 characters', async () => {
@@ -369,7 +389,7 @@ describe('cleanseHtml', () => {
             evaluate: vi.fn().mockImplementation(async (fn) => fn()),
         }
 
-        const cleanedHtml = await cleanseHtml(page as any)
+        const cleanedHtml = await cleanHtmlForAnalysis(page as any)
         expect(cleanedHtml.length).toBe(100000)
     })
 })

@@ -87,6 +87,8 @@ export const removeDupeImages = async (imageFiles: ImageFiles[]) => {
                     }
                 }
             }
+        } else if (item.imageFileName === 'home-screenshot.jpg') {
+            seen.set('home-screenshot.jpg', item)
         }
     }
 
@@ -168,9 +170,6 @@ export const extractFormData = async (page: Page) => {
 }
 
 export const extractPageContent = async (page: Page, isHomePage: boolean) => {
-    /*     if (page.url().includes('/veterinary-services')) {
-        console.log('contoent', await page.content())
-    } */
     const result = await page.evaluate((isHomePage) => {
         // Unwanted tags for content scrape
         const unwantedSelectors = ['nav', 'script', 'style']
@@ -278,18 +277,84 @@ export function hashUrl(url: string): string {
 }
 
 //remove unecessary elements from HTML before analyzing
-export async function cleanseHtml(page: Page): Promise<string> {
+export async function cleanHtmlForAnalysis(page: Page): Promise<string> {
     const cleanedHtml = await page.evaluate(() => {
-        const elementsToRemove = ['script', 'meta', 'noscript', 'link', 'svg']
+        const elementsToRemove = ['script', 'noscript', 'iframe', 'meta', 'svg', 'link']
         elementsToRemove.forEach((selector) => {
-            document.querySelectorAll(selector).forEach((el) => el.remove())
+            document.querySelectorAll(selector).forEach((el) => {
+                el.remove()
+            })
         })
 
-        return document.body.innerHTML
+        // Find footer content
+        const footerElement = document.querySelector('footer') || document.querySelector('#footer') || document.querySelector('.footer')
+        const footerContent = footerElement?.outerHTML
+
+        // Find all elements containing hours
+        const hoursElements: Element[] = []
+
+        try {
+            // Check tags for hours content
+            const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, div, span, p, label')
+            for (let i = 0; i < elements.length; i++) {
+                const elem = elements[i]
+                const text = elem.textContent || ''
+                if (text.toLowerCase().indexOf('hours') !== -1) {
+                    // Check if this element is a child of an already found hours element
+                    const isChildOfExisting = hoursElements.some((existing) => existing.contains(elem))
+                    if (!isChildOfExisting) {
+                        const container = elem.parentElement
+                        if (container && container !== document.body && !document.body.isSameNode(container) && hoursElements.indexOf(container) === -1) {
+                            hoursElements.push(container)
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('Error analyzing hours:', error)
+        }
+
+        if (hoursElements.length <= 0) {
+            // Check common hours-related classes
+            const hoursSelectors = ['.hours', '#hours', '[class*="hours"]', '.business-hours', '.store-hours', '.opening-hours', '.operating-hours']
+
+            hoursSelectors.forEach((selector) => {
+                const elements = document.querySelectorAll(selector)
+                elements.forEach((el) => {
+                    if (!hoursElements.includes(el)) {
+                        hoursElements.push(el)
+                    }
+                })
+            })
+        }
+
+        // Collect hours content first
+        let hoursContent = ''
+        hoursElements.forEach((el) => {
+            hoursContent += el.outerHTML
+        })
+
+        // Remove the pushed up elements
+        if (footerElement) {
+            footerElement.remove()
+        }
+        hoursElements.forEach((el) => {
+            el.remove()
+        })
+
+        // Create the new HTML structure
+        const finalHtml = `
+                ${hoursContent}
+                ${footerContent || ''}
+                ${document.body.innerHTML}
+            `
+        return finalHtml
     })
 
     // Ensure it's within token limits
-    return cleanedHtml.length > 100000 ? cleanedHtml.slice(0, 100000) : cleanedHtml
+    const truncatedHtml = cleanedHtml.length > 100000 ? cleanedHtml.slice(0, 100000) : cleanedHtml
+
+    return truncatedHtml
 }
 
 export const checkPagesAreSameDomain = (basePath: string, domainToCheck: string): boolean => {
@@ -966,7 +1031,7 @@ export const createCombinedAddress = (businessInfo: BusinessInfoData, currentBus
         state: addSecondLocation ? currentBusinessInfo?.location_data?.address?.region || '' : combinedBusinessAddress?.state ?? '',
         country: 'US',
     }
-    //Do we just return this new address and change the logic in the main function to be simpler?
+
     return {
         addSecondLocation,
         newAddressData,

@@ -2,7 +2,7 @@ import { BrowserContext, Page, Response } from 'playwright'
 import path from 'path'
 import type { ScrapeResult, Settings } from '../../services/scrape-service.js'
 import {
-    cleanseHtml,
+    cleanHtmlForAnalysis,
     extractFormData,
     extractPageContent,
     hashUrl,
@@ -16,7 +16,6 @@ import {
 } from './utils.js'
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
-
 import { setupBrowser } from './playwright-setup.js'
 
 export interface ImageFiles {
@@ -130,10 +129,13 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             }
         })
 
+        const pageTextContent = await extractPageContent(page, isHomePage)
+
+        //this step must be done last as it modies the DOM
         let scrapeAnalysisResult
         if (isHomePage && screenshotBuffer) {
             console.log('Using AI to analyze page...')
-            const cleanedHtml = await cleanseHtml(page) //remove unwanted elements
+            const cleanedHtml = await cleanHtmlForAnalysis(page) //remove unwanted elements
             scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
 
             if (scrapeAnalysisResult.logoTag) {
@@ -141,9 +143,6 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                 imageFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, imageFiles)
             }
         }
-
-        //this step must be done last as it modies the DOM
-        const pageTextContent = await extractPageContent(page, isHomePage)
 
         //stop lazy load image processing after 15 pages for speed reasons
         if (settings.scrapeImages && n < 16) {
