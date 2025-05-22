@@ -152,3 +152,5 @@ export const schemaOrgBusinessTypes = [
     'TouristInformationCenter',
     'TravelAgency',
 ]
+
+export const scrapeInfoDocName = 'scrapedInfoDoc'

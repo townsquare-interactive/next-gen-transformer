@@ -8,6 +8,7 @@ import {
     moveS3DataToDuda as moveS3DataToDudaService,
     scrapeAssetsFromSite,
     removeScrapedFolder,
+    getScrapedInfoDocFromS3,
 } from '../../services/scrape-service.js'
 import { save } from '../../output/save-scraped-data.js'
 import { handleError } from '../../utilities/errors.js'
@@ -115,5 +116,18 @@ export const moveS3DataToDuda = async (req: Request, res: Response) => {
     } catch (err) {
         err.state = { ...err.state, req: req.body }
         handleError(err, res, req.body.url)
+    }
+}
+
+export const getScrapeDoc = async (req: Request, res: Response) => {
+    try {
+        middleware(req)
+        const validatedRequest = zodDataParse(req.query, GetPageListSchema, 'input')
+        const url = validatedRequest.url as string
+        const scrapedInfo = await getScrapedInfoDocFromS3(url)
+        res.json(scrapedInfo)
+    } catch (err) {
+        err.state = { ...err.state, req: req.query }
+        handleError(err, res, req.query.url as string)
     }
 }

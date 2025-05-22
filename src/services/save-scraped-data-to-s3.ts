@@ -6,6 +6,8 @@ import { zodDataParse } from '../schema/utils-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { addFileS3, addImageToS3, deleteFolderS3 } from '../utilities/s3Functions.js'
 import { UploadedResourcesObj } from './duda/save-images.js'
+import { scrapeInfoDocName } from './duda/constants.js'
+import { createBusinessInfoDocument } from '../api/scrapers/utils.js'
 
 export const s3ScrapedSitesFolder = 'scraped-sites/'
 
@@ -36,6 +38,10 @@ export async function saveData(saveData: SavingScrapedData) {
         const websiteData: ScrapedAndAnalyzedSiteData = siteData
         const validatedSiteData = zodDataParse(websiteData, ScrapedAndAnalyzedSiteDataSchema, 'scrapedOutput')
         siteDataUrl = await saveSiteDataToS3(saveData.settings, validatedSiteData, siteDataUploadFunction)
+
+        //create business info document
+        const businessDoc = createBusinessInfoDocument(validatedSiteData)
+        siteDataUrl = await saveBusinessInfoDocument(saveData.settings, businessDoc, siteDataUploadFunction)
     }
 
     return { ...imageData, siteDataUrl, siteData }
@@ -48,6 +54,22 @@ export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: Scra
         const siteDataUrl = await uploadFunction(scrapedPageData, folderPath)
 
         return siteDataUrl
+    } catch (err) {
+        throw new ScrapingError({
+            domain: settings.url,
+            message: `Failed to save scraped site data: ` + err.message,
+            state: { scrapeStatus: 'Scraped site data not saved', method: settings.saveMethod },
+            errorType: 'SCR-012',
+        })
+    }
+}
+
+export const saveBusinessInfoDocument = async (settings: Settings, businessDoc: any, siteDataUploadFunction?: siteDataUploadFunction) => {
+    try {
+        const uploadFunction = siteDataUploadFunction || addFileS3
+        const folderPath = `${s3ScrapedSitesFolder}${settings.basePath}/scraped/${scrapeInfoDocName}`
+        const businessDocUrl = await uploadFunction(businessDoc, folderPath, 'txt')
+        return businessDocUrl
     } catch (err) {
         throw new ScrapingError({
             domain: settings.url,

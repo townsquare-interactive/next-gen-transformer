@@ -12,7 +12,7 @@ import { defaultHeaders } from '../api/scrapers/playwright-setup.js'
 import { transformBusinessInfo } from '../api/scrapers/utils.js'
 import { s3ScrapedSitesFolder } from './save-scraped-data-to-s3.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
-
+import { scrapeInfoDocName } from './duda/constants.js'
 export interface ScrapeResult {
     imageList: string[]
     imageFiles: ImageFiles[]
@@ -301,6 +301,23 @@ export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: 
         })
     }
     return scrapedData
+}
+
+export const getScrapedInfoDocFromS3 = async (url: string, getFileFunction?: (url: string) => Promise<ScrapedAndAnalyzedSiteData>) => {
+    const getFile = getFileFunction || getFileS3
+    const siteFolderName = convertUrlToApexId(url)
+    const scrapedFolder = `${s3ScrapedSitesFolder}${siteFolderName}/scraped`
+    const siteDataPath = scrapedFolder + `/${scrapeInfoDocName}.txt`
+    const scrapedInfo = await getFile(siteDataPath, null)
+    if (!scrapedInfo) {
+        throw new ScrapingError({
+            domain: url,
+            message: 'Scraped info doc not found in S3',
+            errorType: 'AMS-006',
+            state: { scrapeStatus: 'Asset doc never uploaded' },
+        })
+    }
+    return scrapedInfo
 }
 
 export const moveS3DataToDuda = async (siteData: ScrapedAndAnalyzedSiteData, uploadLocation: string, siteType: 'priority' | 'secondary') => {
