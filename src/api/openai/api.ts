@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { ScrapingError } from '../../utilities/errors.js'
+import type { ScreenshotData } from '../../schema/output-zod.js'
 
 export async function analyzePageData(url: string, screenshotBuffer: Buffer, pageHtml: string) {
     try {
@@ -97,9 +98,40 @@ export async function analyzePageData(url: string, screenshotBuffer: Buffer, pag
     }
 }
 
-export const extractJsonFromRes = (response: string) => {
+type RecursivePartial<T> = {
+    [P in keyof T]?: RecursivePartial<T[P]> | null
+}
+
+const replaceNullStrings = <T>(obj: RecursivePartial<T> | null | undefined): RecursivePartial<T> | null => {
+    // Special case for explicit null or undefined
+    if (obj === null || obj === undefined || obj === 'null') {
+        return null
+    }
+
+    // Don't convert booleans to null
+    if (typeof obj === 'boolean') {
+        return obj
+    }
+
+    // Handle other primitives
+    if (typeof obj !== 'object') {
+        return obj
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map((item) => (item === 'null' ? null : item))
+    }
+
+    const newObj: RecursivePartial<T> = {}
+    for (const key in obj) {
+        const value = obj[key]
+        newObj[key] = replaceNullStrings(value)
+    }
+    return newObj
+}
+
+export const extractJsonFromRes = (response: string): ScreenshotData => {
     try {
-        // Use regex to extract the JSON block from the content
         const jsonMatch = response.match(/```json([\s\S]*?)```/i) || response.match(/({[\s\S]*})/)
         if (!jsonMatch) {
             throw new Error('Error extracting JSON: No JSON found in response.')
@@ -110,8 +142,10 @@ export const extractJsonFromRes = (response: string) => {
         // Remove comments (only outside of string literals)
         jsonString = jsonString.replace(/("(?:\\.|[^"\\])*")|\/\/.*|\/\*[\s\S]*?\*\//g, (match, stringLiteral) => (stringLiteral ? match : ''))
 
-        // Parse JSON string
-        return JSON.parse(jsonString)
+        // Parse and clean JSON string
+        const parsedJson = JSON.parse(jsonString)
+        const cleanedData = replaceNullStrings<ScreenshotData>(parsedJson)
+        return cleanedData as ScreenshotData
     } catch (error) {
         console.error('Error extracting JSON:', error.message)
         throw { ...error, message: 'Error extracting JSON: ' + error.message }

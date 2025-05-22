@@ -1,5 +1,6 @@
 import { it, describe, expect, vi } from 'vitest'
 import { extractJsonFromRes } from './api.js'
+import { c } from 'vitest/dist/reporters-5f784f42.js'
 
 describe('extractJsonFromRes', () => {
     it('should extract correct JSON from an example AI response', async () => {
@@ -12,7 +13,15 @@ describe('extractJsonFromRes', () => {
           "companyName": "Toy Mania Charlotte",
           "address": "242 S Sharon Amity Road, Charlotte, NC 28211",
           "phoneNumber": "(704) 910-2001",
-          "hours": "Mon - Thurs, 9 am to 7 pm; Fri - Sat, 9 am to 7 pm; Sunday, 12 am to 6 pm",
+          "hours": {
+            "is24Hours": false,
+            "regularHours": {
+                "Mon": "9 am to 7 pm",
+                "Tue": "9 am to 7 pm",
+                "Wed": "9 am to 7 pm",
+                "Thu": "9 am to 7 pm"
+            }
+          },
           "styles": {
             "colors": {
               "primaryColor": "#FF4040",
@@ -45,8 +54,12 @@ describe('extractJsonFromRes', () => {
         `
 
         const parsedJson = extractJsonFromRes(responseContent)
-
+        console.log('parse boy', parsedJson)
         expect(parsedJson.companyName).toBe('Toy Mania Charlotte')
+        expect(parsedJson.hours).toEqual({
+            is24Hours: false,
+            regularHours: { Mon: '9 am to 7 pm', Tue: '9 am to 7 pm', Wed: '9 am to 7 pm', Thu: '9 am to 7 pm' },
+        })
     })
     it('should throw an error when json is not found in the response', async () => {
         const responseContent = `generic non json response `
@@ -93,6 +106,79 @@ describe('extractJsonFromRes', () => {
 
         const parsedJson = extractJsonFromRes(contentWithComments)
 
+        expect(parsedJson.styles?.colors?.primaryColor).toBe('#00BFFF')
         expect(parsedJson.address).toBe('Hannibal, OH 43931')
+    })
+
+    it('should change null strings to null value', async () => {
+        const contentWithComments = `{
+      "logoTag": "<img src=\\"/files/2023/11/water-drop-white.png\\">",
+      "companyName": "Aqua Pool & Spa",
+      "address": null,
+      "phoneNumber": "null",
+      "hours": "Mo, Tu, We, Th, Fr, Sa, Su 07:00-19:00",
+      "styles": {
+        "colors": {
+          "primaryColor": "null", // Assumed based on screenshot,
+          "secondaryColor": "#ff0000"
+        },
+        "fonts": {
+          "headerFonts": ["Roboto", "IBM Plex Sans"],
+          "bodyFonts": ["Roboto", "IBM Plex Sans"]
+        }
+      },
+      "links": {
+        "socials": [],
+        "other": [
+          "https://maps.google.com/maps?daddr=, Hannibal, OH 43931",
+          "https://www.google.com/gtag/js?id=G-PF8RFHR03F",
+          "https://www.googletagmanager.com/gtag/js?id=G-TDG4C70DL9"
+        ]
+      }
+    }`
+
+        const parsedJson = extractJsonFromRes(contentWithComments)
+        expect(parsedJson.address).toBeNull()
+        expect(parsedJson.styles?.colors).toEqual({
+            primaryColor: null,
+            secondaryColor: '#ff0000',
+        })
+        expect(parsedJson.phoneNumber).toBeNull()
+    })
+
+    it('should parse the data correctly with zod', async () => {
+        const contentWithComments = `{
+    "logoTag": "<img src=\\"/files/2023/11/water-drop-white.png\\">",
+    "companyName": "Aqua Pool & Spa",
+    "address": null,
+    "phoneNumber": "null",
+    "hours": 12,
+    "styles": {
+      "colors": {
+        "primaryColor": "null", // Assumed based on screenshot,
+        "secondaryColor": "#ff0000"
+      },
+      "fonts": {
+        "headerFonts": ["Roboto", "IBM Plex Sans"],
+        "bodyFonts": ["Roboto", "IBM Plex Sans"]
+      }
+    },
+    "links": {
+      "socials": [],
+      "other": [
+        "https://maps.google.com/maps?daddr=, Hannibal, OH 43931",
+        "https://www.google.com/gtag/js?id=G-PF8RFHR03F",
+        "https://www.googletagmanager.com/gtag/js?id=G-TDG4C70DL9"
+      ]
+    }
+  }`
+
+        const parsedJson = extractJsonFromRes(contentWithComments)
+        expect(parsedJson.address).toBeNull()
+        expect(parsedJson.styles?.colors).toEqual({
+            primaryColor: null,
+            secondaryColor: '#ff0000',
+        })
+        expect(parsedJson.phoneNumber).toBeNull()
     })
 })
