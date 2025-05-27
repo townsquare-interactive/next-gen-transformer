@@ -3,7 +3,7 @@ import { saveData as s3FileUpload } from '../services/save-scraped-data-to-s3.js
 import { save as dudaUpload } from '../services/save-to-duda.js'
 import { UploadedResourcesObj } from '../services/duda/save-images.js'
 import type { Settings } from '../services/scrape-service.js'
-import { ScrapedAndAnalyzedSiteData, ScrapedColors, ScrapedPageSeo } from '../schema/output-zod.js'
+import { S3UploadedImageList, ScrapedAndAnalyzedSiteData, ScrapedColors, ScrapedPageSeo } from '../schema/output-zod.js'
 
 export interface SaveOutput {
     uploadedImages?: UploadedResourcesObj[]
@@ -19,7 +19,7 @@ export interface ScrapedDataToSave {
     imageNames: never[]
     url: string
     imageFiles?: ImageFiles[]
-    imageList?: string[]
+    imageList?: S3UploadedImageList[]
     siteData: ScrapedAndAnalyzedSiteData
 }
 
@@ -38,7 +38,7 @@ type utilityFunctions = {
 export interface SavingScrapedData {
     settings: Settings
     imageFiles?: ImageFiles[]
-    imageList?: string[]
+    imageList?: S3UploadedImageList[]
     siteData?: ScrapedAndAnalyzedSiteData
     logoUrl?: string
     functions?: utilityFunctions
@@ -99,7 +99,7 @@ export async function saveToService(
     settings: Settings,
     siteData: ScrapedAndAnalyzedSiteData,
     imageFiles?: ImageFiles[],
-    imageList?: string[],
+    imageList?: S3UploadedImageList[],
     logoUrl?: string,
     functions?: utilityFunctions
 ) {

@@ -13,6 +13,7 @@ import {
     isValidImageSize,
     getImageDimensions,
     isStockImage,
+    convertTitleToReadableFormat,
 } from './utils.js'
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
@@ -26,6 +27,8 @@ export interface ImageFiles {
     originalImageLink: string
     type?: 'logo'
     fileExtension: string
+    pageTitle: string
+    src?: string
 }
 
 export interface ScrapeSiteData {
@@ -67,7 +70,8 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     //limit image scraping to the first 26 pages found
     if (settings.scrapeImages && n < 27) {
         console.log('Scraping images...')
-        imageFiles = await scrapeImagesFromPage(page, browser)
+        const pageTitle = convertTitleToReadableFormat(settings.url)
+        imageFiles = await scrapeImagesFromPage(page, browser, pageTitle)
     } else {
         console.log('Skipping image scrape.', settings.url)
     }
@@ -116,6 +120,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
                 hashedFileName: '',
                 originalImageLink: '',
                 fileExtension: '.jpg',
+                pageTitle: 'Home',
             })
         }
 
@@ -164,7 +169,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
     }
 }
 
-const scrapeImagesFromPage = async (page: Page, browser: BrowserContext): Promise<ImageFiles[]> => {
+const scrapeImagesFromPage = async (page: Page, browser: BrowserContext, pageTitle: string): Promise<ImageFiles[]> => {
     try {
         const imageFiles: ImageFiles[] = []
         const imagePromises: Promise<void>[] = []
@@ -240,6 +245,7 @@ const scrapeImagesFromPage = async (page: Page, browser: BrowserContext): Promis
                             hashedFileName: hashedFileName,
                             originalImageLink: processedImageUrl,
                             fileExtension: fileExtension,
+                            pageTitle: pageTitle,
                         })
                     } catch (err) {
                         console.log(`Error processing image response from ${url.href}:`, err)

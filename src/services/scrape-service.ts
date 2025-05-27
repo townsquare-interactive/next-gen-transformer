@@ -10,9 +10,9 @@ import pLimit from 'p-limit'
 import { save, ScrapedDataToSave } from '../output/save-scraped-data.js'
 import { defaultHeaders } from '../api/scrapers/playwright-setup.js'
 import { transformBusinessInfo } from '../api/scrapers/utils.js'
-import { s3ScrapedSitesFolder } from './save-scraped-data-to-s3.js'
+import { s3ScrapedSitesFolder } from '../api/scrapers/constants.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
-import { scrapeInfoDocName } from './duda/constants.js'
+import { scrapeInfoDocName } from '../api/scrapers/constants.js'
 export interface ScrapeResult {
     imageList: string[]
     imageFiles: ImageFiles[]

@@ -42,6 +42,7 @@ describe('save', () => {
                 hashedFileName: 'test-image.jpg',
                 originalImageLink: 'http://example.com/image.jpg',
                 fileExtension: 'jpg',
+                pageTitle: 'Home',
             },
             {
                 url: new URL('http://example.com/image2.jpg'),
@@ -50,6 +51,7 @@ describe('save', () => {
                 hashedFileName: 'test-image2.jpg',
                 originalImageLink: 'http://example.com/image2.jpg',
                 fileExtension: 'jpg',
+                pageTitle: 'Home',
             },
         ]
 
@@ -58,7 +60,10 @@ describe('save', () => {
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '',
             assetData: {
-                s3UploadedImages: ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg'],
+                s3UploadedImages: [
+                    { src: 'https://s3.example.com/image.jpg', pageTitle: 'Home' },
+                    { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home' },
+                ],
                 s3LogoUrl: '',
             },
             businessInfo: mockBusinessInfo,
@@ -133,6 +138,7 @@ describe('save', () => {
                 hashedFileName: 'test-image.jpg',
                 originalImageLink: 'http://example.com/image.jpg',
                 fileExtension: 'jpg',
+                pageTitle: 'Home',
             },
         ]
 
@@ -167,6 +173,7 @@ describe('save', () => {
                 hashedFileName: 'test-image.jpg',
                 originalImageLink: 'http://example.com/image.jpg',
                 fileExtension: 'jpg',
+                pageTitle: 'Home',
             },
         ]
 
@@ -250,6 +257,7 @@ describe('save', () => {
                 hashedFileName: 'test-image.jpg',
                 originalImageLink: 'http://example.com/image.jpg',
                 fileExtension: 'jpg',
+                pageTitle: 'Home',
             },
         ]
 
@@ -326,14 +334,20 @@ describe('save', () => {
     })
 
     it('should handle Duda upload with imageList instead of imageFiles', async () => {
-        const mockImageList = ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg']
+        const mockImageList = [
+            { src: 'https://s3.example.com/image.jpg', pageTitle: 'Home' },
+            { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home' },
+        ]
 
         const mockSiteData: ScrapedAndAnalyzedSiteData = {
             pages: [],
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '',
             assetData: {
-                s3UploadedImages: ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg'],
+                s3UploadedImages: [
+                    { src: 'https://s3.example.com/image.jpg', pageTitle: 'Home' },
+                    { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home' },
+                ],
                 s3LogoUrl: '',
             },
         }

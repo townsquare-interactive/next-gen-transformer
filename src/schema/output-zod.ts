@@ -608,6 +608,11 @@ export const OpenAIAnalysisSchema = z
     })
     .strip() // removes unknown fields
 
+export const S3UploadedImageSchema = z.object({
+    src: z.string().optional(),
+    pageTitle: z.string().optional(),
+})
+
 // Schema for ScrapedAndAnalyzedSiteData
 export const ScrapedAndAnalyzedSiteDataSchema = z.object({
     baseUrl: z.string(),
@@ -616,7 +621,7 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
     businessInfo: ScreenshotDataSchema.optional(),
     assetData: z
         .object({
-            s3UploadedImages: z.array(z.string()).optional(),
+            s3UploadedImages: z.array(S3UploadedImageSchema).optional(),
             s3LogoUrl: z.string().optional(),
         })
         .optional(),
@@ -632,6 +637,7 @@ export type ScrapedForm = z.infer<typeof FormSchema>
 export type BusinessHours = z.infer<typeof HoursSchema>
 export type ScrapedHours = z.infer<typeof ScrapedHoursSchema>
 export type ScrapedColors = z.infer<typeof ColorsSchema>
+export type S3UploadedImageList = z.infer<typeof S3UploadedImageSchema>
 /*---------------------------End of scraping------------------------------*/
 
 export type CompositeData = z.infer<typeof CompositeSchema>

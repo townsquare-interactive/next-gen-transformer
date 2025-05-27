@@ -107,7 +107,7 @@ describe('saveImages', () => {
                     folder: 'Imported',
                 },
             ],
-            settings
+            settings.uploadLocation
         )
         console.log('real result?', result)
     })
@@ -225,7 +225,7 @@ describe('saveImages', () => {
                     folder: 'Imported',
                 },
             ],
-            settings
+            settings.uploadLocation
         )
     })
 
