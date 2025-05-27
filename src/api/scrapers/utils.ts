@@ -462,19 +462,23 @@ const transformHours = (businessInfo: ScreenshotData) => {
     return null
 }
 
+export const convertTitleToReadableFormat = (url: string) => {
+    return (() => {
+        const path = new URL(url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
+        const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
+        const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
+        return lastSegment
+            .replace(/-/g, ' ') // Replace hyphens with spaces
+            .replace(/\b\w/g, (char: string) => char.toUpperCase()) // Capitalize each word
+    })()
+}
+
 export const transformScrapedPageData = (pages: ScrapedPageData[]) => {
     const newPages = []
     for (const page of pages) {
         const newPage = {
             ...page,
-            title: (() => {
-                const path = new URL(page.url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
-                const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
-                const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
-                return lastSegment
-                    .replace(/-/g, ' ') // Replace hyphens with spaces
-                    .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize each word
-            })(),
+            title: convertTitleToReadableFormat(page.url),
         }
         newPages.push(newPage)
     }

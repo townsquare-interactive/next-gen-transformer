@@ -3,8 +3,10 @@ import type { Settings } from '../scrape-service.js'
 import { preprocessImageUrl } from '../../api/scrapers/utils.js'
 import { ScrapingError } from '../../utilities/errors.js'
 import type { SaveOutput } from '../../output/save-scraped-data.js'
-import { dudaImageFetch } from '../duda-api.js'
-import { logoFileName } from '../save-scraped-data-to-s3.js'
+import { dudaImageUpload } from '../duda-api.js'
+import { logoFileName } from '../../api/scrapers/constants.js'
+import { S3UploadedImageList } from '../../schema/output-zod.js'
+import { UploadResourceResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 
 export interface UploadPayload {
     resource_type: 'IMAGE'
@@ -14,36 +16,33 @@ export interface UploadPayload {
 
 export interface UploadedResourcesObj {
     id?: string
-    src: string
+    src?: string
     original_url?: string
     new_url?: string
-    status?: 'UPLOADED' | 'NOT_FOUND'
-}
-
-export interface DudaResponse {
-    success: boolean
-    message?: string
-    uploaded_resources: UploadedResourcesObj[]
+    status?: string
+    pageTitle?: string
+    n_failures?: number
+    uploaded_resources?: UploadResourceResponse['uploaded_resources']
 }
 
 export async function saveImages(
     settings: Settings,
     imageFiles?: ImageFiles[],
-    imageList?: string[],
+    imageList?: S3UploadedImageList[],
     logoUrl?: string,
-    fetchFunction?: (payload: UploadPayload[]) => Promise<DudaResponse>
+    fetchFunction?: (payload: UploadPayload[]) => Promise<UploadResourceResponse>
 ): Promise<SaveOutput> {
-    const dudaFetchFunction = fetchFunction || dudaImageFetch
+    const dudaFetchFunction = fetchFunction || dudaImageUpload
     const BATCH_DELAY = 2000 // 2 second delay
     const BATCHES_BEFORE_DELAY = 3 // Number of batches to process before delay
 
     let preprocessedPayload
-    if (imageFiles && imageFiles.length > 0) {
-        //use imageFiles from scraper
-        preprocessedPayload = processImageUrlsForDuda(imageFiles)
-    } else if (imageList && imageList.length > 0) {
-        //use imageList from s3
-        preprocessedPayload = processSringArrayForDuda(imageList, logoUrl)
+    const usingS3Images = (!imageFiles || imageFiles.length <= 0) && imageList && imageList.length > 0
+
+    if ((imageFiles && imageFiles.length > 0) || (imageList && imageList.length > 0)) {
+        const imageFilesToProcess = imageFiles && imageFiles.length > 0 ? imageFiles : imageList
+
+        preprocessedPayload = processImageUrlsForDuda(imageFilesToProcess, usingS3Images ? logoUrl : undefined)
     }
 
     const originalLogoUrl = findLogoFile(imageList, imageFiles, logoFileName)
@@ -51,13 +50,15 @@ export async function saveImages(
     if (preprocessedPayload) {
         // Slice preprocessed payload into batches of 10
         const batches = processBatch(preprocessedPayload, 10)
-        const batchResults: DudaResponse[] = []
+        const batchResults: UploadResourceResponse[] = []
         console.log('batches length', batches.length)
 
         for (let i = 0; i < batches.length; i++) {
             try {
-                const responseData = await dudaFetchFunction(batches[i], settings)
-                batchResults.push(responseData)
+                const responseData = await dudaFetchFunction(batches[i], settings.uploadLocation || '')
+                if (responseData) {
+                    batchResults.push(responseData)
+                }
 
                 // Add delay after every 3 batches (but not after the last batch)
                 if ((i + 1) % BATCHES_BEFORE_DELAY === 0 && i < batches.length - 1) {
@@ -105,65 +106,58 @@ export async function saveImages(
     }
 }
 
-export function processImageUrlsForDuda(imageFiles: ImageFiles[]): UploadPayload[] {
+export function processImageUrlsForDuda(imageFiles?: ImageFiles[] | S3UploadedImageList[], logoUrl?: string): UploadPayload[] {
+    if (!imageFiles) {
+        return []
+    }
+
     const seenUrls = new Set<string>()
     const processedUrls: UploadPayload[] = []
     const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
-        const processedUrl = preprocessImageUrl(file.url)
+        //handle src files from S3
+        if (file.src) {
+            if (seenUrls.has(file.src)) {
+                console.warn(`Duplicate URL skipped: ${file.src}`)
+                return
+            }
 
-        if (!processedUrl) {
-            console.warn(`Invalid URL skipped: ${file.url}`)
-            return
+            seenUrls.add(file.src)
+            processedUrls.push({
+                resource_type: 'IMAGE',
+                src: file.src,
+                folder: file.pageTitle || dudaImageFolder,
+            })
+        } //handle URLs coming from websites
+        else if (typeof file === 'object' && 'url' in file) {
+            const processedUrl = preprocessImageUrl(file.url as URL)
+
+            if (!processedUrl) {
+                console.warn(`Invalid URL skipped: ${file.url}`)
+                return
+            }
+
+            if (seenUrls.has(processedUrl)) {
+                console.warn(`Duplicate URL skipped: ${processedUrl}`)
+                return
+            }
+            seenUrls.add(processedUrl)
+            processedUrls.push({
+                resource_type: 'IMAGE',
+                src: processedUrl,
+                folder: file.pageTitle || dudaImageFolder,
+            })
         }
-
-        if (seenUrls.has(processedUrl)) {
-            console.warn(`Duplicate URL skipped: ${processedUrl}`)
-            return
-        }
-
-        seenUrls.add(processedUrl)
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: processedUrl,
-            folder: dudaImageFolder,
-        })
     })
 
-    return processedUrls
-}
-
-export function processSringArrayForDuda(imageFiles: string[], logoUrl?: string): UploadPayload[] {
-    const seenUrls = new Set<string>()
-    const processedUrls: UploadPayload[] = []
-    const dudaImageFolder = 'Imported'
-
-    imageFiles.forEach((file) => {
-        if (!file) {
-            console.warn(`Invalid URL skipped: ${file}`)
-            return
-        }
-
-        if (seenUrls.has(file)) {
-            console.warn(`Duplicate URL skipped: ${file}`)
-            return
-        }
-
-        seenUrls.add(file)
-        processedUrls.push({
-            resource_type: 'IMAGE',
-            src: file,
-            folder: dudaImageFolder,
-        })
-    })
-
-    // Only add logoUrl if it hasn't been processed already
     if (logoUrl && !seenUrls.has(logoUrl)) {
+        console.log('logoUrl', logoUrl)
+        console.log('seenUrls', seenUrls)
         processedUrls.push({
             resource_type: 'IMAGE',
             src: logoUrl,
-            folder: dudaImageFolder,
+            folder: 'Home',
         })
     }
 
@@ -178,9 +172,9 @@ export function processBatch(payload: UploadPayload[], batchSize: number): Uploa
     return batches
 }
 
-const findLogoFile = (imageList: string[] | undefined, imageFiles: ImageFiles[] | undefined, logoFileName: string) => {
+const findLogoFile = (imageList: S3UploadedImageList[] | undefined, imageFiles: ImageFiles[] | undefined, logoFileName: string) => {
     if (imageList && imageList.length > 0) {
-        return imageList.find((url) => url.includes(logoFileName))
+        return imageList.find((url) => url.src?.includes(logoFileName))?.src
     }
 
     if (imageFiles && imageFiles.length > 0) {
