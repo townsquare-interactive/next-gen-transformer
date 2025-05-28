@@ -5,6 +5,7 @@ import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { Settings } from '../services/scrape-service.js'
 
 const mockBusinessInfo = {
+    businessType: 'NailSalon',
     styles: {
         colors: {
             primaryColor: '#000000',
@@ -60,6 +61,7 @@ describe('save', () => {
                 s3UploadedImages: ['https://s3.example.com/image.jpg', 'https://s3.example.com/image2.jpg'],
                 s3LogoUrl: '',
             },
+            businessInfo: mockBusinessInfo,
         }
 
         const mockScrapedData = {
@@ -101,6 +103,17 @@ describe('save', () => {
         expect(result.dataUploadDetails?.siteDataUrl).toBe('https://s3.example.com/site-data.json')
         expect(result.url).toBe('http://example.com')
         expect(result.siteData).toStrictEqual(mockSiteData)
+        expect(mockSiteDataUpload).toHaveBeenCalledTimes(2)
+
+        //expect the business info doc to be created and uploaded
+        const secondCallArgs = mockSiteDataUpload.mock.calls[1]
+        const content = secondCallArgs[0]
+        expect(content).toContain('Company Name: Test Company')
+        expect(content).toContain('Phone:   123-456-7890')
+        expect(content).toContain('Email:   test@example.com')
+        expect(content).toContain('Street:  123 Main St')
+        expect(content).toContain('City:    Anytown')
+        expect(content).toContain('State:   CA')
     })
 
     it('should skip image upload when saveImages is false', async () => {

@@ -33,7 +33,7 @@
         "description": "Unable to load URL when scraping site"
     },
     "SCR-012": {
-        "description": "Unable to upload scraped images"
+        "description": "Unable to upload scraped data"
     },
     "SCR-013": {
         "description": "Unable to analyze scraped data with openai"

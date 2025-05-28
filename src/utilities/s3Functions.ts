@@ -94,8 +94,17 @@ export const folderExistsInS3 = async (folderKey: string): Promise<boolean> => {
 
 //add file to s3 bucket
 export const addFileS3 = async (file: any, key: string, fileType = 'json') => {
-    const s3ContentType = fileType.includes('css') ? 'text/css' : 'application/json'
-    const body = fileType === 'json' ? JSON.stringify(file) : file
+    const s3ContentType = fileType.includes('css') ? 'text/css' : fileType === 'md' ? 'text/markdown' : 'application/json'
+    // Convert the file content to the appropriate format
+    let body: string
+    if (fileType === 'json') {
+        body = JSON.stringify(file)
+    } else if (fileType === 'md') {
+        // Ensure markdown content is a string and trim any extra whitespace
+        body = typeof file === 'string' ? file.trim() : String(file).trim()
+    } else {
+        body = file
+    }
 
     await s3
         .putObject({

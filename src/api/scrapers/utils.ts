@@ -1064,3 +1064,93 @@ export const isStockImage = (url: URL): boolean => {
     const filename = url.pathname.split('/').pop() || ''
     return stockPatterns.some((pattern) => pattern.test(filename))
 }
+
+export const createBusinessInfoDocument = (scrapedData: ScrapedAndAnalyzedSiteData) => {
+    // Format hours
+    const formatHours = (hours?: ScrapedHours | null) => {
+        if (!hours) {
+            return 'N/A'
+        }
+        if (hours.is24Hours) {
+            return 'Open 24 Hours'
+        }
+
+        const regularHours = hours.regularHours
+        if (!regularHours) {
+            return 'N/A'
+        }
+
+        // Define days with proper type
+        const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const
+        type DayKey = (typeof days)[number]
+
+        return days
+            .map((day: DayKey) => {
+                const hourString = regularHours[day]
+                return hourString ? `${day}: ${hourString}` : `${day}: Closed`
+            })
+            .join('\n        ') // Extra indentation for readability
+    }
+
+    // Format page content with indentation
+    const formatPageContent = (content: string | null) => {
+        if (!content) {
+            return ''
+        }
+
+        const lines = content
+            // .replace(/\s+/g, ' ')
+            .trim()
+            .split(/\n|(?=<h[1-6])/g) // Split on newlines or before headers
+            .map((line) => `    ${line}`) // Add 4 spaces of indentation
+            .join('\n')
+
+        return lines
+    }
+
+    // Format address
+    const formatAddress = (address: ScreenshotData['address']) => {
+        if (!address) return 'N/A'
+
+        return `
+        Street:  ${address.streetAddress || 'N/A'}
+        City:    ${address.city || 'N/A'}
+        State:   ${address.state || 'N/A'}
+        Zip:     ${address.postalCode || 'N/A'}
+        Country: ${address.country || 'N/A'}`
+    }
+
+    // Create text content
+    const textContent = `
+    =====================================
+    BUSINESS INFORMATION
+    =====================================
+    Company Name: ${scrapedData.businessInfo?.companyName || 'N/A'}
+
+    Contact Details:
+    ---------------
+        Phone:   ${scrapedData.businessInfo?.phoneNumber || 'N/A'}
+        Email:   ${scrapedData.businessInfo?.email || 'N/A'}
+        Address: ${scrapedData.businessInfo?.address ? formatAddress(scrapedData.businessInfo.address) : 'N/A'}
+
+    Business Hours:
+    -------------
+        ${formatHours(scrapedData.businessInfo?.hours)}
+
+    =====================================
+    PAGE CONTENT
+    =====================================
+    ${scrapedData.pages
+        .map(
+            (page) => `
+    ---------------
+    ${page.title ? page.title.toUpperCase() : ''}
+    ---------------
+    ${formatPageContent(page.content)}
+    `
+        )
+        .join('\n\n')}
+    `
+
+    return textContent
+}

@@ -87,7 +87,7 @@ Listed below are the common error types that can be seen in the API response aft
 | DMN-009 | Error when checking domains config setup in Vercel |
 | AMS-010 | Unable to find requestData saved in page file, likely older page |
 | SCR-011 | Unable to load URL when scraping site |
-| SCR-012 | Unable to upload scraped images |
+| SCR-012 | Unable to upload scraped data |
 | SCR-013 | Unable to analyze scraped data with openai |
 | SCR-014 | Unable to delete scraped data folder |
 | VAL-015 | Error validating Bearer token |

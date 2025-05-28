@@ -541,7 +541,7 @@ export const HoursSchema = z
 
 export const ScrapedHoursSchema = z.object({
     regularHours: HoursSchema,
-    is24Hours: z.boolean(),
+    is24Hours: z.boolean().nullable(),
 })
 
 const ColorsSchema = z.object({
@@ -554,7 +554,7 @@ const ColorsSchema = z.object({
 })
 
 // Schema for ScreenshotData
-const ScreenshotDataSchema = z.object({
+export const ScreenshotDataSchema = z.object({
     logoTag: z.string().optional().nullable(),
     companyName: z.string().nullable(),
     address: z.object({
@@ -567,6 +567,7 @@ const ScreenshotDataSchema = z.object({
     email: z.string().email().nullable(),
     phoneNumber: z.string().nullable(),
     hours: ScrapedHoursSchema.nullable(),
+    businessType: z.string().nullable(),
     links: z.object({
         socials: z.array(z.string().nullable()).nullable(),
         other: z.array(z.string().nullable()).nullable(),
@@ -581,6 +582,31 @@ const ScreenshotDataSchema = z.object({
         colors: ColorsSchema.nullable(),
     }),
 })
+
+export const OpenAIAnalysisSchema = z
+    .object({
+        logoTag: z.string().optional().nullable(),
+        companyName: z.string().nullable(),
+        address: z.string().nullable(),
+        email: z.string().email().nullable(),
+        phoneNumber: z.string().nullable(),
+        hours: ScrapedHoursSchema.nullable(),
+        businessType: z.string().nullable(),
+        links: z.object({
+            socials: z.array(z.string().nullable()).nullable(),
+            other: z.array(z.string().nullable()).nullable(),
+        }),
+        styles: z.object({
+            fonts: z
+                .object({
+                    headerFonts: z.array(z.string().nullable()).nullable(),
+                    bodyFonts: z.array(z.string().nullable()).nullable(),
+                })
+                .nullable(),
+            colors: ColorsSchema.nullable(),
+        }),
+    })
+    .strip() // removes unknown fields
 
 // Schema for ScrapedAndAnalyzedSiteData
 export const ScrapedAndAnalyzedSiteDataSchema = z.object({

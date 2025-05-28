@@ -561,6 +561,89 @@ export const openApiSpec = createDocument({
                 },
             },
         },
+        '/api/cms-routes/scraped-info-doc': {
+            get: {
+                summary: 'Get scraped info doc',
+                description: 'Retrieves the formatted business information document from S3 for a given URL.',
+                parameters: [
+                    {
+                        name: 'url',
+                        in: 'query',
+                        required: true,
+                        description: 'URL of the website to retrieve the info document for',
+                        schema: {
+                            type: 'string',
+                        },
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Successfully retrieved info document',
+                        content: {
+                            'text/plain': {
+                                schema: {
+                                    type: 'string',
+                                },
+                                example: `
+=====================================
+BUSINESS INFORMATION
+=====================================
+Company Name: Example Company
+
+Contact Details:
+---------------
+    Phone:   (555) 555-5555
+    Email:   contact@example.com
+    Address:
+    Street:  123 Main St
+    City:    Anytown
+    State:   CA
+    Zip:     12345
+    Country: US
+
+Business Hours:
+-------------
+    MON: 9:00 AM - 5:00 PM
+    TUE: 9:00 AM - 5:00 PM
+    WED: 9:00 AM - 5:00 PM
+    THU: 9:00 AM - 5:00 PM
+    FRI: 9:00 AM - 5:00 PM
+    SAT: Closed
+    SUN: Closed`,
+                            },
+                        },
+                    },
+                    '401': unauthorizedResponseExample,
+                    '404': {
+                        description: 'Info document not found',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' },
+                                        status: { type: 'string' },
+                                    },
+                                },
+                                example: {
+                                    id: '9cc7daa5-0e0f-4912-82e9-7c43ab154eab',
+                                    errorType: 'AMS-006',
+                                    message: 'Scraping Error: Scraped info doc not found in S3 (Error ID: 9cc7daa5-0e0f-4912-82e9-7c43ab154eab)',
+                                    domain: 'https://www.toymaniasusa.com',
+                                    state: {
+                                        scrapeStatus: 'Asset doc never uploaded',
+                                        req: {
+                                            url: 'https://www.toymaniasusa.com',
+                                        },
+                                    },
+                                    status: 'Error',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {

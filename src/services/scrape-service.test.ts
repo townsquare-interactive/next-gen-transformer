@@ -1,5 +1,5 @@
 import { it, describe, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getScrapedDataFromS3, scrapeAssetsFromSite } from './scrape-service.js'
+import { getScrapedDataFromS3, getScrapedInfoDocFromS3, scrapeAssetsFromSite } from './scrape-service.js'
 import { ScrapingError } from '../utilities/errors.js'
 
 describe('scrapeAssetsFromSite', () => {
@@ -272,6 +272,36 @@ describe('getScrapedDataFromS3', () => {
                 domain: url,
                 message: 'Scraped data not found in S3',
                 errorType: 'AMS-006',
+            })
+        }
+    })
+})
+
+describe('getScrapedInfoDocFromS3', () => {
+    beforeEach(() => {
+        vi.restoreAllMocks()
+    })
+
+    it('get and return scraped info doc from s3', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockGetScrapedInfoDocFromS3 = vi.fn().mockResolvedValue('scraped info doc')
+
+        const result = await getScrapedInfoDocFromS3(url, mockGetScrapedInfoDocFromS3)
+        expect(result).toEqual('scraped info doc')
+    })
+
+    it('throw error if no data found in s3', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockGetScrapedInfoDocFromS3 = vi.fn().mockResolvedValue(null)
+        try {
+            const result = await getScrapedInfoDocFromS3(url, mockGetScrapedInfoDocFromS3)
+        } catch (err) {
+            expect(err).toBeInstanceOf(ScrapingError)
+            expect(err).toMatchObject({
+                domain: url,
+                message: 'Scraped info doc not found in S3',
+                errorType: 'AMS-006',
+                state: { scrapeStatus: 'Asset doc never uploaded' },
             })
         }
     })

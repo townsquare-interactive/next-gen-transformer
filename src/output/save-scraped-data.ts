@@ -23,7 +23,7 @@ export interface ScrapedDataToSave {
     siteData: ScrapedAndAnalyzedSiteData
 }
 
-export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string) => string
+export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string, fileType?: string) => string
 
 type utilityFunctions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

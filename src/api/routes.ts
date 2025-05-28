@@ -30,7 +30,7 @@ router.post('/scrape-site', ScrapeController.scrapeSite)
 router.delete('/scrape-site/:url', ScrapeController.removeScrapedContent)
 router.get('/scraped-data', ScrapeController.getScrapedData)
 router.post('/move-s3-data-to-duda', ScrapeController.moveS3DataToDuda)
-
+router.get('/scraped-info-doc', ScrapeController.getScrapeDoc)
 //save from luna cms
 router.post('/save', CMSController.save)
 
