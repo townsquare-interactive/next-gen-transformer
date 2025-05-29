@@ -611,6 +611,7 @@ export const OpenAIAnalysisSchema = z
 export const S3UploadedImageSchema = z.object({
     src: z.string().optional(),
     pageTitle: z.string().optional(),
+    type: z.string().optional(),
 })
 
 // Schema for ScrapedAndAnalyzedSiteData
@@ -623,6 +624,7 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
         .object({
             s3UploadedImages: z.array(S3UploadedImageSchema).optional(),
             s3LogoUrl: z.string().optional(),
+            s3MediaFiles: z.array(S3UploadedImageSchema).optional(),
         })
         .optional(),
     siteSeo: ScrapedPageSeoSchema.optional(),

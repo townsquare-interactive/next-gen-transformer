@@ -26,7 +26,6 @@ export async function saveData(saveData: SavingScrapedData) {
         siteData = {
             ...saveData.siteData,
             assetData: {
-                //s3UploadedImages: imageData?.uploadedImages.map((img) => img.src),
                 s3UploadedImages: imageData?.uploadedImages.map((img) => {
                     return {
                         src: img.src,
@@ -34,6 +33,12 @@ export async function saveData(saveData: SavingScrapedData) {
                     }
                 }),
                 s3LogoUrl: imageData?.logoUrl || '',
+                s3MediaFiles: imageData?.mediaFiles.map((img) => {
+                    return {
+                        src: img.src,
+                        pageTitle: img.pageTitle,
+                    }
+                }),
             },
         }
 
@@ -85,6 +90,7 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
     try {
         let uploadedImagesCount = 0
         const imageList: UploadedResourcesObj[] = []
+        const mediaFiles: UploadedResourcesObj[] = []
         console.log('imagefiles length', imageFiles.length)
         const uploadImage = fetchFunction || addImageToS3
         const baseS3FolderName = `${s3ScrapedSitesFolder}${settings.basePath}`
@@ -113,12 +119,15 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
                 s3LogoUrl = s3Url
                 console.log('s3url', s3Url)
             }
-            imageList.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
-            uploadedImagesCount += 1
-            console.log('s3Url', s3Url)
+            if (imageFiles[i].type === 'video' || imageFiles[i].type === 'audio') {
+                mediaFiles.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
+            } else {
+                imageList.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
+                uploadedImagesCount += 1
+            }
         }
 
-        return { uploadedImages: imageList, imageUploadCount: uploadedImagesCount, failedImageList: [], logoUrl: s3LogoUrl }
+        return { uploadedImages: imageList, imageUploadCount: uploadedImagesCount, failedImageList: [], logoUrl: s3LogoUrl, mediaFiles: mediaFiles }
     } catch (err) {
         throw new ScrapingError({
             domain: settings.url,
@@ -128,34 +137,3 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
         })
     }
 }
-
-/* function matchImagesWithS3(siteData: any): any[] {
-    return siteData.pages.map((page) => {
-        const s3PageImageList = page.images
-            .map((pageImage) => {
-                // Extract filename from page image URL, handling empty strings
-                if (!pageImage) return null
-                const pageImageFile = decodeURIComponent(pageImage.split('/').pop() || '')
-
-                // Find matching S3 image by comparing filenames
-                const matchingS3Image = siteData.s3UploadedImages.find((s3Image) => {
-                    const s3ImageFile = decodeURIComponent(s3Image.split('/').pop() || '')
-
-                    // Remove query parameters and compare base filenames
-                    const cleanPageFile = pageImageFile.split('?')[0]
-                    const cleanS3File = s3ImageFile.split('?')[0]
-
-                    return cleanPageFile === cleanS3File
-                })
-
-                return matchingS3Image
-            })
-            .filter((url): url is string => url !== null) // Remove null values
-
-        console.log('s3PageImageList', s3PageImageList)
-        return {
-            ...page,
-            s3PageImageList,
-        }
-    })
-} */
