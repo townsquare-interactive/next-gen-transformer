@@ -1158,3 +1158,18 @@ export const createBusinessInfoDocument = (scrapedData: ScrapedAndAnalyzedSiteDa
 
     return textContent
 }
+
+export function isValidMediaType(contentType: string): boolean {
+    return isValidImageType(contentType) || isValidAudioVideoType(contentType)
+}
+
+export function isValidAudioVideoType(contentType: string): boolean {
+    const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'audio/mpeg', 'audio/mp3', 'video/quicktime']
+    return validTypes.includes(contentType.toLowerCase())
+}
+
+export function isValidMediaSize(fileSize: number): boolean {
+    const MAX_MEDIA_SIZE = 150 * 1024 * 1024 // 150MB max
+    const MIN_MEDIA_SIZE = 1024 // 1KB min
+    return fileSize >= MIN_MEDIA_SIZE && fileSize <= MAX_MEDIA_SIZE
+}

@@ -116,6 +116,10 @@ export function processImageUrlsForDuda(imageFiles?: ImageFiles[] | S3UploadedIm
     const dudaImageFolder = 'Imported'
 
     imageFiles.forEach((file) => {
+        if (file.type && (file.type === 'video' || file.type === 'audio')) {
+            return
+        }
+
         //handle src files from S3
         if (file.src) {
             if (seenUrls.has(file.src)) {

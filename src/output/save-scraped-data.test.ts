@@ -53,9 +53,19 @@ describe('save', () => {
                 fileExtension: 'jpg',
                 pageTitle: 'Home',
             },
+            {
+                url: new URL('http://example.com/video.mp4'),
+                imageFileName: 'test-video.mp4',
+                fileContents: Buffer.from('mock-video-data'),
+                hashedFileName: 'test-video.mp4',
+                originalImageLink: 'http://example.com/video.mp4',
+                fileExtension: 'mp4',
+                pageTitle: 'Home',
+                type: 'video',
+            },
         ]
 
-        const mockSiteData: ScrapedAndAnalyzedSiteData = {
+        const mockSiteDataResult: ScrapedAndAnalyzedSiteData = {
             pages: [],
             baseUrl: 'http://example.com/image.jpg',
             dudaUploadLocation: '',
@@ -65,7 +75,15 @@ describe('save', () => {
                     { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home' },
                 ],
                 s3LogoUrl: '',
+                s3MediaFiles: [{ src: 'https://s3.example.com/video.mp4', pageTitle: 'Home' }],
             },
+            businessInfo: mockBusinessInfo,
+        }
+
+        const mockSiteData: ScrapedAndAnalyzedSiteData = {
+            pages: [],
+            baseUrl: 'http://example.com/image.jpg',
+            dudaUploadLocation: '',
             businessInfo: mockBusinessInfo,
         }
 
@@ -80,6 +98,7 @@ describe('save', () => {
             .fn()
             .mockImplementationOnce(() => 'https://s3.example.com/image.jpg')
             .mockImplementationOnce(() => 'https://s3.example.com/image2.jpg')
+            .mockImplementationOnce(() => 'https://s3.example.com/video.mp4')
 
         const mockSiteDataUpload = vi.fn().mockReturnValue('https://s3.example.com/site-data.json')
         const mockSeoUpload = vi.fn().mockResolvedValue({})
@@ -107,7 +126,7 @@ describe('save', () => {
         expect(result.dataUploadDetails?.s3UploadedImages).toHaveLength(2)
         expect(result.dataUploadDetails?.siteDataUrl).toBe('https://s3.example.com/site-data.json')
         expect(result.url).toBe('http://example.com')
-        expect(result.siteData).toStrictEqual(mockSiteData)
+        expect(result.siteData).toStrictEqual(mockSiteDataResult)
         expect(mockSiteDataUpload).toHaveBeenCalledTimes(2)
 
         //expect the business info doc to be created and uploaded
