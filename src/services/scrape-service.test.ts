@@ -16,6 +16,7 @@ describe('scrapeAssetsFromSite', () => {
                 { imageFileName: 'image1.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image1content' } },
                 { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
                 { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
+                { imageFileName: 'image4.mp4', fileContents: 'image4content', url: { origin: 'image4content', pathname: 'image1content' }, type: 'video' },
             ],
         })
 
@@ -29,7 +30,7 @@ describe('scrapeAssetsFromSite', () => {
         })
 
         expect(mockScrapeFunction).toHaveBeenCalledTimes(1)
-        expect(result.imageFiles.length).toBe(3)
+        expect(result.imageFiles.length).toBe(4)
     })
 
     it('should run multiples scrapes with multiple pages', async () => {
@@ -116,8 +117,6 @@ describe('scrapeAssetsFromSite', () => {
             error = err
         }
 
-        console.log('check error', error)
-
         expect(error).toMatchObject({
             domain: url,
             message: expect.stringContaining('Found pages to scrape are not all on the same domain'),
@@ -179,12 +178,6 @@ describe('scrapeAssetsFromSite', () => {
         }
 
         expect(error).toBeInstanceOf(ScrapingError)
-
-        /*        expect(error.domain).toEqual(errUrl)
-        expect(error.state).toEqual({ scrapeStatus: 'Site not scraped' })
-        expect(error.message).toEqual('ScrapingError: Invalid or non-HTML page: https://www.notereal.com')
-        expect(error.errorType).toEqual('SCR-011') */
-
         expect(error).toMatchObject({
             domain: errUrl,
             message: expect.stringContaining('Invalid or non-HTML page: https://www.notereal.com'),

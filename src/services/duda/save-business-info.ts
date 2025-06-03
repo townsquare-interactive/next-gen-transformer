@@ -4,7 +4,7 @@ import { BusinessInfoObject, LocationObject } from '../../types/duda-api-type.js
 import { createDudaLocation, getBusinessInfoFromDuda, uploadBusinessInfo } from '../duda-api.js'
 import { Settings } from '../scrape-service.js'
 import { combineSocialAccounts, transformHoursToDudaFormat, transformTextToDudaFormat, createCombinedAddress } from '../../api/scrapers/utils.js'
-import { schemaOrgBusinessTypes } from './constants.js'
+import { schemaOrgBusinessTypes } from '../../api/scrapers/constants.js'
 export type BusinessInfoData = ScrapedAndAnalyzedSiteData['businessInfo']
 
 export async function saveBusinessInfoToDuda(

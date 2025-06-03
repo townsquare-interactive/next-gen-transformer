@@ -462,19 +462,23 @@ const transformHours = (businessInfo: ScreenshotData) => {
     return null
 }
 
+export const convertTitleToReadableFormat = (url: string) => {
+    return (() => {
+        const path = new URL(url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
+        const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
+        const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
+        return lastSegment
+            .replace(/-/g, ' ') // Replace hyphens with spaces
+            .replace(/\b\w/g, (char: string) => char.toUpperCase()) // Capitalize each word
+    })()
+}
+
 export const transformScrapedPageData = (pages: ScrapedPageData[]) => {
     const newPages = []
     for (const page of pages) {
         const newPage = {
             ...page,
-            title: (() => {
-                const path = new URL(page.url).pathname.replace(/\.[^/.]+$/, '') // Remove file extension
-                const segments = path.split('/').filter(Boolean) // Split path and remove empty segments
-                const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'Home'
-                return lastSegment
-                    .replace(/-/g, ' ') // Replace hyphens with spaces
-                    .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize each word
-            })(),
+            title: convertTitleToReadableFormat(page.url),
         }
         newPages.push(newPage)
     }
@@ -1153,4 +1157,19 @@ export const createBusinessInfoDocument = (scrapedData: ScrapedAndAnalyzedSiteDa
     `
 
     return textContent
+}
+
+export function isValidMediaType(contentType: string): boolean {
+    return isValidImageType(contentType) || isValidAudioVideoType(contentType)
+}
+
+export function isValidAudioVideoType(contentType: string): boolean {
+    const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'audio/mpeg', 'audio/mp3', 'video/quicktime']
+    return validTypes.includes(contentType.toLowerCase())
+}
+
+export function isValidMediaSize(fileSize: number): boolean {
+    const MAX_MEDIA_SIZE = 150 * 1024 * 1024 // 150MB max
+    const MIN_MEDIA_SIZE = 1024 // 1KB min
+    return fileSize >= MIN_MEDIA_SIZE && fileSize <= MAX_MEDIA_SIZE
 }

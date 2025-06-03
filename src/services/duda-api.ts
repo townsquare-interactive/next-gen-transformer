@@ -1,46 +1,20 @@
-import { DudaResponse, UploadPayload } from './duda/save-images.js'
-import { Settings } from './scrape-service.js'
+import { UploadPayload } from './duda/save-images.js'
 import { ScrapedPageSeo } from '../schema/output-zod.js'
 import { dudaApiClient } from './duda-api-client.js'
 import { PageObject, LocationObject, BusinessInfoObject, DudaColors, DudaSiteSeo } from '../types/duda-api-type.js'
 import { DataUploadError } from '../utilities/errors.js'
 
-const dudaUserName = process.env.DUDA_USERNAME
-const dudaPassword = process.env.DUDA_PASSWORD
-const BASE_URL = process.env.DUDA_USE_SANDBOX === '1' ? 'https://api-sandbox.duda.co' : 'https://api.duda.co'
+export async function dudaImageUpload(payload: UploadPayload[], siteId: string) {
+    try {
+        const response = await dudaApiClient.getClient().content.uploadResource({
+            site_name: siteId,
+            raw_body: payload,
+        })
 
-// Encode username and password for Basic Auth
-const authStr = `${dudaUserName}:${dudaPassword}`
-const authB64 = Buffer.from(authStr).toString('base64')
-const HEADERS = {
-    Authorization: `Basic ${authB64}`,
-    'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.9',
-    Connection: 'keep-alive',
-    'Cache-Control': 'no-cache',
-    Pragma: 'no-cache',
-}
-
-export async function dudaImageFetch(payload: UploadPayload[], settings?: Settings) {
-    const siteName = settings?.uploadLocation
-    //https://developer.duda.co/reference/site-content-upload-resources
-    const dudaApiUrl = `${BASE_URL}/api/sites/multiscreen/resources/${siteName}/upload`
-
-    const response = await fetch(dudaApiUrl, {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(payload),
-    })
-
-    if (!response.ok) {
-        console.error(`status text: ${response.statusText}`)
-        throw response.statusText
+        return response
+    } catch (error) {
+        translateDudaError(error, siteId)
     }
-
-    const responseData: DudaResponse = await response.json()
-    return responseData
 }
 
 export async function getDudaSite(siteId: string) {

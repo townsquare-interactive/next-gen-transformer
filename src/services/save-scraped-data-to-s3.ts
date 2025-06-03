@@ -6,12 +6,8 @@ import { zodDataParse } from '../schema/utils-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { addFileS3, addImageToS3, deleteFolderS3 } from '../utilities/s3Functions.js'
 import { UploadedResourcesObj } from './duda/save-images.js'
-import { scrapeInfoDocName } from './duda/constants.js'
+import { logoFileName, s3ScrapedSitesFolder, scrapeInfoDocName } from '../api/scrapers/constants.js'
 import { createBusinessInfoDocument } from '../api/scrapers/utils.js'
-
-export const s3ScrapedSitesFolder = 'scraped-sites/'
-
-export const logoFileName = 'header-logo'
 
 export async function saveData(saveData: SavingScrapedData) {
     console.log('saving to s3')
@@ -30,8 +26,19 @@ export async function saveData(saveData: SavingScrapedData) {
         siteData = {
             ...saveData.siteData,
             assetData: {
-                s3UploadedImages: imageData?.uploadedImages.map((img) => img.src),
+                s3UploadedImages: imageData?.uploadedImages.map((img) => {
+                    return {
+                        src: img.src,
+                        pageTitle: img.pageTitle,
+                    }
+                }),
                 s3LogoUrl: imageData?.logoUrl || '',
+                s3MediaFiles: imageData?.mediaFiles.map((img) => {
+                    return {
+                        src: img.src,
+                        pageTitle: img.pageTitle,
+                    }
+                }),
             },
         }
 
@@ -52,7 +59,6 @@ export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: Scra
         const uploadFunction = siteDataUploadFunction || addFileS3
         const folderPath = `${s3ScrapedSitesFolder}${settings.basePath}/scraped/siteData`
         const siteDataUrl = await uploadFunction(scrapedPageData, folderPath)
-
         return siteDataUrl
     } catch (err) {
         throw new ScrapingError({
@@ -84,6 +90,7 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
     try {
         let uploadedImagesCount = 0
         const imageList: UploadedResourcesObj[] = []
+        const mediaFiles: UploadedResourcesObj[] = []
         console.log('imagefiles length', imageFiles.length)
         const uploadImage = fetchFunction || addImageToS3
         const baseS3FolderName = `${s3ScrapedSitesFolder}${settings.basePath}`
@@ -107,17 +114,20 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
                 fileName = `${basePath}/${logoFileName}${imageFiles[i].fileExtension}` //need to add file ext
             }
 
-            //may have to change this to hash
             const s3Url = await uploadImage(imageFiles[i].fileContents, fileName)
             if (imageFiles[i].type === 'logo') {
                 s3LogoUrl = s3Url
                 console.log('s3url', s3Url)
             }
-            imageList.push({ src: s3Url, status: 'UPLOADED' })
-            uploadedImagesCount += 1
+            if (imageFiles[i].type === 'video' || imageFiles[i].type === 'audio') {
+                mediaFiles.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
+            } else {
+                imageList.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
+                uploadedImagesCount += 1
+            }
         }
 
-        return { uploadedImages: imageList, imageUploadCount: uploadedImagesCount, failedImageList: [], logoUrl: s3LogoUrl }
+        return { uploadedImages: imageList, imageUploadCount: uploadedImagesCount, failedImageList: [], logoUrl: s3LogoUrl, mediaFiles: mediaFiles }
     } catch (err) {
         throw new ScrapingError({
             domain: settings.url,
@@ -127,34 +137,3 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
         })
     }
 }
-
-/* function matchImagesWithS3(siteData: any): any[] {
-    return siteData.pages.map((page) => {
-        const s3PageImageList = page.images
-            .map((pageImage) => {
-                // Extract filename from page image URL, handling empty strings
-                if (!pageImage) return null
-                const pageImageFile = decodeURIComponent(pageImage.split('/').pop() || '')
-
-                // Find matching S3 image by comparing filenames
-                const matchingS3Image = siteData.s3UploadedImages.find((s3Image) => {
-                    const s3ImageFile = decodeURIComponent(s3Image.split('/').pop() || '')
-
-                    // Remove query parameters and compare base filenames
-                    const cleanPageFile = pageImageFile.split('?')[0]
-                    const cleanS3File = s3ImageFile.split('?')[0]
-
-                    return cleanPageFile === cleanS3File
-                })
-
-                return matchingS3Image
-            })
-            .filter((url): url is string => url !== null) // Remove null values
-
-        console.log('s3PageImageList', s3PageImageList)
-        return {
-            ...page,
-            s3PageImageList,
-        }
-    })
-} */

@@ -154,3 +154,7 @@ export const schemaOrgBusinessTypes = [
 ]
 
 export const scrapeInfoDocName = 'scrapedInfoDoc'
+
+export const s3ScrapedSitesFolder = 'scraped-sites/'
+
+export const logoFileName = 'header-logo'
