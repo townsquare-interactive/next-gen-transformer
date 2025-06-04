@@ -228,6 +228,74 @@ describe('scrapeAssetsFromSite', () => {
         expect(mockScrapeFunction).toHaveBeenCalled()
     }, 15000)
 
+    it('should analyze the contact page if hours were not found on the home page', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockValidateURl = vi.fn().mockResolvedValue(true)
+        const mockScrapeFunction = vi
+            .fn()
+            .mockResolvedValueOnce({
+                // First page images
+                imageList: ['image1.jpg', 'image2.jpg'],
+                imageFiles: [
+                    {
+                        imageFileName: 'image1.jpg',
+                        fileContents: 'turn the correct number of image files on a single page scrapeimage1content',
+                        url: { origin: 'scrapeurl.com', pathname: 'image1content' },
+                    },
+                    { imageFileName: 'image2.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image1content' } },
+                    { imageFileName: 'image3.jpg', fileContents: 'image3content', url: { origin: 'image3content', pathname: 'image1content' } },
+                ],
+                businessInfo: {
+                    hours: { regularHours: { MON: null, TUE: null, WED: null, THU: null, FRI: null, SAT: null, SUN: null } },
+                    phoneNumber: null,
+                },
+            })
+            .mockResolvedValueOnce({
+                //for contact page
+                imageList: ['image1.jpg', 'image2.jpg'],
+                imageFiles: [
+                    { imageFileName: 'image4.jpg', fileContents: 'image1content', url: { origin: 'scrapeurl.com', pathname: 'image4content' } },
+                    { imageFileName: 'image5.jpg', fileContents: 'image2content', url: { origin: 'image2content', pathname: 'image5content' } },
+                ],
+                businessInfo: {
+                    hours: {
+                        regularHours: {
+                            MON: '8:00AM-7:00PM',
+                            TUE: '8:00AM-7:00PM',
+                            WED: '8:00AM-7:00PM',
+                            THU: '8:00AM-7:00PM',
+                            FRI: '8:00AM-7:00PM',
+                            SAT: '8:00AM-7:00PM',
+                            SUN: 'Closed',
+                        },
+                    },
+                    phoneNumber: '919-445-2322',
+                },
+            })
+
+        const mockFindPagesFunction = vi.fn().mockResolvedValue(['https://scrapeurl.com/page1', 'https://scrapeurl.com/contact'])
+
+        const result = await scrapeAssetsFromSite({
+            url,
+            saveMethod: 'test',
+            functions: { scrapeFunction: mockScrapeFunction, scrapePagesFunction: mockFindPagesFunction, isValidateUrl: mockValidateURl }, // Pass the mock function
+            basePath: 'scrapeurl',
+        })
+
+        // Verify that the mock scrape function was called twice
+        expect(mockScrapeFunction).toHaveBeenCalledTimes(2)
+        expect(result.siteData.businessInfo?.hours?.regularHours).toEqual({
+            MON: '8:00am - 7:00pm',
+            TUE: '8:00am - 7:00pm',
+            WED: '8:00am - 7:00pm',
+            THU: '8:00am - 7:00pm',
+            FRI: '8:00am - 7:00pm',
+            SAT: '8:00am - 7:00pm',
+            SUN: 'closed',
+        })
+        expect(result.siteData.businessInfo?.phoneNumber).toEqual('919-445-2322')
+    })
+
     afterEach(() => {
         vi.restoreAllMocks()
     })

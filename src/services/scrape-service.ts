@@ -3,7 +3,15 @@ import { findPages } from '../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
-import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles, transformScrapedPageData } from '../api/scrapers/utils.js'
+import {
+    checkPagesAreOnSameDomain,
+    combineBusinessData,
+    isAnalyzePage,
+    removeDupeImages,
+    renameDuplicateFiles,
+    transformScrapedPageData,
+    validHours,
+} from '../api/scrapers/utils.js'
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo, ScreenshotData } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
@@ -37,7 +45,7 @@ interface DeleteScrapedFolderRes {
     status: 'fail' | 'success'
 }
 
-type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
+type ScrapeFunctionType = (settings: Settings, n: number, analyzePage?: boolean) => Promise<ScrapeResult>
 
 export interface Settings extends ScrapeWebsiteReq {
     saveMethod?: SaveFileMethodType
@@ -178,14 +186,17 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     try {
         // **Step 1: Scrape the homepage first**
         console.log('Scraping homepage:', homepage, 'individually...')
-        const homepageData = await scrapeFunction({ ...settings, url: homepage }, 0)
+        const homepageData = await scrapeFunction({ ...settings, url: homepage }, 0, true)
 
         if (!homepageData) {
             throw new Error(`Failed to scrape homepage: ${homepage}`)
         }
 
-        // Extract AI analysis from homepage (if available)
-        const screenshotPageData = homepageData.businessInfo
+        //analyze contact page if hours were not found on the home page
+        let analyzeContactPage = true
+        if (homepageData.businessInfo?.hours?.regularHours) {
+            analyzeContactPage = !validHours(homepageData.businessInfo.hours)
+        }
 
         // Initialize storage for results
         const seo = [homepageData.pageSeo] // Start with homepage SEO data
@@ -207,7 +218,7 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
                 limit(async () => {
                     try {
                         console.log('Scraping page:', page, '...')
-                        return await scrapeFunction({ ...settings, url: page }, index + 1)
+                        return await scrapeFunction({ ...settings, url: page }, index + 1, isAnalyzePage(page, analyzeContactPage))
                     } catch (err) {
                         console.error('Scrape function failed for page:', page, err)
                         return null // Handle failures gracefully for inner pages
@@ -220,6 +231,15 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
         const validScrapedPages = scrapedPages
             .filter((res) => res.status === 'fulfilled' && res.value)
             .map((res) => (res as PromiseFulfilledResult<ScrapeResult>).value)
+
+        //combine business data from each page
+        const internalBusinessData = validScrapedPages.map((data) => data.businessInfo)
+        let screenshotPageData = homepageData.businessInfo
+        if (internalBusinessData.length >= 1 && analyzeContactPage) {
+            const combinedBusinessData = combineBusinessData(homepageData.businessInfo, internalBusinessData)
+            // Use the combined data instead of just homepage data
+            screenshotPageData = combinedBusinessData || homepageData.businessInfo
+        }
 
         // Push results from other pages
         seo.push(...validScrapedPages.map((data) => data.pageSeo))
