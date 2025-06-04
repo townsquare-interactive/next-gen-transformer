@@ -2,8 +2,11 @@ import { v4 as uuidv4 } from 'uuid'
 import { Response } from 'express'
 import { LandingReq } from '../schema/input-zod.js'
 import { Dns } from '../../types.js'
+import { addFileS3, getFileS3 } from './s3Functions.js'
+import { s3ScrapedSitesFolder } from '../api/scrapers/constants.js'
+import { convertUrlToApexId } from './utils.js'
+import { ScrapedAndAnalyzedSiteData } from '../schema/output-zod.js'
 
-//Type declarations
 interface ErrorState {
     req?: LandingReq
     fileStatus?: string
@@ -135,8 +138,45 @@ export class AuthorizationError extends BaseError {
 
 const errorStatus = 'Error'
 
+async function uploadErrorDataToService(error: BaseError, errorId: string, url = '', res: Response) {
+    try {
+        const currentDate = new Date().toISOString().split('T')[0]
+
+        const errorData = {
+            id: errorId,
+            message: error.message,
+            error: error,
+            stack: error.stack,
+            date: currentDate,
+        }
+
+        const basePath = convertUrlToApexId(url)
+
+        const folderPath = `${s3ScrapedSitesFolder}errors/${currentDate}/${basePath}`
+        await addFileS3(errorData, folderPath, 'json')
+
+        //add to error field in current siteData file
+        if (url) {
+            const siteDataFilePath = `${s3ScrapedSitesFolder}${basePath}/scraped/siteData`
+            const siteData: ScrapedAndAnalyzedSiteData = await getFileS3(siteDataFilePath + '.json', null)
+            if (siteData) {
+                siteData.error = errorData
+                await addFileS3(siteData, siteDataFilePath, 'json')
+            } else {
+                await addFileS3({ error: errorData }, siteDataFilePath, 'json')
+            }
+        }
+
+        return error
+    } catch (err) {
+        console.log('error ocurred while trying to upload error data', err)
+        //handle error without uploading
+        handleError(error, res, url, true, false)
+    }
+}
+
 // Handles all types of errors and calls the specified error class
-export const handleError = (err: BaseError, res: Response, url: string = '', sendResponse: boolean = true) => {
+export const handleError = async (err: BaseError, res: Response, url: string = '', sendResponse: boolean = true, uploadErrorData = false) => {
     const errorID = uuidv4()
 
     const errorData = {
@@ -149,6 +189,11 @@ export const handleError = (err: BaseError, res: Response, url: string = '', sen
 
     // Log the error with the unique ID
     console.error(`[Error ID: ${errorID}]`, errorData, `${err.stack}`)
+
+    //upload error details to s3
+    if (uploadErrorData) {
+        await uploadErrorDataToService(err, errorID, url, res)
+    }
 
     if (sendResponse) {
         let statusType = null

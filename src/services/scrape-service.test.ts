@@ -268,6 +268,44 @@ describe('getScrapedDataFromS3', () => {
             })
         }
     })
+    it('throw error if error data found in s3 file', async () => {
+        const url = 'https://scrapeurl.com'
+        const mockScrapeFunction = vi.fn().mockResolvedValue({
+            error: {
+                id: 'a90f3a58-880b-4ab8-8769-c2d818fcaa46',
+                message: 'Scraped data not found in S3',
+                error: {
+                    errorType: 'AMS-010',
+                    state: {
+                        req: {
+                            url: 'https://nextgenprototype.production.townsquareinteractive.com',
+                        },
+                    },
+                },
+                stack: 'Error Stack',
+                date: '2025-06-03',
+            },
+        })
+
+        try {
+            const result = await getScrapedDataFromS3(url, mockScrapeFunction)
+        } catch (err) {
+            expect(err).toBeInstanceOf(ScrapingError)
+            expect(err).toMatchObject({
+                domain: '',
+                message: 'Error during scraping: Scraped data not found in S3',
+                errorType: 'AMS-010',
+                state: {
+                    id: 'a90f3a58-880b-4ab8-8769-c2d818fcaa46',
+                    req: {
+                        url: 'https://nextgenprototype.production.townsquareinteractive.com',
+                    },
+                    stack: 'Error Stack',
+                    date: '2025-06-03',
+                },
+            })
+        }
+    })
 })
 
 describe('getScrapedInfoDocFromS3', () => {

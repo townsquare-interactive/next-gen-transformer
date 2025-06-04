@@ -614,6 +614,35 @@ export const S3UploadedImageSchema = z.object({
     type: z.string().optional(),
 })
 
+const ErrorSchema = z.object({
+    message: z.string(),
+    errorType: z.string(),
+    state: z.object({
+        req: z.any().optional(),
+        fileStatus: z.string().optional(),
+        domainStatus: z.string().optional(),
+        dns: z.array(z.any()).optional(),
+        dataStatus: z.string().optional(),
+        siteStatus: z.string().optional(),
+        scrapeStatus: z.string().optional(),
+        method: z.string().optional(),
+        pages: z.array(z.string()).optional(),
+        erroredFields: z
+            .array(
+                z.object({
+                    fieldPath: z.array(z.string()),
+                    message: z.string(),
+                })
+            )
+            .optional(),
+        dudaErrorCode: z.string().optional(),
+        dudaErrorStatus: z.number().optional(),
+        missingFields: z.array(z.string()).optional(),
+    }),
+    domain: z.string().optional(),
+    name: z.string(),
+})
+
 // Schema for ScrapedAndAnalyzedSiteData
 export const ScrapedAndAnalyzedSiteDataSchema = z.object({
     baseUrl: z.string(),
@@ -628,6 +657,15 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
         })
         .optional(),
     siteSeo: ScrapedPageSeoSchema.optional(),
+    error: z
+        .object({
+            id: z.string(),
+            error: ErrorSchema,
+            stack: z.string().optional(),
+            date: z.string(),
+        })
+        .optional()
+        .nullable(),
 })
 
 //scraped data

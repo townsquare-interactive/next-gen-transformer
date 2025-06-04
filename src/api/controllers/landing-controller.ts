@@ -7,7 +7,7 @@ import { DomainRes } from '../../../types.js'
 import { checkDomainConfigOnVercel, publishDomainToVercel } from '../../services/domain-service.js'
 import { getRequestData, validateLandingRequestData } from '../../services/landing-service.js'
 import { removeLandingProject, removeLandingSite } from '../../services/remove-landing-service.js'
-import { saveInputSchema, createSiteInputSchema, SubdomainInputSchema, RequestDataReq, RequestDataSchema } from '../../schema/input-zod.js'
+import { RequestDataReq, RequestDataSchema } from '../../schema/input-zod.js'
 import { zodDataParse } from '../../schema/utils-zod.js'
 
 const useDomainPublish = process.env.CREATE_SITE_DOMAINS === '0' ? false : true
@@ -29,7 +29,7 @@ export const createLanding = async (req: Request, res: Response) => {
         }
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        await handleError(err, res, req.body.url)
     }
 }
 
@@ -39,7 +39,7 @@ export const removeLandingDomain = async (req: Request, res: Response) => {
         res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.params }
-        handleError(err, res, req.params.domain)
+        await handleError(err, res, req.params.domain)
     }
 }
 
@@ -49,7 +49,7 @@ export const removeApexID = async (req: Request, res: Response) => {
         res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.params }
-        handleError(err, res, req.params.apexID)
+        await handleError(err, res, req.params.apexID)
     }
 }
 
@@ -65,7 +65,7 @@ export const checkDomainConfig = async (req: Request, res: Response) => {
         res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -77,6 +77,6 @@ export const getLandingRequestData = async (req: Request, res: Response) => {
         res.json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res)
+        await handleError(err, res)
     }
 }

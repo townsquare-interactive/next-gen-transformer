@@ -25,7 +25,7 @@ export const getPageList = async (req: Request, res: Response) => {
         res.json(pages)
     } catch (err) {
         err.state = { ...err.state, req: req.query }
-        handleError(err, res, req.query.url as string)
+        await handleError(err, res, req.query.url as string)
     }
 }
 
@@ -39,7 +39,7 @@ export const scrapePages = async (req: Request, res: Response) => {
         res.json(saveResponse)
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        await handleError(err, res, req.body.url, true, process.env.UPLOAD_ERROR_DATA === '1')
     }
 }
 
@@ -63,7 +63,7 @@ export const scrapeSite = async (req: Request, res: Response) => {
                     } catch (err) {
                         //seperate error handling for background process
                         err.state = { ...err.state, req: req.body }
-                        handleError(err, res, req.body.url, false)
+                        await handleError(err, res, req.body.url, true, true)
                         reject(err)
                     }
                 })
@@ -77,7 +77,7 @@ export const scrapeSite = async (req: Request, res: Response) => {
         }
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        await handleError(err, res, req.body.url, true, process.env.UPLOAD_ERROR_DATA === '1')
     }
 }
 
@@ -89,7 +89,7 @@ export const removeScrapedContent = async (req: Request, res: Response) => {
         res.status(response.status === 'success' ? 200 : 404).json(response)
     } catch (err) {
         err.state = { ...err.state, req: req.params }
-        handleError(err, res, req.params.url)
+        await handleError(err, res, req.params.url)
     }
 }
 
@@ -102,7 +102,7 @@ export const getScrapedData = async (req: Request, res: Response) => {
         res.json(scrapedData)
     } catch (err) {
         err.state = { ...err.state, req: req.query }
-        handleError(err, res, req.query.url as string)
+        await handleError(err, res, req.query.url as string)
     }
 }
 
@@ -115,7 +115,7 @@ export const moveS3DataToDuda = async (req: Request, res: Response) => {
         res.json({ ...moveResponse, ...middlewareResponse })
     } catch (err) {
         err.state = { ...err.state, req: req.body }
-        handleError(err, res, req.body.url)
+        await handleError(err, res, req.body.url)
     }
 }
 
@@ -128,6 +128,6 @@ export const getScrapeDoc = async (req: Request, res: Response) => {
         res.json(scrapedInfo)
     } catch (err) {
         err.state = { ...err.state, req: req.query }
-        handleError(err, res, req.query.url as string)
+        await handleError(err, res, req.query.url as string)
     }
 }

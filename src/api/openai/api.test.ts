@@ -1,6 +1,5 @@
 import { it, describe, expect, vi } from 'vitest'
 import { extractJsonFromRes } from './api.js'
-import { c } from 'vitest/dist/reporters-5f784f42.js'
 
 describe('extractJsonFromRes', () => {
     it('should extract correct JSON from an example AI response', async () => {
