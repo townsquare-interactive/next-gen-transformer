@@ -1173,3 +1173,58 @@ export function isValidMediaSize(fileSize: number): boolean {
     const MIN_MEDIA_SIZE = 1024 // 1KB min
     return fileSize >= MIN_MEDIA_SIZE && fileSize <= MAX_MEDIA_SIZE
 }
+
+export const isAnalyzePage = (page: string, analyzeContactPage: boolean) => {
+    try {
+        if (analyzeContactPage) {
+            //extract slug from url
+            const url = new URL(page)
+            const slug =
+                url.pathname
+                    .toLowerCase()
+                    .split('/')
+                    .filter((segment) => segment.length > 0)
+                    .pop() || ''
+
+            return slug.includes('contact')
+        }
+    } catch (error) {
+        console.warn('Error determining if page needs analysis:', error)
+    }
+    return false
+}
+
+export const validHours = (hours?: ScrapedHours | null) => {
+    if (!hours || hours.regularHours === null) {
+        return false
+    }
+
+    const hoursNull = Object.values(hours.regularHours).every((hour) => hour === null)
+    const foundHours = !hoursNull
+    return foundHours
+}
+
+export const combineBusinessData = (homepageData: ScreenshotData | undefined, internalPagesData: (ScreenshotData | undefined)[]) => {
+    if (!homepageData) return null
+
+    const combinedData: ScreenshotData = { ...homepageData }
+
+    // Filter out undefined/null data from other pages
+    const validInternalPagesData = internalPagesData.filter((data): data is ScreenshotData => !!data)
+
+    for (const internalPageData of validInternalPagesData) {
+        // Check and merge hours data
+        if (!validHours(combinedData.hours)) {
+            combinedData.hours = internalPageData.hours
+        }
+
+        // Check and other business data
+        if (!combinedData.address || Object.values(combinedData.address).every((field) => !field)) {
+            combinedData.address = internalPageData.address
+        }
+        if (!combinedData.email) combinedData.email = internalPageData.email
+        if (!combinedData.phoneNumber) combinedData.phoneNumber = internalPageData.phoneNumber
+    }
+
+    return combinedData
+}
