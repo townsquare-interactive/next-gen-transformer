@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ValidationError, TransformError, SiteDeploymentError, handleError, DataUploadError } from './errors.js'
-
-// Mocking uuidv4 to always return the same UUID
-vi.mock('uuid', () => ({
-    v4: vi.fn().mockReturnValue('12345678-1234-1234-1234-123456789abc'),
-}))
+import * as s3Functions from '../utilities/s3Functions.js'
 
 describe('handleError', () => {
     let consoleErrorMock: any
@@ -12,13 +8,25 @@ describe('handleError', () => {
     //mock console error
     beforeEach(() => {
         consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {})
+        // Mocking uuidv4 to always return the same UUID
+        vi.mock('uuid', () => ({
+            v4: vi.fn().mockReturnValue('12345678-1234-1234-1234-123456789abc'),
+        }))
     })
 
     afterEach(() => {
         consoleErrorMock.mockRestore()
     })
 
-    it('should log the error and send response with error ID for ValidationError', () => {
+    beforeEach(() => {
+        // Mock utility functions
+        vi.spyOn(s3Functions, 'addFileS3').mockResolvedValue('')
+        vi.spyOn(s3Functions, 'getFileS3').mockResolvedValue({
+            companyName: 'test',
+        })
+    })
+
+    it('should log the error and send response with error ID for ValidationError', async () => {
         const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
@@ -29,7 +37,7 @@ describe('handleError', () => {
             state: { erroredFields: [{ fieldPath: ['phone'], message: 'zod message' }] },
         })
 
-        handleError(error, mockResponse)
+        await handleError(error, mockResponse)
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
@@ -51,7 +59,7 @@ describe('handleError', () => {
         })
     })
 
-    it('should log the error and send response with error ID for TransformError', () => {
+    it('should log the error and send response with error ID for TransformError', async () => {
         const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
@@ -62,7 +70,7 @@ describe('handleError', () => {
             state: { siteStatus: 'deploymentState' },
         })
 
-        handleError(error, mockResponse, 'example.com')
+        await handleError(error, mockResponse, 'example.com')
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
@@ -84,7 +92,7 @@ describe('handleError', () => {
         })
     })
 
-    it('should log the error and send response with error ID for SiteDeploymentError', () => {
+    it('should log the error and send response with error ID for SiteDeploymentError', async () => {
         const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
@@ -98,7 +106,7 @@ describe('handleError', () => {
             },
         })
 
-        handleError(error, mockResponse)
+        await handleError(error, mockResponse)
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
@@ -126,7 +134,7 @@ describe('handleError', () => {
             status: 'Error',
         })
     })
-    it('should log the error and send response with error ID for DataUploadError', () => {
+    it('should log the error and send response with error ID for DataUploadError', async () => {
         const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
@@ -138,7 +146,7 @@ describe('handleError', () => {
             state: { fileStatus: 'deploymentState' },
         })
 
-        handleError(error, mockResponse)
+        await handleError(error, mockResponse)
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
@@ -159,14 +167,14 @@ describe('handleError', () => {
         })
     })
 
-    it('should log the error and send response with error ID for unexpected errors', () => {
+    it('should log the error and send response with error ID for unexpected errors', async () => {
         const mockResponse: any = {
             status: vi.fn().mockReturnThis(),
             json: vi.fn(),
         }
         const error: any = new Error('Function failed to call')
 
-        handleError(error, mockResponse, 'example.com')
+        await handleError(error, mockResponse, 'example.com')
 
         // Check if console.error was called with the correct message
         expect(console.error).toHaveBeenCalledWith(
@@ -185,5 +193,142 @@ describe('handleError', () => {
             domain: 'example.com',
             state: undefined,
         })
+    })
+
+    it('should upload error data to s3', async () => {
+        const mockResponse: any = {
+            status: vi.fn().mockReturnThis(),
+            json: vi.fn(),
+        }
+        const error: any = new Error('Error upload test')
+
+        await handleError(error, mockResponse, 'example.com', true, true)
+
+        // Check if S3 functions were called with correct arguments
+        const { addFileS3, getFileS3 } = s3Functions
+
+        // Verify getFileS3 was called with correct path
+        expect(getFileS3).toHaveBeenCalledWith(expect.stringContaining('/scraped/siteData.json'), null)
+
+        // Verify addFileS3 was called twice - once for error file and once for siteData
+        expect(addFileS3).toHaveBeenCalledTimes(2)
+
+        // First call should be for the error file
+        expect(addFileS3).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                id: '12345678-1234-1234-1234-123456789abc',
+                error: error,
+                stack: expect.any(String),
+                date: expect.any(String),
+            }),
+            expect.stringContaining('/errors/'),
+            'json'
+        )
+
+        // Second call should be for updating siteData
+        expect(addFileS3).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                companyName: 'test',
+                error: expect.objectContaining({
+                    id: '12345678-1234-1234-1234-123456789abc',
+                }),
+            }),
+            expect.stringContaining('/scraped/siteData'),
+            'json'
+        )
+
+        // Check if response was sent with the correct status and JSON
+        expect(mockResponse.status).toHaveBeenCalledWith(500)
+        expect(mockResponse.json).toHaveBeenCalledWith({
+            id: '12345678-1234-1234-1234-123456789abc',
+            errorType: 'GEN-003',
+            message: 'An unexpected error occurred: Error upload test (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            status: 'Error',
+            domain: 'example.com',
+            state: undefined,
+        })
+    })
+
+    it('should add error to existing siteData when getFileS3 returns valid JSON', async () => {
+        const mockResponse: any = {
+            status: vi.fn().mockReturnThis(),
+            json: vi.fn(),
+        }
+        const error: any = new Error('Error upload test')
+
+        // Mock getFileS3 to return specific siteData for this test
+        vi.spyOn(s3Functions, 'getFileS3').mockResolvedValueOnce({
+            baseUrl: 'https://example.com',
+            pages: [],
+            businessInfo: {
+                companyName: 'Test Company',
+                email: 'test@example.com',
+            },
+        })
+
+        await handleError(error, mockResponse, 'example.com', true, true)
+
+        // Verify getFileS3 was called with correct path
+        expect(s3Functions.getFileS3).toHaveBeenCalledWith(expect.stringContaining('/scraped/siteData.json'), null)
+
+        // Verify addFileS3 was called with the combined data
+        expect(s3Functions.addFileS3).toHaveBeenCalledWith(
+            expect.objectContaining({
+                baseUrl: 'https://example.com',
+                pages: [],
+                businessInfo: {
+                    companyName: 'Test Company',
+                    email: 'test@example.com',
+                },
+                error: expect.objectContaining({
+                    id: '12345678-1234-1234-1234-123456789abc',
+                    error: error,
+                    stack: expect.any(String),
+                    date: expect.any(String),
+                }),
+            }),
+            expect.stringContaining('/scraped/siteData'),
+            'json'
+        )
+    })
+
+    it('should handle S3 upload failures by calling handleError again without uploading', async () => {
+        const mockResponse: any = {
+            status: vi.fn().mockReturnThis(),
+            json: vi.fn(),
+        }
+        const error = new ValidationError({
+            message: 'Original error',
+            errorType: 'VAL-001',
+            state: { erroredFields: [{ fieldPath: ['phone'], message: 'validation failed' }] },
+        })
+
+        // Make addFileS3 throw an error
+        vi.spyOn(s3Functions, 'addFileS3').mockRejectedValueOnce(new Error('S3 upload failed'))
+
+        // First call to handleError with uploadErrorData = true
+        await handleError(error, mockResponse, 'example.com', true, true)
+
+        // Verify handleError was called again (through the catch block) with uploadErrorData = false
+        expect(mockResponse.json).toHaveBeenCalledTimes(2)
+        expect(mockResponse.json).toHaveBeenNthCalledWith(1, {
+            id: '12345678-1234-1234-1234-123456789abc',
+            errorType: 'VAL-001',
+            message: 'Original error (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            state: { erroredFields: [{ fieldPath: ['phone'], message: 'validation failed' }] },
+            status: 'Error',
+        })
+        expect(mockResponse.json).toHaveBeenNthCalledWith(2, {
+            id: '12345678-1234-1234-1234-123456789abc',
+            errorType: 'VAL-001',
+            message: 'Original error (Error ID: 12345678-1234-1234-1234-123456789abc)',
+            state: { erroredFields: [{ fieldPath: ['phone'], message: 'validation failed' }] },
+            status: 'Error',
+        })
+
+        // Verify addFileS3 was called only once (the failed attempt)
+        expect(s3Functions.addFileS3).toHaveBeenCalledTimes(1)
     })
 })

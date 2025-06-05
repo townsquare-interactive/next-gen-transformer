@@ -22,6 +22,6 @@ export const save = async (req: Request, res: Response) => {
             res.status(500).json({ err: 'Something went wrong' })
         }
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }

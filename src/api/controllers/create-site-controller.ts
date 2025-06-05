@@ -35,7 +35,7 @@ export const publishDomain = async (req: Request, res: Response) => {
         console.log(response)
         res.json(response)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -46,7 +46,7 @@ export const removeDomain = async (req: Request, res: Response) => {
         console.log(response)
         res.json(response)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -57,7 +57,7 @@ export const publishSite = async (req: Request, res: Response) => {
         console.log(response)
         res.json(response)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -68,7 +68,7 @@ export const unpublishSite = async (req: Request, res: Response) => {
         console.log(response)
         res.json(response)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -77,7 +77,7 @@ export const getTemplates = async (req: Request, res: Response) => {
         const siteTemplates = await getFileS3(`global-assets/templates/siteTemplates.json`, 'templates not found in s3')
         res.json(siteTemplates)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -105,6 +105,6 @@ export const updateDomain = async (req: Request, res: Response) => {
         console.log(response)
         res.json(response)
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }

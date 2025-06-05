@@ -23,12 +23,12 @@ export interface ScrapedDataToSave {
     siteData: ScrapedAndAnalyzedSiteData
 }
 
-export type siteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string, fileType?: string) => string
+export type SiteDataUploadFunction = (siteData: ScrapedAndAnalyzedSiteData, key: string, fileType?: string) => string
 
 type utilityFunctions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     imageUploadFunction?: (payload: any) => any
-    siteDataUploadFunction?: siteDataUploadFunction
+    siteDataUploadFunction?: SiteDataUploadFunction
     seoUploadFunction?: (siteId: string, seoData?: ScrapedPageSeo, enableBusinessSchema?: boolean) => Promise<void>
     savePagesToDudaFunction?: (siteId: string, seoData: ScrapedAndAnalyzedSiteData['pages']) => Promise<void>
     saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, businessInfo: ScrapedAndAnalyzedSiteData['businessInfo']) => Promise<boolean>
@@ -103,38 +103,34 @@ export async function saveToService(
     logoUrl?: string,
     functions?: utilityFunctions
 ) {
-    try {
-        console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
+    console.log(`${!settings.saveMethod ? 'no save method' : 'save method = ' + settings.saveMethod}`)
 
-        let save: (saveData: SavingScrapedData) => Promise<SaveOutput>
-        switch (settings.saveMethod) {
-            case 's3Upload':
-                save = s3FileUpload
-                break
-            case 'dudaUpload':
-                save = dudaUpload
-                break
-            case undefined:
-                save = s3FileUpload
-                break
-            default:
-                save = s3FileUpload
-                break
-        }
+    let save: (saveData: SavingScrapedData) => Promise<SaveOutput>
+    switch (settings.saveMethod) {
+        case 's3Upload':
+            save = s3FileUpload
+            break
+        case 'dudaUpload':
+            save = dudaUpload
+            break
+        case undefined:
+            save = s3FileUpload
+            break
+        default:
+            save = s3FileUpload
+            break
+    }
 
-        const savedData = await save({ settings, imageFiles, imageList, siteData, logoUrl, functions })
+    const savedData = await save({ settings, imageFiles, imageList, siteData, logoUrl, functions })
 
-        return {
-            imageData: {
-                uploadedResources: savedData.uploadedImages,
-                imageUploadTotal: savedData.imageUploadCount,
-                failedImageList: savedData.failedImageList,
-                logoUrl: savedData.logoUrl || '',
-            },
-            siteDataUrl: savedData.siteDataUrl || '',
-            siteData: savedData.siteData || siteData,
-        }
-    } catch (err) {
-        throw err
+    return {
+        imageData: {
+            uploadedResources: savedData.uploadedImages,
+            imageUploadTotal: savedData.imageUploadCount,
+            failedImageList: savedData.failedImageList,
+            logoUrl: savedData.logoUrl || '',
+        },
+        siteDataUrl: savedData.siteDataUrl || '',
+        siteData: savedData.siteData || siteData,
     }
 }

@@ -300,6 +300,17 @@ export const getScrapedDataFromS3 = async (url: string, getFileFunction?: (url: 
             state: { scrapeStatus: 'Scraped data not found in S3' },
         })
     }
+
+    //throw error if error logs found in S3
+    if (scrapedData.error) {
+        const foundError = scrapedData.error
+        throw new ScrapingError({
+            domain: foundError.error.url || '',
+            message: 'Error during scraping: ' + foundError.message,
+            errorType: foundError.error.errorType,
+            state: { id: foundError.id, ...foundError.error.state, stack: foundError.stack, date: foundError.date },
+        })
+    }
     return scrapedData
 }
 

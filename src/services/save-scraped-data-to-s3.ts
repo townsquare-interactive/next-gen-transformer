@@ -1,6 +1,6 @@
 import type { ImageFiles } from '../api/scrapers/asset-scrape.js'
 import { type Settings } from './scrape-service.js'
-import { SavingScrapedData, siteDataUploadFunction } from '../output/save-scraped-data.js'
+import { SavingScrapedData, SiteDataUploadFunction } from '../output/save-scraped-data.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedAndAnalyzedSiteDataSchema } from '../schema/output-zod.js'
 import { zodDataParse } from '../schema/utils-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
@@ -54,7 +54,7 @@ export async function saveData(saveData: SavingScrapedData) {
     return { ...imageData, siteDataUrl, siteData }
 }
 
-export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData, siteDataUploadFunction?: siteDataUploadFunction) => {
+export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: ScrapedAndAnalyzedSiteData, siteDataUploadFunction?: SiteDataUploadFunction) => {
     try {
         const uploadFunction = siteDataUploadFunction || addFileS3
         const folderPath = `${s3ScrapedSitesFolder}${settings.basePath}/scraped/siteData`
@@ -70,7 +70,7 @@ export const saveSiteDataToS3 = async (settings: Settings, scrapedPageData: Scra
     }
 }
 
-export const saveBusinessInfoDocument = async (settings: Settings, businessDoc: any, siteDataUploadFunction?: siteDataUploadFunction) => {
+export const saveBusinessInfoDocument = async (settings: Settings, businessDoc: any, siteDataUploadFunction?: SiteDataUploadFunction) => {
     try {
         const uploadFunction = siteDataUploadFunction || addFileS3
         const folderPath = `${s3ScrapedSitesFolder}${settings.basePath}/scraped/${scrapeInfoDocName}`

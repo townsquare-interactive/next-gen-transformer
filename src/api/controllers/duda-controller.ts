@@ -130,7 +130,7 @@ export const changeBusinessSchemaStatus = async (req: Request, res: Response) =>
         const response = await toggleBusinessSchema(validatedRequest.siteName, validatedRequest.toggleOption)
         return res.json({ data: response })
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
 
@@ -142,6 +142,6 @@ export const saveContent = async (req: Request, res: Response) => {
 
         return res.json({ response })
     } catch (err) {
-        handleError(err, res)
+        await handleError(err, res)
     }
 }
