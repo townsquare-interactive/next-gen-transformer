@@ -652,7 +652,8 @@ export const transformTextToDudaFormat = (
             label: 'Fonts',
             text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
         }
-        customTexts.push(fontText)
+        const fontTextChunks = createContentChunks(fontText.text, fontText.label)
+        customTexts.push(...fontTextChunks)
     }
 
     // Add skipped links
@@ -661,7 +662,8 @@ export const transformTextToDudaFormat = (
             label: 'Social Media',
             text: skippedLinks.join('<br>'),
         }
-        customTexts.push(skippedLinksText)
+        const skippedLinksTextChunks = createContentChunks(skippedLinksText.text, skippedLinksText.label)
+        customTexts.push(...skippedLinksTextChunks)
     }
 
     if ((iframeContent && iframeContent.length > 0) || (mediaLinks && mediaLinks.length > 0)) {
@@ -679,7 +681,9 @@ export const transformTextToDudaFormat = (
                     .join('<br><br>') || ''
             }<br><br><h3>Iframe Content</h3><br>${iframeContent?.map(encodeIframeHtml).join('<br><br>') || ''}`,
         }
-        customTexts.push(mediaText)
+
+        const mediaTextChunks = createContentChunks(mediaText.text, mediaText.label)
+        customTexts.push(...mediaTextChunks)
     }
 
     // Add address
@@ -692,7 +696,8 @@ export const transformTextToDudaFormat = (
                       businessInfo?.address?.state || ''
                   }<br>${businessInfo?.address?.postalCode || ''}`,
     }
-    customTexts.push(addressText)
+    const addressTextChunks = createContentChunks(addressText.text, addressText.label)
+    customTexts.push(...addressTextChunks)
 
     return customTexts
 }
