@@ -3,7 +3,7 @@ import { cleanHtmlForAnalysis, extractFormData, extractPageContent, updateImageO
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
 import { setupBrowser } from './playwright-setup.js'
-import { scrapeMediaFromPage, scrollToLazyLoadImages } from './scrape-media.js'
+import { extractIframeContent, scrapeMediaFromPage, scrollToLazyLoadImages } from './scrape-media.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -72,6 +72,8 @@ export async function scrape(settings: Settings, n: number, analyzePage = false)
         //extract form data from pages
         const formData = await extractFormData(page)
 
+        const iframeContent = await extractIframeContent(page)
+
         let screenshotBuffer
         if (isHomePage || analyzePage) {
             screenshotBuffer = await page.screenshot({ fullPage: true })
@@ -127,6 +129,7 @@ export async function scrape(settings: Settings, n: number, analyzePage = false)
             businessInfo: scrapeAnalysisResult,
             content: pageTextContent,
             forms: formData,
+            iframeContent: iframeContent,
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)

@@ -1,5 +1,5 @@
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
-import { ScrapedAndAnalyzedSiteData } from '../../schema/output-zod.js'
+import { S3UploadedImageList, ScrapedAndAnalyzedSiteData } from '../../schema/output-zod.js'
 import { BusinessInfoObject, LocationObject } from '../../types/duda-api-type.js'
 import { createDudaLocation, getBusinessInfoFromDuda, uploadBusinessInfo } from '../duda-api.js'
 import { Settings } from '../scrape-service.js'
@@ -10,12 +10,13 @@ export type BusinessInfoData = ScrapedAndAnalyzedSiteData['businessInfo']
 export async function saveBusinessInfoToDuda(
     siteId: string,
     logoUrl: string,
-    businessInfo: BusinessInfoData,
+    siteData: ScrapedAndAnalyzedSiteData,
     pages: ScrapedAndAnalyzedSiteData['pages'],
     settings: Settings
 ) {
     //get info first if secondary site
     const siteType = settings.siteType
+    const businessInfo = siteData.businessInfo
     let currentBusinessInfo: ContentLibraryResponse | undefined
 
     if (siteType === 'secondary') {
@@ -36,6 +37,8 @@ export async function saveBusinessInfoToDuda(
         pages,
         primaryLocation,
         skippedLinks || [],
+        siteData.iframeContent || [],
+        siteData.assetData?.s3MediaFiles || [],
         currentBusinessInfo
     )
 
@@ -74,10 +77,12 @@ export const transformBusinessInfoDataToDudaFormat = (
     pages: ScrapedAndAnalyzedSiteData['pages'],
     transformedLocationData: LocationObject,
     skippedLinks: string[],
+    iframeContent: string[],
+    mediaFiles: S3UploadedImageList[],
     currentBusinessInfo?: ContentLibraryResponse
 ): BusinessInfoObject => {
     // Transform pages into custom text array with content splitting
-    const customTexts = transformTextToDudaFormat(pages, businessInfo, skippedLinks)
+    const customTexts = transformTextToDudaFormat(pages, businessInfo, skippedLinks, iframeContent, mediaFiles)
     const transformedData = {
         companyName: currentBusinessInfo?.business_data?.name ?? businessInfo?.companyName ?? '',
         site_texts: {

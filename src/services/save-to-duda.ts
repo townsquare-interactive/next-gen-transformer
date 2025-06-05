@@ -35,11 +35,15 @@ export async function save(saveData: SavingScrapedData) {
         await saveColorsToDudaFunction(settings.uploadLocation, saveData.siteData.businessInfo.styles.colors)
     }
 
-    const imageFiles = saveData.imageFiles
-    const logoUrl = saveData.siteData?.assetData?.s3LogoUrl || saveData.logoUrl
-    const fetchFunction = saveData.functions?.imageUploadFunction
-    const imageData = await saveImages(settings, imageFiles, saveData.imageList || [], logoUrl, fetchFunction)
-    const dudaLogoUrl = imageData.dudaLogoUrl
+    let dudaLogoUrl: string | undefined
+    let imageData
+    if ((saveData.imageFiles && saveData.imageFiles.length > 0) || (saveData.imageList && saveData.imageList.length > 0)) {
+        const imageFiles = saveData.imageFiles
+        const logoUrl = saveData.siteData?.assetData?.s3LogoUrl || saveData.logoUrl
+        const fetchFunction = saveData.functions?.imageUploadFunction
+        imageData = await saveImages(settings, imageFiles, saveData.imageList || [], logoUrl, fetchFunction)
+        dudaLogoUrl = imageData.dudaLogoUrl
+    }
 
     let enableBusinessSchema: boolean = false
     if (saveData.siteData?.businessInfo) {
@@ -47,7 +51,7 @@ export async function save(saveData: SavingScrapedData) {
         enableBusinessSchema = await saveBusinessInfoToDudaFunction(
             settings.uploadLocation,
             dudaLogoUrl ?? '',
-            saveData.siteData.businessInfo,
+            saveData.siteData,
             saveData.siteData.pages,
             settings
         )
@@ -60,5 +64,5 @@ export async function save(saveData: SavingScrapedData) {
         await seoUploadFunction(settings.uploadLocation, saveData.siteData?.siteSeo, enableBusinessSchema)
     }
 
-    return imageData
+    return imageData || {}
 }

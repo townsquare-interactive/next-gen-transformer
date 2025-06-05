@@ -673,7 +673,15 @@ describe('transformBusinessInfoToDudaFormat', () => {
             { content: 'check stuff⌛🌟🌐\n', url: 'https://example.com/page1', images: [], forms: [], title: 'June Foot Spa' },
             { content: 'page 2 content', url: 'https://example.com/page2', images: [], forms: [], title: 'June Page 2' },
         ]
-        const result = transformBusinessInfoDataToDudaFormat(logoUrl, mockBusinessInfoObject, pages, dudaLocationData, [])
+        const result = transformBusinessInfoDataToDudaFormat(
+            logoUrl,
+            mockBusinessInfoObject,
+            pages,
+            dudaLocationData,
+            [],
+            ['<iframe src="https://www.google.com"></iframe>'],
+            [{ src: 'https://www.google.com', pageTitle: 'June Foot Spa' }]
+        )
 
         const transformedResultCheck = {
             companyName: 'June Foot Spa',
@@ -682,6 +690,10 @@ describe('transformBusinessInfoToDudaFormat', () => {
                     { label: 'June Foot Spa: https://example.com/page1', text: 'check stuff<br>' }, //remove emojis
                     { label: 'June Page 2: https://example.com/page2', text: 'page 2 content' },
                     { label: 'Fonts', text: 'Header Fonts: Arial, Helvetica<br><br>Body Fonts: Arial, Helvetica' },
+                    {
+                        label: 'Media Files',
+                        text: '<h3>Files</h3><br>https://www.google.com<br><br><h3>Iframe Content</h3><br>&lt;iframe src=&quot;https://www.google.com&quot;&gt;&lt;/iframe&gt;',
+                    },
                     {
                         label: 'Address',
                         text: '149-36 Northern Blvd<br>Flushing, <br>11354',
@@ -706,6 +718,8 @@ describe('transformBusinessInfoToDudaFormat', () => {
             { ...mockBusinessInfoObject, styles: { fonts: null, colors: null } },
             pages,
             dudaLocationData,
+            [],
+            [],
             []
         )
 

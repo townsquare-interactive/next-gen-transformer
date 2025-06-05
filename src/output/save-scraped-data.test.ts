@@ -256,7 +256,7 @@ describe('save', () => {
         expect(mockImageUpload).toHaveBeenCalled()
         expect(mockUploadColors).toHaveBeenCalledWith(settings.uploadLocation, mockBusinessInfo.styles.colors)
         expect(mockSeoUpload).toHaveBeenCalledWith(settings.uploadLocation, mockSiteData.siteSeo, false)
-        expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockBusinessInfo, mockSiteData.pages, settings)
+        expect(mockUploadBusinessInfo).toHaveBeenCalledWith(settings.uploadLocation, '', mockSiteData, mockSiteData.pages, settings)
 
         //returned upload data
         expect(result).toHaveProperty('dataUploadDetails')

@@ -3,7 +3,7 @@ import { convertUrlToApexId, createRandomFiveCharString } from '../../utilities/
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 import { ScrapingError } from '../../utilities/errors.js'
-import { BusinessHours, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
+import { BusinessHours, S3UploadedImageList, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
 import { BusinessInfoData } from '../../services/duda/save-business-info.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 import { SaveGeneratedContentReq } from '../../schema/input-zod.js'
@@ -11,7 +11,7 @@ import { SaveGeneratedContentReq } from '../../schema/input-zod.js'
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
     if (!itemUrl) {
-        console.error('URL is null or undefined:', itemUrl)
+        console.warn('URL is null or undefined:', itemUrl)
         return null
     }
 
@@ -627,7 +627,13 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
     return services
 }
 
-export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData, skippedLinks: string[]) => {
+export const transformTextToDudaFormat = (
+    pages: ScrapedAndAnalyzedSiteData['pages'],
+    businessInfo: BusinessInfoData,
+    skippedLinks: string[],
+    iframeContent?: string[],
+    mediaLinks?: S3UploadedImageList[]
+) => {
     const customTexts = pages.flatMap((page) => {
         if (!page.content) return []
         const content = filterContent(page.content || '')
@@ -656,6 +662,24 @@ export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pag
             text: skippedLinks.join('<br>'),
         }
         customTexts.push(skippedLinksText)
+    }
+
+    if ((iframeContent && iframeContent.length > 0) || (mediaLinks && mediaLinks.length > 0)) {
+        //needed for uploading to Duda
+        const encodeIframeHtml = (html: string): string => {
+            return html.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#x27;').replace(/"/g, '&quot;')
+        }
+
+        const mediaText = {
+            label: 'Media Files',
+            text: `<h3>Files</h3><br>${
+                mediaLinks
+                    ?.map((link) => link.src)
+                    .filter(Boolean)
+                    .join('<br><br>') || ''
+            }<br><br><h3>Iframe Content</h3><br>${iframeContent?.map(encodeIframeHtml).join('<br><br>') || ''}`,
+        }
+        customTexts.push(mediaText)
     }
 
     // Add address

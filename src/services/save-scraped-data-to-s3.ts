@@ -33,10 +33,10 @@ export async function saveData(saveData: SavingScrapedData) {
                     }
                 }),
                 s3LogoUrl: imageData?.logoUrl || '',
-                s3MediaFiles: imageData?.mediaFiles.map((img) => {
+                s3MediaFiles: imageData?.mediaFiles.map((file) => {
                     return {
-                        src: img.src,
-                        pageTitle: img.pageTitle,
+                        src: file.src,
+                        pageTitle: file.pageTitle,
                     }
                 }),
             },

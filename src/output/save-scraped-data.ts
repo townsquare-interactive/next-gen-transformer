@@ -31,7 +31,7 @@ type utilityFunctions = {
     siteDataUploadFunction?: SiteDataUploadFunction
     seoUploadFunction?: (siteId: string, seoData?: ScrapedPageSeo, enableBusinessSchema?: boolean) => Promise<void>
     savePagesToDudaFunction?: (siteId: string, seoData: ScrapedAndAnalyzedSiteData['pages']) => Promise<void>
-    saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, businessInfo: ScrapedAndAnalyzedSiteData['businessInfo']) => Promise<boolean>
+    saveBusinessInfoToDudaFunction?: (siteId: string, logoUrl: string, siteData: ScrapedAndAnalyzedSiteData) => Promise<boolean>
     saveColorsToDudaFunction?: (siteId: string, colors: ScrapedColors) => Promise<void>
 }
 
@@ -67,7 +67,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
         if (settings.saveMethod != 's3Upload') {
             saveServiceRes = await saveToService(
                 settings,
-                scrapedData.siteData,
+                s3SavedRes?.siteData || scrapedData.siteData,
                 scrapedData.imageFiles,
                 scrapedData.imageList,
                 s3SavedRes?.imageData?.logoUrl || '',
@@ -83,6 +83,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
                 failedImageCount: savedInfoResponse?.imageData.failedImageList?.length || 0,
                 uploadedResources: savedInfoResponse?.imageData.uploadedResources || [],
                 s3UploadedImages: s3SavedRes?.siteData.assetData?.s3UploadedImages || [],
+                s3MediaFiles: s3SavedRes?.siteData.assetData?.s3MediaFiles || [],
                 failedImages: savedInfoResponse?.imageData.failedImageList || [],
                 siteDataUrl: siteDataUrl || '',
             },
