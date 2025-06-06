@@ -833,7 +833,22 @@ describe('transformSocialAccountsToDudaFormat', () => {
             linkedin: 'company/mycompany',
         })
     })
-    it('should handle URLs with query parameters', () => {
+
+    //fb profile query param
+    it('should handle fb profile query parameter', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: ['https://facebook.com/profile.php?id=61574783129841&ref=page_internal', ''],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result.socialAccounts).toEqual({
+            facebook: 'profile.php?id=61574783129841',
+        })
+    })
+
+    it('should handle URLs multipe slashes', () => {
         const businessInfo: Partial<BusinessInfoData> = {
             links: {
                 socials: ['https://www.facebook.com/people/kyle/233234', ''],
@@ -843,6 +858,19 @@ describe('transformSocialAccountsToDudaFormat', () => {
         const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
         expect(result.socialAccounts).toEqual({
             facebook: 'people/kyle/233234',
+        })
+    })
+
+    it('should handle URLs multipe slashes', () => {
+        const businessInfo: Partial<BusinessInfoData> = {
+            links: {
+                socials: ['https://www.facebook.com/people/AOA-Electrical-Handyman-Services/61574783129841', ''],
+                other: [],
+            },
+        }
+        const result = transformSocialAccountsToDudaFormat(businessInfo as BusinessInfoData)
+        expect(result.socialAccounts).toEqual({
+            facebook: 'people/AOA-Electrical-Handyman-Services/61574783129841',
         })
     })
 

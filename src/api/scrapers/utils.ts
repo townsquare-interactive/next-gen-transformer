@@ -968,17 +968,32 @@ export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoDa
             const type = determineSocialAccountType(link.toLowerCase())
 
             if (type) {
-                // Get full path but clean it
-                const fullPath = url.pathname
-                    .replace(/^\/|\/$/g, '') // Remove leading/trailing slashes
-                    .split('?')[0] // Remove query parameters
-                    .replace(/[^\w\/-]/g, '') // Remove special chars except for alphanumeric, hyphens, and forward slashes
-
-                if (fullPath && fullPath.length < 61) {
-                    socialAccounts[type] = fullPath
+                let typeLimit = 60
+                if (type === 'facebook') {
+                    typeLimit = 200
+                }
+                if (type === 'facebook' && url.pathname.includes('profile.php') && url.searchParams.get('id')) {
+                    // Special handling for Facebook profile IDs
+                    const profileId = url.searchParams.get('id')
+                    if (profileId && profileId.length < 61) {
+                        socialAccounts[type] = `profile.php?id=${profileId}`
+                    } else {
+                        skippedLinks.push(link)
+                        console.warn('Invalid Facebook profile ID:', link)
+                    }
                 } else {
-                    skippedLinks.push(link)
-                    console.warn('Invalid URL in social links:', link)
+                    // Regular handling for other social media URLs
+                    const fullPath = url.pathname
+                        .replace(/^\/|\/$/g, '') // Remove leading/trailing slashes
+                        .split('?')[0] // Remove query parameters
+                        .replace(/[^\w\/-]/g, '') // Remove special chars except for alphanumeric, hyphens, and forward slashes
+
+                    if (fullPath && fullPath.length <= typeLimit) {
+                        socialAccounts[type] = fullPath
+                    } else {
+                        skippedLinks.push(link)
+                        console.warn('Invalid URL in social links:', link)
+                    }
                 }
             } else {
                 skippedLinks.push(link)
