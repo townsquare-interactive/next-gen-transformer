@@ -3,7 +3,15 @@ import { findPages } from '../api/scrapers/page-list-scrape.js'
 import { SaveFileMethodType, ScrapeWebsiteReq } from '../schema/input-zod.js'
 import { ScrapingError } from '../utilities/errors.js'
 import { convertUrlToApexId } from '../utilities/utils.js'
-import { checkPagesAreOnSameDomain, removeDupeImages, renameDuplicateFiles, transformScrapedPageData } from '../api/scrapers/utils.js'
+import {
+    checkPagesAreOnSameDomain,
+    combineBusinessData,
+    isAnalyzePage,
+    removeDupeImages,
+    renameDuplicateFiles,
+    transformScrapedPageData,
+    validHours,
+} from '../api/scrapers/utils.js'
 import { deleteFolderS3, getFileS3 } from '../utilities/s3Functions.js'
 import { ScrapedAndAnalyzedSiteData, ScrapedForm, ScrapedPageData, ScrapedPageSeo, ScreenshotData } from '../schema/output-zod.js'
 import pLimit from 'p-limit'
@@ -20,6 +28,7 @@ export interface ScrapeResult {
     businessInfo?: ScreenshotData
     content: string
     forms: ScrapedForm[]
+    iframeContent?: string[]
 }
 
 export interface ScrapeFullSiteResult {
@@ -29,6 +38,7 @@ export interface ScrapeFullSiteResult {
     seo: (ScrapedPageSeo | undefined)[]
     pagesData: ScrapedPageData[]
     siteSeo?: ScrapedPageSeo
+    iframeContent?: string[]
 }
 
 interface DeleteScrapedFolderRes {
@@ -37,7 +47,7 @@ interface DeleteScrapedFolderRes {
     status: 'fail' | 'success'
 }
 
-type ScrapeFunctionType = (settings: Settings, n: number) => Promise<ScrapeResult>
+type ScrapeFunctionType = (settings: Settings, n: number, analyzePage?: boolean) => Promise<ScrapeResult>
 
 export interface Settings extends ScrapeWebsiteReq {
     saveMethod?: SaveFileMethodType
@@ -97,9 +107,15 @@ export async function scrapeAssetsFromSite(settings: Settings, pages?: string[],
                     dudaUploadLocation: settings.uploadLocation || '',
                     businessInfo: transformedScrapedData.businessInfo,
                     siteSeo: transformedScrapedData.siteSeo,
+                    iframeContent: transformedScrapedData.iframeContent,
                 }
 
-                return { imageNames: [], url: siteName, imageFiles: transformedScrapedData.imageFiles, siteData: siteData }
+                return {
+                    imageNames: [],
+                    url: siteName,
+                    imageFiles: transformedScrapedData.imageFiles,
+                    siteData: siteData,
+                }
             } catch (error) {
                 lastError = error
                 console.error(`Scraping attempt ${attempt} failed:`, error)
@@ -175,74 +191,83 @@ export const scrapeDataFromPages = async (pages: string[], settings: Settings, s
     const otherPages = pages.slice(1) // Remaining pages
     const limit = pLimit(3) // Limit concurrency
 
-    try {
-        // **Step 1: Scrape the homepage first**
-        console.log('Scraping homepage:', homepage, 'individually...')
-        const homepageData = await scrapeFunction({ ...settings, url: homepage }, 0)
+    // **Step 1: Scrape the homepage first**
+    console.log('Scraping homepage:', homepage, 'individually...')
+    const homepageData = await scrapeFunction({ ...settings, url: homepage }, 0, true)
 
-        if (!homepageData) {
-            throw new Error(`Failed to scrape homepage: ${homepage}`)
-        }
-
-        // Extract AI analysis from homepage (if available)
-        const screenshotPageData = homepageData.businessInfo
-
-        // Initialize storage for results
-        const seo = [homepageData.pageSeo] // Start with homepage SEO data
-        const imageFiles = [...homepageData.imageFiles] // Start with homepage images
-        const pagesData = [
-            {
-                url: homepage,
-                seo: homepageData.pageSeo,
-                images: homepageData.imageList,
-                content: homepageData.content,
-                forms: homepageData.forms,
-            },
-        ]
-
-        // **Step 2: Scrape other pages in parallel with limit**
-        console.log('Starting limited parallel scraping for other pages...')
-        const scrapedPages = await Promise.allSettled(
-            otherPages.map((page, index) =>
-                limit(async () => {
-                    try {
-                        console.log('Scraping page:', page, '...')
-                        return await scrapeFunction({ ...settings, url: page }, index + 1)
-                    } catch (err) {
-                        console.error('Scrape function failed for page:', page, err)
-                        return null // Handle failures gracefully for inner pages
-                    }
-                })
-            )
-        )
-        //ScrapedPageData
-        // Extract successful results
-        const validScrapedPages = scrapedPages
-            .filter((res) => res.status === 'fulfilled' && res.value)
-            .map((res) => (res as PromiseFulfilledResult<ScrapeResult>).value)
-
-        // Push results from other pages
-        seo.push(...validScrapedPages.map((data) => data.pageSeo))
-        imageFiles.push(...validScrapedPages.flatMap((data) => data.imageFiles))
-        pagesData.push(
-            ...validScrapedPages.map((data, index) => ({
-                url: otherPages[index],
-                seo: data.pageSeo,
-                images: data.imageList,
-                content: data.content,
-                forms: data.forms,
-            }))
-        )
-
-        // Remove duplicate images
-        const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
-        const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
-
-        return { imageFiles: renamedDupes, seo, businessInfo: screenshotPageData, pagesData }
-    } catch (err) {
-        console.error('Error during scraping:', err)
-        throw err
+    if (!homepageData) {
+        throw new Error(`Failed to scrape homepage: ${homepage}`)
     }
+
+    //analyze contact page if hours were not found on the home page
+    let analyzeContactPage = true
+    if (homepageData.businessInfo?.hours?.regularHours) {
+        analyzeContactPage = !validHours(homepageData.businessInfo.hours)
+    }
+
+    // Initialize storage for results
+    const seo = [homepageData.pageSeo] // Start with homepage SEO data
+    const imageFiles = [...homepageData.imageFiles] // Start with homepage images
+    const pagesData = [
+        {
+            url: homepage,
+            seo: homepageData.pageSeo,
+            images: homepageData.imageList,
+            content: homepageData.content,
+            forms: homepageData.forms,
+        },
+    ]
+    const iframeContent = homepageData.iframeContent || []
+
+    // **Step 2: Scrape other pages in parallel with limit**
+    console.log('Starting limited parallel scraping for other pages...')
+    const scrapedPages = await Promise.allSettled(
+        otherPages.map((page, index) =>
+            limit(async () => {
+                try {
+                    console.log('Scraping page:', page, '...')
+                    return await scrapeFunction({ ...settings, url: page }, index + 1, isAnalyzePage(page, analyzeContactPage))
+                } catch (err) {
+                    console.error('Scrape function failed for page:', page, err)
+                    return null // Handle failures gracefully for inner pages
+                }
+            })
+        )
+    )
+    //ScrapedPageData
+    // Extract successful results
+    const validScrapedPages = scrapedPages
+        .filter((res) => res.status === 'fulfilled' && res.value)
+        .map((res) => (res as PromiseFulfilledResult<ScrapeResult>).value)
+
+    //combine business data from each page
+    const internalBusinessData = validScrapedPages.map((data) => data.businessInfo)
+    let screenshotPageData = homepageData.businessInfo
+    if (internalBusinessData.length >= 1 && analyzeContactPage) {
+        const combinedBusinessData = combineBusinessData(homepageData.businessInfo, internalBusinessData)
+        // Use the combined data instead of just homepage data
+        screenshotPageData = combinedBusinessData || homepageData.businessInfo
+    }
+
+    // Push results from other pages
+    seo.push(...validScrapedPages.map((data) => data.pageSeo))
+    imageFiles.push(...validScrapedPages.flatMap((data) => data.imageFiles))
+    pagesData.push(
+        ...validScrapedPages.map((data, index) => ({
+            url: otherPages[index],
+            seo: data.pageSeo,
+            images: data.imageList,
+            content: data.content,
+            forms: data.forms,
+        }))
+    )
+    iframeContent.push(...validScrapedPages.flatMap((data) => data.iframeContent || []))
+
+    // Remove duplicate images
+    const imageFilesNoDuplicates = await removeDupeImages(imageFiles)
+    const renamedDupes = renameDuplicateFiles(imageFilesNoDuplicates)
+
+    return { imageFiles: renamedDupes, seo, businessInfo: screenshotPageData, pagesData, iframeContent }
 }
 
 export const removeScrapedFolder = async (url: string): Promise<DeleteScrapedFolderRes> => {

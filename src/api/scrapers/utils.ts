@@ -3,7 +3,7 @@ import { convertUrlToApexId, createRandomFiveCharString } from '../../utilities/
 import { ImageFiles } from './asset-scrape.js'
 import crypto from 'crypto'
 import { ScrapingError } from '../../utilities/errors.js'
-import { BusinessHours, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
+import { BusinessHours, S3UploadedImageList, ScrapedAndAnalyzedSiteData, ScrapedHours, ScrapedPageData, ScreenshotData } from '../../schema/output-zod.js'
 import { BusinessInfoData } from '../../services/duda/save-business-info.js'
 import { ContentLibraryResponse } from '@dudadev/partner-api/dist/types/lib/content/types.js'
 import { SaveGeneratedContentReq } from '../../schema/input-zod.js'
@@ -11,7 +11,7 @@ import { SaveGeneratedContentReq } from '../../schema/input-zod.js'
 export function preprocessImageUrl(itemUrl: URL | null): string | null {
     //a null or undefined URL should not be processed for Duda uploading
     if (!itemUrl) {
-        console.error('URL is null or undefined:', itemUrl)
+        console.warn('URL is null or undefined:', itemUrl)
         return null
     }
 
@@ -627,7 +627,13 @@ export function transformAIContent(data: SaveGeneratedContentReq): ServiceConten
     return services
 }
 
-export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pages'], businessInfo: BusinessInfoData, skippedLinks: string[]) => {
+export const transformTextToDudaFormat = (
+    pages: ScrapedAndAnalyzedSiteData['pages'],
+    businessInfo: BusinessInfoData,
+    skippedLinks: string[],
+    iframeContent?: string[],
+    mediaLinks?: S3UploadedImageList[]
+) => {
     const customTexts = pages.flatMap((page) => {
         if (!page.content) return []
         const content = filterContent(page.content || '')
@@ -646,7 +652,8 @@ export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pag
             label: 'Fonts',
             text: `Header Fonts: ${headerFonts || ''}<br><br>Body Fonts: ${bodyFonts || ''}`,
         }
-        customTexts.push(fontText)
+        const fontTextChunks = createContentChunks(fontText.text, fontText.label)
+        customTexts.push(...fontTextChunks)
     }
 
     // Add skipped links
@@ -655,7 +662,28 @@ export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pag
             label: 'Social Media',
             text: skippedLinks.join('<br>'),
         }
-        customTexts.push(skippedLinksText)
+        const skippedLinksTextChunks = createContentChunks(skippedLinksText.text, skippedLinksText.label)
+        customTexts.push(...skippedLinksTextChunks)
+    }
+
+    if ((iframeContent && iframeContent.length > 0) || (mediaLinks && mediaLinks.length > 0)) {
+        //needed for uploading to Duda
+        const encodeIframeHtml = (html: string): string => {
+            return html.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#x27;').replace(/"/g, '&quot;')
+        }
+
+        const mediaText = {
+            label: 'Media Files',
+            text: `<h3>Files</h3><br>${
+                mediaLinks
+                    ?.map((link) => link.src)
+                    .filter(Boolean)
+                    .join('<br><br>') || ''
+            }<br><br><h3>Iframe Content</h3><br>${iframeContent?.map(encodeIframeHtml).join('<br><br>') || ''}`,
+        }
+
+        const mediaTextChunks = createContentChunks(mediaText.text, mediaText.label)
+        customTexts.push(...mediaTextChunks)
     }
 
     // Add address
@@ -668,7 +696,8 @@ export const transformTextToDudaFormat = (pages: ScrapedAndAnalyzedSiteData['pag
                       businessInfo?.address?.state || ''
                   }<br>${businessInfo?.address?.postalCode || ''}`,
     }
-    customTexts.push(addressText)
+    const addressTextChunks = createContentChunks(addressText.text, addressText.label)
+    customTexts.push(...addressTextChunks)
 
     return customTexts
 }
@@ -939,17 +968,32 @@ export const transformSocialAccountsToDudaFormat = (businessInfo: BusinessInfoDa
             const type = determineSocialAccountType(link.toLowerCase())
 
             if (type) {
-                // Get full path but clean it
-                const fullPath = url.pathname
-                    .replace(/^\/|\/$/g, '') // Remove leading/trailing slashes
-                    .split('?')[0] // Remove query parameters
-                    .replace(/[^\w\/-]/g, '') // Remove special chars except for alphanumeric, hyphens, and forward slashes
-
-                if (fullPath && fullPath.length < 61) {
-                    socialAccounts[type] = fullPath
+                let typeLimit = 60
+                if (type === 'facebook') {
+                    typeLimit = 200
+                }
+                if (type === 'facebook' && url.pathname.includes('profile.php') && url.searchParams.get('id')) {
+                    // Special handling for Facebook profile IDs
+                    const profileId = url.searchParams.get('id')
+                    if (profileId && profileId.length < 61) {
+                        socialAccounts[type] = `profile.php?id=${profileId}`
+                    } else {
+                        skippedLinks.push(link)
+                        console.warn('Invalid Facebook profile ID:', link)
+                    }
                 } else {
-                    skippedLinks.push(link)
-                    console.warn('Invalid URL in social links:', link)
+                    // Regular handling for other social media URLs
+                    const fullPath = url.pathname
+                        .replace(/^\/|\/$/g, '') // Remove leading/trailing slashes
+                        .split('?')[0] // Remove query parameters
+                        .replace(/[^\w\/-]/g, '') // Remove special chars except for alphanumeric, hyphens, and forward slashes
+
+                    if (fullPath && fullPath.length <= typeLimit) {
+                        socialAccounts[type] = fullPath
+                    } else {
+                        skippedLinks.push(link)
+                        console.warn('Invalid URL in social links:', link)
+                    }
                 }
             } else {
                 skippedLinks.push(link)
@@ -1172,4 +1216,59 @@ export function isValidMediaSize(fileSize: number): boolean {
     const MAX_MEDIA_SIZE = 150 * 1024 * 1024 // 150MB max
     const MIN_MEDIA_SIZE = 1024 // 1KB min
     return fileSize >= MIN_MEDIA_SIZE && fileSize <= MAX_MEDIA_SIZE
+}
+
+export const isAnalyzePage = (page: string, analyzeContactPage: boolean) => {
+    try {
+        if (analyzeContactPage) {
+            //extract slug from url
+            const url = new URL(page)
+            const slug =
+                url.pathname
+                    .toLowerCase()
+                    .split('/')
+                    .filter((segment) => segment.length > 0)
+                    .pop() || ''
+
+            return slug.includes('contact')
+        }
+    } catch (error) {
+        console.warn('Error determining if page needs analysis:', error)
+    }
+    return false
+}
+
+export const validHours = (hours?: ScrapedHours | null) => {
+    if (!hours || hours.regularHours === null) {
+        return false
+    }
+
+    const hoursNull = Object.values(hours.regularHours).every((hour) => hour === null)
+    const foundHours = !hoursNull
+    return foundHours
+}
+
+export const combineBusinessData = (homepageData: ScreenshotData | undefined, internalPagesData: (ScreenshotData | undefined)[]) => {
+    if (!homepageData) return null
+
+    const combinedData: ScreenshotData = { ...homepageData }
+
+    // Filter out undefined/null data from other pages
+    const validInternalPagesData = internalPagesData.filter((data): data is ScreenshotData => !!data)
+
+    for (const internalPageData of validInternalPagesData) {
+        // Check and merge hours data
+        if (!validHours(combinedData.hours)) {
+            combinedData.hours = internalPageData.hours
+        }
+
+        // Check and other business data
+        if (!combinedData.address || Object.values(combinedData.address).every((field) => !field)) {
+            combinedData.address = internalPageData.address
+        }
+        if (!combinedData.email) combinedData.email = internalPageData.email
+        if (!combinedData.phoneNumber) combinedData.phoneNumber = internalPageData.phoneNumber
+    }
+
+    return combinedData
 }

@@ -3,7 +3,7 @@ import { cleanHtmlForAnalysis, extractFormData, extractPageContent, updateImageO
 import { analyzePageData } from '../openai/api.js'
 import { ScrapedPageSeo } from '../../schema/output-zod.js'
 import { setupBrowser } from './playwright-setup.js'
-import { scrapeMediaFromPage, scrollToLazyLoadImages } from './scrape-media.js'
+import { extractIframeContent, scrapeMediaFromPage, scrollToLazyLoadImages } from './scrape-media.js'
 
 export interface ImageFiles {
     imageFileName: string
@@ -25,7 +25,7 @@ export interface ScrapeSiteData {
     s3LogoUrl?: string
 }
 
-export async function scrape(settings: Settings, n: number): Promise<ScrapeResult> {
+export async function scrape(settings: Settings, n: number, analyzePage = false): Promise<ScrapeResult> {
     const { browser, page } = await setupBrowser()
     const isHomePage = n === 0
 
@@ -72,8 +72,10 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
         //extract form data from pages
         const formData = await extractFormData(page)
 
+        const iframeContent = await extractIframeContent(page)
+
         let screenshotBuffer
-        if (isHomePage) {
+        if (isHomePage || analyzePage) {
             screenshotBuffer = await page.screenshot({ fullPage: true })
 
             mediaFiles.push({
@@ -101,12 +103,13 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
 
         //this step must be done last as it modies the DOM
         let scrapeAnalysisResult
-        if (isHomePage && screenshotBuffer) {
-            console.log('Using AI to analyze page...')
+        if ((isHomePage || analyzePage) && screenshotBuffer) {
+            console.time(`AI Analysis Duration ${settings.url}`)
+            console.log(`Using AI to analyze page ${settings.url}...`)
             const cleanedHtml = await cleanHtmlForAnalysis(page) //remove unwanted elements
             scrapeAnalysisResult = await analyzePageData(settings.url, screenshotBuffer, cleanedHtml)
 
-            if (scrapeAnalysisResult.logoTag) {
+            if (scrapeAnalysisResult.logoTag && isHomePage) {
                 console.log('Found a logo src object', scrapeAnalysisResult.logoTag)
                 mediaFiles = updateImageObjWithLogo(scrapeAnalysisResult.logoTag, mediaFiles)
             }
@@ -126,6 +129,7 @@ export async function scrape(settings: Settings, n: number): Promise<ScrapeResul
             businessInfo: scrapeAnalysisResult,
             content: pageTextContent,
             forms: formData,
+            iframeContent: iframeContent,
         }
     } catch (error) {
         console.error(`Error scraping URL: ${settings.url}. Details: ${error.message}`)

@@ -666,6 +666,7 @@ export const ScrapedAndAnalyzedSiteDataSchema = z.object({
         })
         .optional()
         .nullable(),
+    iframeContent: z.array(z.string()).optional(),
 })
 
 //scraped data

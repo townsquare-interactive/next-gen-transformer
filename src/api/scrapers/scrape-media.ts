@@ -220,3 +220,11 @@ export const scrapeMediaFromPage = async (page: Page, pageTitle: string): Promis
         throw error
     }
 }
+
+export const extractIframeContent = async (page: Page) => {
+    const iframeContent = await page.evaluate(() => {
+        const iframes = document.querySelectorAll('iframe')
+        return Array.from(iframes).map((iframe) => iframe.outerHTML)
+    })
+    return iframeContent
+}
