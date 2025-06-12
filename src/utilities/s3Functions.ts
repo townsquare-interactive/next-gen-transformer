@@ -22,7 +22,7 @@ const s3 = new S3({
     },
     region: process.env.CMS_DEFAULT_REGION,
     requestHandler: new NodeHttpHandler({
-        socketTimeout: 3000,
+        socketTimeout: 30000,
         httpAgent: new HttpAgent({ keepAlive: true, maxSockets: 300 }),
         // socketAcquisitionTimeoutMs: 10000
     }),
