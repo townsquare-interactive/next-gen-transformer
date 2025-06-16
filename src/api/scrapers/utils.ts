@@ -382,9 +382,54 @@ export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) =
 
 const parseScrapedPhoneNumber = (phoneNumber: string) => {
     if (phoneNumber) {
-        return phoneNumber.replaceAll('–', '-') //replace double dash with single dash
+        const phone = phoneNumber.replaceAll('–', '-') //replace double dash with single dash
+        const convertedPhone = convertTextToPhoneNumber(phone)
+        return convertedPhone
     }
     return null
+}
+
+const convertTextToPhoneNumber = (phoneNumber: string): string => {
+    if (!phoneNumber) return phoneNumber
+
+    // Map of letters to numbers based on phone keypad
+    const letterToNumber: Record<string, string> = {
+        a: '2',
+        b: '2',
+        c: '2',
+        d: '3',
+        e: '3',
+        f: '3',
+        g: '4',
+        h: '4',
+        i: '4',
+        j: '5',
+        k: '5',
+        l: '5',
+        m: '6',
+        n: '6',
+        o: '6',
+        p: '7',
+        q: '7',
+        r: '7',
+        s: '7',
+        t: '8',
+        u: '8',
+        v: '8',
+        w: '9',
+        x: '9',
+        y: '9',
+        z: '9',
+    }
+
+    let result = phoneNumber.toLowerCase()
+
+    // Replace letters with their number equivalents
+    for (const [letter, number] of Object.entries(letterToNumber)) {
+        result = result.replace(new RegExp(letter, 'g'), number)
+    }
+
+    return result
 }
 
 export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string) => {
@@ -393,7 +438,8 @@ export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string)
     }
 
     if (businessInfo.phoneNumber) {
-        businessInfo.phoneNumber = parseScrapedPhoneNumber(businessInfo.phoneNumber) //replace double dash with single dash
+        // First convert any text-based numbers, then handle dashes
+        businessInfo.phoneNumber = parseScrapedPhoneNumber(businessInfo.phoneNumber)
     }
 
     //remove links from same domain in other section
