@@ -380,9 +380,20 @@ export const checkPagesAreOnSameDomain = (baseDomain: string, pages: string[]) =
     return true
 }
 
+const parseScrapedPhoneNumber = (phoneNumber: string) => {
+    if (phoneNumber) {
+        return phoneNumber.replaceAll('–', '-') //replace double dash with single dash
+    }
+    return null
+}
+
 export const transformBusinessInfo = (businessInfo: ScreenshotData, url: string) => {
     if (businessInfo.hours?.regularHours) {
         businessInfo.hours = { ...businessInfo.hours, regularHours: transformHours(businessInfo) }
+    }
+
+    if (businessInfo.phoneNumber) {
+        businessInfo.phoneNumber = parseScrapedPhoneNumber(businessInfo.phoneNumber) //replace double dash with single dash
     }
 
     //remove links from same domain in other section
