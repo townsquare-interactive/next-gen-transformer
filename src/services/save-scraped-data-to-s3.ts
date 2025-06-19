@@ -30,6 +30,7 @@ export async function saveData(saveData: SavingScrapedData) {
                     return {
                         src: img.src,
                         pageTitle: img.pageTitle,
+                        type: img.type,
                     }
                 }),
                 s3LogoUrl: imageData?.logoUrl || '',
@@ -122,7 +123,7 @@ export async function saveImages(settings: Settings, imageFiles: ImageFiles[], l
             if (imageFiles[i].type === 'video' || imageFiles[i].type === 'audio') {
                 mediaFiles.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
             } else {
-                imageList.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle })
+                imageList.push({ src: s3Url, status: 'UPLOADED', pageTitle: imageFiles[i].pageTitle, type: imageFiles[i].type })
                 uploadedImagesCount += 1
             }
         }

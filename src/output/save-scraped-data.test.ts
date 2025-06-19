@@ -71,8 +71,8 @@ describe('save', () => {
             dudaUploadLocation: '',
             assetData: {
                 s3UploadedImages: [
-                    { src: 'https://s3.example.com/image.jpg', pageTitle: 'Home' },
-                    { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home' },
+                    { src: 'https://s3.example.com/image.jpg', pageTitle: 'Home', type: undefined },
+                    { src: 'https://s3.example.com/image2.jpg', pageTitle: 'Home', type: undefined },
                 ],
                 s3LogoUrl: '',
                 s3MediaFiles: [{ src: 'https://s3.example.com/video.mp4', pageTitle: 'Home' }],

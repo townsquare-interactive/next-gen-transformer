@@ -51,14 +51,7 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
 
         //save/backup data to s3 by default
         if (settings.backupImagesSave || settings.saveMethod === 's3Upload') {
-            s3SavedRes = await saveToService(
-                { ...settings, saveMethod: 's3Upload' },
-                scrapedData.siteData,
-                scrapedData.imageFiles,
-                scrapedData.imageList,
-                '',
-                functions
-            )
+            s3SavedRes = await saveToService({ ...settings, saveMethod: 's3Upload' }, scrapedData.siteData, scrapedData.imageFiles, [], '', functions)
             siteDataUrl = s3SavedRes?.siteDataUrl
         }
 
@@ -68,8 +61,8 @@ export const save = async (settings: Settings, scrapedData: ScrapedDataToSave, f
             saveServiceRes = await saveToService(
                 settings,
                 s3SavedRes?.siteData || scrapedData.siteData,
-                scrapedData.imageFiles,
-                scrapedData.imageList,
+                s3SavedRes?.siteData.assetData?.s3UploadedImages ? [] : scrapedData.imageFiles,
+                s3SavedRes?.siteData.assetData?.s3UploadedImages || scrapedData.imageList || scrapedData.imageFiles,
                 s3SavedRes?.imageData?.logoUrl || '',
                 functions
             )

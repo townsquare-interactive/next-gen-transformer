@@ -20,6 +20,7 @@ export interface UploadedResourcesObj {
     original_url?: string
     new_url?: string
     status?: string
+    type?: string
     pageTitle?: string
     n_failures?: number
     uploaded_resources?: UploadResourceResponse['uploaded_resources']
@@ -40,8 +41,8 @@ export async function saveImages(
     const usingS3Images = (!imageFiles || imageFiles.length <= 0) && imageList && imageList.length > 0
 
     if ((imageFiles && imageFiles.length > 0) || (imageList && imageList.length > 0)) {
-        const imageFilesToProcess = imageFiles && imageFiles.length > 0 ? imageFiles : imageList
-
+        //use s3 images if available and site URLs as backup
+        const imageFilesToProcess = imageList && imageList.length > 0 ? imageList : imageFiles && imageFiles.length > 0 ? imageFiles : undefined
         preprocessedPayload = processImageUrlsForDuda(imageFilesToProcess, usingS3Images ? logoUrl : undefined)
     }
 
@@ -66,6 +67,7 @@ export async function saveImages(
                     await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY))
                 }
             } catch (error) {
+                console.log('failed batch:', batches[i])
                 console.error(`Error uploading batch: ${error}`)
                 throw new ScrapingError({
                     domain: settings.url,
@@ -131,7 +133,7 @@ export function processImageUrlsForDuda(imageFiles?: ImageFiles[] | S3UploadedIm
             processedUrls.push({
                 resource_type: 'IMAGE',
                 src: file.src,
-                folder: file.pageTitle || dudaImageFolder,
+                folder: (file.pageTitle || dudaImageFolder).trim(),
             })
         } //handle URLs coming from websites
         else if (typeof file === 'object' && 'url' in file) {
@@ -150,7 +152,7 @@ export function processImageUrlsForDuda(imageFiles?: ImageFiles[] | S3UploadedIm
             processedUrls.push({
                 resource_type: 'IMAGE',
                 src: processedUrl,
-                folder: file.pageTitle || dudaImageFolder,
+                folder: (file.pageTitle || dudaImageFolder).trim(),
             })
         }
     })
